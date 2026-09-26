@@ -239,7 +239,7 @@ public final class BuiltinConditions {
 
 	/** {@code "ns:id"} → exact, {@code "#ns:tag"} → tag. Null on malformed input. */
 	@Nullable
-	private static Predicate<BlockState> blockMatcher(String idOrTag) {
+	static Predicate<BlockState> blockMatcher(String idOrTag) {
 		if (idOrTag.startsWith("#")) {
 			Identifier tag = Identifier.tryParse(idOrTag.substring(1));
 			return tag == null ? null
@@ -251,7 +251,7 @@ public final class BuiltinConditions {
 	}
 
 	@Nullable
-	private static Predicate<ItemStack> itemMatcher(String idOrTag) {
+	static Predicate<ItemStack> itemMatcher(String idOrTag) {
 		if (idOrTag.startsWith("#")) {
 			Identifier tag = Identifier.tryParse(idOrTag.substring(1));
 			return tag == null ? null
@@ -263,7 +263,7 @@ public final class BuiltinConditions {
 	}
 
 	@Nullable
-	private static Predicate<Entity> entityMatcher(String idOrTag) {
+	static Predicate<Entity> entityMatcher(String idOrTag) {
 		if (idOrTag.startsWith("#")) {
 			Identifier tag = Identifier.tryParse(idOrTag.substring(1));
 			if (tag == null) {

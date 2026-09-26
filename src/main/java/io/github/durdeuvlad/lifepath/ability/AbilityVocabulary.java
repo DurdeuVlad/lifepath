@@ -8,8 +8,10 @@ import io.github.durdeuvlad.lifepath.skill.SkillXpService;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -29,18 +31,33 @@ public final class AbilityVocabulary {
 	/**
 	 * Evaluation context handed to every evaluator. {@link #self()} is null on
 	 * data paths (unit tests, headless evaluation) — entity-requiring
-	 * evaluators must null-check it rather than NPE.
+	 * evaluators must null-check it rather than NPE. {@link #abilityId()} is
+	 * the evaluating ability (for namespacing e.g. attribute modifiers); null
+	 * only in bare test contexts.
 	 */
 	public record EvalContext(@Nullable ServerPlayerEntity self,
-			PlayerCharacterData data, long now) {}
+			PlayerCharacterData data, long now, @Nullable Identifier abilityId) {
+		public EvalContext(ServerPlayerEntity self, PlayerCharacterData data, long now) {
+			this(self, data, now, null);
+		}
+	}
 
 	/**
-	 * One resolved target — an entity wrapper so data-path tests (no live
-	 * player) still exercise the per-target action loop; entity-requiring
-	 * actions must null-check {@link #entity()}.
+	 * One resolved target: an entity ({@link #entity()}, any {@link Entity} —
+	 * AoE resolvers return non-players too) and/or a position
+	 * ({@link #pos()}, for block targets). Actions must null-check whichever
+	 * they need. {@link #data()} is <b>the target's own</b> character model —
+	 * set for player targets ({@code self}, players resolved by
+	 * {@code entities_in_radius}), null for non-player entities and block
+	 * targets. Resource/XP actions therefore apply per-target to player
+	 * models and no-op on mobs — never multiplied against the caster's model.
 	 */
-	public record TargetContext(@Nullable ServerPlayerEntity entity,
-			PlayerCharacterData data) {}
+	public record TargetContext(@Nullable Entity entity,
+			@Nullable BlockPos pos, @Nullable PlayerCharacterData data) {
+		public TargetContext(@Nullable Entity entity, @Nullable PlayerCharacterData data) {
+			this(entity, entity == null ? null : entity.getBlockPos(), data);
+		}
+	}
 
 	@FunctionalInterface
 	public interface ConditionEvaluator {
@@ -109,11 +126,13 @@ public final class AbilityVocabulary {
 
 		registerTarget(LifepathMod.id("self"), (ctx, params) ->
 				List.of(new TargetContext(ctx.self(), ctx.data())));
+		BuiltinTargets.init();
+		BuiltinActions.init();
 
 		registerAction(LifepathMod.id("grant_xp"), (target, ctx, params) -> {
 			Identifier skill = id(params, "skill");
 			double amount = num(params, "amount", 0.0);
-			if (skill == null || amount <= 0) {
+			if (skill == null || amount <= 0 || target.data() == null) {
 				return;
 			}
 			SkillXpService.awardXp(target.data(), skill, amount,
@@ -122,7 +141,7 @@ public final class AbilityVocabulary {
 		registerAction(LifepathMod.id("resource_delta"), (target, ctx, params) -> {
 			Identifier res = id(params, "resource");
 			double delta = num(params, "amount", 0.0);
-			if (res == null || delta == 0.0) {
+			if (res == null || delta == 0.0 || target.data() == null) {
 				return;
 			}
 			var cur = target.data().resources().get(res);
@@ -196,5 +215,7 @@ public final class AbilityVocabulary {
 		TARGETS.clear();
 		initialized = false;
 		BuiltinConditions.resetForTests();
+		BuiltinTargets.resetForTests();
+		BuiltinActions.resetForTests();
 	}
 }
