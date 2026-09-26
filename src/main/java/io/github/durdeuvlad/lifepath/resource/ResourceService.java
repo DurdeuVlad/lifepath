@@ -73,6 +73,10 @@ public final class ResourceService {
 			return;
 		}
 		initialized = true;
+		// After CharacterManager's JOIN snapshot (registered earlier in init):
+		// band indices ride deltas only, so quiescent resources need a push.
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN
+				.register((handler, sender, server) -> sendSnapshotDeltas(handler.getPlayer()));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			int interval = tickIntervalTicks();
 			if (++ticks % interval != 0) {
@@ -98,7 +102,14 @@ public final class ResourceService {
 	public static double current(PlayerCharacterData data, Identifier resourceId) {
 		var state = data.resources().get(resourceId);
 		if (state != null) {
-			return state.current();
+			// Clamp on read: a def reload may have shrunk bounds under a stored
+			// value — conditions/costs must never see an out-of-range number.
+			ResourceDefinition def = LifepathContent.resources().get(resourceId);
+			double lo = def != null ? def.min() : state.min();
+			double hi = def != null ? def.max() : state.max();
+			double cur = state.current();
+			return !Double.isFinite(cur) ? (def != null ? def.defaultValue() : state.min())
+					: Math.max(lo, Math.min(hi, cur));
 		}
 		ResourceDefinition def = LifepathContent.resources().get(resourceId);
 		return def != null ? def.defaultValue() : 0.0;
@@ -172,13 +183,24 @@ public final class ResourceService {
 		data.setResource(resourceId,
 				new PlayerCharacterData.ResourceState(next, lo, hi));
 		if (next != old) {
-			onBandTransition(data, player, resourceId, def,
-					ResourceDefinition.bandOf(def, old), ResourceDefinition.bandOf(def, next),
-					nowMs);
+			int toBand = ResourceDefinition.bandOf(def, next);
+			// Delta + events emit BEFORE entry actions run — a band action may
+			// mutate THIS same resource; its nested packet/event must land
+			// last so client + bus state resolve to the resting value.
 			if (player != null) {
-				ServerPlayNetworking.send(player, new ResourceUpdatePayload(resourceId,
-						next, lo, hi, ResourceDefinition.bandOf(def, next)));
+				try {
+					ServerPlayNetworking.send(player, new ResourceUpdatePayload(
+							resourceId, next, lo, hi, toBand));
+				} catch (Exception e) {
+					LifepathMod.LOGGER.error("resource {} sync failed", resourceId, e);
+				}
+				CharacterManager.markDirty(player);
 			}
+			onBandTransition(data, player, resourceId, def,
+					ResourceDefinition.bandOf(def, old), toBand, nowMs);
+			// Entry actions may have re-mutated — report the resting value.
+			var resting = data.resources().get(resourceId);
+			return resting != null ? resting.current() : next;
 		}
 		return next;
 	}
@@ -198,13 +220,15 @@ public final class ResourceService {
 		try {
 			if (fromBand >= 0) {
 				stripBandEffects(player, def.bands().get(fromBand));
-				publish(player, BAND_EXIT, resourceId, fromBand);
+				publish(player, BAND_EXIT, resourceId, fromBand, nowMs);
 			}
 			if (toBand >= 0) {
 				ResourceDefinition.Band band = def.bands().get(toBand);
 				applyBandEffects(player, band);
+				// Event BEFORE entry actions — nested mutations publish after
+				// this, so observers' last event reflects the resting band.
+				publish(player, BAND_ENTER, resourceId, toBand, nowMs);
 				runEntryActions(data, player, resourceId, band, nowMs);
-				publish(player, BAND_ENTER, resourceId, toBand);
 			}
 		} finally {
 			transitionDepth--;
@@ -270,10 +294,27 @@ public final class ResourceService {
 	}
 
 	private static void publish(@Nullable ServerPlayerEntity player, Identifier type,
-			Identifier resourceId, int bandIndex) {
+			Identifier resourceId, int bandIndex, long nowMs) {
 		ActivityDispatcher.publish(new ActivityEvent(player, type, resourceId,
-				Set.of(), ActivityEvent.Cause.SYSTEM, System.currentTimeMillis(),
+				Set.of(), ActivityEvent.Cause.SYSTEM, nowMs,
 				Map.of("band", Integer.toString(bandIndex))));
+	}
+
+	/**
+	 * Join-time delta sync (M4-5/m6): the character snapshot carries values but
+	 * not band indices — emit one delta per owned resource right after the
+	 * initial snapshot so a quiescent meter still reports its band for M6.
+	 * Registered after {@code CharacterManager}'s JOIN sync so deltas land last.
+	 */
+	private static void sendSnapshotDeltas(ServerPlayerEntity player) {
+		PlayerCharacterData data = CharacterManager.getCharacter(player);
+		for (Identifier id : data.resources().keySet()) {
+			ResourceDefinition def = LifepathContent.resources().get(id);
+			var s = data.resources().get(id);
+			ServerPlayNetworking.send(player, new ResourceUpdatePayload(id,
+					s.current(), s.min(), s.max(),
+					ResourceDefinition.bandOf(def, s.current())));
+		}
 	}
 
 	private static int tickIntervalTicks() {

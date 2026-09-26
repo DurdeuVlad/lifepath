@@ -33,6 +33,14 @@ import org.jetbrains.annotations.Nullable;
  * <p>Malformed data fails the file at load: {@code min >= max}, a default
  * outside {@code [min, max]}, a non-finite regen, a reversed range, or
  * overlapping bands all reject the file rather than silently clamping.
+ *
+ * <p><b>Reload caveat:</b> bands are resolved at mutation time, so a datapack
+ * reload that reshapes bands does not retroactively fire transitions — a
+ * removed band's sustained status effects linger until natural expiry, and new
+ * bands take effect on the next sweep/mutation without an ENTER event.
+ * <b>Depth cap:</b> band actions that re-mutate the same resource are
+ * recursion-capped; when the cap trips the value write has already landed —
+ * world-side effects of the resting band are skipped for that pass (logged).
  */
 public record ResourceDefinition(Identifier id, double min, double max,
 		double defaultValue, double regenPerSecond, List<Band> bands) {

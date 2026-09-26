@@ -121,6 +121,25 @@ public final class CharacterPersistence {
 			if (unknown("resource", id)) {
 				drop("resource", id);
 				data.removeResource(id);
+				continue;
+			}
+			// Known resource: repair non-finite values and out-of-bounds drift
+			// (a def reload may have shrunk [min,max] under a stored value) at
+			// the load boundary — NaN would brick modify() permanently.
+			var s = data.resources().get(id);
+			var def = io.github.durdeuvlad.lifepath.registry.LifepathContent
+					.resources().get(id);
+			double lo = def != null ? def.min() : s.min();
+			double hi = def != null ? def.max() : s.max();
+			double cur = s.current();
+			double repaired = !Double.isFinite(cur)
+					? (def != null ? def.defaultValue() : s.min())
+					: Math.max(lo, Math.min(hi, cur));
+			if (repaired != cur) {
+				data.setResource(id,
+						new PlayerCharacterData.ResourceState(repaired, lo, hi));
+				LifepathMod.LOGGER.warn(
+						"repaired out-of-range resource {} ({} -> {})", id, cur, repaired);
 			}
 		}
 		long cooldownMinPersistMs = (long) (LifepathConfig.getOrDefault(

@@ -125,8 +125,13 @@ public final class AbilityVocabulary {
 			if (res == null) {
 				return false;
 			}
-			// Unmaterialized resources read as their definition's default.
-			return io.github.durdeuvlad.lifepath.resource.ResourceService
+			// Fail closed on unknown ids — a typo'd/removed resource file must
+			// not satisfy the bare condition via the 0.0 fallback.
+			boolean known = ctx.data().resources().containsKey(res)
+					|| io.github.durdeuvlad.lifepath.registry.LifepathContent
+							.resources().get(res) != null;
+			// Unmaterialized-but-defined resources read as their default.
+			return known && io.github.durdeuvlad.lifepath.resource.ResourceService
 					.current(ctx.data(), res) >= num(params, "min", 0.0);
 		});
 

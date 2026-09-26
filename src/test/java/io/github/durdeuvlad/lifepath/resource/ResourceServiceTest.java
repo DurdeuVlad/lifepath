@@ -59,6 +59,8 @@ class ResourceServiceTest {
 		ActivityDispatcher.resetForTests();
 		AbilityVocabulary.resetForTests();
 		LifepathContent.resources().clear();
+		LifepathContent.species().clear();
+		LifepathContent.abilities().clear();
 	}
 
 	private static ResourceDefinition parse(String json) {
@@ -226,6 +228,68 @@ class ResourceServiceTest {
 		var has = AbilityVocabulary.condition(LifepathMod.id("has_resource"));
 		assertTrue(has.test(ctx, JsonParser.parseString(
 				"{\"resource\": \"lifepath:temperature\", \"min\": 50}").getAsJsonObject()));
+		// Unknown/removed resource ids must FAIL CLOSED even at the default
+		// min of 0 (0.0 >= 0.0 would otherwise satisfy the bare condition).
+		assertFalse(has.test(ctx, JsonParser.parseString(
+				"{\"resource\": \"lifepath:nonexistent\"}").getAsJsonObject()));
+		assertFalse(has.test(ctx, JsonParser.parseString(
+				"{\"resource\": \"typo:bad\", \"min\": 0}").getAsJsonObject()));
+	}
+
+	@Test
+	void bandOrderingLastWriteWinsUnderNestedMutation() {
+		// Band A's entry action pushes into band C — the nested ENTER(C) must
+		// publish AFTER ENTER(A) so observers' last event is the resting band.
+		AbilityVocabulary.registerAction(LifepathMod.id("jump_to_90"),
+				(target, ctx, params) ->
+						ResourceService.setTo(ctx.data(), null, TEMP, 90.0, ctx.now()));
+		register(parse("""
+				{"min": 0, "max": 100, "default": 10,
+				 "bands": [{"range": [30, 50],
+				             "actions": [{"type": "lifepath:jump_to_90"}]},
+				           {"range": [80, 100]}]}
+				"""));
+		ResourceService.setTo(data, null, TEMP, 40.0, 0L); // enters A → nested 90 → C
+		assertEquals(90.0, ResourceService.current(data, TEMP));
+		// Event order: ENTER(A=0), EXIT(A=0), ENTER(C=1) — last ENTER is the
+		// resting band C, not the transit band A.
+		var enters = events.stream()
+				.filter(e -> e.type().equals(ResourceService.BAND_ENTER))
+				.map(e -> e.attributes().get("band")).toList();
+		assertEquals(List.of("0", "1"), enters);
+	}
+
+	@Test
+	void decodeRejectsUnknownBandActions() {
+		// Unknown band action type → rejected (same contract as ability files).
+		// Registry-backed effect-id validation is live-server-only (vanilla
+		// Registries aren't bootstrapped headless) — verified on server boot.
+		var badAction = ResourceDefinition.ResourceFile.CODEC
+				.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+						{"min": 0, "max": 100, "bands": [{"range": [0, 50],
+						  "actions": [{"type": "lifepath:does_not_exist"}]}]}
+						""")).result().orElseThrow();
+		assertThrows(IllegalArgumentException.class,
+				() -> LifepathContent.decodeResource(TEMP, badAction));
+	}
+
+	@Test
+	void sanitizeRepairsNonFiniteAndDriftedResources() {
+		register(parse("{\"min\": 0, \"max\": 100, \"default\": 50}"));
+		// NaN persisted via NBT — would brick modify() forever without repair.
+		data.setResource(TEMP, new PlayerCharacterData.ResourceState(
+				Double.NaN, 0.0, 100.0));
+		io.github.durdeuvlad.lifepath.character.persistence.CharacterPersistence
+				.sanitize(data);
+		assertEquals(50.0, data.resources().get(TEMP).current(),
+				"NaN repaired to def default");
+		// Out-of-def-bounds drift clamps at load.
+		data.setResource(TEMP, new PlayerCharacterData.ResourceState(
+				500.0, 0.0, 100.0));
+		io.github.durdeuvlad.lifepath.character.persistence.CharacterPersistence
+				.sanitize(data);
+		assertEquals(100.0, data.resources().get(TEMP).current(),
+				"over-max clamped to def max");
 	}
 
 	@Test

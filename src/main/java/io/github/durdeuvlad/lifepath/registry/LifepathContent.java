@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.ContentIndex;
 import io.github.durdeuvlad.lifepath.character.persistence.CharacterPersistence;
+import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.content.AbilityDefinition;
 import io.github.durdeuvlad.lifepath.content.LevelCurveDefinition;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
@@ -147,8 +148,8 @@ public final class LifepathContent {
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (traits, conditions,
-	 * attunements, resources, …) answer permissively so nothing gets dropped
-	 * before its own milestone lands.
+	 * attunements, …) answer permissively so nothing gets dropped before its
+	 * own milestone lands.
 	 */
 	public static boolean exists(String domain, Identifier id) {
 		return switch (domain) {
@@ -199,6 +200,41 @@ public final class LifepathContent {
 					}
 				}
 			}
+		}
+		// Band effect ids: a typo'd effect would be silently dropped every
+		// sweep — fail the file the same way unknown action types do. Guarded:
+		// vanilla Registries aren't bootstrapped in the unit-test environment,
+		// so headless decodes defer this check to runtime fail-closed guards.
+		try {
+			for (var band : def.bands()) {
+				for (var fx : band.effects()) {
+					var entry = net.minecraft.registry.Registries.STATUS_EFFECT
+							.getEntry(fx.effect());
+					if (entry.isEmpty()) {
+						throw new IllegalArgumentException("resource " + id
+								+ " band effect names unknown status effect "
+								+ fx.effect());
+					}
+					// Instant effects re-fire onApplied every sweep — they
+					// cannot be "sustained" and would pulse each interval.
+					if (entry.get().value().isInstant()) {
+						throw new IllegalArgumentException("resource " + id
+								+ " band effect " + fx.effect()
+								+ " is instant — sustained effects require a "
+								+ "duration-based status effect");
+					}
+					if (fx.durationTicks() < ((Number) LifepathConfig.getOrDefault(
+							LifepathMod.id("resources"), "tick_interval_ticks", 20))
+							.intValue()) {
+						LifepathMod.LOGGER.warn("resource {} band effect {} "
+								+ "duration_ticks {} is below tick_interval_ticks"
+								+ " — it will expire mid-sweep", id, fx.effect(),
+								fx.durationTicks());
+					}
+				}
+			}
+		} catch (ExceptionInInitializerError | NoClassDefFoundError e) {
+			// Headless decode (tests): skip registry-backed validation only.
 		}
 		if (!unknown.isEmpty()) {
 			throw new IllegalArgumentException(
