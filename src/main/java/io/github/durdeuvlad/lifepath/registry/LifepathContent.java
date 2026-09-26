@@ -65,6 +65,10 @@ public final class LifepathContent {
 			new ContentRegistry<>(LifepathMod.id("ability"));
 	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.ResourceDefinition>
 			RESOURCES = new ContentRegistry<>(LifepathMod.id("resource"));
+	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.DietDefinition>
+			DIETS = new ContentRegistry<>(LifepathMod.id("diet"));
+	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.RelationDefinition>
+			RELATIONS = new ContentRegistry<>(LifepathMod.id("relation"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -112,6 +116,16 @@ public final class LifepathContent {
 		ReloadManager.registerData(LifepathMod.id("ability"),
 				manager -> loadDomain(manager, "ability", AbilityDefinition.AbilityFile.CODEC,
 						LifepathContent::decodeAbility, ABILITIES));
+		// Species-adjacent rule domains (M5-4): species refs are only recorded
+		// post-load, so registration order relative to species does not matter.
+		ReloadManager.registerData(LifepathMod.id("diet"),
+				manager -> loadDomain(manager, "diet",
+						io.github.durdeuvlad.lifepath.content.DietDefinition.DietFile.CODEC,
+						io.github.durdeuvlad.lifepath.content.DietDefinition::fromFile, DIETS));
+		ReloadManager.registerData(LifepathMod.id("relation"),
+				manager -> loadDomain(manager, "relation",
+						io.github.durdeuvlad.lifepath.content.RelationDefinition.RelationFile.CODEC,
+						io.github.durdeuvlad.lifepath.content.RelationDefinition::fromFile, RELATIONS));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateReferences());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -146,6 +160,14 @@ public final class LifepathContent {
 		return RESOURCES;
 	}
 
+	public static ContentRegistry<io.github.durdeuvlad.lifepath.content.DietDefinition> diets() {
+		return DIETS;
+	}
+
+	public static ContentRegistry<io.github.durdeuvlad.lifepath.content.RelationDefinition> relations() {
+		return RELATIONS;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (traits, conditions,
@@ -161,6 +183,8 @@ public final class LifepathContent {
 			case "xp_source" -> XP_SOURCES.contains(id);
 			case "ability" -> ABILITIES.contains(id);
 			case "resource" -> RESOURCES.contains(id);
+			case "diet" -> DIETS.contains(id);
+			case "relation" -> RELATIONS.contains(id);
 			default -> true;
 		};
 	}
@@ -445,8 +469,8 @@ public final class LifepathContent {
 			recordRefs("species", def.id(), def.activeAbilities(), "ability");
 			recordRefs("species", def.id(), def.minAptitudes().keySet(), "skill");
 			recordRefs("species", def.id(), def.resources(), "resource");
-			recordRef("species", def.id(), def.dietRules(), "diet_rules");
-			recordRef("species", def.id(), def.mobDispositions(), "mob_disposition");
+			recordRef("species", def.id(), def.dietRules(), "diet");
+			recordRef("species", def.id(), def.mobDispositions(), "relation");
 		}
 		for (SpecializationDefinition def : SPECIALIZATIONS.all().values()) {
 			recordRefs("specialization", def.id(), def.startingSkills().keySet(), "skill");
@@ -499,6 +523,8 @@ public final class LifepathContent {
 			case "xp_source" -> XP_SOURCES;
 			case "ability" -> ABILITIES;
 			case "resource" -> RESOURCES;
+			case "diet" -> DIETS;
+			case "relation" -> RELATIONS;
 			default -> null;
 		};
 	}
