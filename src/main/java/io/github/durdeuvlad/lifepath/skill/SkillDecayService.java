@@ -80,8 +80,18 @@ public final class SkillDecayService {
 		if (cur == null) {
 			return null;
 		}
+		// The checkpoint is monotone: clock regressions never re-open charged
+		// time, and disabled/undefined passes still CONSUME the window so a
+		// later re-enable doesn't charge the whole backlog.
+		long checkpoint = Math.max(now, cur.lastDecayCheckpoint());
 		if (def == null || !enabled()) {
-			return cur;
+			SkillProgress stamped = new SkillProgress(cur.xp(), cur.level(),
+					cur.highestLevel(), cur.protectedFloor(), cur.aptitude(),
+					cur.lastMeaningfulUse(), checkpoint);
+			if (!stamped.equals(cur)) {
+				data.setSkillProgress(skillId, stamped);
+			}
+			return stamped;
 		}
 		double fracCur = fractionalLevel(def, cur);
 		double fracRaw = decayedFractionalLevel(cur, def, data, now);
@@ -96,17 +106,24 @@ public final class SkillDecayService {
 		double newXp = decayed ? xpForFractional(def, bounded) : cur.xp();
 		SkillProgress next = new SkillProgress(newXp, newLevel,
 				cur.highestLevel(), cur.protectedFloor(), cur.aptitude(),
-				cur.lastMeaningfulUse(), now);
+				cur.lastMeaningfulUse(), checkpoint);
 		data.setSkillProgress(skillId, next);
 		return next;
 	}
 
-	/** Decays every tracked skill; returns how many records changed. */
+	/**
+	 * Decays every tracked skill; returns how many records ACTUALLY lost xp
+	 * or level (checkpoint-only advances don't count — callers use this for
+	 * dirty/sync decisions and a checkpoint alone is safe to leave
+	 * unpersisted).
+	 */
 	public static int applyLazyAll(PlayerCharacterData data, long now) {
 		int changed = 0;
 		for (Identifier id : new ArrayList<>(data.skills().keySet())) {
 			SkillProgress before = data.skill(id);
-			if (!applyLazy(data, id, now).equals(before)) {
+			SkillProgress after = applyLazy(data, id, now);
+			if (after != null
+					&& (after.level() != before.level() || after.xp() != before.xp())) {
 				changed++;
 			}
 		}
@@ -120,8 +137,12 @@ public final class SkillDecayService {
 	static double decayedFractionalLevel(SkillProgress cur, SkillDefinition def,
 			PlayerCharacterData data, long now) {
 		double frac = fractionalLevel(def, cur);
-		long anchor = Math.max(cur.lastMeaningfulUse(), cur.lastDecayCheckpoint());
-		long decayMs = now - anchor - (long) (graceHours() * HOUR_MS);
+		// Grace is consumed ONCE per idle period (anchored on meaningful use);
+		// the checkpoint marks time already charged. Subtracting grace from
+		// (now − checkpoint) would re-gift the full grace every pass.
+		long graceEnd = cur.lastMeaningfulUse() + (long) (graceHours() * HOUR_MS);
+		long anchor = Math.max(graceEnd, cur.lastDecayCheckpoint());
+		long decayMs = now - anchor;
 		if (decayMs <= 0 || frac <= 0) {
 			return frac;
 		}
@@ -201,7 +222,12 @@ public final class SkillDecayService {
 		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "maintenance_minutes", 60.0)).doubleValue();
 	}
 
-	/** The configured bands, ascending. Malformed/missing entries fall back to §9 defaults. */
+	/**
+	 * The configured bands, ascending. Malformed/missing entries fall back to
+	 * §9 defaults; a non-monotone {@code band_i_upper} collapses to the
+	 * previous bound (a degenerate, never-matching band) rather than
+	 * overlapping earlier bands.
+	 */
 	static List<Band> bands() {
 		int[] defaultsUpper = {25, 50, 75, 90, 100};
 		double[] defaultsRate = {0.0, 0.05, 0.10, 0.20, 0.35};
@@ -211,7 +237,8 @@ public final class SkillDecayService {
 					DECAY_CONFIG, "band_" + (i + 1) + "_upper", defaultsUpper[i])).intValue();
 			double rate = ((Number) LifepathConfig.getOrDefault(
 					DECAY_CONFIG, "band_" + (i + 1) + "_rate", defaultsRate[i])).doubleValue();
-			bands.add(new Band(i == 0 ? 0 : bands.get(i - 1).upper(), upper, rate));
+			int lower = bands.isEmpty() ? 0 : bands.get(bands.size() - 1).upper();
+			bands.add(new Band(lower, Math.max(upper, lower), i == 0 ? Math.max(0.0, rate) : rate));
 		}
 		return bands;
 	}

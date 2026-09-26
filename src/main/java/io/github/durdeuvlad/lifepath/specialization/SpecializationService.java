@@ -63,7 +63,7 @@ public final class SpecializationService {
 				data.setSkillProgress(e.getKey(), SkillService.clamped(e.getKey(),
 						new SkillProgress(xp, target,
 								Math.max(cur.highestLevel(), target), cur.protectedFloor(),
-								cur.aptitude(), now)));
+								cur.aptitude(), now, Math.max(now, cur.lastDecayCheckpoint()))));
 			}
 		}
 		// Aptitude overrides are raise-only like levels — spec switches never
@@ -73,7 +73,7 @@ public final class SpecializationService {
 			if (cur != null && e.getValue().ordinal() > cur.aptitude().ordinal()) {
 				data.setSkillProgress(e.getKey(), new SkillProgress(cur.xp(), cur.level(),
 						cur.highestLevel(), cur.protectedFloor(), e.getValue(),
-						cur.lastMeaningfulUse()));
+						cur.lastMeaningfulUse(), cur.lastDecayCheckpoint()));
 			}
 		}
 		// Protected floors are stored verbatim (raise-only): a floor above the
@@ -83,7 +83,7 @@ public final class SpecializationService {
 			if (cur != null && e.getValue() > cur.protectedFloor()) {
 				data.setSkillProgress(e.getKey(), new SkillProgress(cur.xp(), cur.level(),
 						cur.highestLevel(), e.getValue(), cur.aptitude(),
-						cur.lastMeaningfulUse()));
+						cur.lastMeaningfulUse(), cur.lastDecayCheckpoint()));
 			}
 		}
 		return ApplyResult.APPLIED;

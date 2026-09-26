@@ -74,7 +74,11 @@ public final class SkillService {
 		int floor = Math.max(0, Math.min(progress.protectedFloor(), Math.max(0, maxLevel)));
 		double xp = Double.isFinite(progress.xp()) ? Math.max(0.0, progress.xp()) : 0.0;
 		long lastUse = Math.max(0L, progress.lastMeaningfulUse());
-		return new SkillProgress(xp, level, highest, floor, progress.aptitude(), lastUse);
+		// The decay checkpoint is a monotone ledger — repairing via the 6-arg
+		// ctor would rewind it to lastUse and re-open already-charged time.
+		long checkpoint = Math.max(lastUse, Math.max(0L, progress.lastDecayCheckpoint()));
+		return new SkillProgress(xp, level, highest, floor, progress.aptitude(),
+				lastUse, checkpoint);
 	}
 
 	/** {@link #clamped} against the skill's own definition (or the 100 default). */
@@ -93,7 +97,8 @@ public final class SkillService {
 		int level = Math.max(0, Math.min(newLevel, Math.max(0, maxLevel)));
 		return clamped(new SkillProgress(progress.xp(), level,
 				Math.max(progress.highestLevel(), level),
-				progress.protectedFloor(), progress.aptitude(), progress.lastMeaningfulUse()),
+				progress.protectedFloor(), progress.aptitude(), progress.lastMeaningfulUse(),
+				progress.lastDecayCheckpoint()),
 				maxLevel);
 	}
 

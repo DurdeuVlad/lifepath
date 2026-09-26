@@ -144,7 +144,8 @@ public final class SkillXpService {
 			// timestamp), but no XP accrues and no level can change.
 			data.setSkillProgress(skillId, SkillService.clamped(
 					new SkillProgress(current.xp(), current.level(), current.highestLevel(),
-							current.protectedFloor(), current.aptitude(), now), def.maxLevel()));
+							current.protectedFloor(), current.aptitude(), now,
+							Math.max(now, current.lastDecayCheckpoint())), def.maxLevel()));
 			return new XpResult(0, current.level(), current.level(),
 					current.xp(), current.xp(), true);
 		}
@@ -173,7 +174,8 @@ public final class SkillXpService {
 		int newLevel = Math.min(def.maxLevel(), LevelCurves.levelForSkill(def, newXp));
 		SkillProgress next = SkillService.clamped(
 				new SkillProgress(newXp, newLevel, Math.max(current.highestLevel(), newLevel),
-						current.protectedFloor(), current.aptitude(), now), def.maxLevel());
+						current.protectedFloor(), current.aptitude(), now,
+						Math.max(now, current.lastDecayCheckpoint())), def.maxLevel());
 		data.setSkillProgress(skillId, next);
 		return new XpResult(Math.max(0, newLevel - current.level()), current.level(),
 				newLevel, current.xp(), next.xp(), true);
@@ -207,7 +209,8 @@ public final class SkillXpService {
 		int newLevel = Math.min(def.maxLevel(), LevelCurves.levelForSkill(def, xp));
 		SkillProgress next = SkillService.clamped(
 				new SkillProgress(xp, newLevel, Math.max(current.highestLevel(), newLevel),
-						current.protectedFloor(), current.aptitude(), System.currentTimeMillis()),
+						current.protectedFloor(), current.aptitude(), System.currentTimeMillis(),
+						Math.max(System.currentTimeMillis(), current.lastDecayCheckpoint())),
 				def.maxLevel());
 		data.setSkillProgress(skillId, next);
 		return new XpResult(Math.max(0, newLevel - current.level()), current.level(),

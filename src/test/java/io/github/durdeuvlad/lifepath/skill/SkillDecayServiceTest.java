@@ -101,6 +101,35 @@ class SkillDecayServiceTest {
 	}
 
 	@Test
+	void graceIsChargedOnceNotPerPass() {
+		// Two passes inside one idle window: grace applies to the window as a
+		// whole, not to each pass. Pass 1 at +3d charges 1d (post-2d-grace);
+		// pass 2 at +6d must charge ONLY the new 3d gap — total 4 decay-days.
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atLevel(60, T0));
+		SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + DAY);
+		SkillProgress second = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 4 * DAY);
+		// Band 51–75, 0.10/day: (1 + 3) days → 0.4 level → 59.6.
+		assertEquals(59.6, second.xp() / 10.0, 0.001);
+	}
+
+	@Test
+	void persistenceRoundTripKeepsTheCheckpoint() throws Exception {
+		// The checkpoint must survive save/load — a rewind would re-charge the
+		// same window on every login (sanitize repair path used to drop it).
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atLevel(60, T0));
+		long now = T0 + GRACE + DAY;
+		SkillDecayService.applyLazy(data, SKILL, now);
+		SkillProgress restored = io.github.durdeuvlad.lifepath.character.persistence
+				.CharacterPersistence.deserialize(
+						io.github.durdeuvlad.lifepath.character.persistence
+								.CharacterPersistence.serialize(data)).skill(SKILL);
+		assertEquals(now, restored.lastDecayCheckpoint(),
+				"checkpoint must survive the sanitize path");
+	}
+
+	@Test
 	void checkpointAdvancesAndNeverDoubleCharges() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 		data.setSkillProgress(SKILL, atLevel(60, T0));
