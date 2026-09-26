@@ -35,7 +35,7 @@ public record SkillDefinition(
 	/** A named level breakpoint: display text + references to effects (M4+). */
 	public record Milestone(int level, String description, List<Identifier> effectRefs) {
 		public static final Codec<Milestone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.INT.fieldOf("level").forGetter(Milestone::level),
+				Codec.intRange(1, 10000).fieldOf("level").forGetter(Milestone::level),
 				Codec.STRING.optionalFieldOf("description", "").forGetter(Milestone::description),
 				Identifier.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Milestone::effectRefs)
 		).apply(instance, Milestone::new));
@@ -59,7 +59,7 @@ public record SkillDefinition(
 		public static final Codec<SkillDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SkillDefinitionFile::displayName),
 				Category.CODEC.fieldOf("category").forGetter(SkillDefinitionFile::category),
-				Codec.INT.optionalFieldOf("max_level", 100).forGetter(SkillDefinitionFile::maxLevel),
+				Codec.intRange(1, 10000).optionalFieldOf("max_level", 100).forGetter(SkillDefinitionFile::maxLevel),
 				Identifier.CODEC.optionalFieldOf("level_curve").forGetter(SkillDefinitionFile::levelCurve),
 				Milestone.CODEC.listOf().optionalFieldOf("milestones", List.of()).forGetter(SkillDefinitionFile::milestones),
 				Identifier.CODEC.optionalFieldOf("xp_sources").forGetter(SkillDefinitionFile::xpSources),

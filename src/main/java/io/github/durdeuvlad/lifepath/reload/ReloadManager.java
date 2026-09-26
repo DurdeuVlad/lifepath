@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
@@ -25,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 public final class ReloadManager {
 	private static final Identifier LISTENER_ID = LifepathMod.id("engine_reload");
 	private static final Map<Identifier, Runnable> RELOADERS = new LinkedHashMap<>();
-	private static final Map<Identifier, java.util.function.Consumer<net.minecraft.resource.ResourceManager>>
+	private static final Map<Identifier, Consumer<ResourceManager>>
 			DATA_RELOADERS = new LinkedHashMap<>();
 	private static boolean initialized;
 
@@ -34,7 +35,7 @@ public final class ReloadManager {
 
 	/** Registers a named reloader. Registration order is the run order. */
 	public static void register(Identifier id, Runnable reloader) {
-		if (RELOADERS.put(id, reloader) != null) {
+		if (RELOADERS.put(id, reloader) != null || DATA_RELOADERS.containsKey(id)) {
 			throw new IllegalArgumentException("duplicate reloader: " + id);
 		}
 	}
@@ -47,7 +48,7 @@ public final class ReloadManager {
 	 * rather than failed.
 	 */
 	public static void registerData(Identifier id,
-			java.util.function.Consumer<net.minecraft.resource.ResourceManager> reloader) {
+			Consumer<ResourceManager> reloader) {
 		if (DATA_RELOADERS.put(id, reloader) != null || RELOADERS.containsKey(id)) {
 			throw new IllegalArgumentException("duplicate reloader: " + id);
 		}
@@ -77,17 +78,6 @@ public final class ReloadManager {
 	public record ReloadResult(Identifier id, boolean success, @Nullable String error) {
 	}
 
-	/**
-	 * Runs every registered reloader in registration order. Called by datapack
-	 * reload and {@code /lifepath reload}.
-	 *
-	 * @return one {@link ReloadResult} per registered reloader, in run order;
-	 *         a failing reloader is logged as ERROR, marked unsuccessful, and
-	 *         never aborts the rest.
-	 *         <p>Note: only {@link Exception} is contained — an {@link Error}
-	 *         still aborts the chain and propagates (deliberate: swallowing
-	 *         VM-level failures hides real corruption).
-	 */
 	/** {@link #reloadAll(ResourceManager)} without a resource manager: data reloaders report skipped. */
 	public static List<ReloadResult> reloadAll() {
 		return reloadAll(null);
@@ -113,10 +103,9 @@ public final class ReloadManager {
 				results.add(new ReloadResult(reloader.getKey(), false, detail));
 			}
 		}
-		for (Map.Entry<Identifier, java.util.function.Consumer<ResourceManager>> reloader
-				: DATA_RELOADERS.entrySet()) {
+		for (Map.Entry<Identifier, Consumer<ResourceManager>> reloader : DATA_RELOADERS.entrySet()) {
 			if (manager == null) {
-				results.add(new ReloadResult(reloader.getKey(), false, "skipped: no resource manager"));
+				results.add(new ReloadResult(reloader.getKey(), true, "skipped: no resource manager"));
 				continue;
 			}
 			try {

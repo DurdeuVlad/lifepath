@@ -14,8 +14,11 @@ import io.github.durdeuvlad.lifepath.reload.ReloadManager;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -56,12 +59,17 @@ public final class LifepathContent {
 	}
 
 	private static final List<UnresolvedReference> UNRESOLVED = new ArrayList<>();
+	private static boolean initialized;
 
 	private LifepathContent() {
 	}
 
-	/** Registers the content loaders (datapack + {@code /lifepath reload} share this path). */
+	/** Registers the content loaders (datapack + {@code /lifepath reload} share this path). Idempotent. */
 	public static void init() {
+		if (initialized) {
+			return;
+		}
+		initialized = true;
 		ReloadManager.registerData(LifepathMod.id("species"),
 				manager -> loadDomain(manager, "species", SpeciesDefinition.SpeciesDefinitionFile.CODEC,
 						SpeciesDefinition::fromFile, SPECIES));
@@ -121,17 +129,19 @@ public final class LifepathContent {
 	 */
 	public static <F, T> void loadDomain(ResourceManager manager, String directory,
 			Codec<F> fileCodec, FileDecoder<F, T> decoder, ContentRegistry<T> registry) {
-		registry.clear();
-		Map<Identifier, JsonElement> parsed = new java.util.LinkedHashMap<>();
-		Map<Identifier, net.minecraft.resource.Resource> files =
+		// Read stage first: the registry keeps its previous contents if the
+		// scan itself fails — only a completed read replaces the domain.
+		Map<Identifier, JsonElement> parsed = new LinkedHashMap<>();
+		Map<Identifier, Resource> files =
 				manager.findResources(directory, id -> id.getPath().endsWith(".json"));
-		for (Map.Entry<Identifier, net.minecraft.resource.Resource> file : files.entrySet()) {
+		for (Map.Entry<Identifier, Resource> file : files.entrySet()) {
 			try (var reader = new InputStreamReader(file.getValue().getInputStream(), StandardCharsets.UTF_8)) {
 				parsed.put(entryId(file.getKey(), directory), JsonParser.parseReader(reader));
 			} catch (Exception e) {
 				LifepathMod.LOGGER.error("skipping {} file {}: {}", directory, file.getKey(), e.getMessage());
 			}
 		}
+		registry.clear();
 		registerAll(directory, parsed, fileCodec, decoder, registry);
 	}
 
@@ -155,7 +165,7 @@ public final class LifepathContent {
 				LifepathMod.LOGGER.error("skipping {} file {}: {}", directory, file.getKey(), e.getMessage());
 			}
 		}
-		LifepathMod.LOGGER.info("loaded {} {} definition(s)", registry.size(), directory);
+		LifepathMod.LOGGER.info("loaded {} {} definition(s)", loaded, directory);
 		return loaded;
 	}
 
@@ -178,6 +188,7 @@ public final class LifepathContent {
 		for (SpeciesDefinition def : SPECIES.all().values()) {
 			recordRefs("species", def.id(), def.passiveAbilities(), "ability");
 			recordRefs("species", def.id(), def.activeAbilities(), "ability");
+			recordRefs("species", def.id(), def.minAptitudes().keySet(), "skill");
 			recordRefs("species", def.id(), def.resources(), "resource");
 			recordRef("species", def.id(), def.dietRules(), "diet_rules");
 			recordRef("species", def.id(), def.mobDispositions(), "mob_disposition");
@@ -203,12 +214,12 @@ public final class LifepathContent {
 	private static void recordRefs(String domain, Identifier source,
 			Iterable<Identifier> refs, String targetDomain) {
 		for (Identifier ref : refs) {
-			recordRef(domain, source, java.util.Optional.of(ref), targetDomain);
+			recordRef(domain, source, Optional.of(ref), targetDomain);
 		}
 	}
 
 	private static void recordRef(String domain, Identifier source,
-			java.util.Optional<Identifier> ref, String targetDomain) {
+			Optional<Identifier> ref, String targetDomain) {
 		ref.ifPresent(id -> {
 			ContentRegistry<?> registry = registryFor(targetDomain);
 			if (registry == null || !registry.contains(id)) {
