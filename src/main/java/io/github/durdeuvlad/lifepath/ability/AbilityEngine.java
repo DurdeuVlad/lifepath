@@ -138,8 +138,7 @@ public final class AbilityEngine {
 				continue;
 			}
 			long intervalMs = Math.max(1, def.trigger().intervalTicks()) * 50L;
-			Identifier due = scheduleKey(def.id());
-			Long dueAt = data.cooldowns().get(due);
+			Long dueAt = CooldownService.nextDueAt(data, def.id());
 			if (dueAt != null && dueAt > now) {
 				continue;
 			}
@@ -149,7 +148,7 @@ public final class AbilityEngine {
 			double elapsedSeconds = dueAt != null
 					? Math.max(0.0, (now - (dueAt - intervalMs)) / 1000.0)
 					: intervalMs / 1000.0;
-			data.setCooldown(due, now + intervalMs);
+			CooldownService.markNextDue(data, def.id(), now + intervalMs);
 			if (evaluate(data, player, def, now, elapsedSeconds) == Outcome.EXECUTED
 					&& player != null) {
 				CharacterManager.changed(player);
@@ -222,8 +221,7 @@ public final class AbilityEngine {
 		if (!conditionsMet(ctx, def)) {
 			return debug(def, Outcome.CONDITIONS_FAILED);
 		}
-		Long onCooldownUntil = data.cooldowns().get(def.id());
-		if (onCooldownUntil != null && onCooldownUntil > now) {
+		if (CooldownService.isOnCooldown(data, def.id(), now)) {
 			return debug(def, Outcome.ON_COOLDOWN);
 		}
 		if (def.cost().isPresent()) {
@@ -279,8 +277,14 @@ public final class AbilityEngine {
 						new PlayerCharacterData.ResourceState(left, res.min(), res.max()));
 			}
 		});
-		def.cooldown().ifPresent(cd ->
-				data.setCooldown(def.id(), now + (long) (cd.seconds() * 1000.0)));
+		def.cooldown().ifPresent(cd -> {
+			long expiry = CooldownService.trigger(data, def.id(), cd.seconds(), now);
+			if (self != null && expiry >= 0) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(self,
+						new io.github.durdeuvlad.lifepath.network.s2c
+								.CooldownUpdatePayload(def.id(), expiry));
+			}
+		});
 		applyResourceInteractions(data, def, interactionSeconds);
 		return Outcome.EXECUTED;
 	}
@@ -341,16 +345,9 @@ public final class AbilityEngine {
 		return outcome;
 	}
 
-	/**
-	 * Cooldown-map key for the "next passive eval" marker: {@code schedule/<ns>/<path>}
-	 * keeps namespace and path losslessly distinct (unlike a {@code :}→{@code _}
-	 * rewrite, which collides e.g. {@code a:b_c} with {@code a_b:c}). The
-	 * {@code schedule/} prefix is the sentinel {@code CharacterPersistence}'s
-	 * sanitize skips — these are engine bookkeeping, not ability cooldowns.
-	 */
+	/** Kept for existing call sites/tests — the key format lives in {@link CooldownService}. */
 	static Identifier scheduleKey(Identifier abilityId) {
-		return Identifier.of("lifepath",
-				"schedule/" + abilityId.getNamespace() + "/" + abilityId.getPath());
+		return CooldownService.scheduleKey(abilityId);
 	}
 
 	private static int passiveIntervalTicks() {
