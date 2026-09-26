@@ -1,0 +1,8 @@
+{
+	"display_name": "Frost Walk",
+	"trigger": {"type": "active"},
+	"target": {"type": "lifepath:blocks_in_radius",
+	           "block": "minecraft:water", "radius": 7, "limit": 192},
+	"actions": [{"type": "lifepath:freeze_water", "temporary": true}],
+	"cooldown": {"seconds": 120}
+}

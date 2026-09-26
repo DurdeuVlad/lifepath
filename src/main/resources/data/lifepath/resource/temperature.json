@@ -1,0 +1,19 @@
+{
+	"min": 0,
+	"max": 100,
+	"default": 50,
+	"regen_per_second": 0.0,
+	"bands": [
+		{"range": [0, 25], "effects": [
+			{"effect": "minecraft:speed", "duration_ticks": 80},
+			{"effect": "minecraft:regeneration", "duration_ticks": 80}
+		]},
+		{"range": [71, 85], "effects": [
+			{"effect": "minecraft:slowness", "duration_ticks": 80}
+		]},
+		{"range": [86, 99], "effects": [
+			{"effect": "minecraft:weakness", "duration_ticks": 80},
+			{"effect": "minecraft:slowness", "duration_ticks": 80, "amplifier": 1}
+		]}
+	]
+}

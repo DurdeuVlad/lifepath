@@ -1,0 +1,11 @@
+{
+	"display_name": "Overheat",
+	"trigger": {"type": "passive", "interval_ticks": 40},
+	"conditions": {"all": [{"type": "lifepath:resource_threshold",
+	                        "resource": "lifepath:temperature",
+	                        "op": ">=", "value": 100}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:damage", "amount": 1.0, "source": "fire"}
+	]
+}
