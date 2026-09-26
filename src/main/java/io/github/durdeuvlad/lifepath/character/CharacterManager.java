@@ -186,6 +186,11 @@ public final class CharacterManager {
 	static PlayerCharacterData snapshotForSync(PlayerCharacterData data, long nowMillis) {
 		PlayerCharacterData copy = CharacterPersistence.copy(data);
 		copy.clearExpiredCooldowns(nowMillis);
+		// Passive-schedule markers are server bookkeeping, not cooldowns —
+		// a HUD iterating cooldowns must never see them (M4-4).
+		copy.cooldowns().keySet().stream()
+				.filter(io.github.durdeuvlad.lifepath.ability.CooldownService::isScheduleKey)
+				.toList().forEach(copy::removeCooldown);
 		// The anti-exploit ledger is server-only bookkeeping - never synced.
 		copy.clearActionSignatures();
 		return copy;

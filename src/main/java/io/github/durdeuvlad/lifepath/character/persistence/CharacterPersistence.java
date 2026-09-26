@@ -1,9 +1,11 @@
 package io.github.durdeuvlad.lifepath.character.persistence;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
+import io.github.durdeuvlad.lifepath.ability.CooldownService;
 import io.github.durdeuvlad.lifepath.character.ContentIndex;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.character.migration.CharacterMigrations;
+import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.github.durdeuvlad.lifepath.skill.SkillService;
 import io.github.durdeuvlad.lifepath.util.Serialization;
@@ -121,14 +123,12 @@ public final class CharacterPersistence {
 				data.removeResource(id);
 			}
 		}
-		long cooldownMinPersistMs = (long) (((Number) io.github.durdeuvlad.lifepath.config
-				.LifepathConfig.getOrDefault(LifepathMod.id("abilities"),
-						"persist_min_seconds", 5.0)).doubleValue() * 1000.0);
+		long cooldownMinPersistMs = (long) (LifepathConfig.getOrDefault(
+				LifepathMod.id("abilities"), "persist_min_seconds", 5.0) * 1000.0);
 		for (Identifier id : new ArrayList<>(data.cooldowns().keySet())) {
 			// `schedule/*` keys are the ability engine's passive-eval markers —
 			// engine bookkeeping, not ability references (M4-1).
-			if (id.getPath().startsWith(io.github.durdeuvlad.lifepath.ability
-					.CooldownService.SCHEDULE_PREFIX)) {
+			if (CooldownService.isScheduleKey(id)) {
 				continue;
 			}
 			if (unknown("ability", id)) {
@@ -139,7 +139,7 @@ public final class CharacterPersistence {
 			// M4-4: short-lived cooldowns don't persist — remaining <= the
 			// configured threshold at load means the entry is dropped.
 			Long expiry = data.cooldowns().get(id);
-			if (expiry == null || expiry - nowMs <= cooldownMinPersistMs) {
+			if (expiry == null || expiry <= nowMs + cooldownMinPersistMs) {
 				data.removeCooldown(id);
 			}
 		}

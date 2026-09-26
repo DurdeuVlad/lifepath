@@ -142,10 +142,16 @@ public final class CharacterCommands {
 						+ "  " + s.current() + "/" + s.min() + "-" + s.max()));
 			}
 		}
-		if (data.cooldowns().isEmpty()) {
+		// Passive-schedule markers are engine bookkeeping — not shown as
+		// cooldowns in admin output (M4-4).
+		var visibleCooldowns = data.cooldowns().entrySet().stream()
+				.filter(e -> !io.github.durdeuvlad.lifepath.ability.CooldownService
+						.isScheduleKey(e.getKey()))
+				.toList();
+		if (visibleCooldowns.isEmpty()) {
 			lines.add(Text.literal("  cooldowns: <none>"));
 		} else {
-			for (Map.Entry<Identifier, Long> cd : data.cooldowns().entrySet()) {
+			for (Map.Entry<Identifier, Long> cd : visibleCooldowns) {
 				long remaining = cd.getValue() - nowMillis;
 				lines.add(Text.literal("  cooldown " + cd.getKey()
 						+ (remaining <= 0

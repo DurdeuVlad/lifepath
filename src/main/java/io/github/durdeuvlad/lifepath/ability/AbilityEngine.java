@@ -280,9 +280,14 @@ public final class AbilityEngine {
 		def.cooldown().ifPresent(cd -> {
 			long expiry = CooldownService.trigger(data, def.id(), cd.seconds(), now);
 			if (self != null && expiry >= 0) {
-				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(self,
-						new io.github.durdeuvlad.lifepath.network.s2c
-								.CooldownUpdatePayload(def.id(), expiry));
+				try {
+					net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(self,
+							new io.github.durdeuvlad.lifepath.network.s2c
+									.CooldownUpdatePayload(def.id(), expiry));
+				} catch (Exception e) {
+					// Advisory HUD delta — a send failure must not break the eval.
+					LifepathMod.LOGGER.error("ability {} cooldown sync failed", def.id(), e);
+				}
 			}
 		});
 		applyResourceInteractions(data, def, interactionSeconds);

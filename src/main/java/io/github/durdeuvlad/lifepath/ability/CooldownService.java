@@ -46,6 +46,16 @@ public final class CooldownService {
 	 */
 	public static final String SCHEDULE_PREFIX = "schedule/";
 
+	/**
+	 * True when {@code id} is a passive-schedule marker rather than a real
+	 * ability cooldown key — namespace-checked so a foreign content id like
+	 * {@code othermod:schedule/x} is never mistaken for engine bookkeeping.
+	 */
+	public static boolean isScheduleKey(Identifier id) {
+		return LifepathMod.MOD_ID.equals(id.getNamespace())
+				&& id.getPath().startsWith(SCHEDULE_PREFIX);
+	}
+
 	// ------------------------------------------------------------------
 	// Data-path cores — testable without a live player; no packets sent.
 	// ------------------------------------------------------------------
@@ -80,7 +90,11 @@ public final class CooldownService {
 			data.removeCooldown(abilityId);
 			return -1L;
 		}
-		long expiry = nowMs + (long) (effective * 1000.0);
+		// Saturating add: a datapack can name an absurd duration; an
+		// overflowing expiry would wrap negative and act as NO cooldown.
+		long expiry = effective * 1000.0 > (double) (Long.MAX_VALUE - nowMs)
+				? Long.MAX_VALUE
+				: nowMs + (long) (effective * 1000.0);
 		data.setCooldown(abilityId, expiry);
 		return expiry;
 	}
@@ -95,6 +109,8 @@ public final class CooldownService {
 			double cooldownSeconds, long nowMs) {
 		long expiry = trigger(CharacterManager.getCharacter(player), abilityId,
 				cooldownSeconds, nowMs);
+		// A trigger outside an execution path must still persist the stamp.
+		CharacterManager.markDirty(player);
 		ServerPlayNetworking.send(player,
 				new CooldownUpdatePayload(abilityId, Math.max(0L, expiry)));
 		return expiry;
@@ -107,7 +123,7 @@ public final class CooldownService {
 	 * @return true when a cooldown entry existed.
 	 */
 	public static boolean clear(PlayerCharacterData data, Identifier abilityId) {
-		if (abilityId.getPath().startsWith(SCHEDULE_PREFIX)) {
+		if (isScheduleKey(abilityId)) {
 			return false;
 		}
 		boolean present = data.cooldowns().containsKey(abilityId);
@@ -119,7 +135,7 @@ public final class CooldownService {
 	public static int clearAll(PlayerCharacterData data) {
 		List<Identifier> real = new ArrayList<>();
 		for (Identifier id : data.cooldowns().keySet()) {
-			if (!id.getPath().startsWith(SCHEDULE_PREFIX)) {
+			if (!isScheduleKey(id)) {
 				real.add(id);
 			}
 		}
@@ -142,7 +158,7 @@ public final class CooldownService {
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
 		List<Identifier> cleared = new ArrayList<>();
 		for (Identifier id : data.cooldowns().keySet()) {
-			if (!id.getPath().startsWith(SCHEDULE_PREFIX)) {
+			if (!isScheduleKey(id)) {
 				cleared.add(id);
 			}
 		}
