@@ -178,7 +178,7 @@ public final class LifepathContent {
 	 */
 	public static AbilityDefinition decodeAbility(Identifier id, AbilityDefinition.AbilityFile file) {
 		AbilityDefinition def = AbilityDefinition.fromFile(id, file);
-		java.util.List<String> errors = new ArrayList<>();
+		java.util.Set<String> errors = new java.util.LinkedHashSet<>();
 		for (Identifier t : io.github.durdeuvlad.lifepath.ability
 				.AbilityVocabulary.unknownNodeTypes(def)) {
 			errors.add("unknown spec node type " + t);
@@ -198,9 +198,16 @@ public final class LifepathContent {
 		}
 		// Content-ref scan: the param-name conventions `resource` / `skill`
 		// are the contract for every spec node (documented in ABILITIES.md).
+		// `#`-prefixed values are tag references — skipped by design.
 		for (var node : specNodes(def)) {
 			checkRef(errors, id, node, "resource", RESOURCES);
 			checkRef(errors, id, node, "skill", SKILLS);
+		}
+		for (Identifier event : def.trigger().events()) {
+			if (!KNOWN_EVENT_TYPES.contains(event)) {
+				LifepathMod.LOGGER.warn("ability {} subscribes to unknown event "
+						+ "type {} — typo? it may never fire", id, event);
+			}
 		}
 		def.cost().ifPresent(c -> {
 			if (!RESOURCES.contains(c.resource())) {
@@ -213,12 +220,29 @@ public final class LifepathContent {
 						+ " has no resource definition");
 			}
 		}
+		if (!def.resourceInteractions().isEmpty()
+				&& def.trigger().kind() != AbilityDefinition.Kind.PASSIVE) {
+			LifepathMod.LOGGER.warn("ability {} declares resource_interactions "
+					+ "on a {} trigger — they only apply under passive", id,
+					def.trigger().kind());
+		}
 		if (!errors.isEmpty()) {
 			throw new IllegalArgumentException(
 					"ability " + id + " invalid — " + String.join("; ", errors));
 		}
 		return def;
 	}
+
+	/** Activity ids the bus can actually produce — unknown subscribers warn. */
+	private static final java.util.Set<Identifier> KNOWN_EVENT_TYPES = java.util.Set.of(
+			io.github.durdeuvlad.lifepath.event.ActivityTypes.MINING,
+			io.github.durdeuvlad.lifepath.event.ActivityTypes.FARMING,
+			io.github.durdeuvlad.lifepath.event.ActivityTypes.SMITHING,
+			io.github.durdeuvlad.lifepath.event.ActivityTypes.FISHING,
+			io.github.durdeuvlad.lifepath.event.ActivityTypes.CRAFTING,
+			io.github.durdeuvlad.lifepath.event.ActivityTypes.COMBAT,
+			io.github.durdeuvlad.lifepath.resource.ResourceService.BAND_ENTER,
+			io.github.durdeuvlad.lifepath.resource.ResourceService.BAND_EXIT);
 
 	private static java.util.List<AbilityDefinition.SpecNode> specNodes(AbilityDefinition def) {
 		java.util.List<AbilityDefinition.SpecNode> all = new ArrayList<>();
@@ -229,14 +253,21 @@ public final class LifepathContent {
 		return all;
 	}
 
-	private static void checkRef(java.util.List<String> errors, Identifier file,
+	private static void checkRef(java.util.Set<String> errors, Identifier file,
 			AbilityDefinition.SpecNode node, String key, ContentRegistry<?> registry) {
 		var el = node.raw().get(key);
 		if (el == null || !el.isJsonPrimitive() || !el.getAsJsonPrimitive().isString()) {
 			return;
 		}
-		Identifier ref = Identifier.tryParse(el.getAsString());
-		if (ref != null && !registry.contains(ref)) {
+		String raw = el.getAsString();
+		if (raw.startsWith("#")) {
+			return; // tag reference — validated fail-closed at use time
+		}
+		Identifier ref = Identifier.tryParse(raw);
+		if (ref == null) {
+			errors.add("node " + node.type() + " " + key + "=\"" + raw
+					+ "\" is not a valid identifier");
+		} else if (!registry.contains(ref)) {
 			errors.add("node " + node.type() + " " + key + "=" + ref
 					+ " has no matching definition");
 		}
@@ -252,6 +283,7 @@ public final class LifepathContent {
 			io.github.durdeuvlad.lifepath.content.ResourceDefinition.ResourceFile file) {
 		var def = io.github.durdeuvlad.lifepath.content.ResourceDefinition.fromFile(id, file);
 		java.util.List<Identifier> unknown = new ArrayList<>();
+		java.util.Set<String> dangling = new java.util.LinkedHashSet<>();
 		if (io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.isInitialized()) {
 			for (var band : def.bands()) {
 				for (var node : band.actions()) {
@@ -259,6 +291,10 @@ public final class LifepathContent {
 							.action(node.type()) == null) {
 						unknown.add(node.type());
 					}
+					// Band actions obey the same content-ref contract as
+					// ability nodes — a dangling resource/skill fails loudly.
+					checkRef(dangling, id, node, "resource", RESOURCES);
+					checkRef(dangling, id, node, "skill", SKILLS);
 				}
 			}
 		}
@@ -297,9 +333,14 @@ public final class LifepathContent {
 		} catch (ExceptionInInitializerError | NoClassDefFoundError e) {
 			// Headless decode (tests): skip registry-backed validation only.
 		}
-		if (!unknown.isEmpty()) {
+		if (!unknown.isEmpty() || !dangling.isEmpty()) {
+			java.util.List<String> all = new ArrayList<>();
+			if (!unknown.isEmpty()) {
+				all.add("band actions use unknown types " + unknown);
+			}
+			all.addAll(dangling);
 			throw new IllegalArgumentException(
-					"resource " + id + " band actions use unknown types " + unknown);
+					"resource " + id + " invalid — " + String.join("; ", all));
 		}
 		return def;
 	}

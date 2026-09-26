@@ -13,9 +13,8 @@ override semantics apply: same-id files in later packs win.
     "all": [{"type": "lifepath:biome_tag", "tag": "minecraft:is_forest"}],
     "any": []
   },
-  "target": {"type": "lifepath:blocks_in_radius", "radius": 7,
-             "tag": "lifepath:growable"},
-  "actions": [{"type": "lifepath:grow_blocks", "growth_rolls": 3}],
+  "target": {"type": "lifepath:entities_in_radius", "radius": 5},
+  "actions": [{"type": "lifepath:highlight_entities", "duration_ticks": 60}],
   "cost": {"resource": "lifepath:mana", "amount": 10},
   "cooldown": {"seconds": 240},
   "resource_interactions": [{"resource": "lifepath:mana", "per_second": -0.5}]
@@ -27,8 +26,8 @@ override semantics apply: same-id files in later packs win.
 | Field | Required | Meaning |
 |---|---|---|
 | `display_name` | yes | Human label (future UI). |
-| `enabled` | no, default `true` | `false` keeps the def registered (refs resolve, ownership counts) but every trigger path returns `DISABLED`. |
-| `trigger` | yes | `{"type": "active"\|"passive"\|"event"}`. `passive` honors `interval_ticks` (default 20). `event` requires `events[]` (activity-type ids, e.g. `lifepath:mining`, `lifepath:resource_band_enter`). `events[]` on a non-event trigger warns and is ignored. |
+| `enabled` | no, default `true` | `false` keeps the def registered (refs resolve, ownership counts) but every trigger path returns `DISABLED`. Does NOT skip load validation — a disabled file with errors is still rejected. |
+| `trigger` | yes | `{"type": "active"\|"passive"\|"event"}`. `passive` honors `interval_ticks` (default 20, ignored on other kinds). `event` requires `events[]` (activity-type ids, e.g. `lifepath:mining`, `lifepath:resource_band_enter`). `events[]` on a non-event trigger warns and is ignored. `resource_interactions` likewise only apply under `passive`. |
 | `conditions` | no | `all[]` must ALL pass; `any[]` (if present) needs at least one pass. Empty = always true. |
 | `target` | yes | One spec node resolving the target set. |
 | `actions` | yes | Spec nodes run per resolved target, in order. Empty warns (cooldown-only ability). |
@@ -45,36 +44,65 @@ Load collects **every** error and fails the file with one joined message
 per problem class:
 
 - unknown `type` in any condition / target / action / resource-band action;
-- `resource` / `skill` params (plus `cost.resource`, `resource_interactions[].resource`) naming no loaded definition;
-- `event` trigger with empty `events[]`;
-- codec violations (non-positive `cooldown.seconds`/`cost.amount`, bad ranges, non-finite numbers, malformed JSON).
+- `resource` / `skill` params (plus `cost.resource`, `resource_interactions[].resource`) that fail to parse as an identifier or name no loaded definition — the same scan applies to resource-band actions;
+- `event` trigger with empty `events[]` — and a WARN for event ids outside the known activity-type set (the bus accepts arbitrary ids, so typos warn rather than error).
 
 Registry-backed params (`effect`, `item`, `entity`, `block`, `sound`,
-`particle`, `attribute`, `tag`…) are intentionally **not** checked at decode —
-vanilla registries aren't guaranteed populated on every decode path.
-Evaluators resolve them fail-closed at use time (unknown → the node no-ops
-with a log). New primitives must follow the same rule.
+`particle`, `attribute`, tag ids under `block`/`entity`/`item`/`tag`…) are
+intentionally **not** checked at decode — vanilla registries aren't guaranteed
+populated on every decode path. Evaluators resolve them fail-closed at use
+time (unknown → the node no-ops with a log). New primitives must follow the
+same rule. A `#`-prefixed string under `resource`/`skill` is treated as a tag
+reference and skipped by the content-ref scan.
 
 ## Built-in vocabulary
 
-Conditions (`lifepath:` namespace unless noted): `always`, `has_resource`
-(`resource`, `min`), `resource_threshold` (`resource`, `op`, `value`),
-`skill_level` (`skill`, `op`, `value`), `health_threshold`, `biome_tag` (`tag`),
-`dimension` (`id`), `daylight`, `night`, `weather` (`value`), `submerged`,
-`on_fire`, `block_nearby` (`block`, `radius`), `entity_nearby` (`entity`,
-`radius`), `inventory_contains` (`item`, `count`), `equipment_contains`.
+### Conditions (`lifepath:` namespace)
 
-Targets: `self`, `entities_in_radius` (`radius`, `entity`?, `living_only`?),
-`blocks_in_radius` (`radius`, `tag`?).
+| Type | Params |
+|---|---|
+| `always` | — |
+| `has_resource` | `resource`, `min` (default 0) |
+| `resource_threshold` | `resource`, `op`, `value` |
+| `skill_level` | `skill`, `op`, `level` |
+| `health_threshold` | `op`, `value` |
+| `biome_tag` | `tag` (biome tag id, `#` optional) |
+| `dimension` | `id` |
+| `daylight` / `night` | — |
+| `weather` | `state`: `thunder`\|`rain`\|`clear` |
+| `submerged` / `on_fire` | — |
+| `block_nearby` | `block` (id or `#tag`), `radius` |
+| `entity_nearby` | `entity` (id or `#tag`), `radius` |
+| `inventory_contains` | `item` (id or `#tag`), `min_count` |
+| `equipment_contains` | `item` (id or `#tag`), `slot`? |
 
-Actions: `grant_xp` (`skill`, `amount`), `resource_delta` (`resource`,
-`amount`), `modify_resource` (`resource`, `delta`\|`set_to`), `debug_log`
-(`message`), `apply_effect` (`effect`, `duration`, `amplifier`),
-`remove_effect`, `modify_attribute` (`attribute`, `operation`, `value`,
-`duration_ticks`?), `damage` (`amount`, `source`?), `heal` (`amount`),
-`grow_blocks` (`growth_rolls`), `freeze_water` (`temporary`?),
-`highlight_entities` (`duration_ticks`, `visibility`), `consume_item`
-(`item`, `count`), `play_sound` (`sound`), `spawn_particle`.
+### Targets
+
+| Type | Params |
+|---|---|
+| `self` | — |
+| `entities_in_radius` | `radius`, `entity` (id or `#tag`, optional), `living_only` (default true) |
+| `blocks_in_radius` | `radius`, `block` (id or `#tag`, **required** — absent resolves to nothing), `limit` (scan cap) |
+
+### Actions
+
+| Type | Params |
+|---|---|
+| `grant_xp` | `skill`, `amount` |
+| `resource_delta` | `resource`, `amount` |
+| `modify_resource` | `resource`, `delta` or `set_to` |
+| `debug_log` | `message` |
+| `apply_effect` | `effect`, `duration` (ticks), `amplifier` |
+| `remove_effect` | `effect` (id or `#tag`) |
+| `modify_attribute` | `attribute`, `operation` (`add_value`\|`add_multiplied_base`\|`add_multiplied_total`), `value`, `duration_ticks`? |
+| `damage` | `amount`, `source`? (`magic`\|`starve`\|`fall`\|`fire`\|`wither`, else player-attack) |
+| `heal` | `amount` |
+| `grow_blocks` | `growth_rolls` |
+| `freeze_water` | `temporary` (default true) |
+| `highlight_entities` | `duration_ticks`, `visibility` (`self`\|`global`) |
+| `consume_item` | `item` (id or `#tag`), `count` |
+| `play_sound` | `sound`, `volume`?, `pitch`? |
+| `spawn_particle` | `particle`, `count`?, `dx`/`dy`/`dz`?, `speed`? |
 
 ## Java extension contract
 
@@ -94,8 +122,10 @@ Contract rules (also in the `AbilityVocabulary` javadoc):
    targets; `target.data()` null for model-less targets. Guard both.
 4. Mutate character state through `ResourceService` / `SkillXpService` /
    `CooldownService` — never the model maps directly.
-5. A node referencing content declares it via `resource`/`skill` param keys
-   so load validation sees it. Other registry refs resolve lazily fail-closed.
+5. A node referencing a Lifepath content id declares it via the `resource` /
+   `skill` param keys so load validation sees it — if your param means
+   something else, name it differently or `#`-prefix it (tag values skip the
+   scan). Other registry refs resolve lazily fail-closed.
 
 ## Shipped synthetic abilities
 
@@ -105,4 +135,4 @@ production content; granting them via unlocks is the test seam):
 `test_active_cooldown` (active + 60s cooldown),
 `test_aoe_target` (entities_in_radius + highlight),
 `test_resource_conditioned` (threshold gate + cost on `lifepath_test:test_focus`),
-`test_state_change` (block_broken event + modify_resource).
+`test_state_change` (`lifepath:mining` event + `modify_resource`).

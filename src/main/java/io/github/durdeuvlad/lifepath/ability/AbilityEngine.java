@@ -217,10 +217,10 @@ public final class AbilityEngine {
 	public static Outcome evaluate(PlayerCharacterData data,
 			@Nullable ServerPlayerEntity self, AbilityDefinition def, long now,
 			double interactionSeconds) {
-		EvalContext ctx = new EvalContext(self, data, now, def.id());
 		if (!def.enabled()) {
 			return debug(def, Outcome.DISABLED);
 		}
+		EvalContext ctx = new EvalContext(self, data, now, def.id());
 		if (!conditionsMet(ctx, def)) {
 			return debug(def, Outcome.CONDITIONS_FAILED);
 		}
