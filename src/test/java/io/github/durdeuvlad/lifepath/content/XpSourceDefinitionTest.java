@@ -117,14 +117,43 @@ class XpSourceDefinitionTest {
 				""");
 		assertEquals(0.05, def.resolve(Identifier.of("minecraft", "stone"), Set.of()).amount());
 		assertTrue(def.resolve(Identifier.of("minecraft", "stone"), Set.of()).specific());
-		// Tag hit: deepslate coal ore carries minecraft:coal_ores.
 		var tagHit = def.resolve(Identifier.of("minecraft", "deepslate_coal_ore"),
 				Set.of(Identifier.of("minecraft", "coal_ores")));
 		assertEquals(0.30, tagHit.amount());
 		assertTrue(tagHit.specific());
-		// Unmapped: base_xp, non-specific.
 		var unmapped = def.resolve(Identifier.of("minecraft", "dirt"), Set.of());
 		assertEquals(0.02, unmapped.amount());
 		assertFalse(unmapped.specific());
+	}
+
+	@Test
+	void perTagFirstMatchFollowsFileOrder() {
+		// Two overlapping tags: the FIRST in JSON order must win. This pins
+		// that the decoded map preserves document order end-to-end.
+		var def = parse("""
+				{"activity": "lifepath:mining", "skill": "lifepath:mining",
+				 "base_xp": 0.0,
+				 "per_tag": {"minecraft:coal_ores": 0.30, "lifepath:rare_crop": 9.9}}
+				""");
+		var resolved = def.resolve(Identifier.of("minecraft", "deepslate_coal_ore"),
+				Set.of(Identifier.of("minecraft", "coal_ores"),
+						Identifier.of("lifepath", "rare_crop")));
+		assertEquals(0.30, resolved.amount(), "first per_tag entry wins over later matches");
+	}
+
+	@Test
+	void miningSourceRequiresMinableTag() throws Exception {
+		Path file = Path.of("src/main/resources/data/lifepath/xp_source/mining.json");
+		var def = XpSourceDefinition.fromFile(Identifier.of("lifepath", "mining"),
+				XpSourceDefinition.XpSourceFile.CODEC.parse(JsonOps.INSTANCE,
+						JsonParser.parseString(Files.readString(file))).result().orElseThrow());
+		// Review fix: breaking crops/dirt must not grant mining XP — the
+		// source is scoped to the shipped lifepath:minable block tag.
+		assertTrue(def.requiredTags().contains(Identifier.of("lifepath", "minable")));
+		// A farming event carrying no minable tag must not match it.
+		var harvest = new ActivityEvent(null, ActivityTypes.MINING,
+				Identifier.of("minecraft", "wheat"), Set.of(Identifier.of("lifepath", "harvested")),
+				ActivityEvent.Cause.PLAYER, 0, Map.of());
+		assertFalse(def.matches(harvest));
 	}
 }

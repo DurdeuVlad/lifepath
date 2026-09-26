@@ -30,7 +30,7 @@ public abstract class BlockItemMixin {
 				&& context.getWorld() instanceof ServerWorld world) {
 			BlockState placed = context.getWorld().getBlockState(context.getBlockPos());
 			VanillaGameplayProducers.onBlockPlaced(serverPlayer, world,
-					context.getBlockPos(), placed, context, result);
+					context.getBlockPos(), placed);
 		}
 	}
 }
