@@ -80,4 +80,21 @@ class PlayerCharacterDataCodecTest {
 		assertEquals(1, data.traits().size());
 		org.junit.jupiter.api.Assertions.assertFalse(data.addId(PlayerCharacterData.ListKind.TRAITS, id));
 	}
+
+	@Test
+	void clearExpiredCooldownsBoundary() {
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		Identifier active = Identifier.of("lifepath", "active");
+		Identifier boundary = Identifier.of("lifepath", "boundary");
+		Identifier expired = Identifier.of("lifepath", "expired");
+		data.setCooldown(active, 101L);
+		data.setCooldown(boundary, 100L);
+		data.setCooldown(expired, 50L);
+
+		data.clearExpiredCooldowns(100L);
+
+		assertTrue(data.cooldowns().containsKey(active));
+		org.junit.jupiter.api.Assertions.assertFalse(data.cooldowns().containsKey(boundary));
+		org.junit.jupiter.api.Assertions.assertFalse(data.cooldowns().containsKey(expired));
+	}
 }

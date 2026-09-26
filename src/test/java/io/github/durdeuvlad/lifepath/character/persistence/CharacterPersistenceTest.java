@@ -84,6 +84,33 @@ class CharacterPersistenceTest {
 		assertEquals(LifepathMod.DATA_VERSION, decoded.dataVersion());
 	}
 
+	@Test
+	void newerVersionBlobKeepsItsVersion() {
+		// Forward-compat: a blob from a NEWER mod version must not be restamped
+		// to the current version (that would defeat the migration chain's
+		// "leave what we don't understand" contract and invite double-migrations).
+		NbtCompound raw = CharacterPersistence.serialize(sampleData());
+		raw.putInt("data_version", LifepathMod.DATA_VERSION + 4);
+
+		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
+
+		assertEquals(LifepathMod.DATA_VERSION + 4, decoded.dataVersion());
+	}
+
+	@Test
+	void unknownAptitudeDefaultsToCWithoutNukingBlob() {
+		NbtCompound raw = CharacterPersistence.serialize(sampleData());
+		NbtCompound skill = raw.getCompound("skills").getCompound("lifepath:test_skill");
+		skill.putString("aptitude", "zzz");
+
+		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
+
+		assertEquals(Aptitude.C, decoded.skills()
+				.get(Identifier.of("lifepath", "test_skill")).aptitude());
+		assertEquals(10.0, decoded.skills()
+				.get(Identifier.of("lifepath", "test_skill")).xp());
+	}
+
 	private long backupFiles() {
 		try (var files = Files.list(tempDir.resolve("corrupt"))) {
 			return files.count();

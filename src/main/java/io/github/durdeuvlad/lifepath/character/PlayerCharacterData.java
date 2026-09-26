@@ -35,7 +35,14 @@ public final class PlayerCharacterData {
 		D, C, B, A, S;
 
 		public static final Codec<Aptitude> CODEC = Codec.STRING.xmap(
-				name -> Aptitude.valueOf(name.toUpperCase(Locale.ROOT)),
+				name -> {
+					try {
+						return Aptitude.valueOf(name.toUpperCase(Locale.ROOT));
+					} catch (IllegalArgumentException e) {
+						LifepathMod.LOGGER.warn("unknown aptitude '{}', defaulting to C", name);
+						return Aptitude.C;
+					}
+				},
 				aptitude -> aptitude.name().toLowerCase(Locale.ROOT));
 	}
 
@@ -66,9 +73,9 @@ public final class PlayerCharacterData {
 	public record ResourceState(double current, double min, double max) {
 
 		public static final Codec<ResourceState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.DOUBLE.fieldOf("current").forGetter(ResourceState::current),
-				Codec.DOUBLE.fieldOf("min").forGetter(ResourceState::min),
-				Codec.DOUBLE.fieldOf("max").forGetter(ResourceState::max)
+				Codec.DOUBLE.optionalFieldOf("current", 0.0).forGetter(ResourceState::current),
+				Codec.DOUBLE.optionalFieldOf("min", 0.0).forGetter(ResourceState::min),
+				Codec.DOUBLE.optionalFieldOf("max", 0.0).forGetter(ResourceState::max)
 		).apply(instance, ResourceState::new));
 	}
 

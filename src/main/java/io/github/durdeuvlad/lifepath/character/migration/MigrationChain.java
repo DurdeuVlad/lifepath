@@ -75,6 +75,12 @@ public final class MigrationChain {
 			if (migration.toVersion() != migration.fromVersion() + 1) {
 				throw new IllegalArgumentException("migrations must bump exactly one version");
 			}
+			for (DataMigration existing : migrations) {
+				if (existing.fromVersion() == migration.fromVersion()) {
+					throw new IllegalArgumentException(
+							"duplicate migration step from version " + migration.fromVersion());
+				}
+			}
 			migrations.add(migration);
 			return this;
 		}

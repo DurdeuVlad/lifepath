@@ -5,8 +5,8 @@ import io.github.durdeuvlad.lifepath.character.ContentIndex;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.character.migration.CharacterMigrations;
 import io.github.durdeuvlad.lifepath.util.Serialization;
-import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.nio.file.Path;
 import java.util.UUID;
 import net.minecraft.nbt.NbtCompound;
@@ -44,11 +44,18 @@ public final class CharacterPersistence {
 		return (NbtCompound) Serialization.toNbt(PlayerCharacterData.CODEC, data);
 	}
 
-	/** Migrates + decodes + sanitizes. Throws on decode/migration failure. */
+	/**
+	 * Migrates + decodes + sanitizes. Throws on decode/migration failure.
+	 * Older blobs are restamped to {@link LifepathMod#DATA_VERSION}; NEWER
+	 * blobs keep their version (matching {@link CharacterMigrations}' forward-compat
+	 * rule — a downgrade never rewrites data it doesn't understand).
+	 */
 	public static PlayerCharacterData deserialize(NbtCompound raw) {
 		NbtCompound migrated = CharacterMigrations.migrate(raw.copy());
 		PlayerCharacterData data = Serialization.fromNbt(PlayerCharacterData.CODEC, migrated);
-		data.setDataVersion(LifepathMod.DATA_VERSION);
+		if (data.dataVersion() < LifepathMod.DATA_VERSION) {
+			data.setDataVersion(LifepathMod.DATA_VERSION);
+		}
 		return sanitize(data);
 	}
 
@@ -74,19 +81,19 @@ public final class CharacterPersistence {
 			drop("specialization", data.specializationId());
 			data.setSpecializationId(null);
 		}
-		for (Identifier id : new java.util.ArrayList<>(data.skills().keySet())) {
+		for (Identifier id : new ArrayList<>(data.skills().keySet())) {
 			if (unknown("skill", id)) {
 				drop("skill", id);
 				data.removeSkill(id);
 			}
 		}
-		for (Identifier id : new java.util.ArrayList<>(data.resources().keySet())) {
+		for (Identifier id : new ArrayList<>(data.resources().keySet())) {
 			if (unknown("resource", id)) {
 				drop("resource", id);
 				data.removeResource(id);
 			}
 		}
-		for (Identifier id : new java.util.ArrayList<>(data.cooldowns().keySet())) {
+		for (Identifier id : new ArrayList<>(data.cooldowns().keySet())) {
 			if (unknown("ability", id)) {
 				drop("ability", id);
 				data.removeCooldown(id);
@@ -99,7 +106,7 @@ public final class CharacterPersistence {
 				case ATTUNEMENTS -> "attunement";
 				case UNLOCKS -> "ability";
 			};
-			for (Identifier id : new java.util.ArrayList<>(data.list(list))) {
+			for (Identifier id : new ArrayList<>(data.list(list))) {
 				if (unknown(domain, id)) {
 					drop(domain, id);
 					data.removeId(list, id);
@@ -117,17 +124,22 @@ public final class CharacterPersistence {
 		LifepathMod.LOGGER.warn("dropping reference to missing {} definition {}", domain, id);
 	}
 
-	private static Path writeBackup(NbtCompound raw, UUID owner, @Nullable Path backupDir) {
+	/**
+	 * Writes {@code raw} to {@code <backupDir>/corrupt/<uuid>-<nanos>.snbt} for
+	 * manual recovery. Returns the written path, or null if {@code backupDir}
+	 * is null or the write fails (logged).
+	 */
+	public static Path writeBackup(NbtCompound raw, UUID owner, @Nullable Path backupDir) {
 		if (backupDir == null) {
 			return null;
 		}
 		try {
 			Path dir = backupDir.resolve("corrupt");
 			Files.createDirectories(dir);
-			Path file = dir.resolve(owner + "-" + System.currentTimeMillis() + ".snbt");
+			Path file = dir.resolve(owner + "-" + System.nanoTime() + ".snbt");
 			Files.writeString(file, raw.toString());
 			return file;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LifepathMod.LOGGER.error("failed to write corrupt-data backup for {}", owner, e);
 			return null;
 		}
