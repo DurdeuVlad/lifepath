@@ -96,9 +96,12 @@ public final class LifepathContent {
 		ReloadManager.registerData(LifepathMod.id("xp_source"),
 				manager -> loadDomain(manager, "xp_source", XpSourceDefinition.XpSourceFile.CODEC,
 						XpSourceDefinition::fromFile, XP_SOURCES));
+		// Ability files must only name registered vocabulary types (M4-2
+		// contract) — an unknown condition/action/target fails the file with
+		// an error naming the ability instead of silently no-op'ing at eval.
 		ReloadManager.registerData(LifepathMod.id("ability"),
 				manager -> loadDomain(manager, "ability", AbilityDefinition.AbilityFile.CODEC,
-						AbilityDefinition::fromFile, ABILITIES));
+						LifepathContent::decodeAbility, ABILITIES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateReferences());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -144,6 +147,23 @@ public final class LifepathContent {
 			case "ability" -> ABILITIES.contains(id);
 			default -> true;
 		};
+	}
+
+	/**
+	 * Ability decode + vocabulary validation (M4-2 contract): a file naming an
+	 * unknown condition/target/action type fails here — the loader reports the
+	 * file name and skips the entry rather than letting it fail-closed forever.
+	 * Shared with tests so the production decode path is what they exercise.
+	 */
+	public static AbilityDefinition decodeAbility(Identifier id, AbilityDefinition.AbilityFile file) {
+		AbilityDefinition def = AbilityDefinition.fromFile(id, file);
+		var unknown = io.github.durdeuvlad.lifepath.ability
+				.AbilityVocabulary.unknownNodeTypes(def);
+		if (!unknown.isEmpty()) {
+			throw new IllegalArgumentException(
+					"ability " + id + " uses unknown spec node types " + unknown);
+		}
+		return def;
 	}
 
 	/** Cross-domain references recorded during the last load; replaced each reload. For M7-5 full validation. */

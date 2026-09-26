@@ -143,6 +143,9 @@ public class LifepathMod implements ModInitializer {
 				.define("passive_interval_ticks", 20, v -> v >= 1 && v <= 1200,
 						"Engine tick interval for PASSIVE abilities (each ability's"
 								+ " own interval_ticks is additionally honored).")
+				.define("nearby_max_radius", 32, v -> v >= 1 && v <= 64,
+						"Radius cap for block_nearby/entity_nearby conditions"
+								+ " (params clamp to this).")
 				.build());
 		LifepathConfig.define(DiminishingReturns.CONFIG, ConfigSpec.builder()
 				.define("enabled", true,
