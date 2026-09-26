@@ -42,8 +42,8 @@ public record SpecializationDefinition(
 				Codec.STRING.fieldOf("display_name").forGetter(SpecializationDefinitionFile::displayName),
 				Codec.unboundedMap(Identifier.CODEC, Codec.intRange(0, 10000)).optionalFieldOf("starting_skills", Map.of()).forGetter(SpecializationDefinitionFile::startingSkills),
 				Codec.unboundedMap(Identifier.CODEC, Aptitude.CODEC).optionalFieldOf("aptitudes", Map.of()).forGetter(SpecializationDefinitionFile::aptitudes),
-				Codec.unboundedMap(Identifier.CODEC, Codec.DOUBLE).optionalFieldOf("xp_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::xpModifiers),
-				Codec.unboundedMap(Identifier.CODEC, Codec.DOUBLE).optionalFieldOf("decay_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::decayModifiers),
+				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 100.0)).optionalFieldOf("xp_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::xpModifiers),
+				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 1.0)).optionalFieldOf("decay_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::decayModifiers),
 				Codec.unboundedMap(Identifier.CODEC, Codec.intRange(0, 10000)).optionalFieldOf("protected_floors", Map.of()).forGetter(SpecializationDefinitionFile::protectedFloors),
 				Identifier.CODEC.listOf().optionalFieldOf("signature", List.of()).forGetter(SpecializationDefinitionFile::signatureRefs)
 		).apply(instance, SpecializationDefinitionFile::new));

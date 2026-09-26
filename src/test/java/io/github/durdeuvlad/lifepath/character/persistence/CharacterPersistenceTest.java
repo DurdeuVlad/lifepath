@@ -95,7 +95,7 @@ class CharacterPersistenceTest {
 			SkillProgress p = decoded.skill(skill);
 			assertEquals(60, p.level());
 			assertEquals(400, p.highestLevel()); // historical peak never lowered
-			assertEquals(60, p.protectedFloor());
+			assertEquals(60, p.protectedFloor()); // floor clamps to [0, maxLevel=60] — may exceed level
 			assertEquals(0.0, p.xp());
 			assertEquals(0, p.lastMeaningfulUse());
 		} finally {

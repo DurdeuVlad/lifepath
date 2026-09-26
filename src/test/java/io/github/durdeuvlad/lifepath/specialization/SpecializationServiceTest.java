@@ -71,6 +71,19 @@ class SpecializationServiceTest {
 	}
 
 	@Test
+	void applyNeverDowngradesAptitudeOrLevel() {
+		registerSpec(Map.of(MINING, 10), Map.of(MINING, Aptitude.C), Map.of(),
+				Map.of(), Map.of());
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(MINING, new SkillProgress(0, 50, 50, 0, Aptitude.S, 0));
+
+		SpecializationService.apply(data, SPEC);
+		assertEquals(50, data.skill(MINING).level());
+		assertEquals(Aptitude.S, data.skill(MINING).aptitude(),
+				"aptitude overrides are raise-only like levels");
+	}
+
+	@Test
 	void applyUnknownSpecFailsClean() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 		assertEquals(SpecializationService.ApplyResult.UNKNOWN_SPEC,
@@ -79,7 +92,7 @@ class SpecializationServiceTest {
 	}
 
 	@Test
-	void specXpModifierFeedsAwardPath() {
+	void specModifierLookupsReadTheDefinition() {
 		SkillXpService.init();
 		registerSpec(Map.of(), Map.of(), Map.of(MINING, 1.5), Map.of(MINING, 0.3), Map.of());
 		PlayerCharacterData data = PlayerCharacterData.createDefault();

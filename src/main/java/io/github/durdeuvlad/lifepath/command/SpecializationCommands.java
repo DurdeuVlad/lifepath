@@ -25,7 +25,8 @@ import net.minecraft.util.Identifier;
  *   <li>{@code get <player>} — show the current specialization and its key fields.</li>
  *   <li>{@code set <player> <id>} — apply the spec: sets the id, raises
  *       starting levels (never lowers), applies aptitude overrides and
- *       protected floors. {@code none} clears.</li>
+ *       protected floors (all raise-only). There is no clear/un-apply path —
+ *       baked grants are irrevocable short of {@code character reset}.</li>
  * </ul>
  */
 public final class SpecializationCommands {

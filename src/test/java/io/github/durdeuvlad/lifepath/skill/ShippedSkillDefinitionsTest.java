@@ -25,7 +25,8 @@ class ShippedSkillDefinitionsTest {
 			"mining", "gathering",
 			"farming", "gathering",
 			"smithing", "crafting",
-			"fishing", "gathering");
+			"fishing", "gathering",
+			"engineering", "crafting");
 
 	@Test
 	void everyShippedSkillFileParses() throws Exception {
@@ -40,7 +41,7 @@ class ShippedSkillDefinitionsTest {
 	}
 
 	@Test
-	void fourRequiredSkillsExistWithCorrectCategories() throws Exception {
+	void requiredSkillsExistWithCorrectCategories() throws Exception {
 		for (Map.Entry<String, String> e : REQUIRED.entrySet()) {
 			Path file = SKILL_DIR.resolve(e.getKey() + ".json");
 			assertTrue(Files.exists(file), "missing shipped skill " + file);

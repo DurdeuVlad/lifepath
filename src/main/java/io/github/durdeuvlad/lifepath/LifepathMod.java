@@ -80,6 +80,8 @@ public class LifepathMod implements ModInitializer {
 						"Per-skill XP multiplier for lifepath:fishing.")
 				.define("foraging_xp_multiplier", 1.0, v -> v >= 0 && v <= 1000,
 						"Per-skill XP multiplier for lifepath:foraging.")
+				.define("engineering_xp_multiplier", 1.0, v -> v >= 0 && v <= 1000,
+						"Per-skill XP multiplier for lifepath:engineering.")
 				.define("aptitude_d_xp_multiplier", 0.70, v -> v >= 0 && v <= 100,
 						"XP multiplier for aptitude grade D (GAMEDESIGN §8).")
 				.define("aptitude_c_xp_multiplier", 0.90, v -> v >= 0 && v <= 100,

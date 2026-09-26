@@ -1,10 +1,11 @@
 package io.github.durdeuvlad.lifepath.specialization;
 
-import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
+import io.github.durdeuvlad.lifepath.content.SkillDefinition;
 import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.skill.Aptitude;
+import io.github.durdeuvlad.lifepath.skill.LevelCurves;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.github.durdeuvlad.lifepath.skill.SkillService;
 import java.util.Map;
@@ -42,25 +43,41 @@ public final class SpecializationService {
 		}
 		data.setSpecializationId(specId);
 
+		long now = System.currentTimeMillis();
 		for (Map.Entry<Identifier, Integer> e : def.startingSkills().entrySet()) {
 			SkillProgress cur = SkillService.ensureProgress(data, e.getKey());
-			if (cur != null && cur.level() < e.getValue()) {
-				// Raise-only: starting levels never lower an existing level and
-				// highestLevel must reflect the granted level immediately.
+			if (cur == null) {
+				continue;
+			}
+			int target = Math.min(e.getValue(), SkillService.maxLevel(e.getKey()));
+			if (cur.level() < target) {
+				// Grant LEVELS + the xp backing them: without xp snapped to the
+				// threshold, the next award recomputes level from xp and the
+				// grant silently evaporates (caught by review).
+				double xp = Math.max(cur.xp(),
+						LevelCurves.xpForLevel(
+								SkillService.definition(e.getKey())
+										.flatMap(SkillDefinition::levelCurve)
+										.orElse(LevelCurves.DEFAULT_ID),
+								target));
 				data.setSkillProgress(e.getKey(), SkillService.clamped(e.getKey(),
-						new SkillProgress(cur.xp(), e.getValue(),
-								Math.max(cur.highestLevel(), e.getValue()), cur.protectedFloor(),
-								cur.aptitude(), cur.lastMeaningfulUse())));
+						new SkillProgress(xp, target,
+								Math.max(cur.highestLevel(), target), cur.protectedFloor(),
+								cur.aptitude(), now)));
 			}
 		}
+		// Aptitude overrides are raise-only like levels — spec switches never
+		// downgrade a recorded grade.
 		for (Map.Entry<Identifier, Aptitude> e : def.aptitudes().entrySet()) {
 			SkillProgress cur = SkillService.ensureProgress(data, e.getKey());
-			if (cur != null) {
+			if (cur != null && e.getValue().ordinal() > cur.aptitude().ordinal()) {
 				data.setSkillProgress(e.getKey(), new SkillProgress(cur.xp(), cur.level(),
 						cur.highestLevel(), cur.protectedFloor(), e.getValue(),
 						cur.lastMeaningfulUse()));
 			}
 		}
+		// Protected floors are stored verbatim (raise-only): a floor above the
+		// granted level is a valid decay floor — it simply cannot be undercut.
 		for (Map.Entry<Identifier, Integer> e : def.protectedFloors().entrySet()) {
 			SkillProgress cur = SkillService.ensureProgress(data, e.getKey());
 			if (cur != null && e.getValue() > cur.protectedFloor()) {
