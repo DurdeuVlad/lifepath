@@ -26,10 +26,14 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// TOML config parsing (bundled into the mod jar).
+	implementation "com.electronwill.night-config:toml:3.8.3"
+	include "com.electronwill.night-config:toml:3.8.3"
 
 	testImplementation "org.junit.jupiter:junit-jupiter:5.10.2"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"

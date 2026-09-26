@@ -21,4 +21,9 @@ class LifepathModTest {
 	void idRejectsInvalidPathCharacters() {
 		assertThrows(InvalidIdentifierException.class, () -> LifepathMod.id("UPPER CASE!"));
 	}
+
+	@Test
+	void dataVersionStartsAtOne() {
+		assertEquals(1, LifepathMod.DATA_VERSION);
+	}
 }
