@@ -35,8 +35,8 @@ public final class RegistryBootstrap {
 			try {
 				step.getValue().run();
 				LifepathMod.LOGGER.info("registry bootstrap: {} done", step.getKey());
-			} catch (Throwable t) {
-				LifepathMod.LOGGER.error("registry bootstrap step {} failed; continuing", step.getKey(), t);
+			} catch (Exception e) {
+				LifepathMod.LOGGER.error("registry bootstrap step {} failed; continuing", step.getKey(), e);
 			}
 		}
 	}

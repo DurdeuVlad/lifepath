@@ -10,9 +10,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 
@@ -27,13 +30,17 @@ import net.minecraft.util.Identifier;
  * <p>Behaviour contract:
  * <ul>
  *   <li>Missing files/keys are created with spec defaults.</li>
- *   <li>Type mismatches are coerced where possible (e.g. TOML long to int).</li>
+ *   <li>Type mismatches are coerced where lossless (e.g. TOML long to int);
+ *       lossy coercions (overflow, truncation, NaN/inf) are rejected.</li>
  *   <li>Values failing validation reset to the default and log a WARN — never fatal.</li>
  *   <li>A fundamentally unparseable file is renamed to {@code <name>.toml.invalid}
- *       and regenerated from defaults; startup continues.</li>
+ *       and regenerated from defaults; startup continues. A file that fails for
+ *       any other reason falls back to spec defaults with an ERROR — one broken
+ *       file never aborts {@link #loadAll(Path)}.</li>
  *   <li>{@link #reload()} re-reads every file without a restart. Reads are served
- *       from an immutable snapshot taken at load time, so a failed reload never
- *       leaves half-applied values.</li>
+ *       from an immutable snapshot swapped in atomically at the end of a load,
+ *       so a failed reload never leaves half-applied values and readers never
+ *       observe a torn map.</li>
  * </ul>
  */
 public final class LifepathConfig {
@@ -41,7 +48,7 @@ public final class LifepathConfig {
 	public static final Identifier GENERAL = LifepathMod.id("general");
 
 	private static final Map<Identifier, ConfigSpec> SPECS = new LinkedHashMap<>();
-	private static final Map<Identifier, Map<String, Object>> VALUES = new HashMap<>();
+	private static volatile Map<Identifier, Map<String, Object>> VALUES = Map.of();
 	private static Path configDir;
 
 	private LifepathConfig() {
@@ -64,22 +71,32 @@ public final class LifepathConfig {
 		configDir = dir;
 		Map<Identifier, Map<String, Object>> snapshot = new HashMap<>();
 		for (Map.Entry<Identifier, ConfigSpec> file : SPECS.entrySet()) {
-			snapshot.put(file.getKey(), loadFile(dir, file.getKey(), file.getValue()));
+			try {
+				snapshot.put(file.getKey(), Map.copyOf(loadFile(dir, file.getKey(), file.getValue())));
+			} catch (Exception e) {
+				LifepathMod.LOGGER.error("config file {} failed to load; using defaults", file.getKey(), e);
+				snapshot.put(file.getKey(), Map.copyOf(defaultsOf(file.getValue())));
+			}
 		}
-		VALUES.clear();
-		VALUES.putAll(snapshot);
+		VALUES = Map.copyOf(snapshot);
+		warnAboutUnknownFiles(dir);
 	}
 
-	/** Re-reads all config files. Registered with {@code ReloadManager} at init. */
+	/** Re-reads all config files from the directory last used by {@link #loadAll}. */
 	public static void reload() {
-		loadAll();
+		loadAll(configDir != null ? configDir : defaultDir());
 	}
 
 	public static boolean isLoaded(Identifier fileId) {
 		return VALUES.containsKey(fileId);
 	}
 
-	/** Returns the validated value for {@code key} in {@code file}. */
+	/**
+	 * Returns the validated value for {@code key} in {@code file}.
+	 *
+	 * @throws IllegalStateException    if the file's spec was never loaded
+	 * @throws IllegalArgumentException if the key is not in the file's spec
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T get(Identifier fileId, String key) {
 		Map<String, Object> file = VALUES.get(fileId);
@@ -111,9 +128,9 @@ public final class LifepathConfig {
 	private static Map<String, Object> loadFile(Path dir, Identifier fileId, ConfigSpec spec) {
 		Path path = dir.resolve(fileId.getPath() + ".toml");
 		try {
-			Files.createDirectories(dir);
+			Files.createDirectories(path.getParent());
 		} catch (IOException e) {
-			LifepathMod.LOGGER.error("cannot create config dir {}", dir, e);
+			LifepathMod.LOGGER.error("cannot create config dir {}", path.getParent(), e);
 			return defaultsOf(spec);
 		}
 
@@ -160,7 +177,7 @@ public final class LifepathConfig {
 		if (dirty) {
 			try (var writer = Files.newBufferedWriter(path)) {
 				new TomlWriter().write(cfg, writer);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				LifepathMod.LOGGER.error("failed to write config {}", path, e);
 			}
 		}
@@ -168,35 +185,83 @@ public final class LifepathConfig {
 	}
 
 	private static boolean isValid(Object coerced, ConfigSpec.Entry entry) {
-		return coerced != null
-				&& entry.defaultValue().getClass().isInstance(coerced)
+		return coerced != null && typeMatches(coerced, entry.defaultValue())
 				&& entry.validator().test(coerced);
 	}
 
-	/** NightConfig types differ from authored defaults (e.g. TOML ints arrive as Long). */
+	/**
+	 * Category-level type check: NightConfig returns implementation types
+	 * (ArrayList, Config), so spec defaults match by interface, not concrete class.
+	 */
+	private static boolean typeMatches(Object value, Object defaultValue) {
+		if (defaultValue.getClass().isInstance(value)) {
+			return true;
+		}
+		if (defaultValue instanceof Number && value instanceof Number) return true;
+		if (defaultValue instanceof List && value instanceof List) return true;
+		return defaultValue instanceof Map && value instanceof Map;
+	}
+
+	/**
+	 * NightConfig types differ from authored defaults (TOML ints arrive as Long,
+	 * floats as Double). Coercion is only allowed when lossless — overflow,
+	 * truncation and NaN/inf yield {@code null}, which fails validation and
+	 * falls back to the default with a WARN.
+	 */
 	private static Object coerce(Object raw, Object defaultValue) {
 		if (defaultValue.getClass().isInstance(raw)) {
 			return raw;
 		}
-		if (raw instanceof Number number) {
-			if (defaultValue instanceof Integer) return number.intValue();
-			if (defaultValue instanceof Long) return number.longValue();
-			if (defaultValue instanceof Double) return number.doubleValue();
-			if (defaultValue instanceof Float) return number.floatValue();
-			if (defaultValue instanceof Short) return number.shortValue();
-			if (defaultValue instanceof Byte) return number.byteValue();
+		if (!(raw instanceof Number number)) {
+			return raw;
+		}
+		if (number instanceof Double d && !Double.isFinite(d)) return null;
+		if (number instanceof Float f && !Float.isFinite(f)) return null;
+		double asDouble = number.doubleValue();
+		if (defaultValue instanceof Integer) {
+			return isWholeWithin(asDouble, Integer.MIN_VALUE, Integer.MAX_VALUE) ? number.intValue() : null;
+		}
+		if (defaultValue instanceof Long) {
+			return asDouble == Math.rint(asDouble) ? number.longValue() : null;
+		}
+		if (defaultValue instanceof Double) return asDouble;
+		if (defaultValue instanceof Float) return number.floatValue();
+		if (defaultValue instanceof Short) {
+			return isWholeWithin(asDouble, Short.MIN_VALUE, Short.MAX_VALUE) ? number.shortValue() : null;
+		}
+		if (defaultValue instanceof Byte) {
+			return isWholeWithin(asDouble, Byte.MIN_VALUE, Byte.MAX_VALUE) ? number.byteValue() : null;
 		}
 		return raw;
 	}
 
-	private static java.util.List<String> unknownKeys(CommentedConfig cfg, ConfigSpec spec) {
-		java.util.List<String> unknown = new java.util.ArrayList<>();
+	private static boolean isWholeWithin(double value, double min, double max) {
+		return value == Math.rint(value) && value >= min && value <= max;
+	}
+
+	private static List<String> unknownKeys(CommentedConfig cfg, ConfigSpec spec) {
+		List<String> unknown = new ArrayList<>();
 		for (var entry : cfg.entrySet()) {
 			if (!spec.contains(entry.getKey())) {
 				unknown.add(entry.getKey());
 			}
 		}
 		return unknown;
+	}
+
+	/** WARNs about {@code .toml} files that have no registered spec — usually a typo'd filename. */
+	private static void warnAboutUnknownFiles(Path dir) {
+		try (Stream<Path> files = Files.list(dir)) {
+			files.filter(Files::isRegularFile)
+					.map(f -> f.getFileName().toString())
+					.filter(name -> name.endsWith(".toml"))
+					.filter(name -> SPECS.keySet().stream()
+							.noneMatch(id -> (id.getPath() + ".toml").equals(name)))
+					.forEach(name -> LifepathMod.LOGGER.warn(
+							"config file {} has no registered spec; it is ignored", name));
+		} catch (IOException ignored) {
+			// Listing is best-effort diagnostics only.
+		}
 	}
 
 	private static Map<String, Object> defaultsOf(ConfigSpec spec) {
@@ -223,7 +288,7 @@ public final class LifepathConfig {
 	/** Test hook: clears all specs and loaded values. Not for production use. */
 	static void resetForTests() {
 		SPECS.clear();
-		VALUES.clear();
+		VALUES = Map.of();
 		configDir = null;
 	}
 }

@@ -39,7 +39,6 @@ public final class ReloadManager {
 		if (initialized) {
 			return;
 		}
-		initialized = true;
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(
 				new SimpleSynchronousResourceReloadListener() {
 					@Override
@@ -52,6 +51,7 @@ public final class ReloadManager {
 						reloadAll();
 					}
 				});
+		initialized = true;
 	}
 
 	/** Runs every registered reloader. Called by datapack reload and {@code /lifepath reload}. */
@@ -60,13 +60,17 @@ public final class ReloadManager {
 			try {
 				reloader.getValue().run();
 				LifepathMod.LOGGER.info("reloaded {}", reloader.getKey());
-			} catch (Throwable t) {
-				LifepathMod.LOGGER.error("reloader {} failed; continuing", reloader.getKey(), t);
+			} catch (Exception e) {
+				LifepathMod.LOGGER.error("reloader {} failed; continuing", reloader.getKey(), e);
 			}
 		}
 	}
 
-	/** Test hook: clears reloaders and the init flag. Not for production use. */
+	/**
+	 * Test hook: clears reloaders and the init flag. Not for production use.
+	 * Does not unregister the Fabric listener if {@link #init()} ran — only use
+	 * in plain unit tests where the listener was never registered.
+	 */
 	static void resetForTests() {
 		RELOADERS.clear();
 		initialized = false;

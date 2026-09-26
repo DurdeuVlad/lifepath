@@ -50,9 +50,16 @@ public final class ConfigSpec {
 			return define(key, defaultValue, value -> true, comment);
 		}
 
-		/** Declares a validated key. Values failing validation fall back to the default with a WARN. */
+		/**
+		 * Declares a validated key. Values failing validation fall back to the default with a WARN.
+		 * Keys may not contain '.', which TOML would parse as a nested-table path.
+		 */
+		@SuppressWarnings("unchecked")
 		public <T> Builder define(String key, T defaultValue, Predicate<? super T> validator, String comment) {
 			Objects.requireNonNull(defaultValue, "defaultValue");
+			if (key.contains(".")) {
+				throw new IllegalArgumentException("config key must not contain '.': " + key);
+			}
 			if (entries.put(key, new Entry(key, defaultValue, value -> validator.test((T) value), comment)) != null) {
 				throw new IllegalArgumentException("duplicate config key: " + key);
 			}
@@ -60,7 +67,7 @@ public final class ConfigSpec {
 		}
 
 		public ConfigSpec build() {
-			return new ConfigSpec(entries);
+			return new ConfigSpec(new LinkedHashMap<>(entries));
 		}
 	}
 }

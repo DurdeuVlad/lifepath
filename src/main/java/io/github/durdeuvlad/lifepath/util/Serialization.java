@@ -56,7 +56,12 @@ public final class Serialization {
 		compound.put(key, toNbt(codec, value));
 	}
 
-	/** Decodes the element stored under {@code key}, or empty if the key is absent. */
+	/**
+	 * Decodes the element stored under {@code key}, or empty if the key is absent.
+	 *
+	 * @throws IllegalArgumentException if the key exists but fails to decode —
+	 *         callers loading potentially-corrupt saves should catch this.
+	 */
 	public static <T> Optional<T> getNbt(NbtCompound compound, String key, Codec<T> codec) {
 		if (!compound.contains(key)) {
 			return Optional.empty();

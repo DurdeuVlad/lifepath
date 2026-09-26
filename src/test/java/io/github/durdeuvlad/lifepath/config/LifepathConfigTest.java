@@ -85,6 +85,37 @@ class LifepathConfigTest {
 	}
 
 	@Test
+	void lossyCoercionsFallBackToDefaults() throws Exception {
+		defineGeneral();
+		LifepathConfig.loadAll(tempDir);
+
+		Files.writeString(tempDir.resolve("general.toml"),
+				"max_level = 3000000000\nratio = nan\n");
+		LifepathConfig.loadAll(tempDir);
+
+		assertEquals(100, LifepathConfig.getInt(LifepathConfig.GENERAL, "max_level"));
+		assertEquals(1.5, LifepathConfig.getDouble(LifepathConfig.GENERAL, "ratio"));
+	}
+
+	@Test
+	void fractionalDoubleDoesNotCoerceToInt() throws Exception {
+		defineGeneral();
+		LifepathConfig.loadAll(tempDir);
+
+		Files.writeString(tempDir.resolve("general.toml"), "max_level = 2.9\n");
+		LifepathConfig.loadAll(tempDir);
+
+		assertEquals(100, LifepathConfig.getInt(LifepathConfig.GENERAL, "max_level"));
+	}
+
+	@Test
+	void dottedSpecKeysAreRejected() {
+		ConfigSpec.Builder builder = ConfigSpec.builder();
+		assertThrows(IllegalArgumentException.class,
+				() -> builder.define("nested.key", 1, "bad"));
+	}
+
+	@Test
 	void malformedFileIsQuarantinedNotFatal() throws Exception {
 		defineGeneral();
 		Path file = tempDir.resolve("general.toml");

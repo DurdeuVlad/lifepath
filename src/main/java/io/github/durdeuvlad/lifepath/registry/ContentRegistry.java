@@ -44,12 +44,17 @@ public final class ContentRegistry<T> {
 		return entries.containsKey(entryId);
 	}
 
+	/**
+	 * Snapshot copy of all entries. Live-view alternatives were rejected:
+	 * registries get cleared and repopulated on datapack reload, and readers
+	 * must not observe a half-rebuilt map or hit a ConcurrentModificationException.
+	 */
 	public Map<Identifier, T> all() {
-		return Collections.unmodifiableMap(entries);
+		return Collections.unmodifiableMap(new LinkedHashMap<>(entries));
 	}
 
 	public Set<Identifier> ids() {
-		return Collections.unmodifiableSet(entries.keySet());
+		return Collections.unmodifiableSet(new java.util.LinkedHashSet<>(entries.keySet()));
 	}
 
 	public int size() {

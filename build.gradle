@@ -31,9 +31,12 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	// TOML config parsing (bundled into the mod jar).
-	implementation "com.electronwill.night-config:toml:3.8.3"
-	include "com.electronwill.night-config:toml:3.8.3"
+	// TOML config parsing (bundled into the mod jar; include is non-transitive,
+	// so core must be bundled explicitly alongside toml).
+	implementation "com.electronwill.night-config:toml:3.8.4"
+	implementation "com.electronwill.night-config:core:3.8.4"
+	include "com.electronwill.night-config:toml:3.8.4"
+	include "com.electronwill.night-config:core:3.8.4"
 
 	testImplementation "org.junit.jupiter:junit-jupiter:5.10.2"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
