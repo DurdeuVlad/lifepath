@@ -286,7 +286,7 @@ public final class LifepathConfig {
 	}
 
 	/** Test hook: clears all specs and loaded values. Not for production use. */
-	static void resetForTests() {
+	public static void resetForTests() {
 		SPECS.clear();
 		VALUES = Map.of();
 		configDir = null;

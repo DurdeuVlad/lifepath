@@ -3,11 +3,11 @@ package io.github.durdeuvlad.lifepath.character;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.durdeuvlad.lifepath.LifepathMod;
+import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,45 +30,6 @@ import org.jetbrains.annotations.Nullable;
  * invoked by a respawn hook — deliberately not added as dead config.
  */
 public final class PlayerCharacterData {
-	/** Learning aptitude for a skill, ordered worst (D) to best (S). */
-	public enum Aptitude {
-		D, C, B, A, S;
-
-		public static final Codec<Aptitude> CODEC = Codec.STRING.xmap(
-				name -> {
-					try {
-						return Aptitude.valueOf(name.toUpperCase(Locale.ROOT));
-					} catch (IllegalArgumentException e) {
-						LifepathMod.LOGGER.warn("unknown aptitude '{}', defaulting to C", name);
-						return Aptitude.C;
-					}
-				},
-				aptitude -> aptitude.name().toLowerCase(Locale.ROOT));
-	}
-
-	/** Per-skill progression state. */
-	public record SkillProgress(
-			double xp,
-			int level,
-			int highestLevel,
-			int protectedFloor,
-			Aptitude aptitude,
-			long lastMeaningfulUse) {
-
-		public static final Codec<SkillProgress> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.DOUBLE.optionalFieldOf("xp", 0.0).forGetter(SkillProgress::xp),
-				Codec.INT.optionalFieldOf("level", 0).forGetter(SkillProgress::level),
-				Codec.INT.optionalFieldOf("highest_level", 0).forGetter(SkillProgress::highestLevel),
-				Codec.INT.optionalFieldOf("protected_floor", 0).forGetter(SkillProgress::protectedFloor),
-				Aptitude.CODEC.optionalFieldOf("aptitude", Aptitude.C).forGetter(SkillProgress::aptitude),
-				Codec.LONG.optionalFieldOf("last_meaningful_use", 0L).forGetter(SkillProgress::lastMeaningfulUse)
-		).apply(instance, SkillProgress::new));
-
-		public static SkillProgress fresh(Aptitude aptitude) {
-			return new SkillProgress(0.0, 0, 0, 0, aptitude, 0L);
-		}
-	}
-
 	/** One character resource pool (mana-like meters arrive in later milestones). */
 	public record ResourceState(double current, double min, double max) {
 

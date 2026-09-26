@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.Aptitude;
+import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.ResourceState;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.SkillProgress;
+import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.github.durdeuvlad.lifepath.util.Serialization;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;

@@ -48,6 +48,22 @@ public class LifepathMod implements ModInitializer {
 								+ " attachment. Data is also saved on disconnect and server stop;"
 								+ " this is only a crash-loss window control. Minimum 200.")
 				.build());
+		LifepathConfig.define(id("skills"), ConfigSpec.builder()
+				.define("band_untrained", 0, value -> value == 0,
+						"First level of the Untrained band — must stay 0.")
+				.define("band_novice", 1, value -> value > 0 && value <= 100,
+						"First level of the Novice band.")
+				.define("band_apprentice", 20, value -> value > 0 && value <= 100,
+						"First level of the Apprentice band.")
+				.define("band_skilled", 40, value -> value > 0 && value <= 100,
+						"First level of the Skilled band.")
+				.define("band_expert", 60, value -> value > 0 && value <= 100,
+						"First level of the Expert band.")
+				.define("band_master", 80, value -> value > 0 && value <= 100,
+						"First level of the Master band.")
+				.define("band_legendary", 95, value -> value > 0 && value <= 100,
+						"First level of the Legendary band.")
+				.build());
 
 		ReloadManager.register(id("engine_config"), LifepathConfig::reload);
 		ReloadManager.init();

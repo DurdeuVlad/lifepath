@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.Aptitude;
+import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition.Category;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition.Selection;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition.Visibility;
@@ -79,7 +79,7 @@ class DefinitionCodecTest {
 							"display_name": "Foraging",
 							"category": "gathering",
 							"milestones": [
-								{"level": 10, "description": "Trained eye", "effects": ["lifepath:e1"]}
+								{"level": 10, "description_key": "lifepath.skill.trained_eye", "effects": ["lifepath:e1"]}
 							]
 						}
 						""")).result().orElseThrow();
@@ -88,6 +88,7 @@ class DefinitionCodecTest {
 		assertEquals(100, file.maxLevel());
 		assertEquals(1, file.milestones().size());
 		assertEquals(10, file.milestones().get(0).level());
+		assertEquals("lifepath.skill.trained_eye", file.milestones().get(0).descriptionKey());
 		assertEquals(Identifier.of("lifepath", "e1"), file.milestones().get(0).effectRefs().get(0));
 		assertTrue(file.levelCurve().isEmpty());
 		assertTrue(file.xpSources().isEmpty());

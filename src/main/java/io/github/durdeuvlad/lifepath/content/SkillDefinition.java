@@ -32,11 +32,11 @@ public record SkillDefinition(
 				category -> category.name().toLowerCase(Locale.ROOT));
 	}
 
-	/** A named level breakpoint: display text + references to effects (M4+). */
-	public record Milestone(int level, String description, List<Identifier> effectRefs) {
+	/** A named level breakpoint: display-text key + references to effects (M4+). */
+	public record Milestone(int level, String descriptionKey, List<Identifier> effectRefs) {
 		public static final Codec<Milestone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.intRange(1, 10000).fieldOf("level").forGetter(Milestone::level),
-				Codec.STRING.optionalFieldOf("description", "").forGetter(Milestone::description),
+				Codec.STRING.optionalFieldOf("description_key", "").forGetter(Milestone::descriptionKey),
 				Identifier.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Milestone::effectRefs)
 		).apply(instance, Milestone::new));
 	}

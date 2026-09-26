@@ -7,6 +7,7 @@ import com.mojang.brigadier.Command;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.CharacterManager;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
+import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,8 +112,8 @@ public final class CharacterCommands {
 		if (data.skills().isEmpty()) {
 			lines.add(Text.literal("  skills: <none>"));
 		} else {
-			for (Map.Entry<Identifier, PlayerCharacterData.SkillProgress> skill : data.skills().entrySet()) {
-				PlayerCharacterData.SkillProgress p = skill.getValue();
+			for (Map.Entry<Identifier, SkillProgress> skill : data.skills().entrySet()) {
+				SkillProgress p = skill.getValue();
 				lines.add(Text.literal("  skill " + skill.getKey()
 						+ "  level=" + p.level()
 						+ "  xp=" + p.xp()

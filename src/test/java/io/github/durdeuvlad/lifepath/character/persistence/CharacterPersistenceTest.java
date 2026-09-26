@@ -4,13 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.ContentIndex;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.Aptitude;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.ListKind;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.ResourceState;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.SkillProgress;
+import io.github.durdeuvlad.lifepath.content.SkillDefinition;
+import io.github.durdeuvlad.lifepath.registry.LifepathContent;
+import io.github.durdeuvlad.lifepath.skill.Aptitude;
+import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -70,6 +74,32 @@ class CharacterPersistenceTest {
 			assertTrue(sanitized.unlocks().isEmpty());
 		} finally {
 			CharacterPersistence.setContentIndex(ContentIndex.PERMISSIVE);
+		}
+	}
+
+	@Test
+	void knownSkillWithBrokenInvariantsIsRepairedOnLoad() {
+		Identifier skill = Identifier.of("lifepath", "test_skill");
+		SkillDefinition.SkillDefinitionFile file = SkillDefinition.SkillDefinitionFile.CODEC
+				.parse(JsonOps.INSTANCE, JsonParser.parseString(
+						"{\"display_name\": \"T\", \"category\": \"gathering\", \"max_level\": 60}"))
+				.result().orElseThrow();
+		LifepathContent.skills().register(skill, SkillDefinition.fromFile(skill, file));
+		try {
+			PlayerCharacterData data = sampleData();
+			// Corrupt the record: level above def max, floor above level, NaN xp.
+			data.setSkillProgress(skill,
+					new SkillProgress(Double.NaN, 400, 400, 999, Aptitude.B, -7));
+			PlayerCharacterData decoded = CharacterPersistence.deserialize(
+					CharacterPersistence.serialize(data));
+			SkillProgress p = decoded.skill(skill);
+			assertEquals(60, p.level());
+			assertEquals(400, p.highestLevel()); // historical peak never lowered
+			assertEquals(60, p.protectedFloor());
+			assertEquals(0.0, p.xp());
+			assertEquals(0, p.lastMeaningfulUse());
+		} finally {
+			LifepathContent.skills().clear();
 		}
 	}
 

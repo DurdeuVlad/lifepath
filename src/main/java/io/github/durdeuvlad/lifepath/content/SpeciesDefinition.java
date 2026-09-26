@@ -2,7 +2,7 @@ package io.github.durdeuvlad.lifepath.content;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.Aptitude;
+import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;

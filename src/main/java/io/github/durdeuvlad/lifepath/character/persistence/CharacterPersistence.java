@@ -4,6 +4,8 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.ContentIndex;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.character.migration.CharacterMigrations;
+import io.github.durdeuvlad.lifepath.skill.SkillProgress;
+import io.github.durdeuvlad.lifepath.skill.SkillService;
 import io.github.durdeuvlad.lifepath.util.Serialization;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -94,6 +96,13 @@ public final class CharacterPersistence {
 			if (unknown("skill", id)) {
 				drop("skill", id);
 				data.removeSkill(id);
+			} else {
+				// Known skill: repair broken invariants (level/floor/xp drift,
+				// NaN, def maxLevel lowered since last save) at the load boundary.
+				SkillProgress fixed = SkillService.clamped(id, data.skill(id));
+				if (!fixed.equals(data.skill(id))) {
+					data.setSkillProgress(id, fixed);
+				}
 			}
 		}
 		for (Identifier id : new ArrayList<>(data.resources().keySet())) {

@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.Aptitude;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.SkillProgress;
+import io.github.durdeuvlad.lifepath.skill.Aptitude;
+import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.DynamicRegistryManager;
