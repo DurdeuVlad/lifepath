@@ -12,6 +12,7 @@ import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.registry.RegistryBootstrap;
 import io.github.durdeuvlad.lifepath.reload.ReloadManager;
 import io.github.durdeuvlad.lifepath.skill.SkillXpService;
+import io.github.durdeuvlad.lifepath.skill.XpSourceRouter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
@@ -84,6 +85,7 @@ public class LifepathMod implements ModInitializer {
 		LifepathNetworking.registerS2C(CharacterSyncPayload.ID, CharacterSyncPayload.PACKET_CODEC);
 		CharacterManager.init();
 		SkillXpService.init();
+		XpSourceRouter.init();
 	}
 
 	public static Identifier id(String path) {

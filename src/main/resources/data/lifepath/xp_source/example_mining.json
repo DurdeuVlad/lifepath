@@ -1,0 +1,9 @@
+{
+	"activity": "lifepath:mining",
+	"skill": "lifepath:mining",
+	"player_caused_only": true,
+	"base_xp": 0.0,
+	"per_subject": {
+		"lifepath:example_stone": 0.05
+	}
+}

@@ -59,7 +59,7 @@ class LifepathContentTest {
 				new SkillDefinition(Identifier.of("lifepath", "foraging"), "Foraging",
 						SkillDefinition.Category.GATHERING, 100,
 						java.util.Optional.empty(), List.of(),
-						java.util.Optional.empty(), java.util.Optional.empty()));
+						List.of(), java.util.Optional.empty()));
 
 		assertTrue(LifepathContent.exists("skill", Identifier.of("lifepath", "foraging")));
 		assertFalse(LifepathContent.exists("skill", Identifier.of("lifepath", "gone")));
@@ -76,7 +76,7 @@ class LifepathContentTest {
 		LifepathContent.skills().register(skillId,
 				new SkillDefinition(skillId, "Foraging", SkillDefinition.Category.GATHERING, 100,
 						java.util.Optional.empty(), List.of(),
-						java.util.Optional.empty(), java.util.Optional.empty()));
+						List.of(), java.util.Optional.empty()));
 		Identifier minAptSkill = Identifier.of("lifepath", "min_apt_skill");
 		LifepathContent.species().register(Identifier.of("lifepath", "human"),
 				new SpeciesDefinition(Identifier.of("lifepath", "human"), "Human",
