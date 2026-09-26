@@ -1,0 +1,13 @@
+{
+	"activity": "lifepath:smithing",
+	"skill": "lifepath:smithing",
+	"player_caused_only": true,
+	"base_xp": 0.5,
+	"per_tag": {
+		"lifepath:smithing_tier_netherite": 8.0,
+		"lifepath:smithing_tier_diamond": 4.0,
+		"lifepath:smithing_tier_gold": 2.5,
+		"lifepath:smithing_tier_iron": 1.5,
+		"lifepath:smithing_materials": 0.5
+	}
+}

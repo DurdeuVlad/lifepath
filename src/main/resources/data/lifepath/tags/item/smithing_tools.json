@@ -1,0 +1,7 @@
+{
+	"replace": false,
+	"values": [
+		"#minecraft:swords", "#minecraft:pickaxes", "#minecraft:axes",
+		"#minecraft:shovels", "#minecraft:hoes", "#minecraft:trimmable_armor"
+	]
+}
