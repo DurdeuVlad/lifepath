@@ -121,4 +121,30 @@ class DiminishingReturnsTest {
 		SkillXpService.awardXpCore(data, SKILL, 0.5, DIRT);
 		assertEquals(0.5, data.skill(SKILL).xp() - before, 0.001);
 	}
+
+	@Test
+	void oneEventRoutedTwiceCountsOnce() {
+		SkillXpService.init();
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		// A single activity event fanned out to two awards must record ONE
+		// signature entry — the ledger counts actions, not awards.
+		ActivityEvent event = new ActivityEvent(null, Identifier.of("lifepath", "mining"),
+				Identifier.of("minecraft", "stone"), java.util.Set.of(),
+				ActivityEvent.Cause.PLAYER, T0, java.util.Map.of());
+		SkillXpService.awardXpCore(data, SKILL, 0.5, event);
+		SkillXpService.awardXpCore(data, SKILL, 0.5, event);
+		assertEquals(1, DiminishingReturns.count(data, event.repetitionSignature(),
+				T0 + 1000, WINDOW));
+	}
+
+	@Test
+	void pruneSweepDropsDeadSignatures() {
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setActionTimestamps("a|b", List.of(1L, 2L));          // all expired
+		data.setActionTimestamps("c|d", List.of(1L, T0 - 50));     // mixed
+		data.pruneActionSignatures(T0 - WINDOW);
+		assertTrue(!data.actionSignatures().containsKey("a|b"),
+				"dead signature key must be dropped");
+		assertEquals(List.of(T0 - 50), data.actionSignatures().get("c|d"));
+	}
 }

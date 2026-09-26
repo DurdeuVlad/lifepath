@@ -114,7 +114,9 @@ public final class PlayerCharacterData {
 		data.unlocks.addAll(unlocks);
 		data.resources.putAll(resources);
 		data.cooldowns.putAll(cooldowns);
-		actionSignatures.forEach((sig, times) -> data.actionSignatures.put(sig, new ArrayList<>(times)));
+		actionSignatures.forEach((sig, times) -> data.actionSignatures.put(sig,
+				new ArrayList<>(times.size() > 4096
+						? times.subList(times.size() - 4096, times.size()) : times)));
 		data.dataVersion = dataVersion;
 		return data;
 	}
@@ -230,6 +232,26 @@ public final class PlayerCharacterData {
 		}
 	}
 
+	/** Single-key read for the per-award hot path — avoids the deep view copy. */
+	public List<Long> actionTimestamps(String signature) {
+		return Collections.unmodifiableList(
+				actionSignatures.getOrDefault(signature, List.of()));
+	}
+
+	/**
+	 * Sweeps every signature list to entries after {@code cutoffEpochMs},
+	 * dropping emptied keys — stale signatures otherwise accumulate forever.
+	 */
+	public void pruneActionSignatures(long cutoffEpochMs) {
+		actionSignatures.values().forEach(times -> times.removeIf(t -> t <= cutoffEpochMs));
+		actionSignatures.values().removeIf(List::isEmpty);
+	}
+
+	/** Clears the ledger — used on sync snapshots; the client never sees it. */
+	public void clearActionSignatures() {
+		actionSignatures.clear();
+	}
+
 	public void clearExpiredCooldowns(long nowEpochMs) {
 		cooldowns.values().removeIf(expiry -> expiry <= nowEpochMs);
 	}
@@ -270,12 +292,13 @@ public final class PlayerCharacterData {
 				&& attunements.equals(other.attunements)
 				&& unlocks.equals(other.unlocks)
 				&& resources.equals(other.resources)
-				&& cooldowns.equals(other.cooldowns);
+				&& cooldowns.equals(other.cooldowns)
+				&& actionSignatures.equals(other.actionSignatures);
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(speciesId, specializationId, skills, traits, conditions,
-				attunements, unlocks, resources, cooldowns, dataVersion);
+				attunements, unlocks, resources, cooldowns, actionSignatures, dataVersion);
 	}
 }

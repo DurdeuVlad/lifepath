@@ -15,7 +15,10 @@ import org.jetbrains.annotations.Nullable;
  * Return {@code <= 0} to suppress the XP gain entirely (the action still counts
  * as meaningful use — practice happened, it just yielded nothing).
  * Implementations must be deterministic, side-effect-free, and must not read
- * content identity beyond the fields of {@link XpContext}.
+ * content identity beyond the fields of {@link XpContext}. Built-in modifiers
+ * may perform bookkeeping writes through {@code XpContext.data()} (the
+ * diminishing-returns signature ledger); custom modifiers should stay
+ * side-effect-free.
  */
 @FunctionalInterface
 public interface XpModifier {

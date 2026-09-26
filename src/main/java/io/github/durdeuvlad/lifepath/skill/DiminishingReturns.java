@@ -36,8 +36,7 @@ public final class DiminishingReturns {
 	 */
 	public static int recordAndCount(PlayerCharacterData data, String signature,
 			long now, long windowMs) {
-		List<Long> times = new ArrayList<>(data.actionSignatures()
-				.getOrDefault(signature, List.of()));
+		List<Long> times = new ArrayList<>(data.actionTimestamps(signature));
 		long cutoff = now - windowMs;
 		times.removeIf(t -> t <= cutoff);
 		if (times.size() < CAP) {
@@ -52,7 +51,7 @@ public final class DiminishingReturns {
 			long now, long windowMs) {
 		long cutoff = now - windowMs;
 		int n = 0;
-		for (long t : data.actionSignatures().getOrDefault(signature, List.of())) {
+		for (long t : data.actionTimestamps(signature)) {
 			if (t > cutoff) {
 				n++;
 			}
@@ -98,11 +97,23 @@ public final class DiminishingReturns {
 	 * fully-multiplied amount.
 	 */
 	public static double apply(XpModifier.XpContext ctx, double amount) {
-		if (!enabled() || ctx.data() == null || ctx.source() == null) {
+		// Awards already suppressed to nothing don't consume the player's
+		// window — a 0× config period must not poison tiers.
+		if (!enabled() || ctx.data() == null || ctx.source() == null || amount <= 0) {
 			return amount;
 		}
 		String sig = ctx.source().repetitionSignature();
-		int n = recordAndCount(ctx.data(), sig, System.currentTimeMillis(), windowMs());
+		long eventTs = ctx.source().timestamp();
+		// Dedupe router fan-out: one event routed to N awards counts once.
+		// Events with timestamp 0 (data/test paths) always record.
+		List<Long> times = ctx.data().actionTimestamps(sig);
+		int n;
+		if (eventTs != 0 && !times.isEmpty() && times.get(times.size() - 1) == eventTs) {
+			n = count(ctx.data(), sig, System.currentTimeMillis(), windowMs());
+		} else {
+			n = recordAndCount(ctx.data(), sig,
+					eventTs != 0 ? eventTs : System.currentTimeMillis(), windowMs());
+		}
 		double m = multiplierFor(n);
 		if (m < 1.0 && (Boolean) LifepathConfig.getOrDefault(
 				LifepathConfig.GENERAL, "debug_logging", Boolean.FALSE)) {
