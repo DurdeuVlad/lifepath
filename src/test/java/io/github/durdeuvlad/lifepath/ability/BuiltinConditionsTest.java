@@ -132,17 +132,27 @@ class BuiltinConditionsTest {
 	@Test
 	void unknownSpecNodeTypesFailTheFileAtLoad() {
 		// M4-2 contract: an unknown condition type is a load error naming the
-		// ability — never a silent fail-closed.
-		AbilityDefinition.AbilityFile file = AbilityDefinition.AbilityFile.CODEC
-				.parse(JsonOps.INSTANCE, JsonParser.parseString("""
-						{"display_name": "Bad", "trigger": {"type": "active"},
-						 "conditions": {"all": [{"type": "lifepath:not_a_condition"}]},
-						 "target": {"type": "lifepath:self"},
-						 "actions": [{"type": "lifepath:debug_log"}]}
-						""")).result().orElseThrow();
-		var unknown = AbilityVocabulary.unknownNodeTypes(
-				AbilityDefinition.fromFile(LifepathMod.id("bad"), file));
-		assertEquals(java.util.List.of(LifepathMod.id("not_a_condition")), unknown);
+		// ability — never a silent fail-closed. Exercises the production
+		// decoder through registerAll (the real datapack-load path).
+		var files = new java.util.LinkedHashMap<Identifier, com.google.gson.JsonElement>();
+		files.put(LifepathMod.id("bad"), JsonParser.parseString("""
+				{"display_name": "Bad", "trigger": {"type": "active"},
+				 "conditions": {"all": [{"type": "lifepath:not_a_condition"}]},
+				 "target": {"type": "lifepath:self"},
+				 "actions": [{"type": "lifepath:debug_log"}]}
+				"""));
+		files.put(LifepathMod.id("good"), JsonParser.parseString("""
+				{"display_name": "Good", "trigger": {"type": "active"},
+				 "target": {"type": "lifepath:self"},
+				 "actions": [{"type": "lifepath:debug_log"}]}
+				"""));
+		LifepathContent.abilities().clear();
+		int loaded = LifepathContent.registerAll("ability", files,
+				AbilityDefinition.AbilityFile.CODEC, LifepathContent::decodeAbility,
+				LifepathContent.abilities());
+		assertEquals(1, loaded);
+		assertTrue(LifepathContent.abilities().contains(LifepathMod.id("good")));
+		assertFalse(LifepathContent.abilities().contains(LifepathMod.id("bad")));
 	}
 
 	@Test

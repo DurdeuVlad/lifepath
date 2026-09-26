@@ -45,12 +45,19 @@ public final class BuiltinConditions {
 
 		register("biome_tag", (ctx, params) -> {
 			ServerPlayerEntity p = ctx.self();
-			if (p == null) {
+			String idOrTag = str(params, "tag");
+			if (p == null || idOrTag == null) {
 				return false;
 			}
-			Identifier tag = id(params, "tag");
-			return tag != null && p.getWorld().getBiome(p.getBlockPos())
-					.isIn(TagKey.of(RegistryKeys.BIOME, tag));
+			var biome = p.getWorld().getBiome(p.getBlockPos());
+			if (idOrTag.startsWith("#")) {
+				Identifier tag = Identifier.tryParse(idOrTag.substring(1));
+				return tag != null && biome.isIn(TagKey.of(RegistryKeys.BIOME, tag));
+			}
+			Identifier id = Identifier.tryParse(idOrTag);
+			// Bare ids match either an exact biome or a tag by that name.
+			return id != null && (biome.matchesId(id)
+					|| biome.isIn(TagKey.of(RegistryKeys.BIOME, id)));
 		});
 		register("dimension", (ctx, params) -> {
 			ServerPlayerEntity p = ctx.self();
@@ -69,11 +76,15 @@ public final class BuiltinConditions {
 			if (match == null) {
 				return false;
 			}
+			World world = p.getWorld();
 			BlockPos center = p.getBlockPos();
-			for (BlockPos pos : BlockPos.iterate(
-					center.add(-radius, -radius, -radius), center.add(radius, radius, radius))) {
+			// iterateOutwards = cubic shells nearest-first (early exit finds the
+			// closest match); isChunkLoaded guards against synchronous chunk
+			// loads on the server tick at scan fringes.
+			for (BlockPos pos : BlockPos.iterateOutwards(center, radius, radius, radius)) {
 				if (pos.isWithinDistance(center, radius + 0.5)
-						&& match.test(p.getWorld().getBlockState(pos))) {
+						&& world.isChunkLoaded(pos)
+						&& match.test(world.getBlockState(pos))) {
 					return true;
 				}
 			}
@@ -93,16 +104,34 @@ public final class BuiltinConditions {
 			}
 			double r2 = radius * radius;
 			return !p.getWorld().getOtherEntities(p, p.getBoundingBox().expand(radius),
-					e -> (!livingOnly || e instanceof LivingEntity)
+					e -> !e.isSpectator()
+							&& (!livingOnly || e instanceof LivingEntity)
 							&& e.squaredDistanceTo(p) <= r2
 							&& type.test(e)).isEmpty();
 		});
-		register("daylight", (ctx, params) -> ctx.self() != null && ctx.self().getWorld().isDay());
-		register("night", (ctx, params) -> ctx.self() != null && ctx.self().getWorld().isNight());
+		// Time-of-day thresholds, not World.isDay()/isNight() — the latter read
+		// ambient darkness and lie during thunderstorms (night at noon) or in
+		// fixed-time dimensions (never either).
+		register("daylight", (ctx, params) -> {
+			ServerPlayerEntity p = ctx.self();
+			if (p == null) {
+				return false;
+			}
+			long t = Math.floorMod(p.getWorld().getTimeOfDay(), 24000L);
+			return t < 12300 || t >= 23700;
+		});
+		register("night", (ctx, params) -> {
+			ServerPlayerEntity p = ctx.self();
+			if (p == null) {
+				return false;
+			}
+			long t = Math.floorMod(p.getWorld().getTimeOfDay(), 24000L);
+			return t >= 12300 && t < 23700;
+		});
 		register("health_threshold", (ctx, params) -> {
 			ServerPlayerEntity p = ctx.self();
 			String op = str(params, "op");
-			return p != null && op != null
+			return p != null && op != null && hasNumber(params, "value")
 					&& compare(op, p.getHealth(), num(params, "value", 0));
 		});
 		register("inventory_contains", (ctx, params) -> {
@@ -116,6 +145,9 @@ public final class BuiltinConditions {
 				return false;
 			}
 			int needed = (int) num(params, "min_count", 1);
+			if (needed < 1) {
+				return false; // "contains ≤0 items" is vacuous — invalid input fails closed
+			}
 			int found = 0;
 			for (int i = 0; i < p.getInventory().size() && found < needed; i++) {
 				ItemStack stack = p.getInventory().getStack(i);
@@ -172,8 +204,9 @@ public final class BuiltinConditions {
 				return false;
 			}
 			SkillProgress progress = ctx.data().skill(skill);
-			return compare(op, progress != null ? progress.level() : 0,
-					num(params, "level", 0));
+			return hasNumber(params, "level")
+					&& compare(op, progress != null ? progress.level() : 0,
+							num(params, "level", 0));
 		});
 		register("resource_threshold", (ctx, params) -> {
 			Identifier res = id(params, "resource");
@@ -182,7 +215,8 @@ public final class BuiltinConditions {
 				return false;
 			}
 			var state = ctx.data().resources().get(res);
-			return state != null && compare(op, state.current(), num(params, "value", 0));
+			return state != null && hasNumber(params, "value")
+					&& compare(op, state.current(), num(params, "value", 0));
 		});
 	}
 
@@ -253,6 +287,7 @@ public final class BuiltinConditions {
 			case "chest" -> EquipmentSlot.CHEST;
 			case "legs" -> EquipmentSlot.LEGS;
 			case "feet" -> EquipmentSlot.FEET;
+			case "body" -> EquipmentSlot.BODY;
 			default -> null;
 		};
 	}
@@ -293,5 +328,11 @@ public final class BuiltinConditions {
 		var el = params.get(key);
 		return el != null && el.isJsonPrimitive() && el.getAsJsonPrimitive().isBoolean()
 				? el.getAsBoolean() : def;
+	}
+
+	/** True when {@code key} holds a JSON number — required-threshold params fail closed without it. */
+	static boolean hasNumber(JsonObject params, String key) {
+		var el = params.get(key);
+		return el != null && el.isJsonPrimitive() && el.getAsJsonPrimitive().isNumber();
 	}
 }
