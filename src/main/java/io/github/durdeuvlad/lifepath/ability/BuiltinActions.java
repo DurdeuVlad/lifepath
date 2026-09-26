@@ -2,10 +2,10 @@ package io.github.durdeuvlad.lifepath.ability;
 
 import com.google.gson.JsonObject;
 import io.github.durdeuvlad.lifepath.LifepathMod;
-import io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.EvalContext;
 import io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.TargetContext;
-import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import io.github.durdeuvlad.lifepath.network.s2c.HighlightEntitiesPayload;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -45,9 +45,9 @@ final class BuiltinActions {
 
 	private static boolean initialized;
 
-	/** Pending attribute-modifier expiries (player, attribute, modifier, tick). */
-	private record PendingExpiry(UUID player, Identifier attribute,
-			Identifier modifierId, long expireTick) {}
+	/** Pending attribute-modifier expiries (world, entity, attribute, modifier, tick). */
+	private record PendingExpiry(net.minecraft.registry.RegistryKey<World> world,
+			UUID entity, Identifier attribute, Identifier modifierId, long expireTick) {}
 
 	private static final List<PendingExpiry> EXPIRIES = new ArrayList<>();
 	private static long tick;
@@ -57,6 +57,10 @@ final class BuiltinActions {
 			return;
 		}
 		initialized = true;
+
+		// Pending expiries must not linger across an integrated-server restart
+		// in the same JVM (dev); temporary modifiers die on unload anyway.
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> EXPIRIES.clear());
 
 		register("apply_effect", (target, ctx, params) -> {
 			Identifier effect = id(params, "effect");
@@ -117,16 +121,27 @@ final class BuiltinActions {
 			if (instance == null || op == null) {
 				return;
 			}
+			// Modifier id namespaces ability AND attribute — one ability may
+			// touch several attributes without collisions; re-applying the same
+			// (ability, attribute) pair replaces rather than stacking.
 			Identifier modifierId = LifepathMod.id("ability/"
 					+ (ctx.abilityId() != null ? ctx.abilityId() : "external").toString()
-							.replace(':', '_'));
+							.replace(':', '_')
+					+ "/" + attribute.toString().replace(':', '_'));
 			double value = num(params, "value", 0);
 			instance.removeModifier(modifierId); // re-application replaces, never stacks
 			instance.addTemporaryModifier(
 					new EntityAttributeModifier(modifierId, value, op));
-			if (hasNumber(params, "duration_ticks") && ctx.self() != null) {
-				EXPIRIES.add(new PendingExpiry(ctx.self().getUuid(), attribute,
-						modifierId, tick + (long) num(params, "duration_ticks", 0)));
+			if (hasNumber(params, "duration_ticks") && le.getWorld() instanceof ServerWorld) {
+				// Keyed by the MODIFIED entity — expiry must find the target,
+				// not the caster. Recast replaces the pending entry so the
+				// first cast's timer can't truncate the refreshed duration.
+				EXPIRIES.removeIf(e -> e.entity().equals(le.getUuid())
+						&& e.attribute().equals(attribute)
+						&& e.modifierId().equals(modifierId));
+				EXPIRIES.add(new PendingExpiry(le.getWorld().getRegistryKey(),
+						le.getUuid(), attribute, modifierId,
+						tick + (long) num(params, "duration_ticks", 0)));
 			}
 		});
 
@@ -138,6 +153,9 @@ final class BuiltinActions {
 				return;
 			}
 			float amount = (float) num(params, "amount", 0);
+			if (amount <= 0) {
+				return; // negative damage would heal while playing hurt feedback
+			}
 			String source = str(params, "source");
 			DamageSource ds = source == null ? world.getDamageSources().generic()
 					: switch (source) {
@@ -153,7 +171,10 @@ final class BuiltinActions {
 
 		register("heal", (target, ctx, params) -> {
 			if (target.entity() instanceof LivingEntity le && hasNumber(params, "amount")) {
-				le.heal((float) num(params, "amount", 0));
+				float amount = (float) num(params, "amount", 0);
+				if (amount > 0) { // heal(<=0) bypasses the death path — never allow
+					le.heal(amount);
+				}
 			}
 		});
 
@@ -185,8 +206,15 @@ final class BuiltinActions {
 				return;
 			}
 			boolean temporary = bool(params, "temporary", true);
-			world.setBlockState(pos, temporary
-					? Blocks.FROSTED_ICE.getDefaultState() : Blocks.ICE.getDefaultState());
+			if (temporary) {
+				// Same path as FrostWalker: frosted ice + a scheduled melt tick.
+				// (randomTick alone only melts under light — night ice would persist.)
+				world.setBlockState(pos, Blocks.FROSTED_ICE.getDefaultState());
+				world.scheduleBlockTick(pos, Blocks.FROSTED_ICE,
+						60 + world.getRandom().nextInt(61));
+			} else {
+				world.setBlockState(pos, Blocks.ICE.getDefaultState());
+			}
 		});
 
 		register("highlight_entities", (target, ctx, params) -> {
@@ -201,14 +229,12 @@ final class BuiltinActions {
 			if ("global".equals(visibility)) {
 				for (ServerPlayerEntity watcher : world.getPlayers()) {
 					if (watcher.squaredDistanceTo(e) <= 128 * 128) {
-						net.fabricmc.fabric.api.networking.v1
-								.ServerPlayNetworking.send(watcher, payload);
+						ServerPlayNetworking.send(watcher, payload);
 					}
 				}
 			} else {
 				// private: the casting player only — never the global glowing flag
-				net.fabricmc.fabric.api.networking.v1
-						.ServerPlayNetworking.send(ctx.self(), payload);
+				ServerPlayNetworking.send(ctx.self(), payload);
 			}
 		});
 
@@ -217,13 +243,16 @@ final class BuiltinActions {
 				return;
 			}
 			String idOrTag = str(params, "item");
-			Predicate<ItemStack> match = BuiltinConditions.itemMatcher(idOrTag);
+			Predicate<ItemStack> match = idOrTag == null ? null
+					: BuiltinConditions.itemMatcher(idOrTag);
 			if (match == null) {
 				return;
 			}
 			int remaining = Math.max(1, (int) num(params, "count", 1));
 			var inv = p.getInventory();
-			for (int i = 0; i < inv.size() && remaining > 0; i++) {
+			// Main inventory only — consuming worn armor / the offhand item
+			// would be a surprising way to strip a player's equipment.
+			for (int i = 0; i < inv.main.size() && remaining > 0; i++) {
 				ItemStack stack = inv.getStack(i);
 				if (!stack.isEmpty() && match.test(stack)) {
 					int take = Math.min(stack.getCount(), remaining);
@@ -235,7 +264,7 @@ final class BuiltinActions {
 
 		register("modify_resource", (target, ctx, params) -> {
 			Identifier res = id(params, "resource");
-			if (res == null) {
+			if (res == null || target.data() == null) {
 				return;
 			}
 			var cur = target.data().resources().get(res);
@@ -278,6 +307,9 @@ final class BuiltinActions {
 			}
 			ParticleType<?> type = Registries.PARTICLE_TYPE.getOrEmpty(particle).orElse(null);
 			if (!(type instanceof ParticleEffect effect)) {
+				// dust/block/item particles need parameters — fail visibly, not silently
+				LifepathMod.LOGGER.debug(
+						"[ability] spawn_particle skipped: {} is not a simple particle", particle);
 				return;
 			}
 			int count = (int) num(params, "count", 8);
@@ -300,12 +332,13 @@ final class BuiltinActions {
 				continue;
 			}
 			it.remove();
-			ServerPlayerEntity player = server.getPlayerManager().getPlayer(e.player());
-			if (player == null) {
-				continue; // offline — temporary modifiers die with the session anyway
+			ServerWorld world = server.getWorld(e.world());
+			Entity entity = world == null ? null : world.getEntity(e.entity());
+			if (!(entity instanceof LivingEntity le)) {
+				continue; // gone or unloaded — temporary modifiers die with the entity
 			}
 			var entry = Registries.ATTRIBUTE.getEntry(e.attribute()).orElse(null);
-			var instance = entry == null ? null : player.getAttributeInstance(entry);
+			var instance = entry == null ? null : le.getAttributeInstance(entry);
 			if (instance != null) {
 				instance.removeModifier(e.modifierId());
 			}

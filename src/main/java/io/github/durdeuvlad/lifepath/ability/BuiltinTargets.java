@@ -2,11 +2,13 @@ package io.github.durdeuvlad.lifepath.ability;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.TargetContext;
+import io.github.durdeuvlad.lifepath.character.CharacterManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -46,7 +48,11 @@ final class BuiltinTargets {
 							&& (!livingOnly || e instanceof LivingEntity)
 							&& e.squaredDistanceTo(p) <= r2)) {
 				if (type == null || type.test(e)) {
-					out.add(new TargetContext(e, e.getBlockPos(), ctx.data()));
+					// Player targets carry their OWN model — resource/XP
+					// actions act per-target; non-players get null.
+					out.add(new TargetContext(e, e.getBlockPos(),
+							e instanceof ServerPlayerEntity sp
+									? CharacterManager.getCharacter(sp) : null));
 				}
 			}
 			return out;
@@ -55,10 +61,14 @@ final class BuiltinTargets {
 		AbilityVocabulary.registerTarget(LifepathMod.id("blocks_in_radius"), (ctx, params) -> {
 			var p = ctx.self();
 			String idOrTag = BuiltinConditions.str(params, "block");
-			if (p == null) {
-				return List.of();
+			if (p == null || idOrTag == null) {
+				return List.of(); // required filter — fail closed, don't match-all
 			}
-			int radius = BuiltinConditions.radius(params);
+			// Tighter than nearby_max_radius: this resolver scans the whole
+			// cube with no early exit, so cap hard and bound the result count.
+			int radius = Math.min(BuiltinConditions.radius(params), 32);
+			int limit = Math.min(Math.max(1,
+					(int) BuiltinConditions.num(params, "limit", 64)), 512);
 			Predicate<net.minecraft.block.BlockState> match = blockMatcher(idOrTag);
 			if (match == null) {
 				return List.of();
@@ -66,10 +76,15 @@ final class BuiltinTargets {
 			BlockPos center = p.getBlockPos();
 			List<TargetContext> out = new ArrayList<>();
 			for (BlockPos pos : BlockPos.iterateOutwards(center, radius, radius, radius)) {
+				if (out.size() >= limit) {
+					break;
+				}
 				if (pos.isWithinDistance(center, radius + 0.5)
 						&& p.getWorld().isChunkLoaded(pos)
 						&& match.test(p.getWorld().getBlockState(pos))) {
-					out.add(new TargetContext(null, pos.toImmutable(), ctx.data()));
+					// Block targets carry no character model — caster-model
+					// actions (resources/XP) don't multiply per resolved block.
+					out.add(new TargetContext(null, pos.toImmutable(), null));
 				}
 			}
 			return out;

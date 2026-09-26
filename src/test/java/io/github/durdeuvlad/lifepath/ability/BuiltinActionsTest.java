@@ -91,6 +91,21 @@ class BuiltinActionsTest {
 	}
 
 	@Test
+	void resourceActionsNoOpOnModellessTargets() {
+		// Non-player / block targets carry no character model (per-target
+		// semantics) — resource/XP actions must no-op, not NPE or multiply
+		// against the caster's model.
+		TargetContext blockTarget = new TargetContext(null, BlockPos.ORIGIN, null);
+		action("modify_resource").run(blockTarget, ctx,
+				params("{\"resource\": \"lifepath:mana\", \"delta\": 25}"));
+		action("resource_delta").run(blockTarget, ctx,
+				params("{\"resource\": \"lifepath:mana\", \"amount\": 25}"));
+		action("grant_xp").run(blockTarget, ctx,
+				params("{\"skill\": \"lifepath:mining\", \"amount\": 5}"));
+		assertTrue(data.resources().isEmpty(), "caster model must stay untouched");
+	}
+
+	@Test
 	void entityActionsNoOpOnEntitylessTargets() {
 		// apply_effect / remove_effect / modify_attribute / damage / heal /
 		// consume_item / highlight_entities all need a live entity — a

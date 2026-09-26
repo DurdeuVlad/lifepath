@@ -262,6 +262,13 @@ public final class AbilityEngine {
 							action.type(), e);
 				}
 			}
+			// AoE actions can mutate a PLAYER TARGET's model (resources/XP) —
+			// mark+sync theirs too; the caster's own changed() happens in the
+			// caller. Non-player/block targets carry no model.
+			if (t.data() != null && t.data() != data
+					&& t.entity() instanceof ServerPlayerEntity sp) {
+				io.github.durdeuvlad.lifepath.character.CharacterManager.changed(sp);
+			}
 		}
 		def.cost().ifPresent(cost -> {
 			var res = data.resources().get(cost.resource());
