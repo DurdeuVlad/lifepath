@@ -110,7 +110,7 @@ public final class SkillService {
 	/**
 	 * Get-or-create the character's progress for {@code skillId}: returns the
 	 * stored record (clamped) if present, else a fresh {@code xp=0, level=0}
-	 * record with {@link Aptitude#C} which is ALSO stored on the model. Returns
+	 * record with {@link Aptitude#B} which is ALSO stored on the model. Returns
 	 * null when the skill id has no loaded definition (fail-safe).
 	 *
 	 * <p><b>Callers must intend creation.</b> Inspection-only paths must use

@@ -70,15 +70,12 @@ public final class SkillXpService {
 				amount * ((Number) LifepathConfig.getOrDefault(SKILLS_CONFIG,
 						ctx.skillId().getPath() + "_xp_multiplier", 1.0)).doubleValue());
 		// Aptitude multiplier (M3-1): effective grade = max(species floor,
-		// recorded). Runs last of the built-ins; null player → identity.
-		registerModifier(LifepathMod.id("aptitude_multiplier"), (ctx, amount) -> {
-			if (ctx.player() == null) {
-				return amount;
-			}
-			return amount * AptitudeTable.xpMultiplier(SkillService.effectiveAptitude(
-					CharacterManager.getCharacter(ctx.player()).speciesId(),
-					ctx.skillId(), ctx.progress()));
-		});
+		// recorded). Runs last of the built-ins. Reads speciesId from the
+		// award's own data model — applies on data-only paths too and keeps
+		// the modifier side-effect-free (no lazy attachment load).
+		registerModifier(LifepathMod.id("aptitude_multiplier"), (ctx, amount) ->
+				amount * AptitudeTable.xpMultiplier(SkillService.effectiveAptitude(
+						ctx.speciesId(), ctx.skillId(), ctx.progress())));
 	}
 
 	/** Appends {@code modifier} to the pipeline; later registrations run later. */
@@ -143,7 +140,8 @@ public final class SkillXpService {
 			return new XpResult(0, current.level(), current.level(),
 					current.xp(), current.xp(), true);
 		}
-		XpModifier.XpContext ctx = new XpModifier.XpContext(player, skillId, current, source);
+		XpModifier.XpContext ctx = new XpModifier.XpContext(player, skillId, current,
+				source, data.speciesId());
 		double modified = amount;
 		for (Map.Entry<Identifier, XpModifier> entry : MODIFIERS.entrySet()) {
 			try {

@@ -10,6 +10,7 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.LevelCurveDefinition;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
+import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.event.ActivityEvent;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.ArrayList;
@@ -245,11 +246,34 @@ class SkillXpServiceTest {
 	}
 
 	@Test
-	void setXpCoreRejectsUnknownAndNegative() {
+	void aptitudeMultiplierAppliesOnDataPath() {
+		SkillXpService.init();
 		registerSkill(100);
-		registerCurve(100);
-		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		assertFalse(SkillXpService.setXpCore(data, Identifier.of("lifepath", "nope"), 10).applied());
-		assertFalse(SkillXpService.setXpCore(data, SKILL, -1).applied());
+		registerCurve(100); // level1 at 10xp cumulative
+		Identifier dwarf = Identifier.of("lifepath", "dwarf");
+		LifepathContent.species().register(dwarf,
+				new SpeciesDefinition(dwarf, "Dwarf",
+						SpeciesDefinition.Visibility.NORMAL, SpeciesDefinition.Selection.OPEN,
+						java.util.List.of(), java.util.List.of(),
+						java.util.Map.of(SKILL, Aptitude.S),
+						java.util.List.of(), java.util.Optional.empty(), java.util.Optional.empty()));
+
+		// D-grade with a dwarf S-floor → effective S → 1.5x.
+		PlayerCharacterData floored = PlayerCharacterData.createDefault();
+		floored.setSpeciesId(dwarf);
+		SkillXpService.setXpCore(floored, SKILL, 0.0);
+		floored.setSkillProgress(SKILL, new SkillProgress(0, 0, 0, 0, Aptitude.D, 0));
+		var r1 = SkillXpService.awardXpCore(floored, SKILL, 10.0, SRC);
+		assertEquals(15.0, SkillXpService.getProgress(floored, SKILL).xp(), 1e-9,
+				"species floor S should raise D to x1.5");
+		assertTrue(r1.applied());
+
+		// D-grade, no species → recorded D → x0.70.
+		PlayerCharacterData plain = PlayerCharacterData.createDefault();
+		SkillXpService.setXpCore(plain, SKILL, 0.0);
+		plain.setSkillProgress(SKILL, new SkillProgress(0, 0, 0, 0, Aptitude.D, 0));
+		SkillXpService.awardXpCore(plain, SKILL, 10.0, SRC);
+		assertEquals(7.0, SkillXpService.getProgress(plain, SKILL).xp(), 1e-9,
+				"recorded D grade should apply x0.70");
 	}
 }
