@@ -81,6 +81,9 @@ public final class SkillXpService {
 		registerModifier(LifepathMod.id("specialization_multiplier"), (ctx, amount) ->
 				amount * io.github.durdeuvlad.lifepath.specialization.SpecializationService
 						.xpModifierFor(ctx.specializationId(), ctx.skillId()));
+		// Diminishing returns (M3-4): runs LAST so the spam discount applies to
+		// the fully-multiplied amount; records the action signature itself.
+		registerModifier(DiminishingReturns.MODIFIER_ID, DiminishingReturns::apply);
 	}
 
 	/** Appends {@code modifier} to the pipeline; later registrations run later. */
@@ -150,7 +153,7 @@ public final class SkillXpService {
 					current.xp(), current.xp(), true);
 		}
 		XpModifier.XpContext ctx = new XpModifier.XpContext(player, skillId, current,
-				source, data.speciesId(), data.specializationId());
+				source, data.speciesId(), data.specializationId(), data);
 		double modified = amount;
 		for (Map.Entry<Identifier, XpModifier> entry : MODIFIERS.entrySet()) {
 			try {

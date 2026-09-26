@@ -186,6 +186,8 @@ public final class CharacterManager {
 	static PlayerCharacterData snapshotForSync(PlayerCharacterData data, long nowMillis) {
 		PlayerCharacterData copy = CharacterPersistence.copy(data);
 		copy.clearExpiredCooldowns(nowMillis);
+		// The anti-exploit ledger is server-only bookkeeping — never synced.
+		copy.clearActionSignatures();
 		return copy;
 	}
 

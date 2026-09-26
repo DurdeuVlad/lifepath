@@ -12,6 +12,7 @@ import io.github.durdeuvlad.lifepath.producer.VanillaGameplayProducers;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.registry.RegistryBootstrap;
 import io.github.durdeuvlad.lifepath.reload.ReloadManager;
+import io.github.durdeuvlad.lifepath.skill.DiminishingReturns;
 import io.github.durdeuvlad.lifepath.skill.SkillDecayService;
 import io.github.durdeuvlad.lifepath.skill.SkillXpService;
 import io.github.durdeuvlad.lifepath.skill.XpSourceRouter;
@@ -137,6 +138,25 @@ public class LifepathMod implements ModInitializer {
 						"Upper bound of decay band 5 (top).")
 				.define("band_5_rate", 0.35, v -> v >= 0 && v <= 100,
 						"Levels lost per real day inside band 5 (91–100).")
+				.build());
+		LifepathConfig.define(DiminishingReturns.CONFIG, ConfigSpec.builder()
+				.define("enabled", true,
+						"Diminishing returns on repeated identical actions (GAMEDESIGN §11.1).")
+				.define("window_hours", 4.0, v -> v >= 0.0167 && v <= 720,
+						"Rolling window (real hours) over which identical action"
+								+ " signatures are counted. Older entries age out.")
+				.define("tier_1_count", 64, v -> v >= 1 && v <= 4096,
+						"In-window count up to this gets tier_1_multiplier."
+								+ " Capped at the ledger's 4096-entry cap.")
+				.define("tier_1_multiplier", 1.0, v -> v >= 0 && v <= 10,
+						"XP multiplier for counts <= tier_1_count.")
+				.define("tier_2_count", 256, v -> v >= 1 && v <= 4096,
+						"In-window count up to this gets tier_2_multiplier."
+								+ " Capped at the ledger's 4096-entry cap.")
+				.define("tier_2_multiplier", 0.5, v -> v >= 0 && v <= 10,
+						"XP multiplier for counts between the two tiers.")
+				.define("tier_3_multiplier", 0.1, v -> v >= 0 && v <= 10,
+						"XP multiplier for counts above tier_2_count.")
 				.build());
 
 		ReloadManager.register(id("engine_config"), LifepathConfig::reload);

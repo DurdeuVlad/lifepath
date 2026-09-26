@@ -118,6 +118,9 @@ public final class SkillDecayService {
 	 * unpersisted).
 	 */
 	public static int applyLazyAll(PlayerCharacterData data, long now) {
+		// Signature sweep lives on the same lazy triggers — dead keys would
+		// otherwise accumulate in the model/NBT forever.
+		data.pruneActionSignatures(now - DiminishingReturns.windowMs());
 		int changed = 0;
 		for (Identifier id : new ArrayList<>(data.skills().keySet())) {
 			SkillProgress before = data.skill(id);
