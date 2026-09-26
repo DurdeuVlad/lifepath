@@ -1,0 +1,10 @@
+{
+	"display_name": "Arid Nausea",
+	"trigger": {"type": "passive", "interval_ticks": 1200},
+	"conditions": {"all": [{"type": "lifepath:biome_tag", "tag": "#lifepath:arid"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect",
+		 "effect": "minecraft:nausea", "duration": 300, "amplifier": 0}
+	]
+}

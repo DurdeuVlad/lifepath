@@ -27,10 +27,10 @@ override semantics apply: same-id files in later packs win.
 |---|---|---|
 | `display_name` | yes | Human label (future UI). |
 | `enabled` | no, default `true` | `false` keeps the def registered (refs resolve, ownership counts) but every trigger path returns `DISABLED`. Does NOT skip load validation — a disabled file with errors is still rejected. |
-| `trigger` | yes | `{"type": "active"\|"passive"\|"event"}`. `passive` honors `interval_ticks` (default 20, ignored on other kinds). `event` requires `events[]` (activity-type ids, e.g. `lifepath:mining`, `lifepath:resource_band_enter`). `events[]` on a non-event trigger warns and is ignored. `resource_interactions` likewise only apply under `passive`. |
+| `trigger` | yes | `{"type": "active"\|"passive"\|"event"\|"damage_taken"}`. `passive` honors `interval_ticks` (default 20, ignored on other kinds). `event` requires `events[]` (activity-type ids, e.g. `lifepath:mining`, `lifepath:resource_band_enter`). `damage_taken` evaluates synchronously inside the player's `damage()` call: passing conditions scale the incoming amount by `multiplier` (default 1.0), and `actions`/`cost`/`cooldown`/`resource_interactions` are ignored (warned at load). `events[]` on a non-event trigger warns and is ignored. `resource_interactions` likewise only apply under `passive`. |
 | `conditions` | no | `all[]` must ALL pass; `any[]` (if present) needs at least one pass. Empty = always true. |
 | `target` | yes | One spec node resolving the target set. |
-| `actions` | yes | Spec nodes run per resolved target, in order. Empty warns (cooldown-only ability). |
+| `actions` | no, default `[]` | Spec nodes run per resolved target, in order. Empty warns on non-`damage_taken` triggers (cooldown-only ability). |
 | `cost` | no | `{resource, amount > 0}` — gated before target resolution, spent only when actions ran. Unmaterialized resources pay from their definition default. |
 | `cooldown` | no | `{seconds > 0}` — stamped on successful execution only; governed by `abilities.toml` multiplier + persistence threshold. |
 | `resource_interactions` | no | `[{resource, per_second}]` — PASSIVE-only; scales by real elapsed time between evals. |
@@ -75,6 +75,10 @@ reference and skipped by the content-ref scan.
 | `entity_nearby` | `entity` (id or `#tag`), `radius` |
 | `inventory_contains` | `item` (id or `#tag`), `min_count` |
 | `equipment_contains` | `item` (id or `#tag`), `slot`? |
+| `inside_block` | `block` (id or `#tag`, required) — the block state at the player's feet |
+| `attacker_entity` | `entity` (id or `#tag`) — matches `source.getAttacker()`; damage_taken only |
+| `damage_type` | `type` (id or `#tag` on the damage-type registry); damage_taken only |
+| `damage_amount` | `op`, `value` — compares the pre-modifier amount; damage_taken only |
 
 ### Targets
 

@@ -222,6 +222,48 @@ public final class BuiltinConditions {
 							.resources().get(res) != null;
 			return known && compare(op, cur, num(params, "value", 0));
 		});
+		// M5-2 primitives: block occupancy + incoming-damage context.
+		register("inside_block", (ctx, params) -> {
+			ServerPlayerEntity p = ctx.self();
+			String idOrTag = str(params, "block");
+			if (p == null || idOrTag == null) {
+				return false;
+			}
+			Predicate<BlockState> match = blockMatcher(idOrTag);
+			// The block the feet occupy — "standing in vegetation/water/…".
+			return match != null && match.test(
+					p.getWorld().getBlockState(p.getBlockPos()));
+		});
+		register("attacker_entity", (ctx, params) -> {
+			var damage = ctx.damage();
+			String idOrTag = str(params, "entity");
+			if (damage == null || damage.attacker() == null || idOrTag == null) {
+				return false;
+			}
+			Predicate<Entity> match = entityMatcher(idOrTag);
+			return match != null && match.test(damage.attacker());
+		});
+		register("damage_type", (ctx, params) -> {
+			var damage = ctx.damage();
+			String idOrTag = str(params, "type");
+			if (damage == null || damage.source() == null || idOrTag == null) {
+				return false;
+			}
+			if (idOrTag.startsWith("#")) {
+				Identifier tag = Identifier.tryParse(idOrTag.substring(1));
+				return tag != null && damage.source()
+						.isIn(TagKey.of(RegistryKeys.DAMAGE_TYPE, tag));
+			}
+			Identifier type = Identifier.tryParse(idOrTag);
+			return type != null && damage.source().getTypeRegistryEntry()
+					.matchesId(type);
+		});
+		register("damage_amount", (ctx, params) -> {
+			var damage = ctx.damage();
+			String op = str(params, "op");
+			return damage != null && op != null && hasNumber(params, "value")
+					&& compare(op, damage.amount(), num(params, "value", 0));
+		});
 	}
 
 	private static void register(String name, AbilityVocabulary.ConditionEvaluator eval) {

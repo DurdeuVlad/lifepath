@@ -192,7 +192,18 @@ public final class LifepathContent {
 			LifepathMod.LOGGER.warn("ability {} declares events[] on a {} "
 					+ "trigger — ignored", id, def.trigger().kind());
 		}
-		if (def.actions().isEmpty()) {
+		if (def.trigger().kind() == AbilityDefinition.Kind.DAMAGE_TAKEN) {
+			// Incoming-damage path consults only conditions + multiplier —
+			// running actions mid-damage() would recurse.
+			if (!def.actions().isEmpty() || def.cost().isPresent()
+					|| def.cooldown().isPresent()
+					|| !def.resourceInteractions().isEmpty()) {
+				LifepathMod.LOGGER.warn("ability {} damage_taken trigger ignores "
+						+ "actions/cost/cooldown/resource_interactions", id);
+			}
+		}
+		if (def.actions().isEmpty()
+				&& def.trigger().kind() != AbilityDefinition.Kind.DAMAGE_TAKEN) {
 			LifepathMod.LOGGER.warn(
 					"ability {} has no actions — it can only mark cooldowns", id);
 		}

@@ -36,10 +36,27 @@ public final class AbilityVocabulary {
 	 * only in bare test contexts.
 	 */
 	public record EvalContext(@Nullable ServerPlayerEntity self,
-			PlayerCharacterData data, long now, @Nullable Identifier abilityId) {
+			PlayerCharacterData data, long now, @Nullable Identifier abilityId,
+			@Nullable DamageInfo damage) {
 		public EvalContext(ServerPlayerEntity self, PlayerCharacterData data, long now) {
-			this(self, data, now, null);
+			this(self, data, now, null, null);
 		}
+
+		public EvalContext(ServerPlayerEntity self, PlayerCharacterData data, long now,
+				@Nullable Identifier abilityId) {
+			this(self, data, now, abilityId, null);
+		}
+	}
+
+	/**
+	 * Incoming-damage context for {@code damage_taken} triggers (M5-2):
+	 * {@code attacker} is the responsible entity ({@code source.getAttacker()} —
+	 * for projectiles, the shooter), {@code source} the damage source (for
+	 * {@code damage_type} conditions), {@code amount} the pre-modifier base.
+	 * Null on every non-damage eval path — damage conditions fail closed.
+	 */
+	public record DamageInfo(@Nullable Entity attacker,
+			@Nullable net.minecraft.entity.damage.DamageSource source, float amount) {
 	}
 
 	/**
