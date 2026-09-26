@@ -28,6 +28,13 @@ public class LifepathClient implements ClientModInitializer {
 						ClientHighlights.add(payload.entityIds(), payload.durationTicks())));
 		ClientLifepathNetworking.onS2C(CharacterSyncPayload.ID, (payload, context) ->
 				context.client().execute(() -> ClientCharacterState.apply(payload)));
+		// M4-4: cooldown deltas keep the client read-model fresh between
+		// full snapshots (advisory — the server re-validates every eval).
+		ClientLifepathNetworking.onS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.CooldownUpdatePayload.ID,
+				(payload, context) -> context.client().execute(() ->
+						ClientCharacterState.applyCooldown(
+								payload.abilityId(), payload.expiryEpochMs())));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			ClientCharacterState.clear();
 			ClientAbilityState.clear();

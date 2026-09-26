@@ -32,6 +32,24 @@ public final class ClientCharacterState {
 		snapshot = null;
 	}
 
+	/**
+	 * Applies a single-cooldown delta (M4-4 {@code CooldownUpdatePayload}) to
+	 * the read-model snapshot so HUD state stays fresh between full syncs.
+	 * {@code expiryEpochMs <= 0} clears the entry. No-op before first snapshot.
+	 */
+	public static void applyCooldown(net.minecraft.util.Identifier abilityId,
+			long expiryEpochMs) {
+		PlayerCharacterData s = snapshot;
+		if (s == null) {
+			return;
+		}
+		if (expiryEpochMs > 0) {
+			s.setCooldown(abilityId, expiryEpochMs);
+		} else {
+			s.removeCooldown(abilityId);
+		}
+	}
+
 	/** The latest synced snapshot, or null if none has arrived yet. Read-only. */
 	@Nullable
 	public static PlayerCharacterData snapshot() {

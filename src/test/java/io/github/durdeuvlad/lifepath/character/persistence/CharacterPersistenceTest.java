@@ -177,7 +177,11 @@ class CharacterPersistenceTest {
 		data.addId(ListKind.TRAITS, Identifier.of("lifepath", "t1"));
 		data.addId(ListKind.UNLOCKS, Identifier.of("lifepath", "u1"));
 		data.setResource(Identifier.of("lifepath", "mana"), new ResourceState(5.0, 0.0, 10.0));
-		data.setCooldown(Identifier.of("lifepath", "ab1"), 100L);
+		// Live cooldown (M4-4): entries with <= persist_min_seconds remaining at
+		// load are dropped by sanitize, so the round-trip fixture must use a
+		// genuinely live expiry.
+		data.setCooldown(Identifier.of("lifepath", "ab1"),
+				System.currentTimeMillis() + 60_000L);
 		data.setDataVersion(LifepathMod.DATA_VERSION);
 		return data;
 	}

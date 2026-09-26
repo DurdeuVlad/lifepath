@@ -1,9 +1,11 @@
 package io.github.durdeuvlad.lifepath.character.persistence;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
+import io.github.durdeuvlad.lifepath.ability.CooldownService;
 import io.github.durdeuvlad.lifepath.character.ContentIndex;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.character.migration.CharacterMigrations;
+import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.github.durdeuvlad.lifepath.skill.SkillService;
 import io.github.durdeuvlad.lifepath.util.Serialization;
@@ -58,7 +60,7 @@ public final class CharacterPersistence {
 		if (data.dataVersion() < LifepathMod.DATA_VERSION) {
 			data.setDataVersion(LifepathMod.DATA_VERSION);
 		}
-		return sanitize(data);
+		return sanitize(data, System.currentTimeMillis());
 	}
 
 	/**
@@ -84,6 +86,16 @@ public final class CharacterPersistence {
 
 	/** Drops every content reference the index says is gone, WARNing per entry. */
 	public static PlayerCharacterData sanitize(PlayerCharacterData data) {
+		return sanitize(data, System.currentTimeMillis());
+	}
+
+	/**
+	 * {@link #sanitize} with an explicit {@code nowMs} — ability cooldowns
+	 * whose remaining time is &le; {@code abilities.toml persist_min_seconds}
+	 * (default 5s) do not survive relog (M4-4); cooldowns that expired while
+	 * the player was offline fall under the same rule.
+	 */
+	public static PlayerCharacterData sanitize(PlayerCharacterData data, long nowMs) {
 		if (unknown("species", data.speciesId())) {
 			drop("species", data.speciesId());
 			data.setSpeciesId(null);
@@ -111,14 +123,23 @@ public final class CharacterPersistence {
 				data.removeResource(id);
 			}
 		}
+		long cooldownMinPersistMs = (long) (LifepathConfig.getOrDefault(
+				LifepathMod.id("abilities"), "persist_min_seconds", 5.0) * 1000.0);
 		for (Identifier id : new ArrayList<>(data.cooldowns().keySet())) {
 			// `schedule/*` keys are the ability engine's passive-eval markers —
 			// engine bookkeeping, not ability references (M4-1).
-			if (id.getPath().startsWith("schedule/")) {
+			if (CooldownService.isScheduleKey(id)) {
 				continue;
 			}
 			if (unknown("ability", id)) {
 				drop("ability", id);
+				data.removeCooldown(id);
+				continue;
+			}
+			// M4-4: short-lived cooldowns don't persist — remaining <= the
+			// configured threshold at load means the entry is dropped.
+			Long expiry = data.cooldowns().get(id);
+			if (expiry == null || expiry <= nowMs + cooldownMinPersistMs) {
 				data.removeCooldown(id);
 			}
 		}

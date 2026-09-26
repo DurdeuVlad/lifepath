@@ -146,6 +146,13 @@ public class LifepathMod implements ModInitializer {
 				.define("nearby_max_radius", 32, v -> v >= 1 && v <= 64,
 						"Radius cap for block_nearby/entity_nearby conditions"
 								+ " (params clamp to this).")
+				.define("cooldown_multiplier", 1.0, v -> v >= 0 && v <= 100,
+						"Global multiplier on every ability's declared cooldown"
+								+ " (M4-4). Applies to newly triggered cooldowns;"
+								+ " 0 makes future cooldowns a no-op.")
+				.define("persist_min_seconds", 5.0, v -> v >= 0 && v <= 3600,
+						"Ability cooldowns with <= this many seconds remaining"
+								+ " at load do not survive relog (M4-4).")
 				.build());
 		LifepathConfig.define(DiminishingReturns.CONFIG, ConfigSpec.builder()
 				.define("enabled", true,
@@ -183,6 +190,9 @@ public class LifepathMod implements ModInitializer {
 		LifepathNetworking.registerS2C(
 				io.github.durdeuvlad.lifepath.network.s2c.HighlightEntitiesPayload.ID,
 				io.github.durdeuvlad.lifepath.network.s2c.HighlightEntitiesPayload.PACKET_CODEC);
+		LifepathNetworking.registerS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.CooldownUpdatePayload.ID,
+				io.github.durdeuvlad.lifepath.network.s2c.CooldownUpdatePayload.PACKET_CODEC);
 		CharacterManager.init();
 		SkillXpService.init();
 		SkillDecayService.init();

@@ -51,4 +51,18 @@ public final class ClientAbilityState {
 	public static void clear() {
 		selected = null;
 	}
+
+	/**
+	 * Milliseconds remaining on {@code abilityId}'s cooldown per the synced
+	 * read-model (M4-4) — advisory for HUD display only; the server owns the
+	 * truth. Returns 0 when no snapshot or the cooldown is inactive.
+	 */
+	public static long remainingMillis(Identifier abilityId, long nowEpochMs) {
+		var snapshot = ClientCharacterState.snapshot();
+		if (snapshot == null) {
+			return 0L;
+		}
+		Long expiry = snapshot.cooldowns().get(abilityId);
+		return expiry == null ? 0L : Math.max(0L, expiry - nowEpochMs);
+	}
 }
