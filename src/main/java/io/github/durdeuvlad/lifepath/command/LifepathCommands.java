@@ -78,7 +78,8 @@ public final class LifepathCommands {
 	}
 
 	private static int reload(ServerCommandSource source) {
-		List<ReloadManager.ReloadResult> results = ReloadManager.reloadAll();
+		List<ReloadManager.ReloadResult> results =
+				ReloadManager.reloadAll(source.getServer().getResourceManager());
 		int failures = 0;
 		for (ReloadManager.ReloadResult result : results) {
 			if (result.success()) {
