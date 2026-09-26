@@ -1,13 +1,16 @@
 package io.github.durdeuvlad.lifepath.reload;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * One reload lifecycle entrypoint for all engine/data systems. Systems register
@@ -54,16 +57,35 @@ public final class ReloadManager {
 		initialized = true;
 	}
 
-	/** Runs every registered reloader. Called by datapack reload and {@code /lifepath reload}. */
-	public static void reloadAll() {
+	/** Outcome of one registered reloader for reporting (e.g. {@code /lifepath reload}). */
+	public record ReloadResult(Identifier id, boolean success, @Nullable String error) {
+	}
+
+	/**
+	 * Runs every registered reloader in registration order. Called by datapack
+	 * reload and {@code /lifepath reload}.
+	 *
+	 * @return one {@link ReloadResult} per registered reloader, in run order;
+	 *         a failing reloader is logged as ERROR, marked unsuccessful, and
+	 *         never aborts the rest.
+	 *         <p>Note: only {@link Exception} is contained — an {@link Error}
+	 *         still aborts the chain and propagates (deliberate: swallowing
+	 *         VM-level failures hides real corruption).
+	 */
+	public static List<ReloadResult> reloadAll() {
+		List<ReloadResult> results = new ArrayList<>();
 		for (Map.Entry<Identifier, Runnable> reloader : RELOADERS.entrySet()) {
 			try {
 				reloader.getValue().run();
 				LifepathMod.LOGGER.info("reloaded {}", reloader.getKey());
+				results.add(new ReloadResult(reloader.getKey(), true, null));
 			} catch (Exception e) {
 				LifepathMod.LOGGER.error("reloader {} failed; continuing", reloader.getKey(), e);
+				String detail = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+				results.add(new ReloadResult(reloader.getKey(), false, detail));
 			}
 		}
+		return List.copyOf(results);
 	}
 
 	/**
