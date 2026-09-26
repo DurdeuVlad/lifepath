@@ -44,6 +44,7 @@ class RankBandsTest {
 
 	@Test
 	void negativeLevelIsUntrained() {
+		LifepathConfig.resetForTests();
 		assertEquals(RankBand.UNTRAINED, RankBands.bandFor(-5));
 	}
 
@@ -60,18 +61,24 @@ class RankBandsTest {
 	@Test
 	void invalidThresholdsFallBackToDefaults() throws Exception {
 		LifepathConfig.resetForTests();
-		// Non-ascending: legendary(50) < master(80).
+		// Non-ascending: legendary(50) < master(80). Under the BROKEN config,
+		// bandFor(75) would be LEGENDARY (75>=50); under defaults it's EXPERT.
 		defineBands(0, 1, 20, 40, 60, 80, 50);
-		assertEquals(RankBand.LEGENDARY, RankBands.bandFor(95));
-		assertEquals(RankBand.MASTER, RankBands.bandFor(80));
+		assertEquals(RankBand.EXPERT, RankBands.bandFor(75),
+				"non-ascending config must fall back to defaults");
+		org.junit.jupiter.api.Assertions.assertArrayEquals(
+				new int[] {0, 1, 20, 40, 60, 80, 95}, RankBands.thresholds());
 	}
 
 	@Test
 	void zeroUntrainedThresholdRequired() throws Exception {
 		LifepathConfig.resetForTests();
-		// Untrained floor moved off 0 — invalid.
+		// untrained=5 is invalid. Under the broken config level 5 hits the
+		// untrained band itself; under defaults level 5 is NOVICE — the assertion
+		// discriminates applied-invalid from fallback.
 		defineBands(5, 10, 20, 40, 60, 80, 95);
-		assertEquals(RankBand.UNTRAINED, RankBands.bandFor(0));
+		assertEquals(RankBand.NOVICE, RankBands.bandFor(5),
+				"untrained!=0 config must fall back to defaults");
 	}
 
 	@Test

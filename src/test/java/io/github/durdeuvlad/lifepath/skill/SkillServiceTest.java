@@ -90,6 +90,35 @@ class SkillServiceTest {
 	}
 
 	@Test
+	void clampedFixesNonFiniteXp() {
+		// Codec.DOUBLE will decode crafted/corrupt NaN/Inf — clamp must zero them.
+		assertEquals(0.0, SkillService.clamped(
+				new SkillProgress(Double.NaN, 0, 0, 0, Aptitude.C, 0), 100).xp());
+		assertEquals(0.0, SkillService.clamped(
+				new SkillProgress(Double.POSITIVE_INFINITY, 0, 0, 0, Aptitude.C, 0), 100).xp());
+	}
+
+	@Test
+	void withLevelCannotFabricateHighest() {
+		// newLevel above maxLevel must not record a peak that never existed.
+		SkillProgress up = SkillService.withLevel(SkillProgress.fresh(Aptitude.C), 150, 100);
+		assertEquals(100, up.level());
+		assertEquals(100, up.highestLevel());
+	}
+
+	@Test
+	void progressIsReadOnly() {
+		registerSkill(MINING, 100);
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		assertNull(SkillService.progress(data, MINING)); // absent -> null, no creation
+		assertNull(data.skill(MINING));
+		data.setSkillProgress(MINING, new SkillProgress(0, 500, 500, 0, Aptitude.A, 0));
+		SkillProgress p = SkillService.progress(data, MINING);
+		assertEquals(100, p.level()); // clamped view
+		assertEquals(500, data.skill(MINING).level()); // model NOT rewritten on read
+	}
+
+	@Test
 	void withLevelUpdatesHighestAndPreservesFloor() {
 		SkillProgress p = new SkillProgress(12.5, 10, 10, 4, Aptitude.B, 123);
 		SkillProgress up = SkillService.withLevel(p, 25, 100);

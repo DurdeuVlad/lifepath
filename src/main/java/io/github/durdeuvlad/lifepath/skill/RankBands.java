@@ -2,6 +2,8 @@ package io.github.durdeuvlad.lifepath.skill;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.util.Identifier;
 
 /**
@@ -13,6 +15,12 @@ import net.minecraft.util.Identifier;
  * keys {@code band_<name>} = the FIRST level of that band). An invalid
  * configuration (non-increasing thresholds or out-of-range values) degrades to
  * the defaults with one WARN — never a crash.
+ *
+ * <p><b>Server authority note:</b> {@link #bandFor} reads the LOCAL config on
+ * whichever environment calls it. Authoritative consumers (commands, sync
+ * payloads) must run it server-side; client UI may display a locally-configured
+ * band that differs from the server's — a known, acceptable divergence until a
+ * later milestone ships thresholds in the sync payload.
  */
 public final class RankBands {
 	private RankBands() {
@@ -24,7 +32,7 @@ public final class RankBands {
 
 		/** Translation key suffix / stable id for UI. */
 		public String key() {
-			return name().toLowerCase(java.util.Locale.ROOT);
+			return name().toLowerCase(Locale.ROOT);
 		}
 	}
 
@@ -33,7 +41,7 @@ public final class RankBands {
 	private static final String[] KEYS = {
 			"band_untrained", "band_novice", "band_apprentice", "band_skilled",
 			"band_expert", "band_master", "band_legendary"};
-	private static volatile boolean warnedInvalid;
+	private static final AtomicBoolean warnedInvalid = new AtomicBoolean();
 
 	/** The band containing {@code level} (any int tolerated). */
 	public static RankBand bandFor(int level) {
@@ -57,14 +65,13 @@ public final class RankBands {
 					: DEFAULT_THRESHOLDS[i];
 		}
 		if (!valid(t)) {
-			if (!warnedInvalid) {
-				warnedInvalid = true;
+			if (warnedInvalid.compareAndSet(false, true)) {
 				LifepathMod.LOGGER.warn(
 						"invalid rank-band thresholds in skills.toml (must be ascending 0..100, first=0); using defaults");
 			}
 			return DEFAULT_THRESHOLDS.clone();
 		}
-		warnedInvalid = false;
+		warnedInvalid.set(false);
 		return t;
 	}
 

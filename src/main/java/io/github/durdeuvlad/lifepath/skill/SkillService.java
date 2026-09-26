@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class SkillService {
 	private static final Set<Identifier> WARNED = ConcurrentHashMap.newKeySet();
+	private static final int WARNED_CAP = 256;
 	private static final int DEFAULT_MAX_LEVEL = 100;
 
 	private SkillService() {
@@ -39,7 +40,15 @@ public final class SkillService {
 		SkillDefinition def = LifepathContent.skills().get(skillId);
 		if (def == null) {
 			if (WARNED.add(skillId)) {
-				LifepathMod.LOGGER.warn("unknown skill id '{}' (no definition loaded)", skillId);
+				if (WARNED.size() >= WARNED_CAP) {
+					// Bound the set: reset at cap, then re-add so this id still dedups.
+					WARNED.clear();
+					WARNED.add(skillId);
+					LifepathMod.LOGGER.warn(
+							"unknown skill id '{}' (warn set reset at cap {})", skillId, WARNED_CAP);
+				} else {
+					LifepathMod.LOGGER.warn("unknown skill id '{}' (no definition loaded)", skillId);
+				}
 			}
 			return Optional.empty();
 		}
@@ -58,10 +67,10 @@ public final class SkillService {
 	 * [0, level]; negative xp/use timestamps become 0.
 	 */
 	public static SkillProgress clamped(SkillProgress progress, int maxLevel) {
-		int level = Math.max(0, Math.min(progress.level(), maxLevel));
+		int level = Math.max(0, Math.min(progress.level(), Math.max(0, maxLevel)));
 		int highest = Math.max(progress.highestLevel(), level);
 		int floor = Math.max(0, Math.min(progress.protectedFloor(), level));
-		double xp = Math.max(0.0, progress.xp());
+		double xp = Double.isFinite(progress.xp()) ? Math.max(0.0, progress.xp()) : 0.0;
 		long lastUse = Math.max(0L, progress.lastMeaningfulUse());
 		return new SkillProgress(xp, level, highest, floor, progress.aptitude(), lastUse);
 	}
@@ -77,10 +86,25 @@ public final class SkillService {
 	 * {@code protectedFloor} is preserved but re-clamped into [0, level].
 	 */
 	public static SkillProgress withLevel(SkillProgress progress, int newLevel, int maxLevel) {
-		return clamped(new SkillProgress(progress.xp(), newLevel,
-				Math.max(progress.highestLevel(), newLevel),
+		// Clamp BEFORE updating highestLevel — an out-of-range newLevel must not
+		// fabricate an unattained peak (highestLevel can never be lowered again).
+		int level = Math.max(0, Math.min(newLevel, Math.max(0, maxLevel)));
+		return clamped(new SkillProgress(progress.xp(), level,
+				Math.max(progress.highestLevel(), level),
 				progress.protectedFloor(), progress.aptitude(), progress.lastMeaningfulUse()),
 				maxLevel);
+	}
+
+	/**
+	 * Read-only progress lookup: returns the stored (clamped) record for
+	 * {@code skillId}, or null if absent/unknown. Unlike
+	 * {@link #ensureProgress} this NEVER mutates the model — use it for
+	 * inspection paths (UI, listings, decay scans) that must not create entries.
+	 */
+	@Nullable
+	public static SkillProgress progress(PlayerCharacterData data, Identifier skillId) {
+		SkillProgress existing = data.skill(skillId);
+		return existing == null ? null : clamped(skillId, existing);
 	}
 
 	/**
@@ -88,6 +112,10 @@ public final class SkillService {
 	 * stored record (clamped) if present, else a fresh {@code xp=0, level=0}
 	 * record with {@link Aptitude#C} which is ALSO stored on the model. Returns
 	 * null when the skill id has no loaded definition (fail-safe).
+	 *
+	 * <p><b>Callers must intend creation.</b> Inspection-only paths must use
+	 * {@link #progress} instead — every {@code ensureProgress} call on an
+	 * untouched skill permanently persists (and syncs) a new map entry.
 	 */
 	@Nullable
 	public static SkillProgress ensureProgress(PlayerCharacterData data, Identifier skillId) {
