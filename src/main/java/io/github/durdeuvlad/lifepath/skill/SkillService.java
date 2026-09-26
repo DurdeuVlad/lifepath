@@ -64,12 +64,14 @@ public final class SkillService {
 	 * Returns a copy of {@code progress} with all invariants enforced against
 	 * {@code maxLevel}. {@code highestLevel} is repaired upward to at least
 	 * {@code level} (never lowered); {@code protectedFloor} is clamped into
-	 * [0, level]; negative xp/use timestamps become 0.
+	 * [0, maxLevel] — a floor ABOVE the current level is legal: it is a decay
+	 * floor, not a level bound (decay simply cannot act while level is at or
+	 * below it); negative xp/use timestamps become 0.
 	 */
 	public static SkillProgress clamped(SkillProgress progress, int maxLevel) {
 		int level = Math.max(0, Math.min(progress.level(), Math.max(0, maxLevel)));
 		int highest = Math.max(progress.highestLevel(), level);
-		int floor = Math.max(0, Math.min(progress.protectedFloor(), level));
+		int floor = Math.max(0, Math.min(progress.protectedFloor(), Math.max(0, maxLevel)));
 		double xp = Double.isFinite(progress.xp()) ? Math.max(0.0, progress.xp()) : 0.0;
 		long lastUse = Math.max(0L, progress.lastMeaningfulUse());
 		return new SkillProgress(xp, level, highest, floor, progress.aptitude(), lastUse);
@@ -83,7 +85,7 @@ public final class SkillService {
 	/**
 	 * Returns a copy of {@code progress} set to {@code newLevel} (clamped):
 	 * {@code highestLevel} rises if the new level beats it and never falls;
-	 * {@code protectedFloor} is preserved but re-clamped into [0, level].
+	 * {@code protectedFloor} is preserved but re-clamped into [0, maxLevel].
 	 */
 	public static SkillProgress withLevel(SkillProgress progress, int newLevel, int maxLevel) {
 		// Clamp BEFORE updating highestLevel — an out-of-range newLevel must not

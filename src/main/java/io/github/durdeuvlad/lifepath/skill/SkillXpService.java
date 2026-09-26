@@ -76,6 +76,11 @@ public final class SkillXpService {
 		registerModifier(LifepathMod.id("aptitude_multiplier"), (ctx, amount) ->
 				amount * AptitudeTable.xpMultiplier(SkillService.effectiveAptitude(
 						ctx.speciesId(), ctx.skillId(), ctx.progress())));
+		// Specialization multiplier (M3-2): spec xp_modifiers[skillId], read
+		// at award time off the data model — reload-safe.
+		registerModifier(LifepathMod.id("specialization_multiplier"), (ctx, amount) ->
+				amount * io.github.durdeuvlad.lifepath.specialization.SpecializationService
+						.xpModifierFor(ctx.specializationId(), ctx.skillId()));
 	}
 
 	/** Appends {@code modifier} to the pipeline; later registrations run later. */
@@ -141,7 +146,7 @@ public final class SkillXpService {
 					current.xp(), current.xp(), true);
 		}
 		XpModifier.XpContext ctx = new XpModifier.XpContext(player, skillId, current,
-				source, data.speciesId());
+				source, data.speciesId(), data.specializationId());
 		double modified = amount;
 		for (Map.Entry<Identifier, XpModifier> entry : MODIFIERS.entrySet()) {
 			try {

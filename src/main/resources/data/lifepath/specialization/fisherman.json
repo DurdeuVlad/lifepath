@@ -1,0 +1,19 @@
+{
+	"display_name": "Fisherman",
+	"starting_skills": {
+		"lifepath:fishing": 20
+	},
+	"aptitudes": {
+		"lifepath:fishing": "a"
+	},
+	"xp_modifiers": {
+		"lifepath:fishing": 1.35
+	},
+	"decay_modifiers": {
+		"lifepath:fishing": 0.30
+	},
+	"protected_floors": {
+		"lifepath:fishing": 30
+	},
+	"signature": ["lifepath:patient_waters_i"]
+}

@@ -1,0 +1,20 @@
+{
+	"display_name": "Miner",
+	"starting_skills": {
+		"lifepath:mining": 20
+	},
+	"aptitudes": {
+		"lifepath:mining": "a",
+		"lifepath:foraging": "c"
+	},
+	"xp_modifiers": {
+		"lifepath:mining": 1.35
+	},
+	"decay_modifiers": {
+		"lifepath:mining": 0.30
+	},
+	"protected_floors": {
+		"lifepath:mining": 30
+	},
+	"signature": ["lifepath:deepvein_sense_i"]
+}

@@ -10,11 +10,14 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.LevelCurveDefinition;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
+import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.event.ActivityEvent;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
+import io.github.durdeuvlad.lifepath.specialization.SpecializationService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,6 +74,28 @@ class SkillXpServiceTest {
 		assertEquals(5.0, data.skill(SKILL).xp());
 		assertEquals(0, data.skill(SKILL).level());
 		assertTrue(data.skill(SKILL).lastMeaningfulUse() > 0);
+	}
+
+	@Test
+	void specializationGrantSurvivesSubsequentAwards() {
+		// Regression: granted levels must carry xp to their threshold, or the
+		// next award's level-recompute silently collapses level → ~0 (and the
+		// protected floor with it).
+		registerSkill(100);
+		registerCurve(100);
+		Identifier specId = Identifier.of("lifepath", "test_spec");
+		LifepathContent.specializations().register(specId,
+				new SpecializationDefinition(specId, "Spec", Map.of(SKILL, 10),
+						Map.of(), Map.of(), Map.of(), Map.of(SKILL, 30), List.of()));
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		SpecializationService.apply(data, specId);
+		assertEquals(10, data.skill(SKILL).level());
+		assertEquals(30, data.skill(SKILL).protectedFloor(), "floor > level is legal");
+
+		SkillXpService.awardXpCore(data, SKILL, 5.0, SRC);
+		assertTrue(data.skill(SKILL).level() >= 10,
+				"granted level must not collapse on the next award");
+		assertEquals(30, data.skill(SKILL).protectedFloor());
 	}
 
 	@Test

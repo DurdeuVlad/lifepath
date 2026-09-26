@@ -74,10 +74,13 @@ class SkillServiceTest {
 	}
 
 	@Test
-	void floorNeverExceedsLevel() {
+	void floorMayExceedLevelButClampsToMax() {
+		// Floors are decay floors, not level bounds — floor > level is legal
+		// (spec grants can set a protection the level hasn't reached yet).
 		SkillProgress p = new SkillProgress(0, 10, 60, 55, Aptitude.C, 0);
 		SkillProgress c = SkillService.clamped(p, 100);
-		assertEquals(10, c.protectedFloor());
+		assertEquals(55, c.protectedFloor());
+		assertEquals(8, SkillService.clamped(p, 8).protectedFloor());
 	}
 
 	@Test
@@ -131,7 +134,9 @@ class SkillServiceTest {
 		SkillProgress down = SkillService.withLevel(up, 3, 100);
 		assertEquals(3, down.level());
 		assertEquals(25, down.highestLevel());
-		assertEquals(3, down.protectedFloor()); // floor clamped to new level
+		// Floors are decay floors, not level bounds: floor > level is legal
+		// (decay simply cannot act while already at/below the floor).
+		assertEquals(4, down.protectedFloor());
 	}
 
 	@Test
