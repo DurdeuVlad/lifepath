@@ -99,18 +99,19 @@ public final class LifepathContent {
 		ReloadManager.registerData(LifepathMod.id("xp_source"),
 				manager -> loadDomain(manager, "xp_source", XpSourceDefinition.XpSourceFile.CODEC,
 						XpSourceDefinition::fromFile, XP_SOURCES));
-		// Ability files must only name registered vocabulary types (M4-2
-		// contract) — an unknown condition/action/target fails the file with
-		// an error naming the ability instead of silently no-op'ing at eval.
-		ReloadManager.registerData(LifepathMod.id("ability"),
-				manager -> loadDomain(manager, "ability", AbilityDefinition.AbilityFile.CODEC,
-						LifepathContent::decodeAbility, ABILITIES));
-		// Resource defs: band actions must only name registered action types
-		// (same load-time contract as ability files).
+		// Resource defs load BEFORE abilities — ability decode validates
+		// `resource` refs against this registry (M4-6). Band actions validate
+		// against the vocabulary, not the ability registry, so the order is
+		// safe one way only.
 		ReloadManager.registerData(LifepathMod.id("resource"),
 				manager -> loadDomain(manager, "resource",
 						io.github.durdeuvlad.lifepath.content.ResourceDefinition.ResourceFile.CODEC,
 						LifepathContent::decodeResource, RESOURCES));
+		// Ability files must only name registered vocabulary types (M4-2
+		// contract) and existing content refs (M4-6) — failures name the file.
+		ReloadManager.registerData(LifepathMod.id("ability"),
+				manager -> loadDomain(manager, "ability", AbilityDefinition.AbilityFile.CODEC,
+						LifepathContent::decodeAbility, ABILITIES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateReferences());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -165,20 +166,80 @@ public final class LifepathContent {
 	}
 
 	/**
-	 * Ability decode + vocabulary validation (M4-2 contract): a file naming an
-	 * unknown condition/target/action type fails here — the loader reports the
-	 * file name and skips the entry rather than letting it fail-closed forever.
-	 * Shared with tests so the production decode path is what they exercise.
+	 * Ability decode + validation (M4-2/M4-6 contract): collects EVERY problem
+	 * in the file and throws once, joined — the loader logs the full list so a
+	 * broken file is diagnosed in one pass, then skipped. Checks: unknown
+	 * condition/target/action types, dangling content refs ({@code resource},
+	 * {@code skill} params + cost/interaction resources), and dead triggers
+	 * (EVENT with no {@code events[]}). Registry-backed refs (item/effect/
+	 * tag/sound ids) are validated lazily by the evaluators themselves —
+	 * vanilla registries are not available at datapack-decode time on every
+	 * code path — see docs/ABILITIES.md.
 	 */
 	public static AbilityDefinition decodeAbility(Identifier id, AbilityDefinition.AbilityFile file) {
 		AbilityDefinition def = AbilityDefinition.fromFile(id, file);
-		var unknown = io.github.durdeuvlad.lifepath.ability
-				.AbilityVocabulary.unknownNodeTypes(def);
-		if (!unknown.isEmpty()) {
+		java.util.List<String> errors = new ArrayList<>();
+		for (Identifier t : io.github.durdeuvlad.lifepath.ability
+				.AbilityVocabulary.unknownNodeTypes(def)) {
+			errors.add("unknown spec node type " + t);
+		}
+		if (def.trigger().kind() == AbilityDefinition.Kind.EVENT
+				&& def.trigger().events().isEmpty()) {
+			errors.add("trigger type \"event\" declares no events[] — it can never fire");
+		}
+		if (!def.trigger().events().isEmpty()
+				&& def.trigger().kind() != AbilityDefinition.Kind.EVENT) {
+			LifepathMod.LOGGER.warn("ability {} declares events[] on a {} "
+					+ "trigger — ignored", id, def.trigger().kind());
+		}
+		if (def.actions().isEmpty()) {
+			LifepathMod.LOGGER.warn(
+					"ability {} has no actions — it can only mark cooldowns", id);
+		}
+		// Content-ref scan: the param-name conventions `resource` / `skill`
+		// are the contract for every spec node (documented in ABILITIES.md).
+		for (var node : specNodes(def)) {
+			checkRef(errors, id, node, "resource", RESOURCES);
+			checkRef(errors, id, node, "skill", SKILLS);
+		}
+		def.cost().ifPresent(c -> {
+			if (!RESOURCES.contains(c.resource())) {
+				errors.add("cost.resource " + c.resource() + " has no resource definition");
+			}
+		});
+		for (var ri : def.resourceInteractions()) {
+			if (!RESOURCES.contains(ri.resource())) {
+				errors.add("resource_interactions[] resource " + ri.resource()
+						+ " has no resource definition");
+			}
+		}
+		if (!errors.isEmpty()) {
 			throw new IllegalArgumentException(
-					"ability " + id + " uses unknown spec node types " + unknown);
+					"ability " + id + " invalid — " + String.join("; ", errors));
 		}
 		return def;
+	}
+
+	private static java.util.List<AbilityDefinition.SpecNode> specNodes(AbilityDefinition def) {
+		java.util.List<AbilityDefinition.SpecNode> all = new ArrayList<>();
+		all.addAll(def.conditions().all());
+		all.addAll(def.conditions().any());
+		all.add(def.target());
+		all.addAll(def.actions());
+		return all;
+	}
+
+	private static void checkRef(java.util.List<String> errors, Identifier file,
+			AbilityDefinition.SpecNode node, String key, ContentRegistry<?> registry) {
+		var el = node.raw().get(key);
+		if (el == null || !el.isJsonPrimitive() || !el.getAsJsonPrimitive().isString()) {
+			return;
+		}
+		Identifier ref = Identifier.tryParse(el.getAsString());
+		if (ref != null && !registry.contains(ref)) {
+			errors.add("node " + node.type() + " " + key + "=" + ref
+					+ " has no matching definition");
+		}
 	}
 
 	/**

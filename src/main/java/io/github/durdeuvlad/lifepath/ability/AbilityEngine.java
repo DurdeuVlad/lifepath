@@ -41,7 +41,7 @@ public final class AbilityEngine {
 
 	public enum Outcome {
 		EXECUTED, NOT_OWNED, ON_COOLDOWN, COST_UNMET, CONDITIONS_FAILED,
-		NO_TARGETS, UNKNOWN_ABILITY, WRONG_TRIGGER
+		NO_TARGETS, UNKNOWN_ABILITY, WRONG_TRIGGER, DISABLED
 	}
 
 	private static long ticks;
@@ -218,6 +218,9 @@ public final class AbilityEngine {
 			@Nullable ServerPlayerEntity self, AbilityDefinition def, long now,
 			double interactionSeconds) {
 		EvalContext ctx = new EvalContext(self, data, now, def.id());
+		if (!def.enabled()) {
+			return debug(def, Outcome.DISABLED);
+		}
 		if (!conditionsMet(ctx, def)) {
 			return debug(def, Outcome.CONDITIONS_FAILED);
 		}

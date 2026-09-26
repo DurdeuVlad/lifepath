@@ -59,6 +59,29 @@ public final class AbilityVocabulary {
 		}
 	}
 
+	/**
+	 * THE extension contract (M4-6): new ability mechanics register here by id —
+	 * never by subclassing the engine or adding content-specific classes.
+	 * Rules every evaluator/executor/resolver must obey:
+	 * <ul>
+	 *   <li><b>Register during mod init</b> (before datapack load) — load-time
+	 *       validation rejects ability files naming unregistered types.</li>
+	 *   <li><b>Fail closed:</b> missing/malformed params return false/no-op —
+	 *       never throw for content errors (the engine isolates throws, but a
+	 *       throwing evaluator silently disables the ability).</li>
+	 *   <li><b>Nullability:</b> {@code ctx.self()} may be null (data-path evals);
+	 *       {@code target.entity()} is null for block targets and
+	 *       {@code target.data()} is null for model-less targets — guard both.</li>
+	 *   <li><b>Authority:</b> runs on the server thread only; mutate character
+	 *       state through services ({@code ResourceService}, {@code
+	 *       SkillXpService}, {@code CooldownService}), never the model maps.</li>
+	 *   <li><b>Ref params:</b> a node referencing content declares it via the
+	 *       conventional keys {@code "resource"} / {@code "skill"} so load-time
+	 *       validation can check existence.</li>
+	 * </ul>
+	 * Registry-ids inside params (effects/items/tags/sounds) can't be checked
+	 * at decode — evaluators must resolve them fail-closed at use time.
+	 */
 	@FunctionalInterface
 	public interface ConditionEvaluator {
 		boolean test(EvalContext ctx, JsonObject params);
