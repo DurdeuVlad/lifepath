@@ -69,6 +69,16 @@ public final class SkillXpService {
 		registerModifier(LifepathMod.id("per_skill_multiplier"), (ctx, amount) ->
 				amount * ((Number) LifepathConfig.getOrDefault(SKILLS_CONFIG,
 						ctx.skillId().getPath() + "_xp_multiplier", 1.0)).doubleValue());
+		// Aptitude multiplier (M3-1): effective grade = max(species floor,
+		// recorded). Runs last of the built-ins; null player → identity.
+		registerModifier(LifepathMod.id("aptitude_multiplier"), (ctx, amount) -> {
+			if (ctx.player() == null) {
+				return amount;
+			}
+			return amount * AptitudeTable.xpMultiplier(SkillService.effectiveAptitude(
+					CharacterManager.getCharacter(ctx.player()).speciesId(),
+					ctx.skillId(), ctx.progress()));
+		});
 	}
 
 	/** Appends {@code modifier} to the pipeline; later registrations run later. */

@@ -80,6 +80,26 @@ public class LifepathMod implements ModInitializer {
 						"Per-skill XP multiplier for lifepath:fishing.")
 				.define("foraging_xp_multiplier", 1.0, v -> v >= 0 && v <= 1000,
 						"Per-skill XP multiplier for lifepath:foraging.")
+				.define("aptitude_d_xp_multiplier", 0.70, v -> v >= 0 && v <= 100,
+						"XP multiplier for aptitude grade D (GAMEDESIGN §8).")
+				.define("aptitude_c_xp_multiplier", 0.90, v -> v >= 0 && v <= 100,
+						"XP multiplier for aptitude grade C.")
+				.define("aptitude_b_xp_multiplier", 1.00, v -> v >= 0 && v <= 100,
+						"XP multiplier for aptitude grade B.")
+				.define("aptitude_a_xp_multiplier", 1.25, v -> v >= 0 && v <= 100,
+						"XP multiplier for aptitude grade A.")
+				.define("aptitude_s_xp_multiplier", 1.50, v -> v >= 0 && v <= 100,
+						"XP multiplier for aptitude grade S.")
+				.define("aptitude_d_decay_multiplier", 1.25, v -> v >= 0 && v <= 100,
+						"Decay-rate multiplier for grade D (consumed by M3-3).")
+				.define("aptitude_c_decay_multiplier", 1.10, v -> v >= 0 && v <= 100,
+						"Decay-rate multiplier for grade C.")
+				.define("aptitude_b_decay_multiplier", 1.00, v -> v >= 0 && v <= 100,
+						"Decay-rate multiplier for grade B.")
+				.define("aptitude_a_decay_multiplier", 0.80, v -> v >= 0 && v <= 100,
+						"Decay-rate multiplier for grade A.")
+				.define("aptitude_s_decay_multiplier", 0.60, v -> v >= 0 && v <= 100,
+						"Decay-rate multiplier for grade S.")
 				.define("unmapped_sources_award_xp", true,
 						"When false, activity events matching no per_subject/per_tag entry"
 								+ " grant nothing (base_xp ignored). When true, unmapped"
