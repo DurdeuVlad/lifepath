@@ -16,6 +16,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * {@code /lifepath character} — admin tooling for character inspection and
@@ -68,7 +69,8 @@ public final class CharacterCommands {
 
 	private static int inspect(ServerCommandSource source, ServerPlayerEntity target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
-		source.sendFeedback(() -> Text.literal("Lifepath character: " + target.getName().getString()), false);
+		source.sendFeedback(() -> Text.literal("Lifepath character: "
+				+ target.getName().getString() + " (" + target.getUuid() + ")"), false);
 		for (Text line : describe(data, System.currentTimeMillis())) {
 			source.sendFeedback(() -> line, false);
 		}
@@ -84,6 +86,10 @@ public final class CharacterCommands {
 	private static int reset(ServerCommandSource source, ServerPlayerEntity target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		data.reset();
+		// markDirty covers the edge where saveCharacter no-ops (selector resolved a
+		// zombie session during a duplicate login): the entry's real owner then
+		// picks it up at the next periodic/disconnect flush.
+		CharacterManager.markDirty(target);
 		CharacterManager.saveCharacter(target);
 		CharacterManager.syncCharacter(target);
 		LifepathMod.LOGGER.info("admin action: {} reset character data for {} ({})",
@@ -143,7 +149,7 @@ public final class CharacterCommands {
 		return List.copyOf(lines);
 	}
 
-	private static String orNone(@org.jetbrains.annotations.Nullable Identifier id) {
+	private static String orNone(@Nullable Identifier id) {
 		return id == null ? "<none>" : id.toString();
 	}
 

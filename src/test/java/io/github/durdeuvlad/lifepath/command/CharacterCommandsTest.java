@@ -33,12 +33,15 @@ class CharacterCommandsTest {
 
 		CommandNode<ServerCommandSource> character = root().getChild("character");
 		assertNotNull(character, "missing /lifepath character");
+		assertNotNull(character.getCommand(), "bare /lifepath character should print usage");
 		assertNotNull(character.getChild("inspect"));
 		CommandNode<ServerCommandSource> resetNode = character.getChild("reset");
 		assertNotNull(resetNode);
-		// reset -> <player arg> -> "confirm" literal
+		// reset -> <player arg> -> "confirm" literal; the arg node itself must
+		// carry the refuseReset executor or `reset <player>` would fail unexplained.
 		CommandNode<ServerCommandSource> playerArg = resetNode.getChild("player");
 		assertNotNull(playerArg);
+		assertNotNull(playerArg.getCommand(), "reset without confirm must refuse explicitly");
 		assertNotNull(playerArg.getChild("confirm"), "reset must require literal confirm");
 	}
 
@@ -47,6 +50,9 @@ class CharacterCommandsTest {
 		LifepathCommands.init();
 		CharacterCommands.init();
 
+		// The gate predicate dereferences the source (hasPermissionLevel), so a
+		// null source throws NPE — proving a real source-dependent gate, not a
+		// default s -> true (see LifepathCommandsTest for the same pattern).
 		assertThrows(NullPointerException.class, () -> root().getChild("character").canUse(null));
 	}
 
