@@ -1,0 +1,91 @@
+package io.github.durdeuvlad.lifepath.character;
+
+import io.github.durdeuvlad.lifepath.LifepathMod;
+import io.github.durdeuvlad.lifepath.character.persistence.CharacterPersistence;
+import java.nio.file.Path;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.WorldSavePath;
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * Entity-attachment plumbing for {@link PlayerCharacterData}.
+ *
+ * <p>Storage: a {@code copyOnDeath} attachment of raw {@link NbtCompound} —
+ * persists through death/respawn (the documented "nothing resets on death"
+ * rule), logout/login, restarts and dimension changes. Raw NBT (not a typed
+ * attachment) so {@link CharacterPersistence} controls decode order —
+ * migrate → codec → sanitize — and can quarantine corrupt blobs instead of
+ * letting an attachment decode failure break player login.
+ *
+ * <p>Access contract: {@link #get} returns a <b>detached snapshot</b> decoded
+ * fresh from storage — mutate it, then call {@link #set} to persist. A blob
+ * migrated from an older version is written back once (so it doesn't
+ * re-migrate on every read); a corrupt blob is quarantined to a backup file
+ * AND overwritten with defaults, so degradation is one-shot — never repeated
+ * failures, disk spam, or a broken join.
+ */
+public final class CharacterAttachments {
+	private static AttachmentType<NbtCompound> characterData;
+
+	private CharacterAttachments() {
+	}
+
+	/** Registers the attachment type. Called once via {@code RegistryBootstrap}; idempotent. */
+	public static void init() {
+		if (characterData != null) {
+			return;
+		}
+		characterData = AttachmentRegistry.<NbtCompound>builder()
+				.persistent(NbtCompound.CODEC)
+				.copyOnDeath()
+				.initializer(NbtCompound::new)
+				.buildAndRegister(LifepathMod.id("character_data"));
+	}
+
+	/**
+	 * Loads (migrating + sanitizing) the player's character data. A first-join
+	 * player gets valid defaults; a corrupt blob becomes backup + repaired
+	 * defaults. Never throws for data reasons.
+	 */
+	public static PlayerCharacterData get(ServerPlayerEntity player) {
+		NbtCompound raw = player.getAttached(characterData);
+		if (raw == null || raw.isEmpty()) {
+			return PlayerCharacterData.createDefault();
+		}
+		try {
+			PlayerCharacterData data = CharacterPersistence.deserialize(raw);
+			if (versionOf(raw) < LifepathMod.DATA_VERSION) {
+				set(player, data);
+			}
+			return data;
+		} catch (Exception e) {
+			Path backup = CharacterPersistence.writeBackup(raw, player.getUuid(), backupDir(player));
+			LifepathMod.LOGGER.error("corrupt character data for {} (backup: {}); repairing with defaults",
+					player.getUuid(), backup, e);
+			PlayerCharacterData defaults = PlayerCharacterData.createDefault();
+			set(player, defaults);
+			return defaults;
+		}
+	}
+
+	/** Serializes and stores the player's character data. */
+	public static void set(ServerPlayerEntity player, PlayerCharacterData data) {
+		player.setAttached(characterData, CharacterPersistence.serialize(data));
+	}
+
+	private static int versionOf(NbtCompound raw) {
+		return raw.contains("data_version") ? raw.getInt("data_version") : 0;
+	}
+
+	@Nullable
+	private static Path backupDir(ServerPlayerEntity player) {
+		var server = player.getEntityWorld().getServer();
+		if (server == null) {
+			return null;
+		}
+		return server.getSavePath(WorldSavePath.ROOT).resolve("lifepath");
+	}
+}
