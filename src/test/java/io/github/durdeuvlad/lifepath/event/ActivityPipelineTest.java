@@ -45,7 +45,7 @@ class ActivityPipelineTest {
 
 		ActivityEvent s = ActivityEvents.smithing(null, Identifier.of("minecraft", "recipe/x"),
 				Identifier.of("minecraft", "iron_sword"), "iron", Identifier.of("minecraft", "anvil"));
-		assertEquals("iron", s.attributes().get("material_tier"));
+		assertEquals("iron", s.attributes().get("tier"));
 		assertEquals("minecraft:anvil", s.attributes().get("workstation"));
 		assertEquals(ActivityEvent.Cause.PLAYER, s.cause());
 	}

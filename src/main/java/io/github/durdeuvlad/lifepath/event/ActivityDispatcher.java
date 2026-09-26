@@ -34,9 +34,22 @@ public final class ActivityDispatcher {
 		BY_TYPE.computeIfAbsent(type, k -> new CopyOnWriteArrayList<>()).add(listener);
 	}
 
+	/** Unsubscribes a type listener (test/teardown symmetry with {@link #register}). */
+	public static void unregister(Identifier type, Listener listener) {
+		List<Listener> list = BY_TYPE.get(type);
+		if (list != null) {
+			list.remove(listener);
+		}
+	}
+
 	/** Subscribes to every activity event. */
 	public static void registerAny(Listener listener) {
 		ANY.add(listener);
+	}
+
+	/** Unsubscribes an any-listener (test/teardown symmetry with {@link #registerAny}). */
+	public static void unregisterAny(Listener listener) {
+		ANY.remove(listener);
 	}
 
 	/** Publishes one event to type subscribers then any-subscribers. Listener errors are isolated. */

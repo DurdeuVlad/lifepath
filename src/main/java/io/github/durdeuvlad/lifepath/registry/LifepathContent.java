@@ -237,7 +237,7 @@ public final class LifepathContent {
 		}
 		for (SkillDefinition def : SKILLS.all().values()) {
 			recordRef("skill", def.id(), def.levelCurve(), "level_curve");
-			recordRef("skill", def.id(), def.xpSources(), "xp_source");
+			recordRefs("skill", def.id(), def.xpSources(), "xp_source");
 			recordRef("skill", def.id(), def.passiveScaling(), "scaling");
 			for (SkillDefinition.Milestone milestone : def.milestones()) {
 				recordRefs("skill", def.id(), milestone.effectRefs(), "ability");
@@ -261,6 +261,9 @@ public final class LifepathContent {
 			ContentRegistry<?> registry = registryFor(targetDomain);
 			if (registry == null || !registry.contains(id)) {
 				UNRESOLVED.add(new UnresolvedReference(domain, source, id, targetDomain));
+				LifepathMod.LOGGER.warn(
+						"{}:{} references unknown {} '{}' (typo? missing file? pending domain?)",
+						domain, source, targetDomain, id);
 			}
 		});
 	}

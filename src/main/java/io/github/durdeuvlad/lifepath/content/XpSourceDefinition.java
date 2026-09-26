@@ -80,8 +80,8 @@ public record XpSourceDefinition(
 				Identifier.CODEC.fieldOf("activity").forGetter(XpSourceFile::activity),
 				Identifier.CODEC.fieldOf("skill").forGetter(XpSourceFile::skill),
 				Codec.BOOL.optionalFieldOf("player_caused_only", false).forGetter(XpSourceFile::playerCausedOnly),
-				Codec.DOUBLE.optionalFieldOf("base_xp", 0.0).forGetter(XpSourceFile::baseXp),
-				Codec.unboundedMap(Identifier.CODEC, Codec.DOUBLE)
+				Codec.doubleRange(0.0, 1e15).optionalFieldOf("base_xp", 0.0).forGetter(XpSourceFile::baseXp),
+				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 1e15))
 						.optionalFieldOf("per_subject", Map.of()).forGetter(XpSourceFile::perSubject),
 				Identifier.CODEC.listOf().optionalFieldOf("required_tags", List.of())
 						.forGetter(XpSourceFile::requiredTags),

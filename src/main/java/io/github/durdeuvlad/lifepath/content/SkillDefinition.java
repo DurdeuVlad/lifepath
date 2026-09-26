@@ -20,7 +20,7 @@ public record SkillDefinition(
 		int maxLevel,
 		Optional<Identifier> levelCurve,
 		List<Milestone> milestones,
-		Optional<Identifier> xpSources,
+		List<Identifier> xpSources,
 		Optional<Identifier> passiveScaling) {
 
 	/** Broad grouping used for UI and balance bucketing. */
@@ -53,7 +53,7 @@ public record SkillDefinition(
 			int maxLevel,
 			Optional<Identifier> levelCurve,
 			List<Milestone> milestones,
-			Optional<Identifier> xpSources,
+			List<Identifier> xpSources,
 			Optional<Identifier> passiveScaling) {
 
 		public static final Codec<SkillDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -62,7 +62,7 @@ public record SkillDefinition(
 				Codec.intRange(1, 10000).optionalFieldOf("max_level", 100).forGetter(SkillDefinitionFile::maxLevel),
 				Identifier.CODEC.optionalFieldOf("level_curve").forGetter(SkillDefinitionFile::levelCurve),
 				Milestone.CODEC.listOf().optionalFieldOf("milestones", List.of()).forGetter(SkillDefinitionFile::milestones),
-				Identifier.CODEC.optionalFieldOf("xp_sources").forGetter(SkillDefinitionFile::xpSources),
+				Identifier.CODEC.listOf().optionalFieldOf("xp_sources", List.of()).forGetter(SkillDefinitionFile::xpSources),
 				Identifier.CODEC.optionalFieldOf("passive_scaling").forGetter(SkillDefinitionFile::passiveScaling)
 		).apply(instance, SkillDefinitionFile::new));
 	}

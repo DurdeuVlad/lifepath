@@ -33,17 +33,22 @@ public record ActivityEvent(
 		Map<String, String> attributes) {
 
 	public enum Cause {
-		/** A specific player performed the action. */
+		/** A specific player performed the action. Should carry a non-null {@link #player}. */
 		PLAYER,
 		/** A non-player source (explosion, water flow, mob, automation). */
 		NON_PLAYER,
 		/** The game does not expose who caused it — treat as untrusted. */
-		UNKNOWN
+		UNKNOWN,
+		/** Not gameplay at all: admin commands / direct setter paths. */
+		SYSTEM
 	}
 
 	public ActivityEvent {
 		tags = Set.copyOf(tags);
 		attributes = Map.copyOf(attributes);
+		java.util.Objects.requireNonNull(type, "type");
+		java.util.Objects.requireNonNull(sourceId, "sourceId");
+		java.util.Objects.requireNonNull(cause, "cause");
 	}
 
 	/** Stable repetition bucket: identical for identical (type, sourceId) events. */
@@ -58,7 +63,7 @@ public record ActivityEvent(
 
 	/** Source marker for non-activity mutations (admin set-level/set-xp). */
 	public static ActivityEvent admin(Identifier commandId) {
-		return new ActivityEvent(null, commandId, commandId, Set.of(), Cause.PLAYER,
+		return new ActivityEvent(null, commandId, commandId, Set.of(), Cause.SYSTEM,
 				System.currentTimeMillis(), Map.of());
 	}
 }

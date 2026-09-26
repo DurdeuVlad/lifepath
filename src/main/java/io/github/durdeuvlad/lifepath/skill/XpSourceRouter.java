@@ -42,6 +42,8 @@ public final class XpSourceRouter {
 			SkillXpService.awardXp(player, skillId, amount, source);
 		}
 	};
+	// Stable instance — method refs aren't interned, so unregister must use this field.
+	private static final ActivityDispatcher.Listener ROUTER_LISTENER = XpSourceRouter::onActivity;
 	private static boolean initialized;
 
 	/** Subscribes to the dispatcher. Idempotent. */
@@ -50,13 +52,18 @@ public final class XpSourceRouter {
 			return;
 		}
 		initialized = true;
-		ActivityDispatcher.registerAny(XpSourceRouter::onActivity);
+		ActivityDispatcher.registerAny(ROUTER_LISTENER);
 	}
 
-	/** Dispatcher callback: plan then apply via the sink. */
+	/** Dispatcher callback: plan then apply via the sink. Each award is isolated —
+	 * one failing award must not drop the rest of the event's plan. */
 	public static void onActivity(ActivityEvent event) {
 		for (Award award : plan(event)) {
-			sink.award(event.player(), award.skillId(), award.amount(), event);
+			try {
+				sink.award(event.player(), award.skillId(), award.amount(), event);
+			} catch (Exception e) {
+				LifepathMod.LOGGER.error("xp source {} award failed for {}", award.sourceDefId(), event.type(), e);
+			}
 		}
 	}
 
@@ -77,12 +84,17 @@ public final class XpSourceRouter {
 		return awards;
 	}
 
-	/** Test hooks: swap the sink / reset init. Not for production use. */
+	/** Test hook: swap the sink. Always pair with {@link #resetForTests()}. */
 	static void setSinkForTests(AwardSink testSink) {
 		sink = testSink;
 	}
 
+	/**
+	 * Test hook: unsubscribes from the dispatcher, restores the default sink,
+	 * resets init. Self-contained — no dispatcher reset needed before re-init.
+	 */
 	static void resetForTests() {
+		ActivityDispatcher.unregisterAny(ROUTER_LISTENER);
 		sink = (player, skillId, amount, source) -> {
 			if (player != null) {
 				SkillXpService.awardXp(player, skillId, amount, source);
