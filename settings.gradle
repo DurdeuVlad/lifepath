@@ -1,0 +1,21 @@
+pluginManagement {
+	repositories {
+		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+
+	resolutionStrategy {
+		eachPlugin {
+			if (requested.id.id in ['net.fabricmc.fabric-loom', 'fabric-loom']) {
+				useModule("net.fabricmc:fabric-loom:${requested.version}")
+			}
+		}
+	}
+}
+
+// Should match your modid
+rootProject.name = 'lifepath'
