@@ -1,0 +1,10 @@
+{
+	"display_name": "Undead",
+	"description": "The grave holds no power over them. Undead draw sustenance only from necrotic flesh, walk unbothered among their kin, and at night can see the living outlined through the dark.",
+	"visibility": "normal",
+	"selection": "open",
+	"diet_rules": "lifepath:necrophage",
+	"mob_dispositions": "lifepath:undead_kin",
+	"passive_abilities": [],
+	"active_abilities": ["lifepath:undead_death_sight"]
+}

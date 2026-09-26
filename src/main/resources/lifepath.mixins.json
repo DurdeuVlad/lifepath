@@ -8,7 +8,9 @@
 		"BlockItemMixin",
 		"FishingBobberEntityMixin",
 		"SmithingScreenHandlerMixin",
-		"LivingEntityMixin"
+		"LivingEntityMixin",
+		"PlayerEntityMixin",
+		"TargetPredicateMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

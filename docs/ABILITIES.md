@@ -140,3 +140,34 @@ production content; granting them via unlocks is the test seam):
 `test_aoe_target` (entities_in_radius + highlight),
 `test_resource_conditioned` (threshold gate + cost on `lifepath_test:test_focus`),
 `test_state_change` (`lifepath:mining` event + `modify_resource`).
+
+## Species rule domains (`data/<ns>/diet/`, `data/<ns>/relation/`)
+
+M5-4 added two generic content domains a species file references via
+`diet_rules` / `mob_dispositions` ids. Both degrade to vanilla behavior when
+absent, malformed, or unloaded.
+
+### `diet/<name>.json`
+
+```json
+{"allowed": ["#lifepath:undead_foods", "minecraft:golden_apple"]}
+```
+
+`allowed` is a non-empty list of item ids or `#item-tags`. A character with
+the rule gains **zero nutrition** (no hunger/saturation) from unlisted items;
+the item is still eaten and its vanilla food side-effects apply. Enforced by
+wrapping the `HungerManager.eat` call inside `PlayerEntity.eatFood`
+(server-side only). Extend by datapack tags — no Java needed.
+
+### `relation/<name>.json`
+
+```json
+{"rules": [{"entity": "#lifepath:undead", "disposition": "neutral"}]}
+```
+
+`rules` map entity ids or `#entity_type-tags` to `neutral` | `friendly` |
+`hostile`, evaluated in order (first match wins). `neutral`/`friendly`
+suppress the mob's target predicate (`TargetPredicate.test` — one mixin seam
+covers all goal-driven targeting); `hostile` is explicit vanilla. Suppression
+is evaluated on the *target* player's species — an Undead player is ignored
+by `#lifepath:undead` mobs; everyone else is not.
