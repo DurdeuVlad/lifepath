@@ -162,15 +162,12 @@ public final class VanillaGameplayProducers {
 		if (!(player instanceof ServerPlayerEntity serverPlayer) || output.isEmpty()) {
 			return;
 		}
-		Set<Identifier> tags = output.streamTags()
+		Set<Identifier> itemTags = output.streamTags()
 				.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
-		tags.add(workstationId);
 		Identifier itemId = net.minecraft.registry.Registries.ITEM.getId(output.getItem());
-		ActivityDispatcher.publish(new ActivityEvent(serverPlayer, ActivityTypes.SMITHING,
-				itemId, Set.copyOf(tags), ActivityEvent.Cause.PLAYER,
-				System.currentTimeMillis(),
-				Map.of("workstation", workstationId.toString(),
-						"count", Integer.toString(output.getCount()))));
+		ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents.smithing(
+				serverPlayer, itemId, itemTags, workstationId,
+				Map.of("count", Integer.toString(output.getCount()))));
 	}
 
 	private static void publishHarvest(ServerPlayerEntity player, BlockState state) {

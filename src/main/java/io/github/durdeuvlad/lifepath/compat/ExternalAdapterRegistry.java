@@ -23,21 +23,43 @@ public final class ExternalAdapterRegistry {
 		}
 		initialized = true;
 		for (ExternalActivityAdapter adapter : ADAPTERS) {
+			Identifier id = safeId(adapter);
 			try {
 				adapter.register();
-				LifepathMod.LOGGER.info("External activity adapter registered: {}", adapter.id());
-			} catch (RuntimeException e) {
-				// A broken adapter must never take down Lifepath init.
+				LifepathMod.LOGGER.info("External activity adapter registered: {}", id);
+			} catch (Throwable t) {
+				// Throwable, not RuntimeException: LinkageError (adapter built
+				// against a different Lifepath/mod version) is THE expected
+				// failure and must never take down Lifepath init.
 				LifepathMod.LOGGER.error("External activity adapter {} failed to register — skipped",
-						adapter.id(), e);
+						id, t);
 			}
 		}
 		LifepathMod.LOGGER.debug("External activity adapters registered: {}", ADAPTERS.size());
 	}
 
-	/** Register an adapter before Lifepath init completes (late calls are ignored). */
+	/**
+	 * Register an adapter. Must be called BEFORE Lifepath init completes —
+	 * late registrations are warned and dropped (they'd sit silently dead
+	 * otherwise; adapter mods should register from their own entrypoint
+	 * discovery, wired in M7-1).
+	 */
 	public static void register(ExternalActivityAdapter adapter) {
-		ADAPTERS.add(java.util.Objects.requireNonNull(adapter, "adapter"));
+		java.util.Objects.requireNonNull(adapter, "adapter");
+		if (initialized) {
+			LifepathMod.LOGGER.warn("External activity adapter {} registered after init — not wired",
+					safeId(adapter));
+			return;
+		}
+		ADAPTERS.add(adapter);
+	}
+
+	private static Identifier safeId(ExternalActivityAdapter adapter) {
+		try {
+			return adapter.id();
+		} catch (Throwable t) {
+			return Identifier.of("lifepath", "unknown_adapter");
+		}
 	}
 
 	static List<Identifier> registeredIds() {

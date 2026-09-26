@@ -43,10 +43,17 @@ class ActivityPipelineTest {
 		assertEquals("true", f.attributes().get("mature"));
 		assertTrue(f.tags().contains(id("mature")));
 
-		ActivityEvent s = ActivityEvents.smithing(null, Identifier.of("minecraft", "recipe/x"),
-				Identifier.of("minecraft", "iron_sword"), "iron", Identifier.of("minecraft", "anvil"));
-		assertEquals("iron", s.attributes().get("tier"));
-		assertEquals("minecraft:anvil", s.attributes().get("workstation"));
+		// Canonical shape: sourceId = output id; tags = item tags + workstation
+		// + smithing_workstations marker; attrs carry workstation + extras.
+		ActivityEvent s = ActivityEvents.smithing(null, Identifier.of("minecraft", "iron_sword"),
+				Set.of(id("smithing_tier_iron")), id("anvil"), Map.of("count", "1"));
+		assertEquals(Identifier.of("minecraft", "iron_sword"), s.sourceId());
+		assertEquals("lifepath:smithing|minecraft:iron_sword", s.repetitionSignature());
+		assertEquals("lifepath:anvil", s.attributes().get("workstation"));
+		assertEquals("1", s.attributes().get("count"));
+		assertTrue(s.tags().contains(id("anvil")));
+		assertTrue(s.tags().contains(id("smithing_workstations")));
+		assertTrue(s.tags().contains(id("smithing_tier_iron")));
 		assertEquals(ActivityEvent.Cause.PLAYER, s.cause());
 	}
 
