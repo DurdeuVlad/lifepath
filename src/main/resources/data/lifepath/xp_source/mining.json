@@ -1,0 +1,25 @@
+{
+	"activity": "lifepath:mining",
+	"skill": "lifepath:mining",
+	"player_caused_only": true,
+	"base_xp": 0.02,
+	"per_subject": {
+		"minecraft:stone": 0.05,
+		"minecraft:deepslate": 0.07,
+		"minecraft:coal_ore": 0.30,
+		"minecraft:iron_ore": 0.60,
+		"minecraft:gold_ore": 0.80,
+		"minecraft:diamond_ore": 2.00,
+		"minecraft:ancient_debris": 4.00
+	},
+	"per_tag": {
+		"minecraft:coal_ores": 0.30,
+		"minecraft:iron_ores": 0.60,
+		"minecraft:gold_ores": 0.80,
+		"minecraft:diamond_ores": 2.00,
+		"minecraft:copper_ores": 0.40,
+		"minecraft:lapis_ores": 0.50,
+		"minecraft:redstone_ores": 0.60,
+		"minecraft:emerald_ores": 2.50
+	}
+}

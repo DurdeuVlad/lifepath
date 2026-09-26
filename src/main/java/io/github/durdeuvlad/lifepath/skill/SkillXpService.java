@@ -64,6 +64,11 @@ public final class SkillXpService {
 		registerModifier(GLOBAL_MULTIPLIER, (ctx, amount) ->
 				amount * ((Number) LifepathConfig.getOrDefault(
 						SKILLS_CONFIG, "global_xp_multiplier", 1.0)).doubleValue());
+		// Per-skill multiplier: config key "<skill_path>_xp_multiplier" (unknown
+		// skills get 1.0 via getOrDefault). Runs after the global multiplier.
+		registerModifier(LifepathMod.id("per_skill_multiplier"), (ctx, amount) ->
+				amount * ((Number) LifepathConfig.getOrDefault(SKILLS_CONFIG,
+						ctx.skillId().getPath() + "_xp_multiplier", 1.0)).doubleValue());
 	}
 
 	/** Appends {@code modifier} to the pipeline; later registrations run later. */

@@ -38,14 +38,15 @@ public record XpSourceDefinition(
 		boolean playerCausedOnly,
 		double baseXp,
 		Map<Identifier, Double> perSubject,
+		Map<Identifier, Double> perTag,
 		Set<Identifier> requiredTags,
 		Set<Identifier> excludedSubjects) {
 
 	public static XpSourceDefinition fromFile(Identifier id, XpSourceFile file) {
 		return new XpSourceDefinition(id, file.activity(), file.skill(),
 				file.playerCausedOnly(), file.baseXp(),
-				Map.copyOf(file.perSubject()), Set.copyOf(file.requiredTags()),
-				Set.copyOf(file.excludedSubjects()));
+				Map.copyOf(file.perSubject()), new java.util.LinkedHashMap<>(file.perTag()),
+				Set.copyOf(file.requiredTags()), Set.copyOf(file.excludedSubjects()));
 	}
 
 	/** Whether this source matches the event (type, cause, tags, exclusions). */
@@ -62,7 +63,29 @@ public record XpSourceDefinition(
 		return event.tags().containsAll(requiredTags);
 	}
 
-	/** The unmodified XP amount this source yields for {@code sourceId}. */
+	/**
+	 * Award resolution: exact {@code per_subject} override first, then the
+	 * first {@code per_tag} entry (file order) matching an event tag, then
+	 * {@code baseXp}. {@code specific} is false when only the base applied —
+	 * the {@code unmapped_sources_award_xp} config gate keys off that.
+	 */
+	public record Resolved(double amount, boolean specific) {
+	}
+
+	public Resolved resolve(Identifier sourceId, java.util.Set<Identifier> eventTags) {
+		Double exact = perSubject.get(sourceId);
+		if (exact != null) {
+			return new Resolved(exact, true);
+		}
+		for (Map.Entry<Identifier, Double> e : perTag.entrySet()) {
+			if (eventTags.contains(e.getKey())) {
+				return new Resolved(e.getValue(), true);
+			}
+		}
+		return new Resolved(baseXp, false);
+	}
+
+	/** The unmodified XP amount for {@code sourceId} with no tag context (kept for simple callers/tests). */
 	public double amountFor(Identifier sourceId) {
 		return perSubject.getOrDefault(sourceId, baseXp);
 	}
@@ -73,6 +96,7 @@ public record XpSourceDefinition(
 			boolean playerCausedOnly,
 			double baseXp,
 			Map<Identifier, Double> perSubject,
+			Map<Identifier, Double> perTag,
 			List<Identifier> requiredTags,
 			List<Identifier> excludedSubjects) {
 
@@ -83,6 +107,8 @@ public record XpSourceDefinition(
 				Codec.doubleRange(0.0, 1e15).optionalFieldOf("base_xp", 0.0).forGetter(XpSourceFile::baseXp),
 				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 1e15))
 						.optionalFieldOf("per_subject", Map.of()).forGetter(XpSourceFile::perSubject),
+				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 1e15))
+						.optionalFieldOf("per_tag", Map.of()).forGetter(XpSourceFile::perTag),
 				Identifier.CODEC.listOf().optionalFieldOf("required_tags", List.of())
 						.forGetter(XpSourceFile::requiredTags),
 				Identifier.CODEC.listOf().optionalFieldOf("excluded_subjects", List.of())

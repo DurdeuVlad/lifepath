@@ -119,6 +119,34 @@ class XpSourceRouterTest {
 	}
 
 	@Test
+	void unmappedGateBlocksBaseXpWhenDisabled() throws Exception {
+		registerSkill();
+		registerSource("""
+				{"activity": "lifepath:mining", "skill": "lifepath:mining",
+				 "base_xp": 0.5, "per_subject": {"minecraft:stone": 2.0}}
+				""", Identifier.of("lifepath", "gated"));
+
+		var dir = java.nio.file.Files.createTempDirectory("unmapped_cfg");
+		java.nio.file.Files.writeString(dir.resolve("skills.toml"),
+				"unmapped_sources_award_xp = false\n");
+		io.github.durdeuvlad.lifepath.config.LifepathConfig.resetForTests();
+		io.github.durdeuvlad.lifepath.config.LifepathConfig.define(LifepathMod.id("skills"),
+				io.github.durdeuvlad.lifepath.config.ConfigSpec.builder()
+						.define("unmapped_sources_award_xp", true, "test")
+						.build());
+		io.github.durdeuvlad.lifepath.config.LifepathConfig.loadAll(dir);
+		try {
+			// Mapped subject still awards; unmapped subject is gated off.
+			assertEquals(2.0, XpSourceRouter.plan(
+					ActivityEvent.of(ActivityTypes.MINING, STONE)).get(0).amount());
+			assertTrue(XpSourceRouter.plan(ActivityEvent.of(ActivityTypes.MINING,
+					Identifier.of("minecraft", "dirt"))).isEmpty());
+		} finally {
+			io.github.durdeuvlad.lifepath.config.LifepathConfig.resetForTests();
+		}
+	}
+
+	@Test
 	void noEventMeansNoXp() {
 		// "Ordinary non-qualifying actions grant no XP": an activity with no
 		// matching source produces nothing.

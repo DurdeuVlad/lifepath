@@ -8,6 +8,7 @@ import io.github.durdeuvlad.lifepath.config.ConfigSpec;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import io.github.durdeuvlad.lifepath.network.s2c.CharacterSyncPayload;
+import io.github.durdeuvlad.lifepath.producer.VanillaGameplayProducers;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.registry.RegistryBootstrap;
 import io.github.durdeuvlad.lifepath.reload.ReloadManager;
@@ -69,6 +70,20 @@ public class LifepathMod implements ModInitializer {
 						value -> value instanceof Number n && n.doubleValue() >= 0 && n.doubleValue() <= 1000,
 						"Global XP multiplier applied by the lifepath:global_multiplier modifier."
 								+ " 0 disables all XP gain; sane values are 0.1–10.")
+				.define("mining_xp_multiplier", 1.0, v -> v >= 0 && v <= 1000,
+						"Per-skill XP multiplier for lifepath:mining.")
+				.define("farming_xp_multiplier", 1.0, v -> v >= 0 && v <= 1000,
+						"Per-skill XP multiplier for lifepath:farming.")
+				.define("smithing_xp_multiplier", 1.0, v -> v >= 0 && v <= 1000,
+						"Per-skill XP multiplier for lifepath:smithing.")
+				.define("fishing_xp_multiplier", 1.0, v -> v >= 0 && v <= 1000,
+						"Per-skill XP multiplier for lifepath:fishing.")
+				.define("foraging_xp_multiplier", 1.0, v -> v >= 0 && v <= 1000,
+						"Per-skill XP multiplier for lifepath:foraging.")
+				.define("unmapped_sources_award_xp", true,
+						"When false, activity events matching no per_subject/per_tag entry"
+								+ " grant nothing (base_xp ignored). When true, unmapped"
+								+ " sources yield the file's base_xp.")
 				.build());
 
 		ReloadManager.register(id("engine_config"), LifepathConfig::reload);
@@ -86,6 +101,7 @@ public class LifepathMod implements ModInitializer {
 		CharacterManager.init();
 		SkillXpService.init();
 		XpSourceRouter.init();
+		VanillaGameplayProducers.init();
 	}
 
 	public static Identifier id(String path) {

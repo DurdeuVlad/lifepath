@@ -72,12 +72,15 @@ public final class XpSourceRouter {
 	 * an award entry. No side effects — exposed for tests and diagnostics.
 	 */
 	public static List<Award> plan(ActivityEvent event) {
+		boolean allowUnmapped = (Boolean) io.github.durdeuvlad.lifepath.config.LifepathConfig
+				.getOrDefault(LifepathMod.id("skills"), "unmapped_sources_award_xp", Boolean.TRUE);
 		List<Award> awards = new ArrayList<>();
 		for (XpSourceDefinition def : LifepathContent.xpSources().all().values()) {
 			if (def.matches(event)) {
-				double amount = def.amountFor(event.sourceId());
-				if (amount > 0) {
-					awards.add(new Award(def.skill(), def.id(), amount));
+				XpSourceDefinition.Resolved resolved = def.resolve(event.sourceId(), event.tags());
+				// Unmapped events (no exact/tag match) can be config-disabled.
+				if (resolved.amount() > 0 && (resolved.specific() || allowUnmapped)) {
+					awards.add(new Award(def.skill(), def.id(), resolved.amount()));
 				}
 			}
 		}
