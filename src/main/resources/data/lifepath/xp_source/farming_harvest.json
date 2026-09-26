@@ -1,0 +1,16 @@
+{
+	"activity": "lifepath:farming",
+	"skill": "lifepath:farming",
+	"player_caused_only": true,
+	"required_tags": ["lifepath:harvested", "lifepath:mature"],
+	"base_xp": 0.5,
+	"per_subject": {
+		"minecraft:wheat": 0.5,
+		"minecraft:carrots": 0.6,
+		"minecraft:potatoes": 0.6,
+		"minecraft:beetroots": 0.7
+	},
+	"per_tag": {
+		"lifepath:rare_crop": 2.0
+	}
+}

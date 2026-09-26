@@ -80,17 +80,80 @@ class XpSourceDefinitionTest {
 	}
 
 	@Test
-	void shippedExampleParsesAndIsInert() throws Exception {
-		Path file = Path.of("src/main/resources/data/lifepath/xp_source/example_mining.json");
-		assertTrue(Files.exists(file), "example xp_source must ship");
-		var def = XpSourceDefinition.fromFile(Identifier.of("lifepath", "example_mining"),
+	void shippedSourcesParseAndCoverSpecTable() throws Exception {
+		// The M2-4 mining table from docs/GAMEDESIGN.md §11 must ship verbatim.
+		Path mining = Path.of("src/main/resources/data/lifepath/xp_source/mining.json");
+		var miningDef = XpSourceDefinition.fromFile(Identifier.of("lifepath", "mining"),
+				XpSourceDefinition.XpSourceFile.CODEC.parse(JsonOps.INSTANCE,
+						JsonParser.parseString(Files.readString(mining))).result().orElseThrow());
+		Map<String, Double> expected = Map.of(
+				"stone", 0.05, "deepslate", 0.07, "coal_ore", 0.30,
+				"iron_ore", 0.60, "gold_ore", 0.80,
+				"diamond_ore", 2.00, "ancient_debris", 4.00);
+		for (var e : expected.entrySet()) {
+			assertEquals(e.getValue(), miningDef.perSubject().get(Identifier.of("minecraft", e.getKey())),
+					e.getKey() + " xp");
+		}
+		assertTrue(miningDef.perTag().containsKey(Identifier.of("minecraft", "diamond_ores")),
+				"family tags must cover deepslate variants");
+
+		// All shipped xp_source files parse.
+		try (var files = Files.list(Path.of("src/main/resources/data/lifepath/xp_source"))) {
+			for (Path f : files.filter(p -> p.toString().endsWith(".json")).toList()) {
+				assertTrue(XpSourceDefinition.XpSourceFile.CODEC.parse(JsonOps.INSTANCE,
+						JsonParser.parseString(Files.readString(f))).result().isPresent(),
+						f.getFileName() + " must parse");
+			}
+		}
+	}
+
+	@Test
+	void resolvePrefersSubjectThenTagThenBase() {
+		var def = parse("""
+				{"activity": "lifepath:mining", "skill": "lifepath:mining",
+				 "base_xp": 0.02,
+				 "per_subject": {"minecraft:stone": 0.05},
+				 "per_tag": {"minecraft:coal_ores": 0.30}}
+				""");
+		assertEquals(0.05, def.resolve(Identifier.of("minecraft", "stone"), Set.of()).amount());
+		assertTrue(def.resolve(Identifier.of("minecraft", "stone"), Set.of()).specific());
+		var tagHit = def.resolve(Identifier.of("minecraft", "deepslate_coal_ore"),
+				Set.of(Identifier.of("minecraft", "coal_ores")));
+		assertEquals(0.30, tagHit.amount());
+		assertTrue(tagHit.specific());
+		var unmapped = def.resolve(Identifier.of("minecraft", "dirt"), Set.of());
+		assertEquals(0.02, unmapped.amount());
+		assertFalse(unmapped.specific());
+	}
+
+	@Test
+	void perTagFirstMatchFollowsFileOrder() {
+		// Two overlapping tags: the FIRST in JSON order must win. This pins
+		// that the decoded map preserves document order end-to-end.
+		var def = parse("""
+				{"activity": "lifepath:mining", "skill": "lifepath:mining",
+				 "base_xp": 0.0,
+				 "per_tag": {"minecraft:coal_ores": 0.30, "lifepath:rare_crop": 9.9}}
+				""");
+		var resolved = def.resolve(Identifier.of("minecraft", "deepslate_coal_ore"),
+				Set.of(Identifier.of("minecraft", "coal_ores"),
+						Identifier.of("lifepath", "rare_crop")));
+		assertEquals(0.30, resolved.amount(), "first per_tag entry wins over later matches");
+	}
+
+	@Test
+	void miningSourceRequiresMinableTag() throws Exception {
+		Path file = Path.of("src/main/resources/data/lifepath/xp_source/mining.json");
+		var def = XpSourceDefinition.fromFile(Identifier.of("lifepath", "mining"),
 				XpSourceDefinition.XpSourceFile.CODEC.parse(JsonOps.INSTANCE,
 						JsonParser.parseString(Files.readString(file))).result().orElseThrow());
-		assertEquals(ActivityTypes.MINING, def.activity());
-		// Inert: its only subject is a nonexistent lifepath id — it can never award.
-		assertTrue(def.matches(event(ActivityTypes.MINING, Identifier.of("lifepath", "example_stone"),
-				Set.of(), ActivityEvent.Cause.PLAYER)) == def.amountFor(
-						Identifier.of("lifepath", "example_stone")) > 0);
-		assertEquals(0.0, def.amountFor(Identifier.of("minecraft", "stone")));
+		// Review fix: breaking crops/dirt must not grant mining XP — the
+		// source is scoped to the shipped lifepath:minable block tag.
+		assertTrue(def.requiredTags().contains(Identifier.of("lifepath", "minable")));
+		// A farming event carrying no minable tag must not match it.
+		var harvest = new ActivityEvent(null, ActivityTypes.MINING,
+				Identifier.of("minecraft", "wheat"), Set.of(Identifier.of("lifepath", "harvested")),
+				ActivityEvent.Cause.PLAYER, 0, Map.of());
+		assertFalse(def.matches(harvest));
 	}
 }
