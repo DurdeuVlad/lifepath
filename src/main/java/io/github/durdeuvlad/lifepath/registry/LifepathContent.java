@@ -147,14 +147,15 @@ public final class LifepathContent {
 		Map<Identifier, JsonElement> parsed = new LinkedHashMap<>();
 		// findResources recurses — only DIRECT children of the domain dir are
 		// entries; nested paths belong to their own domain (e.g. skill/curve).
+		// The startsWith guard is required too: non-vanilla PackResources may
+		// prefix-match loosely and feed sibling dirs back through.
 		Map<Identifier, Resource> files =
 				manager.findResources(directory, id -> {
 					String path = id.getPath();
-					if (!path.endsWith(".json")) {
+					if (!path.startsWith(directory + "/") || !path.endsWith(".json")) {
 						return false;
 					}
-					String relative = path.substring(directory.length() + 1);
-					return !relative.contains("/");
+					return !path.substring(directory.length() + 1).contains("/");
 				});
 		for (Map.Entry<Identifier, Resource> file : files.entrySet()) {
 			try (var reader = new InputStreamReader(file.getValue().getInputStream(), StandardCharsets.UTF_8)) {

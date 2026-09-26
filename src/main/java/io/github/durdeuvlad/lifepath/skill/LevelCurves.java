@@ -24,11 +24,17 @@ public final class LevelCurves {
 	/** Curve used when a definition references nothing (or nothing resolves). */
 	public static final Identifier DEFAULT_ID = LifepathMod.id("default");
 
-	/** Last-resort table if even {@code lifepath:default} fails to load. */
+	/**
+	 * Last-resort table if even {@code lifepath:default} fails to load.
+	 * Deliberately SHORT (6 levels) and NOT a copy of default.json — a missing
+	 * shipped curve is a packaging bug; this keeps the game playable and the
+	 * divergence loud in behavior, not silently identical.
+	 */
 	private static final LevelCurveDefinition FALLBACK = new LevelCurveDefinition(
 			DEFAULT_ID, List.of(0.0, 40.0, 120.0, 300.0, 600.0, 1000.0));
 
 	private static final Set<Identifier> WARNED = ConcurrentHashMap.newKeySet();
+	private static final int WARNED_CAP = 256;
 
 	/** The curve a skill resolves to (its {@code level_curve} ref, else default, else fallback). */
 	public static LevelCurveDefinition forSkill(SkillDefinition skill) {
@@ -44,7 +50,14 @@ public final class LevelCurves {
 		LevelCurveDefinition def = LifepathContent.levelCurves().get(id);
 		if (def == null) {
 			if (WARNED.add(id)) {
-				LifepathMod.LOGGER.warn("unknown level curve '{}' (no definition loaded)", id);
+				if (WARNED.size() >= WARNED_CAP) {
+					WARNED.clear();
+					WARNED.add(id);
+					LifepathMod.LOGGER.warn(
+							"unknown level curve '{}' (warn set reset at cap {})", id, WARNED_CAP);
+				} else {
+					LifepathMod.LOGGER.warn("unknown level curve '{}' (no definition loaded)", id);
+				}
 			}
 			return Optional.empty();
 		}

@@ -90,9 +90,11 @@ class SkillXpServiceTest {
 		SkillXpService.awardXpCore(data, SKILL, 100000.0, SRC);
 		assertEquals(2, data.skill(SKILL).level());
 		assertEquals(2, data.skill(SKILL).highestLevel());
-		// At cap: further awards are rejected (applied=false).
+		// At cap: awards apply (lastMeaningfulUse updates — decay reads it) but grant no XP/level.
 		var r = SkillXpService.awardXpCore(data, SKILL, 10.0, SRC);
-		assertFalse(r.applied());
+		assertTrue(r.applied());
+		assertEquals(0, r.levelsGained());
+		assertEquals(1e5, data.skill(SKILL).xp(), 1e4); // xp unchanged (modulo fp)
 	}
 
 	@Test
@@ -139,14 +141,94 @@ class SkillXpServiceTest {
 	}
 
 	@Test
-	void globalMultiplierReadsConfig() {
+	void globalMultiplierReadsConfig() throws Exception {
+		// skills.toml with global_xp_multiplier = 2 in a throwaway dir.
+		var dir = java.nio.file.Files.createTempDirectory("xpcfg");
+		java.nio.file.Files.writeString(dir.resolve("skills.toml"), "global_xp_multiplier = 2.0\n");
+		io.github.durdeuvlad.lifepath.config.LifepathConfig.resetForTests();
+		io.github.durdeuvlad.lifepath.config.LifepathConfig.define(LifepathMod.id("skills"),
+				io.github.durdeuvlad.lifepath.config.ConfigSpec.builder()
+						.define("global_xp_multiplier", 1.0, "test")
+						.build());
+		io.github.durdeuvlad.lifepath.config.LifepathConfig.loadAll(dir);
+
 		SkillXpService.init(); // registers lifepath:global_multiplier
 		registerSkill(100);
 		registerCurve(100);
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		// Config not loaded in tests -> multiplier degrades to identity (1.0).
 		SkillXpService.awardXpCore(data, SKILL, 10.0, SRC);
-		assertEquals(10.0, data.skill(SKILL).xp());
+		assertEquals(20.0, data.skill(SKILL).xp()); // 10 * 2.0
+		io.github.durdeuvlad.lifepath.config.LifepathConfig.resetForTests();
+	}
+
+	@Test
+	void xpOverflowSaturatesNotWipes() {
+		registerSkill(100);
+		registerCurve(5); // short curve: xp can far exceed every threshold while level stays 5
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		SkillXpService.setXpCore(data, SKILL, 1e308);
+		var r = SkillXpService.awardXpCore(data, SKILL, 1e308, SRC);
+		assertTrue(r.applied());
+		// Sum overflows to +Inf -> saturates at MAX_VALUE, level stays on curve max, nothing wiped.
+		assertEquals(Double.MAX_VALUE, data.skill(SKILL).xp());
+		assertEquals(5, data.skill(SKILL).level());
+		assertEquals(5, r.newLevel());
+	}
+
+	@Test
+	void throwingModifierIsIsolated() {
+		registerSkill(100);
+		registerCurve(100);
+		SkillXpService.registerModifier(Identifier.of("test", "boom"), (ctx, amt) -> {
+			throw new RuntimeException("broken modifier");
+		});
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		var r = SkillXpService.awardXpCore(data, SKILL, 10.0, SRC);
+		assertTrue(r.applied());
+		assertEquals(10.0, data.skill(SKILL).xp()); // modifier treated as identity
+	}
+
+	@Test
+	void atCapAwardStillMarksMeaningfulUse() {
+		registerSkill(2);
+		registerCurve(100);
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		SkillXpService.setXpCore(data, SKILL, 1e9);
+		SkillProgress capped = data.skill(SKILL);
+		assertEquals(2, capped.level());
+		long before = capped.lastMeaningfulUse();
+		try { Thread.sleep(2); } catch (InterruptedException ignored) {}
+		var r = SkillXpService.awardXpCore(data, SKILL, 10.0, SRC);
+		assertTrue(r.applied());
+		assertEquals(0, r.levelsGained());
+		assertTrue(data.skill(SKILL).lastMeaningfulUse() >= before);
+	}
+
+	@Test
+	void rejectedAwardReportsRealProgress() {
+		registerSkill(100);
+		registerCurve(100);
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		SkillXpService.setXpCore(data, SKILL, 60.0); // level 3
+		var r = SkillXpService.awardXpCore(data, SKILL, -1, SRC);
+		assertFalse(r.applied());
+		assertEquals(3, r.oldLevel()); // real values, not zeros
+		assertEquals(60.0, r.xpBefore());
+	}
+
+	@Test
+	void setLevelCoreClampsAndSnaps() {
+		registerSkill(5);
+		registerCurve(100); // thresholds: level3 = 60
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		var r = SkillXpService.setLevelCore(data, SKILL, 3);
+		assertTrue(r.applied());
+		assertEquals(3, r.newLevel());
+		assertEquals(60.0, data.skill(SKILL).xp());
+		// Clamp to def.maxLevel (5): level 99 -> xp of level 5.
+		var r2 = SkillXpService.setLevelCore(data, SKILL, 99);
+		assertEquals(5, r2.newLevel());
+		assertFalse(SkillXpService.setLevelCore(data, SKILL, -1).applied());
 	}
 
 	@Test

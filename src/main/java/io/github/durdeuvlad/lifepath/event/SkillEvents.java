@@ -13,7 +13,12 @@ public final class SkillEvents {
 	private SkillEvents() {
 	}
 
-	/** Fired AFTER a skill's level increased (never fires on a no-change or decrease). */
+	/**
+	 * Fired AFTER a skill's level increased (never fires on a no-change or
+	 * decrease). Listeners run on the server thread, inside the award call —
+	 * a listener that re-enters {@code SkillXpService.awardXp} for the same
+	 * skill will recurse; keep listeners non-mutating or guard them.
+	 */
 	public static final Event<LevelUp> LEVEL_UP = EventFactory.createArrayBacked(LevelUp.class,
 			listeners -> (player, skillId, oldLevel, newLevel, source) -> {
 				for (LevelUp listener : listeners) {

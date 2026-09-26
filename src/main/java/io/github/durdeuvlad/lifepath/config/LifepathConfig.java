@@ -120,11 +120,11 @@ public final class LifepathConfig {
 		if (file == null || !file.containsKey(key)) {
 			return fallback;
 		}
-		try {
-			return (T) file.get(key);
-		} catch (ClassCastException e) {
-			return fallback;
-		}
+		Object value = file.get(key);
+		// Erased casts can't throw here — narrow explicitly so a wrong-typed
+		// stored value really does fall back instead of CCE-ing at the caller.
+		return fallback == null || fallback.getClass().isInstance(value)
+				? (T) value : fallback;
 	}
 
 	public static boolean getBoolean(Identifier fileId, String key) {

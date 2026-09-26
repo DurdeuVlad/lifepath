@@ -29,8 +29,10 @@ public record LevelCurveDefinition(Identifier id, List<Double> thresholds) {
 	}
 
 	private static void validate(Identifier id, List<Double> t) {
-		if (t.isEmpty() || t.get(0) != 0.0) {
-			throw new IllegalArgumentException(id + ": thresholds must be non-empty with thresholds[0]==0");
+		if (t.size() < 2 || t.get(0) != 0.0) {
+			throw new IllegalArgumentException(id
+					+ ": thresholds must have at least 2 entries with thresholds[0]==0"
+					+ " (a single-entry table would pin the skill at level 0 forever)");
 		}
 		for (int i = 0; i < t.size(); i++) {
 			double v = t.get(i);
@@ -56,8 +58,11 @@ public record LevelCurveDefinition(Identifier id, List<Double> thresholds) {
 
 	/** Level for a total XP amount: the highest {@code L} with {@code xp >= thresholds[L]}. */
 	public int levelFor(double xp) {
-		if (!Double.isFinite(xp) || xp < 0) {
+		if (Double.isNaN(xp) || xp < 0) {
 			return 0;
+		}
+		if (xp == Double.POSITIVE_INFINITY) {
+			return thresholds.size() - 1; // saturated: as maxed as this curve gets
 		}
 		int level = 0;
 		for (int i = 1; i < thresholds.size(); i++) {

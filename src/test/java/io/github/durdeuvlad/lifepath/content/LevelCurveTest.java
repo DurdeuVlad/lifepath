@@ -44,6 +44,7 @@ class LevelCurveTest {
 	@Test
 	void invalidTablesRejected() {
 		assertThrows(IllegalArgumentException.class, () -> curve());
+		assertThrows(IllegalArgumentException.class, () -> curve(0)); // single entry = level-0-only trap
 		assertThrows(IllegalArgumentException.class, () -> curve(5, 10)); // first != 0
 		assertThrows(IllegalArgumentException.class, () -> curve(0, 30, 20)); // not increasing
 		assertThrows(IllegalArgumentException.class, () -> curve(0, Double.NaN));
@@ -55,6 +56,7 @@ class LevelCurveTest {
 		LevelCurveDefinition def = curve(0, 10, 30);
 		assertEquals(0, def.levelFor(Double.NaN));
 		assertEquals(0, def.levelFor(-100));
+		assertEquals(2, def.levelFor(Double.POSITIVE_INFINITY)); // saturated, not 0
 	}
 
 	@Test

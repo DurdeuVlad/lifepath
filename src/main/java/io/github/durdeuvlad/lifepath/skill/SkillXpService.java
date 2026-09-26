@@ -30,7 +30,16 @@ import org.jetbrains.annotations.Nullable;
  * {@code lifepath:global_multiplier} (config {@code skills.toml
  * global_xp_multiplier}) is registered first; M3 lands aptitude,
  * specialization, and diminishing-returns modifiers behind it — no refactor
- * needed.
+ * needed. Modifier contract: deterministic, side-effect-free, returns the
+ * adjusted amount; {@code <=0} or NaN suppresses the gain, +Inf saturates, and
+ * a thrown exception is isolated (logged ERROR, treated as identity).
+ *
+ * <p><b>Threading:</b> server main thread only — same contract as
+ * {@code CharacterManager}. Registration is not thread-safe; do it during init.
+ *
+ * <p><b>{@code lastMeaningfulUse}</b> uses wall-clock millis — it records real
+ * elapsed time for later decay/inactivity systems, not tick counts, so a
+ * backwards clock step merely shifts an idle-start estimate.
  */
 public final class SkillXpService {
 	private SkillXpService() {
@@ -70,6 +79,12 @@ public final class SkillXpService {
 	 */
 	public static XpResult awardXp(ServerPlayerEntity player, Identifier skillId,
 			double amount, ActivityEvent source) {
+		// Validate BEFORE touching the cache — a rejected award must not
+		// lazy-load (and leak) a character entry.
+		SkillDefinition def = SkillService.definition(skillId).orElse(null);
+		if (def == null || !Double.isFinite(amount) || amount <= 0) {
+			return new XpResult(0, 0, 0, 0, 0, false);
+		}
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
 		XpResult result = awardXpCore(data, skillId, amount, source, player);
 		if (result.applied()) {
@@ -91,33 +106,56 @@ public final class SkillXpService {
 	private static XpResult awardXpCore(PlayerCharacterData data, Identifier skillId,
 			double amount, ActivityEvent source, @Nullable ServerPlayerEntity player) {
 		SkillDefinition def = SkillService.definition(skillId).orElse(null);
+		SkillProgress existing = SkillService.progress(data, skillId);
 		if (def == null || !Double.isFinite(amount) || amount <= 0) {
-			return new XpResult(0, 0, 0, 0, 0, false);
+			// Rejected: still report real current values when progress exists.
+			return existing == null
+					? new XpResult(0, 0, 0, 0, 0, false)
+					: new XpResult(0, existing.level(), existing.level(),
+							existing.xp(), existing.xp(), false);
 		}
 		SkillProgress current = SkillService.ensureProgress(data, skillId);
-		if (current == null || current.level() >= def.maxLevel()) {
-			return new XpResult(0, current == null ? 0 : current.level(),
-					current == null ? 0 : current.level(), current == null ? 0 : current.xp(),
-					current == null ? 0 : current.xp(), false);
+		if (current == null) {
+			return new XpResult(0, 0, 0, 0, 0, false);
+		}
+		long now = System.currentTimeMillis();
+		if (current.level() >= def.maxLevel()) {
+			// At cap: practice still counts as meaningful use (decay reads this
+			// timestamp), but no XP accrues and no level can change.
+			data.setSkillProgress(skillId, SkillService.clamped(
+					new SkillProgress(current.xp(), current.level(), current.highestLevel(),
+							current.protectedFloor(), current.aptitude(), now), def.maxLevel()));
+			return new XpResult(0, current.level(), current.level(),
+					current.xp(), current.xp(), true);
 		}
 		XpModifier.XpContext ctx = new XpModifier.XpContext(player, skillId, current, source);
 		double modified = amount;
-		for (XpModifier modifier : MODIFIERS.values()) {
-			modified = modifier.apply(ctx, modified);
-			if (!Double.isFinite(modified) || modified < 0) {
-				modified = 0;
-				break;
+		for (Map.Entry<Identifier, XpModifier> entry : MODIFIERS.entrySet()) {
+			try {
+				double out = entry.getValue().apply(ctx, modified);
+				if (Double.isNaN(out)) {
+					modified = 0;
+					break;
+				}
+				// +Inf clamps to MAX_VALUE rather than wiping the award; <=0 suppresses.
+				modified = out == Double.POSITIVE_INFINITY ? Double.MAX_VALUE
+						: out == Double.NEGATIVE_INFINITY ? 0.0 : Math.max(0.0, out);
+			} catch (Exception e) {
+				// A throwing modifier is a bug, not a service failure: identity + ERROR.
+				LifepathMod.LOGGER.error("xp modifier {} threw; treating as identity",
+						entry.getKey(), e);
 			}
 		}
-		long now = System.currentTimeMillis();
-		double newXp = Math.max(0.0, current.xp() + Math.max(0.0, modified));
+		double sum = current.xp() + Math.max(0.0, modified);
+		// Saturate: an overflowing sum is "maxed out", never a wrapped/NaN wipe.
+		double newXp = Double.isFinite(sum) ? Math.max(0.0, sum) : Double.MAX_VALUE;
 		int newLevel = Math.min(def.maxLevel(), LevelCurves.levelForSkill(def, newXp));
 		SkillProgress next = SkillService.clamped(
 				new SkillProgress(newXp, newLevel, Math.max(current.highestLevel(), newLevel),
 						current.protectedFloor(), current.aptitude(), now), def.maxLevel());
 		data.setSkillProgress(skillId, next);
 		return new XpResult(Math.max(0, newLevel - current.level()), current.level(),
-				newLevel, current.xp(), newXp, true);
+				newLevel, current.xp(), next.xp(), true);
 	}
 
 	/** Admin/setter path: absolute XP, clamped, level recomputed. Fires LEVEL_UP on increase. */
@@ -158,13 +196,27 @@ public final class SkillXpService {
 	/** Admin/setter path: absolute level (clamped); XP snaps to the level's threshold. */
 	public static XpResult setLevel(ServerPlayerEntity player, Identifier skillId,
 			int level, ActivityEvent source) {
+		PlayerCharacterData data = CharacterManager.getCharacter(player);
+		XpResult result = setLevelCore(data, skillId, level);
+		if (result.applied()) {
+			CharacterManager.changed(player);
+			if (result.levelsGained() > 0) {
+				SkillEvents.LEVEL_UP.invoker().onLevelUp(player, skillId,
+						result.oldLevel(), result.newLevel(), source);
+			}
+		}
+		return result;
+	}
+
+	/** Data-only {@link #setLevel} core — no dirty marking, sync, or event fire. */
+	static XpResult setLevelCore(PlayerCharacterData data, Identifier skillId, int level) {
 		SkillDefinition def = SkillService.definition(skillId).orElse(null);
 		if (def == null || level < 0) {
 			return new XpResult(0, 0, 0, 0, 0, false);
 		}
 		double xp = LevelCurves.xpForLevel(def.levelCurve().orElse(LevelCurves.DEFAULT_ID),
 				Math.min(level, def.maxLevel()));
-		return setXp(player, skillId, xp, source);
+		return setXpCore(data, skillId, xp);
 	}
 
 	public static int getLevel(PlayerCharacterData data, Identifier skillId) {
