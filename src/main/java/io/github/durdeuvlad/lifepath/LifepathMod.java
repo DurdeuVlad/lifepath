@@ -112,6 +112,7 @@ public class LifepathMod implements ModInitializer {
 
 		LifepathCommands.init();
 		CharacterCommands.init();
+		io.github.durdeuvlad.lifepath.command.SpecializationCommands.init();
 
 		RegistryBootstrap.register(id("character_attachments"), CharacterAttachments::init);
 		RegistryBootstrap.bootstrap();

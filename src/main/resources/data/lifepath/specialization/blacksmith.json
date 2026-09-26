@@ -1,0 +1,29 @@
+{
+	"display_name": "Blacksmith",
+	"starting_skills": {
+		"lifepath:smithing": 20,
+		"lifepath:mining": 10,
+		"lifepath:engineering": 15
+	},
+	"aptitudes": {
+		"lifepath:smithing": "a",
+		"lifepath:mining": "b",
+		"lifepath:engineering": "b"
+	},
+	"xp_modifiers": {
+		"lifepath:smithing": 1.35,
+		"lifepath:mining": 1.1,
+		"lifepath:engineering": 1.25
+	},
+	"decay_modifiers": {
+		"lifepath:smithing": 0.3,
+		"lifepath:mining": 0.2,
+		"lifepath:engineering": 0.2
+	},
+	"protected_floors": {
+		"lifepath:smithing": 30
+	},
+	"signature": [
+		"lifepath:forge_mastery_i"
+	]
+}

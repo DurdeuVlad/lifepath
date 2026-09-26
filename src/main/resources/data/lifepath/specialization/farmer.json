@@ -1,0 +1,19 @@
+{
+	"display_name": "Farmer",
+	"starting_skills": {
+		"lifepath:farming": 20
+	},
+	"aptitudes": {
+		"lifepath:farming": "a"
+	},
+	"xp_modifiers": {
+		"lifepath:farming": 1.35
+	},
+	"decay_modifiers": {
+		"lifepath:farming": 0.30
+	},
+	"protected_floors": {
+		"lifepath:farming": 30
+	},
+	"signature": ["lifepath:bountiful_harvest_i"]
+}
