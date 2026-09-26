@@ -1,0 +1,11 @@
+{
+	"display_name": "Grass Walker",
+	"trigger": {"type": "passive", "interval_ticks": 20},
+	"conditions": {"all": [{"type": "lifepath:inside_block", "block": "#lifepath:vegetation"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:modify_attribute",
+		 "attribute": "minecraft:generic.movement_speed",
+		 "operation": "add_multiplied_total", "value": 0.10, "duration_ticks": 60}
+	]
+}

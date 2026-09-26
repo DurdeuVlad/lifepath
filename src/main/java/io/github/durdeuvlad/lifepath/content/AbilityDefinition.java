@@ -40,26 +40,38 @@ public record AbilityDefinition(
 				file.cost(), file.cooldown(), file.resourceInteractions());
 	}
 
-	/** Trigger kinds — all three are load-bearing, see {@link Kind}. */
+	/** Trigger kinds — all four are load-bearing, see {@link Kind}. */
 	public enum Kind {
 		/** Re-evaluated at {@code interval_ticks} per player. */
 		PASSIVE,
 		/** Player-triggered via keybind → C2S; server re-validates everything. */
 		ACTIVE,
 		/** Fires when an {@link #events} activity type is dispatched. */
-		EVENT;
+		EVENT,
+		/**
+		 * Incoming-damage modifier (M5-2): evaluated synchronously inside the
+		 * player's {@code damage()} entry — conditions see the attacker/source/
+		 * base amount via {@code EvalContext.damage()}, and passing conditions
+		 * scale the amount by {@code multiplier}. Target/actions/cost/cooldown/
+		 * resource_interactions do not apply (warned at load) — re-running
+		 * actions mid-damage risks recursion.
+		 */
+		DAMAGE_TAKEN;
 
 		public static final Codec<Kind> CODEC = Codec.STRING.xmap(
 				s -> Kind.valueOf(s.toUpperCase(Locale.ROOT)),
 				k -> k.name().toLowerCase(Locale.ROOT));
 	}
 
-	public record Trigger(Kind kind, int intervalTicks, List<Identifier> events) {
+	public record Trigger(Kind kind, int intervalTicks, List<Identifier> events,
+			double multiplier) {
 		public static final Codec<Trigger> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Kind.CODEC.fieldOf("type").forGetter(Trigger::kind),
 				Codec.intRange(1, Integer.MAX_VALUE)
 						.optionalFieldOf("interval_ticks", 20).forGetter(Trigger::intervalTicks),
-				Identifier.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(Trigger::events)
+				Identifier.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(Trigger::events),
+				Codec.doubleRange(0.0, 100.0)
+						.optionalFieldOf("multiplier", 1.0).forGetter(Trigger::multiplier)
 		).apply(i, Trigger::new));
 	}
 
@@ -160,7 +172,8 @@ public record AbilityDefinition(
 				ConditionSet.CODEC.optionalFieldOf("conditions", ConditionSet.NONE)
 						.forGetter(AbilityFile::conditions),
 				SpecNode.CODEC.fieldOf("target").forGetter(AbilityFile::target),
-				SpecNode.CODEC.listOf().fieldOf("actions").forGetter(AbilityFile::actions),
+				SpecNode.CODEC.listOf().optionalFieldOf("actions", List.of())
+						.forGetter(AbilityFile::actions),
 				Cost.CODEC.optionalFieldOf("cost").forGetter(AbilityFile::cost),
 				Cooldown.CODEC.optionalFieldOf("cooldown").forGetter(AbilityFile::cooldown),
 				ResourceInteraction.CODEC.listOf()

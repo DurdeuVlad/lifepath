@@ -174,6 +174,51 @@ public final class AbilityEngine {
 		}
 	}
 
+	/**
+	 * DAMAGE_TAKEN hook (M5-2): called from the {@code LivingEntity.damage}
+	 * injection for every victim. Only {@code damage_taken}-trigger defs owned
+	 * by the victim participate; each whose conditions pass multiplies the
+	 * amount (stacking multiplicatively). Conditions read the attacker/source/
+	 * base amount via {@code EvalContext.damage()}. No actions run here — a
+	 * mid-damage action could recurse; load-time validation warns about them.
+	 */
+	public static float modifyIncomingDamage(net.minecraft.entity.Entity entity,
+			net.minecraft.entity.damage.DamageSource source, float amount) {
+		if (!(entity instanceof ServerPlayerEntity player)
+				|| player.getWorld().isClient()) {
+			return amount;
+		}
+		return modifyIncomingDamage(CharacterManager.getCharacter(player), player,
+				new AbilityVocabulary.DamageInfo(source.getAttacker(), source, amount),
+				amount);
+	}
+
+	/** Data-path core (tests): multiplies {@code amount} per passing owned def. */
+	static float modifyIncomingDamage(PlayerCharacterData data,
+			@Nullable ServerPlayerEntity player, AbilityVocabulary.DamageInfo info,
+			float amount) {
+		float modified = amount;
+		long now = System.currentTimeMillis();
+		for (Identifier id : ownedAbilities(data)) {
+			AbilityDefinition def = LifepathContent.abilities().get(id);
+			if (def == null || !def.enabled()
+					|| def.trigger().kind() != AbilityDefinition.Kind.DAMAGE_TAKEN
+					|| def.trigger().multiplier() == 1.0) {
+				continue;
+			}
+			EvalContext ctx = new EvalContext(player, data, now, def.id(), info);
+			try {
+				if (conditionsMet(ctx, def)) {
+					modified *= (float) def.trigger().multiplier();
+				}
+			} catch (Exception e) {
+				// A buggy condition must never corrupt the damage pipeline.
+				LifepathMod.LOGGER.error("damage_taken ability {} threw", def.id(), e);
+			}
+		}
+		return modified;
+	}
+
 	/** Server-side activation for a C2S request — full validation, never trusts. */
 	public static Outcome tryActivate(ServerPlayerEntity player, Identifier abilityId) {
 		Outcome outcome = tryActivate(CharacterManager.getCharacter(player), player,

@@ -1,0 +1,27 @@
+{
+	"replace": false,
+	"values": [
+		"#minecraft:crops",
+		"#minecraft:saplings",
+		"minecraft:melon_stem",
+		"minecraft:pumpkin_stem",
+		"minecraft:attached_melon_stem",
+		"minecraft:attached_pumpkin_stem",
+		"minecraft:sweet_berry_bush",
+		"minecraft:nether_wart",
+		"minecraft:cocoa",
+		"minecraft:bamboo",
+		"minecraft:sugar_cane",
+		"minecraft:cactus",
+		"minecraft:kelp",
+		"minecraft:cave_vines",
+		"minecraft:cave_vines_plant",
+		"#minecraft:flowers",
+		"#minecraft:tall_flowers",
+		"minecraft:grass_block",
+		"minecraft:short_grass",
+		"minecraft:tall_grass",
+		"minecraft:fern",
+		"minecraft:large_fern"
+	]
+}
