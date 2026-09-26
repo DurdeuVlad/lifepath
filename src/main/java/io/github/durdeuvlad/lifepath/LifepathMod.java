@@ -1,5 +1,6 @@
 package io.github.durdeuvlad.lifepath;
 
+import io.github.durdeuvlad.lifepath.character.CharacterAttachments;
 import io.github.durdeuvlad.lifepath.command.LifepathCommands;
 import io.github.durdeuvlad.lifepath.config.ConfigSpec;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
@@ -42,6 +43,7 @@ public class LifepathMod implements ModInitializer {
 
 		LifepathCommands.init();
 
+		RegistryBootstrap.register(id("character_attachments"), CharacterAttachments::init);
 		RegistryBootstrap.bootstrap();
 	}
 
