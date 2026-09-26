@@ -185,6 +185,13 @@ class XpSourceDefinitionTest {
 		assertTrue(junk < fish && fish < treasure,
 				"fishing weights must order junk < common fish < treasure");
 		assertEquals(0.30, def.resolve(Identifier.of("minecraft", "air"), Set.of()).amount());
+
+		// Enchanted treasure fishing_rod overlaps the junk tag — producer adds
+		// fishing_treasure for enchanted catches and treasure is FIRST in
+		// per_tag order, so it must win.
+		assertEquals(2.5, def.resolve(Identifier.of("minecraft", "fishing_rod"),
+				Set.of(Identifier.of("lifepath", "fishing_treasure"),
+						Identifier.of("lifepath", "fishing_junk"))).amount());
 	}
 
 	@Test

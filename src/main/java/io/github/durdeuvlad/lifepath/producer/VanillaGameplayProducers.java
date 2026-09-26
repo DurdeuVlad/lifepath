@@ -184,6 +184,13 @@ public final class VanillaGameplayProducers {
 		}
 		Set<Identifier> itemTags = caught.streamTags()
 				.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
+		// Enchanted catches are treasure-pool items even when their item type
+		// is also junk-listed (the enchanted fishing_rod overlaps both pools;
+		// item tags are component-blind). Treasure must precede junk in the
+		// xp_source per_tag order.
+		if (caught.hasEnchantments()) {
+			itemTags.add(LifepathMod.id("fishing_treasure"));
+		}
 		Identifier itemId = net.minecraft.registry.Registries.ITEM.getId(caught.getItem());
 		ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents.fishing(
 				serverPlayer, itemId, itemTags,
