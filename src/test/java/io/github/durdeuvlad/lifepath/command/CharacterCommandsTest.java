@@ -1,0 +1,109 @@
+package io.github.durdeuvlad.lifepath.command;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.CommandNode;
+import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
+import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.Aptitude;
+import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.ResourceState;
+import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.SkillProgress;
+import java.util.List;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+class CharacterCommandsTest {
+
+	@BeforeEach
+	void reset() {
+		LifepathCommands.resetForTests();
+		CharacterCommands.resetForTests();
+	}
+
+	@Test
+	void characterTreeHasInspectResetAndConfirm() {
+		LifepathCommands.init();
+		CharacterCommands.init();
+
+		CommandNode<ServerCommandSource> character = root().getChild("character");
+		assertNotNull(character, "missing /lifepath character");
+		assertNotNull(character.getChild("inspect"));
+		CommandNode<ServerCommandSource> resetNode = character.getChild("reset");
+		assertNotNull(resetNode);
+		// reset -> <player arg> -> "confirm" literal
+		CommandNode<ServerCommandSource> playerArg = resetNode.getChild("player");
+		assertNotNull(playerArg);
+		assertNotNull(playerArg.getChild("confirm"), "reset must require literal confirm");
+	}
+
+	@Test
+	void characterTreeIsPermissionGated() {
+		LifepathCommands.init();
+		CharacterCommands.init();
+
+		assertThrows(NullPointerException.class, () -> root().getChild("character").canUse(null));
+	}
+
+	@Test
+	void describePrintsEveryPersistedField() {
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSpeciesId(Identifier.of("lifepath", "test_species"));
+		data.setSpecializationId(Identifier.of("lifepath", "test_spec"));
+		data.setSkillProgress(Identifier.of("lifepath", "s"),
+				new SkillProgress(12.5, 3, 4, 2, Aptitude.A, 1_700_000_000_000L));
+		data.addId(PlayerCharacterData.ListKind.TRAITS, Identifier.of("lifepath", "t1"));
+		data.addId(PlayerCharacterData.ListKind.UNLOCKS, Identifier.of("lifepath", "u1"));
+		data.setResource(Identifier.of("lifepath", "mana"), new ResourceState(5.0, 0.0, 10.0));
+		data.setCooldown(Identifier.of("lifepath", "ab"), 1500L);
+
+		List<Text> lines = CharacterCommands.describe(data, 1000L);
+		String all = lines.stream().map(Text::getString).reduce("", (a, b) -> a + "\n" + b);
+
+		assertTrue(all.contains("lifepath:test_species"));
+		assertTrue(all.contains("lifepath:test_spec"));
+		assertTrue(all.contains("level=3"));
+		assertTrue(all.contains("xp=12.5"));
+		assertTrue(all.contains("highest=4"));
+		assertTrue(all.contains("floor=2"));
+		assertTrue(all.contains("aptitude=A"));
+		assertTrue(all.contains("lifepath:t1"));
+		assertTrue(all.contains("lifepath:u1"));
+		assertTrue(all.contains("5.0/0.0-10.0"));
+		assertTrue(all.contains("expires in 500ms"));
+		assertTrue(all.contains("data_version: 1"));
+	}
+
+	@Test
+	void describeShowsExpiredCooldownsAsExpired() {
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setCooldown(Identifier.of("lifepath", "ab"), 500L);
+
+		String all = CharacterCommands.describe(data, 1000L).stream()
+				.map(Text::getString).reduce("", (a, b) -> a + "\n" + b);
+
+		assertTrue(all.contains("expired 500ms ago"));
+	}
+
+	@Test
+	void modelResetRestoresDefaults() {
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSpeciesId(Identifier.of("lifepath", "x"));
+		data.setSkillProgress(Identifier.of("lifepath", "s"),
+				new SkillProgress(9.0, 2, 2, 1, Aptitude.S, 5L));
+		data.setDataVersion(0);
+
+		data.reset();
+
+		assertEquals(PlayerCharacterData.createDefault(), data);
+	}
+
+	private CommandNode<ServerCommandSource> root() {
+		return new CommandDispatcher<ServerCommandSource>().register(LifepathCommands.buildRoot());
+	}
+}
