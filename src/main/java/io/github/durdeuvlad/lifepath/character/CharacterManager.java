@@ -118,6 +118,12 @@ public final class CharacterManager {
 			entry.owner = player;
 			return entry;
 		});
+		// Lazy decay trigger (M3-3): offline elapsed time is charged once here —
+		// deterministic because the window anchors on persisted timestamps.
+		if (io.github.durdeuvlad.lifepath.skill.SkillDecayService.applyLazyAll(
+				getCharacter(player), System.currentTimeMillis()) > 0) {
+			markDirty(player);
+		}
 		syncCharacter(player);
 	}
 

@@ -12,6 +12,7 @@ import io.github.durdeuvlad.lifepath.producer.VanillaGameplayProducers;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.registry.RegistryBootstrap;
 import io.github.durdeuvlad.lifepath.reload.ReloadManager;
+import io.github.durdeuvlad.lifepath.skill.SkillDecayService;
 import io.github.durdeuvlad.lifepath.skill.SkillXpService;
 import io.github.durdeuvlad.lifepath.skill.XpSourceRouter;
 import net.fabricmc.api.ModInitializer;
@@ -107,6 +108,36 @@ public class LifepathMod implements ModInitializer {
 								+ " grant nothing (base_xp ignored). When true, unmapped"
 								+ " sources yield the file's base_xp.")
 				.build());
+		LifepathConfig.define(SkillDecayService.DECAY_CONFIG, ConfigSpec.builder()
+				.define("enabled", true,
+						"Master switch for skill decay (GAMEDESIGN §9).")
+				.define("grace_hours", 48.0, v -> v >= 0 && v <= 87600,
+						"Real hours after last meaningful use before decay starts.")
+				.define("maintenance_minutes", 60.0, v -> v >= 0 && v <= 14400,
+						"Minutes between the low-frequency decay maintenance pass"
+								+ " over online players. 0 disables the pass (login/award/"
+								+ "inspect triggers still apply).")
+				.define("band_1_upper", 25, v -> v >= 0 && v <= 100,
+						"Upper bound of decay band 1 (default 0–25: no decay).")
+				.define("band_1_rate", 0.0, v -> v >= 0 && v <= 100,
+						"Levels lost per real day inside band 1 (should be 0).")
+				.define("band_2_upper", 50, v -> v >= 0 && v <= 100,
+						"Upper bound of decay band 2.")
+				.define("band_2_rate", 0.05, v -> v >= 0 && v <= 100,
+						"Levels lost per real day inside band 2 (26–50).")
+				.define("band_3_upper", 75, v -> v >= 0 && v <= 100,
+						"Upper bound of decay band 3.")
+				.define("band_3_rate", 0.10, v -> v >= 0 && v <= 100,
+						"Levels lost per real day inside band 3 (51–75).")
+				.define("band_4_upper", 90, v -> v >= 0 && v <= 100,
+						"Upper bound of decay band 4.")
+				.define("band_4_rate", 0.20, v -> v >= 0 && v <= 100,
+						"Levels lost per real day inside band 4 (76–90).")
+				.define("band_5_upper", 100, v -> v >= 0 && v <= 100,
+						"Upper bound of decay band 5 (top).")
+				.define("band_5_rate", 0.35, v -> v >= 0 && v <= 100,
+						"Levels lost per real day inside band 5 (91–100).")
+				.build());
 
 		ReloadManager.register(id("engine_config"), LifepathConfig::reload);
 		ReloadManager.init();
@@ -123,6 +154,7 @@ public class LifepathMod implements ModInitializer {
 		LifepathNetworking.registerS2C(CharacterSyncPayload.ID, CharacterSyncPayload.PACKET_CODEC);
 		CharacterManager.init();
 		SkillXpService.init();
+		SkillDecayService.init();
 		XpSourceRouter.init();
 		VanillaGameplayProducers.init();
 		io.github.durdeuvlad.lifepath.compat.ExternalAdapterRegistry.init();

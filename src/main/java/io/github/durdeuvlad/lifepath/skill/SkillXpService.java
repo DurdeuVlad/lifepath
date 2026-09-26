@@ -131,6 +131,9 @@ public final class SkillXpService {
 					: new XpResult(0, existing.level(), existing.level(),
 							existing.xp(), existing.xp(), false);
 		}
+		// Lazy decay (M3-3): charge the elapsed window for THIS skill before
+		// the award stamps a fresh meaningful-use timestamp.
+		SkillDecayService.applyLazy(data, skillId, System.currentTimeMillis());
 		SkillProgress current = SkillService.ensureProgress(data, skillId);
 		if (current == null) {
 			return new XpResult(0, 0, 0, 0, 0, false);
