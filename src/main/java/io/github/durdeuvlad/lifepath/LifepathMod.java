@@ -40,7 +40,8 @@ public class LifepathMod implements ModInitializer {
 						"Enable verbose dev logging. The LIFEPATH_DEBUG env var also forces this on.")
 				.build());
 		LifepathConfig.define(id("character"), ConfigSpec.builder()
-				.define("flush_interval_ticks", 6000,
+				.define("flush_interval_ticks", CharacterManager.DEFAULT_FLUSH_INTERVAL_TICKS,
+						value -> value >= 200,
 						"Ticks between periodic flushes of dirty character data to the persistent"
 								+ " attachment. Data is also saved on disconnect and server stop;"
 								+ " this is only a crash-loss window control. Minimum 200.")

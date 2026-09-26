@@ -38,16 +38,39 @@ import net.minecraft.server.network.ServerPlayerEntity;
  * <p><b>Sync:</b> {@link #syncCharacter} sends a bounded full snapshot of the
  * UI-needed state (expired cooldowns are pruned from the snapshot copy only).
  * There is deliberately no C2S mutation channel.
+ *
+ * <p><b>Threading:</b> all public methods must be called on the server main
+ * thread — the same thread that fires every lifecycle hook registered here.
+ * The map is concurrent only for structural safety; the model objects and
+ * entity attachments it guards are NOT thread-safe.
  */
 public final class CharacterManager {
-	private static final int DEFAULT_FLUSH_INTERVAL_TICKS = 6000;
+	/** Default for {@code character.flush_interval_ticks}; referenced by the config spec. */
+	public static final int DEFAULT_FLUSH_INTERVAL_TICKS = 6000;
 	private static final int MIN_FLUSH_INTERVAL_TICKS = 200;
 
-	private static final Map<UUID, PlayerCharacterData> CACHE = new ConcurrentHashMap<>();
+	private static final Map<UUID, CachedCharacter> CACHE = new ConcurrentHashMap<>();
 	private static final Set<UUID> DIRTY = ConcurrentHashMap.newKeySet();
 	private static int ticksSinceFlush;
 
 	private CharacterManager() {
+	}
+
+	/**
+	 * Cache entry. {@code owner} tracks WHICH entity currently owns this data —
+	 * a UUID can briefly own two sessions during a duplicate/zombie login (the
+	 * new player entity is constructed before the old one's disconnect cleanup
+	 * runs). Keeping data keyed to its owner prevents an old session's
+	 * disconnect from evicting or overwriting the new session's live state.
+	 */
+	private static final class CachedCharacter {
+		private ServerPlayerEntity owner;
+		private final PlayerCharacterData data;
+
+		private CachedCharacter(ServerPlayerEntity owner, PlayerCharacterData data) {
+			this.owner = owner;
+			this.data = data;
+		}
 	}
 
 	/** Registers lifecycle hooks. Called once during common mod init. */
@@ -57,7 +80,10 @@ public final class CharacterManager {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ServerPlayerEntity player = handler.getPlayer();
 			saveCharacter(player);
-			CACHE.remove(player.getUuid());
+			// Evict only if THIS session still owns the entry — a stale/zombie
+			// session must not remove a newer session's cache.
+			CACHE.computeIfPresent(player.getUuid(), (uuid, entry) ->
+					entry.owner == player ? null : entry);
 			DIRTY.remove(player.getUuid());
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) ->
@@ -77,19 +103,34 @@ public final class CharacterManager {
 		});
 	}
 
-	/** Loads (or reloads) the player's data into the cache and syncs the client. */
+	/**
+	 * Loads (or reloads) the player's data into the cache and syncs the client.
+	 * If an entry already exists for this UUID (e.g. duplicate login while a
+	 * zombie session is still winding down), the EXISTING cached data is kept —
+	 * it may hold unflushed mutations that are fresher than what was just read
+	 * from disk — and ownership transfers to the new entity.
+	 */
 	public static void initializeCharacter(ServerPlayerEntity player) {
-		CACHE.put(player.getUuid(), CharacterAttachments.get(player));
+		CACHE.compute(player.getUuid(), (uuid, entry) -> {
+			if (entry == null) {
+				return new CachedCharacter(player, CharacterAttachments.get(player));
+			}
+			entry.owner = player;
+			return entry;
+		});
 		syncCharacter(player);
 	}
 
 	/**
 	 * Returns the player's cached character data, lazy-loading it from the
 	 * attachment on first access. The returned object is the live model —
-	 * mutate it, then {@link #markDirty}.
+	 * mutate it, then {@link #markDirty}. Call on the server thread only, and
+	 * only for players currently connected (an offline entity would leak a
+	 * cache entry with no eviction path).
 	 */
 	public static PlayerCharacterData getCharacter(ServerPlayerEntity player) {
-		return CACHE.computeIfAbsent(player.getUuid(), uuid -> CharacterAttachments.get(player));
+		return CACHE.computeIfAbsent(player.getUuid(),
+				uuid -> new CachedCharacter(player, CharacterAttachments.get(player))).data;
 	}
 
 	/** Flags the player's cached data as modified; persisted at the next flush point. */
@@ -106,11 +147,15 @@ public final class CharacterManager {
 		syncCharacter(player);
 	}
 
-	/** Writes the cached data back to the persistent attachment. No-op if not cached. */
+	/**
+	 * Writes the cached data back to the persistent attachment. No-op if the
+	 * player no longer owns the cache entry (e.g. a zombie session flushing
+	 * after a duplicate login already transferred ownership).
+	 */
 	public static void saveCharacter(ServerPlayerEntity player) {
-		PlayerCharacterData data = CACHE.get(player.getUuid());
-		if (data != null) {
-			CharacterAttachments.set(player, data);
+		CachedCharacter entry = CACHE.get(player.getUuid());
+		if (entry != null && entry.owner == player) {
+			CharacterAttachments.set(player, entry.data);
 			DIRTY.remove(player.getUuid());
 		}
 	}
@@ -118,8 +163,12 @@ public final class CharacterManager {
 	/** Sends a full bounded snapshot of the player's synced state to their client. */
 	public static void syncCharacter(ServerPlayerEntity player) {
 		PlayerCharacterData data = getCharacter(player);
-		ServerPlayNetworking.send(player,
-				new CharacterSyncPayload(snapshotForSync(data, System.currentTimeMillis())));
+		try {
+			ServerPlayNetworking.send(player,
+					new CharacterSyncPayload(snapshotForSync(data, System.currentTimeMillis())));
+		} catch (Exception e) {
+			LifepathMod.LOGGER.error("failed to send character sync to {}", player.getUuid(), e);
+		}
 	}
 
 	/**
@@ -129,8 +178,7 @@ public final class CharacterManager {
 	 * the copy can never share mutable state with the cache.
 	 */
 	static PlayerCharacterData snapshotForSync(PlayerCharacterData data, long nowMillis) {
-		PlayerCharacterData copy = CharacterPersistence.deserialize(
-				CharacterPersistence.serialize(data));
+		PlayerCharacterData copy = CharacterPersistence.copy(data);
 		copy.clearExpiredCooldowns(nowMillis);
 		return copy;
 	}

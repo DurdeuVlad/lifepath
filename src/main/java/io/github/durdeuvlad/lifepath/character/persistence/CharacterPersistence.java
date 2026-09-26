@@ -59,6 +59,15 @@ public final class CharacterPersistence {
 		return sanitize(data);
 	}
 
+	/**
+	 * Deep copy via codec round-trip — no migration (input is a live model,
+	 * already current) and no sanitize (copies must not prune references or
+	 * emit sanitize WARNs; used for sync snapshots and cache copies).
+	 */
+	public static PlayerCharacterData copy(PlayerCharacterData data) {
+		return Serialization.fromNbt(PlayerCharacterData.CODEC, serialize(data));
+	}
+
 	/** {@link #deserialize} with graceful degradation: backup + fresh defaults + ERROR on failure. */
 	public static PlayerCharacterData loadSafe(NbtCompound raw, UUID owner, @Nullable Path backupDir) {
 		try {
