@@ -109,6 +109,24 @@ public final class LifepathConfig {
 		return (T) file.get(key);
 	}
 
+	/**
+	 * {@link #get} that never throws: returns {@code fallback} when the file
+	 * isn't loaded or the key is absent. For optional/best-effort reads where a
+	 * missing key must degrade gracefully rather than crash the caller.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getOrDefault(Identifier fileId, String key, T fallback) {
+		Map<String, Object> file = VALUES.get(fileId);
+		if (file == null || !file.containsKey(key)) {
+			return fallback;
+		}
+		Object value = file.get(key);
+		// Erased casts can't throw here — narrow explicitly so a wrong-typed
+		// stored value really does fall back instead of CCE-ing at the caller.
+		return fallback == null || fallback.getClass().isInstance(value)
+				? (T) value : fallback;
+	}
+
 	public static boolean getBoolean(Identifier fileId, String key) {
 		return get(fileId, key);
 	}

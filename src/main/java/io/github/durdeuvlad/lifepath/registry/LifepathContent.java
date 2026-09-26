@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.ContentIndex;
 import io.github.durdeuvlad.lifepath.character.persistence.CharacterPersistence;
+import io.github.durdeuvlad.lifepath.content.LevelCurveDefinition;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
@@ -53,6 +54,8 @@ public final class LifepathContent {
 			new ContentRegistry<>(LifepathMod.id("specialization"));
 	private static final ContentRegistry<SkillDefinition> SKILLS =
 			new ContentRegistry<>(LifepathMod.id("skill"));
+	private static final ContentRegistry<LevelCurveDefinition> LEVEL_CURVES =
+			new ContentRegistry<>(LifepathMod.id("level_curve"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -79,6 +82,11 @@ public final class LifepathContent {
 		ReloadManager.registerData(LifepathMod.id("skill"),
 				manager -> loadDomain(manager, "skill", SkillDefinition.SkillDefinitionFile.CODEC,
 						SkillDefinition::fromFile, SKILLS));
+		// Nested domain: curves live under data/<ns>/skill/curve/ — the skill
+		// reloader only scans the domain dir's direct children, so no collision.
+		ReloadManager.registerData(LifepathMod.id("level_curve"),
+				manager -> loadDomain(manager, "skill/curve", LevelCurveDefinition.LevelCurveFile.CODEC,
+						LevelCurveDefinition::fromFile, LEVEL_CURVES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateReferences());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -96,6 +104,10 @@ public final class LifepathContent {
 		return SKILLS;
 	}
 
+	public static ContentRegistry<LevelCurveDefinition> levelCurves() {
+		return LEVEL_CURVES;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (abilities, traits,
@@ -107,6 +119,7 @@ public final class LifepathContent {
 			case "species" -> SPECIES.contains(id);
 			case "specialization" -> SPECIALIZATIONS.contains(id);
 			case "skill" -> SKILLS.contains(id);
+			case "level_curve" -> LEVEL_CURVES.contains(id);
 			default -> true;
 		};
 	}
@@ -132,8 +145,18 @@ public final class LifepathContent {
 		// Read stage first: the registry keeps its previous contents if the
 		// scan itself fails — only a completed read replaces the domain.
 		Map<Identifier, JsonElement> parsed = new LinkedHashMap<>();
+		// findResources recurses — only DIRECT children of the domain dir are
+		// entries; nested paths belong to their own domain (e.g. skill/curve).
+		// The startsWith guard is required too: non-vanilla PackResources may
+		// prefix-match loosely and feed sibling dirs back through.
 		Map<Identifier, Resource> files =
-				manager.findResources(directory, id -> id.getPath().endsWith(".json"));
+				manager.findResources(directory, id -> {
+					String path = id.getPath();
+					if (!path.startsWith(directory + "/") || !path.endsWith(".json")) {
+						return false;
+					}
+					return !path.substring(directory.length() + 1).contains("/");
+				});
 		for (Map.Entry<Identifier, Resource> file : files.entrySet()) {
 			try (var reader = new InputStreamReader(file.getValue().getInputStream(), StandardCharsets.UTF_8)) {
 				parsed.put(entryId(file.getKey(), directory), JsonParser.parseReader(reader));
@@ -234,6 +257,7 @@ public final class LifepathContent {
 			case "species" -> SPECIES;
 			case "specialization" -> SPECIALIZATIONS;
 			case "skill" -> SKILLS;
+			case "level_curve" -> LEVEL_CURVES;
 			default -> null;
 		};
 	}
