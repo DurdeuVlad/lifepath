@@ -151,6 +151,25 @@ public final class VanillaGameplayProducers {
 		return false;
 	}
 
+	/**
+	 * Forge output (anvil / smithing table), called by the screen-handler
+	 * mixins before vanilla consumes the inputs. The output item id is the
+	 * event sourceId → repetition signatures distinguish identical-recipe
+	 * spam for M3-4. All weighting lives in xp_source data.
+	 */
+	public static void onForgeOutput(net.minecraft.entity.player.PlayerEntity player,
+			net.minecraft.item.ItemStack output, Identifier workstationId) {
+		if (!(player instanceof ServerPlayerEntity serverPlayer) || output.isEmpty()) {
+			return;
+		}
+		Set<Identifier> itemTags = output.streamTags()
+				.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
+		Identifier itemId = net.minecraft.registry.Registries.ITEM.getId(output.getItem());
+		ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents.smithing(
+				serverPlayer, itemId, itemTags, workstationId,
+				Map.of("count", Integer.toString(output.getCount()))));
+	}
+
 	private static void publishHarvest(ServerPlayerEntity player, BlockState state) {
 		publishHarvest(player, state,
 				net.minecraft.registry.Registries.BLOCK.getId(state.getBlock()),

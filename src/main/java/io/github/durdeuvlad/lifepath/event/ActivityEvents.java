@@ -20,7 +20,9 @@ import org.jetbrains.annotations.Nullable;
  * <ul>
  *   <li>{@code mining}: sourceId = block id; tag+attr {@code tier} (optional)</li>
  *   <li>{@code farming}: sourceId = crop id; tag {@code lifepath:mature} or {@code lifepath:immature}; attr {@code mature}=true/false</li>
- *   <li>{@code smithing}: sourceId = recipe id; tag = workstation id; attrs {@code output}, {@code tier}, {@code workstation}</li>
+ *   <li>{@code smithing}: sourceId = <b>output item id</b> (repetition signature keys on
+ *       the produced item); tags = output item tags + workstation id +
+ *       {@code lifepath:smithing_workstations}; attr {@code workstation} + extras</li>
  *   <li>{@code fishing}: sourceId = loot item id; attr {@code rarity}</li>
  *   <li>{@code crafting}: sourceId = recipe/output id (stub shape)</li>
  *   <li>{@code combat}: sourceId = entity type id (stub shape)</li>
@@ -56,29 +58,30 @@ public final class ActivityEvents {
 				cause, now(), Map.of("mature", Boolean.toString(mature)));
 	}
 
-	public static ActivityEvent smithing(ServerPlayerEntity player, Identifier recipeId,
-			@Nullable Identifier outputId, @Nullable String materialTier,
-			@Nullable Identifier workstationId) {
-		return smithing(player, recipeId, outputId, materialTier, workstationId,
-				ActivityEvent.Cause.PLAYER);
+	/**
+	 * Canonical smithing event — the SAME shape vanilla producers and compat
+	 * adapters must emit: sourceId = output item id, tags = output item tags
+	 * + workstation id + {@code lifepath:smithing_workstations} marker (so
+	 * xp_source files can gate on the workstation family). Extra descriptive
+	 * attributes merge over the {@code workstation} attr.
+	 */
+	public static ActivityEvent smithing(ServerPlayerEntity player, Identifier outputId,
+			Set<Identifier> outputItemTags, Identifier workstationId,
+			Map<String, String> extraAttrs) {
+		return smithing(player, outputId, outputItemTags, workstationId,
+				extraAttrs, ActivityEvent.Cause.PLAYER);
 	}
 
-	public static ActivityEvent smithing(ServerPlayerEntity player, Identifier recipeId,
-			@Nullable Identifier outputId, @Nullable String materialTier,
-			@Nullable Identifier workstationId, ActivityEvent.Cause cause) {
-		Map<String, String> attrs = new LinkedHashMap<>();
-		if (outputId != null) {
-			attrs.put("output", outputId.toString());
-		}
-		if (materialTier != null) {
-			attrs.put("tier", materialTier);
-		}
-		if (workstationId != null) {
-			attrs.put("workstation", workstationId.toString());
-		}
-		return new ActivityEvent(player, ActivityTypes.SMITHING, recipeId,
-				workstationId == null ? Set.of() : Set.of(workstationId),
-				cause, now(), attrs);
+	public static ActivityEvent smithing(ServerPlayerEntity player, Identifier outputId,
+			Set<Identifier> outputItemTags, Identifier workstationId,
+			Map<String, String> extraAttrs, ActivityEvent.Cause cause) {
+		Set<Identifier> tags = new java.util.HashSet<>(outputItemTags);
+		tags.add(workstationId);
+		tags.add(LifepathMod.id("smithing_workstations"));
+		Map<String, String> attrs = new LinkedHashMap<>(extraAttrs);
+		attrs.put("workstation", workstationId.toString());
+		return new ActivityEvent(player, ActivityTypes.SMITHING, outputId,
+				Set.copyOf(tags), cause, now(), attrs);
 	}
 
 	public static ActivityEvent fishing(ServerPlayerEntity player, Identifier lootId,

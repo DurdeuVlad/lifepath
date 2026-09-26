@@ -102,6 +102,7 @@ public class LifepathMod implements ModInitializer {
 		SkillXpService.init();
 		XpSourceRouter.init();
 		VanillaGameplayProducers.init();
+		io.github.durdeuvlad.lifepath.compat.ExternalAdapterRegistry.init();
 	}
 
 	public static Identifier id(String path) {

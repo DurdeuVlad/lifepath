@@ -142,6 +142,35 @@ class XpSourceDefinitionTest {
 	}
 
 	@Test
+	void smithingSourceTierWeightsOrderedByMaterial() throws Exception {
+		// §11.3: iron < diamond < netherite — weight by output tier tag.
+		Path file = Path.of("src/main/resources/data/lifepath/xp_source/smithing.json");
+		var def = XpSourceDefinition.fromFile(Identifier.of("lifepath", "smithing"),
+				XpSourceDefinition.XpSourceFile.CODEC.parse(JsonOps.INSTANCE,
+						JsonParser.parseString(Files.readString(file))).result().orElseThrow());
+		double iron = def.resolve(Identifier.of("minecraft", "iron_pickaxe"),
+				Set.of(Identifier.of("lifepath", "smithing_tier_iron"))).amount();
+		double diamond = def.resolve(Identifier.of("minecraft", "diamond_chestplate"),
+				Set.of(Identifier.of("lifepath", "smithing_tier_diamond"))).amount();
+		double netherite = def.resolve(Identifier.of("minecraft", "netherite_chestplate"),
+				Set.of(Identifier.of("lifepath", "smithing_tier_netherite"))).amount();
+		assertTrue(iron < diamond && diamond < netherite,
+				"tier weights must order iron < diamond < netherite");
+		assertEquals(0.5, def.resolve(Identifier.of("minecraft", "stick"), Set.of()).amount());
+	}
+
+	@Test
+	void shippedSmithingTagFilesExist() throws Exception {
+		// The semantic-tag contract: files must ship so modpack authors can extend them.
+		for (String tag : new String[]{"smithing_tier_netherite", "smithing_tier_diamond",
+				"smithing_tier_gold", "smithing_tier_iron", "smithing_materials"}) {
+			assertTrue(Files.exists(Path.of("src/main/resources/data/lifepath/tags/item/"
+					+ tag + ".json")), tag + " tag file must ship");
+		}
+		assertTrue(Files.exists(Path.of("src/main/resources/data/lifepath/tags/block/smithing_workstations.json")));
+	}
+
+	@Test
 	void miningSourceRequiresMinableTag() throws Exception {
 		Path file = Path.of("src/main/resources/data/lifepath/xp_source/mining.json");
 		var def = XpSourceDefinition.fromFile(Identifier.of("lifepath", "mining"),
