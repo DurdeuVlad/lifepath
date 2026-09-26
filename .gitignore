@@ -5,6 +5,7 @@ out/
 bin/
 *.class
 *.jar
+!gradle-wrapper.jar
 *.war
 
 # Fabric / Minecraft dev runtime
