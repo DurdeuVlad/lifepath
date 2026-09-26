@@ -22,6 +22,7 @@ class LifepathContentTest {
 		LifepathContent.species().clear();
 		LifepathContent.specializations().clear();
 		LifepathContent.skills().clear();
+		LifepathContent.abilities().clear();
 		LifepathContent.validateReferences();
 	}
 
@@ -64,8 +65,9 @@ class LifepathContentTest {
 		assertTrue(LifepathContent.exists("skill", Identifier.of("lifepath", "foraging")));
 		assertFalse(LifepathContent.exists("skill", Identifier.of("lifepath", "gone")));
 		assertFalse(LifepathContent.exists("species", Identifier.of("lifepath", "gone")));
-		// Domains without a registry yet answer permissively (their milestone hasn't landed).
-		assertTrue(LifepathContent.exists("ability", Identifier.of("lifepath", "anything")));
+		// Domains without a registry yet answer permissively (their milestone hasn't landed);
+		// ability landed in M4-1 and now answers strictly.
+		assertFalse(LifepathContent.exists("ability", Identifier.of("lifepath", "anything")));
 		assertTrue(LifepathContent.exists("trait", Identifier.of("lifepath", "anything")));
 	}
 
