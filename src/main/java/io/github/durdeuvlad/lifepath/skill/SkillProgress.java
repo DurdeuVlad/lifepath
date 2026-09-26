@@ -24,7 +24,7 @@ public record SkillProgress(
 			Codec.INT.optionalFieldOf("level", 0).forGetter(SkillProgress::level),
 			Codec.INT.optionalFieldOf("highest_level", 0).forGetter(SkillProgress::highestLevel),
 			Codec.INT.optionalFieldOf("protected_floor", 0).forGetter(SkillProgress::protectedFloor),
-			Aptitude.CODEC.optionalFieldOf("aptitude", Aptitude.C).forGetter(SkillProgress::aptitude),
+			Aptitude.CODEC.optionalFieldOf("aptitude", Aptitude.B).forGetter(SkillProgress::aptitude),
 			Codec.LONG.optionalFieldOf("last_meaningful_use", 0L).forGetter(SkillProgress::lastMeaningfulUse)
 	).apply(instance, SkillProgress::new));
 

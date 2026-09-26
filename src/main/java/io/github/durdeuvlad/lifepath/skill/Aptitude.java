@@ -10,16 +10,18 @@ import java.util.Locale;
  * creation (species/specialization floors and tables land in later milestones).
  */
 public enum Aptitude {
+	// DECLARATION ORDER IS SEMANTIC: ordinal() is the grade rank
+	// (SkillService.effectiveAptitude compares ordinals for species floors).
 	D, C, B, A, S;
 
-	/** Lenient decode: an unknown rank degrades to {@link #C} with a WARN rather than failing the file. */
+	/** Lenient decode: an unknown rank degrades to {@link #B} (the neutral default) with a WARN rather than failing the file. */
 	public static final Codec<Aptitude> CODEC = Codec.STRING.xmap(
 			name -> {
 				try {
 					return Aptitude.valueOf(name.toUpperCase(Locale.ROOT));
 				} catch (IllegalArgumentException e) {
-					LifepathMod.LOGGER.warn("unknown aptitude '{}', defaulting to C", name);
-					return Aptitude.C;
+					LifepathMod.LOGGER.warn("unknown aptitude '{}', defaulting to B", name);
+					return Aptitude.B;
 				}
 			},
 			aptitude -> aptitude.name().toLowerCase(Locale.ROOT));

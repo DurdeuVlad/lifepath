@@ -140,7 +140,7 @@ class SkillServiceTest {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 		SkillProgress p = SkillService.ensureProgress(data, MINING);
 		assertEquals(0, p.level());
-		assertEquals(Aptitude.C, p.aptitude());
+		assertEquals(Aptitude.B, p.aptitude());
 		assertSame(p, data.skill(MINING));
 	}
 

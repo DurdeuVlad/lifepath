@@ -128,14 +128,14 @@ class CharacterPersistenceTest {
 	}
 
 	@Test
-	void unknownAptitudeDefaultsToCWithoutNukingBlob() {
+	void unknownAptitudeDefaultsToBWithoutNukingBlob() {
 		NbtCompound raw = CharacterPersistence.serialize(sampleData());
 		NbtCompound skill = raw.getCompound("skills").getCompound("lifepath:test_skill");
 		skill.putString("aptitude", "zzz");
 
 		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
 
-		assertEquals(Aptitude.C, decoded.skills()
+		assertEquals(Aptitude.B, decoded.skills()
 				.get(Identifier.of("lifepath", "test_skill")).aptitude());
 		assertEquals(10.0, decoded.skills()
 				.get(Identifier.of("lifepath", "test_skill")).xp());

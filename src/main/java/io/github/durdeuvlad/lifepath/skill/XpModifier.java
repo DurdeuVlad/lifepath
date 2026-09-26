@@ -23,6 +23,7 @@ public interface XpModifier {
 
 	/** Read-only view of the award being processed. {@code player} is null on the data-only path. */
 	record XpContext(@Nullable ServerPlayerEntity player, Identifier skillId,
-			SkillProgress progress, ActivityEvent source) {
+			SkillProgress progress, ActivityEvent source,
+			@Nullable Identifier speciesId) {
 	}
 }

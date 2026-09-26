@@ -110,7 +110,7 @@ public final class SkillService {
 	/**
 	 * Get-or-create the character's progress for {@code skillId}: returns the
 	 * stored record (clamped) if present, else a fresh {@code xp=0, level=0}
-	 * record with {@link Aptitude#C} which is ALSO stored on the model. Returns
+	 * record with {@link Aptitude#B} which is ALSO stored on the model. Returns
 	 * null when the skill id has no loaded definition (fail-safe).
 	 *
 	 * <p><b>Callers must intend creation.</b> Inspection-only paths must use
@@ -130,9 +130,27 @@ public final class SkillService {
 			}
 			return fixed;
 		}
-		SkillProgress fresh = SkillProgress.fresh(Aptitude.C);
+		SkillProgress fresh = SkillProgress.fresh(Aptitude.B);
 		data.setSkillProgress(skillId, fresh);
 		return fresh;
+	}
+
+	/**
+	 * Effective aptitude for XP/decay math (M3-1): the character's recorded
+	 * grade raised to the species floor — {@code max(speciesMin, current)}.
+	 * A null/unknown species means no floor. Pure lookup; writes nothing.
+	 */
+	public static Aptitude effectiveAptitude(@Nullable Identifier speciesId,
+			Identifier skillId, SkillProgress progress) {
+		Aptitude grade = progress.aptitude();
+		if (speciesId != null) {
+			var def = LifepathContent.species().get(speciesId);
+			Aptitude floor = def == null ? null : def.minAptitudes().get(skillId);
+			if (floor != null && floor.ordinal() > grade.ordinal()) {
+				grade = floor;
+			}
+		}
+		return grade;
 	}
 
 	/** Test hook: clears the warn-once set. Not for production use. */
