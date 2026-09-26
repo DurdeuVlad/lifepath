@@ -7,6 +7,7 @@ import io.github.durdeuvlad.lifepath.config.ConfigSpec;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import io.github.durdeuvlad.lifepath.network.s2c.CharacterSyncPayload;
+import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.registry.RegistryBootstrap;
 import io.github.durdeuvlad.lifepath.reload.ReloadManager;
 import net.fabricmc.api.ModInitializer;
@@ -56,6 +57,7 @@ public class LifepathMod implements ModInitializer {
 		RegistryBootstrap.register(id("character_attachments"), CharacterAttachments::init);
 		RegistryBootstrap.bootstrap();
 
+		LifepathContent.init();
 		LifepathNetworking.registerS2C(CharacterSyncPayload.ID, CharacterSyncPayload.PACKET_CODEC);
 		CharacterManager.init();
 	}
