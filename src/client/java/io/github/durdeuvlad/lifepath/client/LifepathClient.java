@@ -35,6 +35,13 @@ public class LifepathClient implements ClientModInitializer {
 				(payload, context) -> context.client().execute(() ->
 						ClientCharacterState.applyCooldown(
 								payload.abilityId(), payload.expiryEpochMs())));
+		// M4-5: resource deltas keep HUD meters fresh between snapshots.
+		ClientLifepathNetworking.onS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.ResourceUpdatePayload.ID,
+				(payload, context) -> context.client().execute(() ->
+						ClientCharacterState.applyResource(payload.resourceId(),
+								payload.current(), payload.min(), payload.max(),
+								payload.bandIndex())));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			ClientCharacterState.clear();
 			ClientAbilityState.clear();

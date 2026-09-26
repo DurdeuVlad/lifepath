@@ -226,8 +226,9 @@ public final class AbilityEngine {
 		}
 		if (def.cost().isPresent()) {
 			AbilityDefinition.Cost cost = def.cost().get();
-			var res = data.resources().get(cost.resource());
-			if (res == null || res.current() < cost.amount()) {
+			// Unmaterialized resources read as their definition's default.
+			if (io.github.durdeuvlad.lifepath.resource.ResourceService
+					.current(data, cost.resource()) < cost.amount()) {
 				return debug(def, Outcome.COST_UNMET);
 			}
 		}
@@ -268,15 +269,9 @@ public final class AbilityEngine {
 				io.github.durdeuvlad.lifepath.character.CharacterManager.changed(sp);
 			}
 		}
-		def.cost().ifPresent(cost -> {
-			var res = data.resources().get(cost.resource());
-			// An action may have drained/removed the resource — re-read, clamp.
-			if (res != null) {
-				double left = Math.max(res.min(), Math.min(res.max(), res.current() - cost.amount()));
-				data.setResource(cost.resource(),
-						new PlayerCharacterData.ResourceState(left, res.min(), res.max()));
-			}
-		});
+		def.cost().ifPresent(cost ->
+				io.github.durdeuvlad.lifepath.resource.ResourceService.modify(
+						data, self, cost.resource(), -cost.amount(), now));
 		def.cooldown().ifPresent(cd -> {
 			long expiry = CooldownService.trigger(data, def.id(), cd.seconds(), now);
 			if (self != null && expiry >= 0) {
@@ -290,25 +285,20 @@ public final class AbilityEngine {
 				}
 			}
 		});
-		applyResourceInteractions(data, def, interactionSeconds);
+		applyResourceInteractions(data, self, def, interactionSeconds, now);
 		return Outcome.EXECUTED;
 	}
 
 	/** Passive-only by contract: scales {@code per_second} by elapsed real time. */
 	private static void applyResourceInteractions(PlayerCharacterData data,
-			AbilityDefinition def, double seconds) {
+			@Nullable ServerPlayerEntity self, AbilityDefinition def,
+			double seconds, long now) {
 		if (def.resourceInteractions().isEmpty() || seconds <= 0.0) {
 			return;
 		}
 		for (AbilityDefinition.ResourceInteraction ri : def.resourceInteractions()) {
-			var res = data.resources().get(ri.resource());
-			if (res == null) {
-				continue;
-			}
-			double next = Math.max(res.min(), Math.min(res.max(),
-					res.current() + ri.perSecond() * seconds));
-			data.setResource(ri.resource(),
-					new PlayerCharacterData.ResourceState(next, res.min(), res.max()));
+			io.github.durdeuvlad.lifepath.resource.ResourceService.modify(
+					data, self, ri.resource(), ri.perSecond() * seconds, now);
 		}
 	}
 

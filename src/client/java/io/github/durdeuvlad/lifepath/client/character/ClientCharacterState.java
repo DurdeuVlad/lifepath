@@ -18,6 +18,9 @@ import org.jetbrains.annotations.Nullable;
 @Environment(EnvType.CLIENT)
 public final class ClientCharacterState {
 	private static volatile PlayerCharacterData snapshot;
+	/** Resource → current band index per the last delta (-1 removed). Server defs aren't client-visible. */
+	private static final java.util.Map<net.minecraft.util.Identifier, Integer>
+			RESOURCE_BANDS = new java.util.concurrent.ConcurrentHashMap<>();
 
 	private ClientCharacterState() {
 	}
@@ -30,6 +33,32 @@ public final class ClientCharacterState {
 	/** Drops the snapshot (disconnect / leaving a server). */
 	public static void clear() {
 		snapshot = null;
+		RESOURCE_BANDS.clear();
+	}
+
+	/**
+	 * Applies a resource delta (M4-5 {@code ResourceUpdatePayload}) to the
+	 * read-model snapshot + records the band index for M6 feedback.
+	 * No-op before the first snapshot.
+	 */
+	public static void applyResource(net.minecraft.util.Identifier resourceId,
+			double current, double min, double max, int bandIndex) {
+		PlayerCharacterData s = snapshot;
+		if (s == null) {
+			return;
+		}
+		s.setResource(resourceId,
+				new PlayerCharacterData.ResourceState(current, min, max));
+		if (bandIndex >= 0) {
+			RESOURCE_BANDS.put(resourceId, bandIndex);
+		} else {
+			RESOURCE_BANDS.remove(resourceId);
+		}
+	}
+
+	/** The band index a resource currently sits in (−1 = none), per the last delta. */
+	public static int resourceBand(net.minecraft.util.Identifier resourceId) {
+		return RESOURCE_BANDS.getOrDefault(resourceId, -1);
 	}
 
 	/**

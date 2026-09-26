@@ -154,6 +154,11 @@ public class LifepathMod implements ModInitializer {
 						"Ability cooldowns with <= this many seconds remaining"
 								+ " at load do not survive relog (M4-4).")
 				.build());
+		LifepathConfig.define(id("resources"), ConfigSpec.builder()
+				.define("tick_interval_ticks", 20, v -> v >= 1 && v <= 1200,
+						"Resource regen/band sweep interval (M4-5) — regen is"
+								+ " tick-batched at this resolution, not per-tick.")
+				.build());
 		LifepathConfig.define(DiminishingReturns.CONFIG, ConfigSpec.builder()
 				.define("enabled", true,
 						"Diminishing returns on repeated identical actions (GAMEDESIGN §11.1).")
@@ -193,6 +198,9 @@ public class LifepathMod implements ModInitializer {
 		LifepathNetworking.registerS2C(
 				io.github.durdeuvlad.lifepath.network.s2c.CooldownUpdatePayload.ID,
 				io.github.durdeuvlad.lifepath.network.s2c.CooldownUpdatePayload.PACKET_CODEC);
+		LifepathNetworking.registerS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.ResourceUpdatePayload.ID,
+				io.github.durdeuvlad.lifepath.network.s2c.ResourceUpdatePayload.PACKET_CODEC);
 		CharacterManager.init();
 		SkillXpService.init();
 		SkillDecayService.init();
@@ -202,6 +210,7 @@ public class LifepathMod implements ModInitializer {
 				io.github.durdeuvlad.lifepath.network.c2s.ActivateAbilityPayload.ID,
 				io.github.durdeuvlad.lifepath.network.c2s.ActivateAbilityPayload.PACKET_CODEC);
 		io.github.durdeuvlad.lifepath.ability.AbilityEngine.init();
+		io.github.durdeuvlad.lifepath.resource.ResourceService.init();
 		XpSourceRouter.init();
 		VanillaGameplayProducers.init();
 		io.github.durdeuvlad.lifepath.compat.ExternalAdapterRegistry.init();
