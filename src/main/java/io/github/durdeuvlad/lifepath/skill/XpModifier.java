@@ -21,9 +21,15 @@ import org.jetbrains.annotations.Nullable;
 public interface XpModifier {
 	double apply(XpContext context, double amount);
 
-	/** Read-only view of the award being processed. {@code player} is null on the data-only path. */
+	/**
+	 * View of the award being processed. {@code player} is null on the
+	 * data-only path; {@code data} is the live character model — read-only by
+	 * convention EXCEPT for sanctioned bookkeeping writes (the diminishing-
+	 * returns signature ledger records itself through it).
+	 */
 	record XpContext(@Nullable ServerPlayerEntity player, Identifier skillId,
 			SkillProgress progress, ActivityEvent source,
-			@Nullable Identifier speciesId, @Nullable Identifier specializationId) {
+			@Nullable Identifier speciesId, @Nullable Identifier specializationId,
+			@Nullable io.github.durdeuvlad.lifepath.character.PlayerCharacterData data) {
 	}
 }

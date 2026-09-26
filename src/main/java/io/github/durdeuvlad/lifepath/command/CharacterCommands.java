@@ -153,6 +153,23 @@ public final class CharacterCommands {
 								: "  expires in " + remaining + "ms")));
 			}
 		}
+		// M3-4 instrumentation: active repetition signatures with their
+		// in-window counts — the balance-tuning surface for diminishing returns.
+		Map<String, List<Long>> sigs = data.actionSignatures();
+		if (sigs.isEmpty()) {
+			lines.add(Text.literal("  action signatures: <none>"));
+		} else {
+			long cutoff = nowMillis
+					- io.github.durdeuvlad.lifepath.skill.DiminishingReturns.windowMs();
+			for (Map.Entry<String, List<Long>> sig : sigs.entrySet()) {
+				long active = sig.getValue().stream().filter(t -> t > cutoff).count();
+				if (active > 0) {
+					lines.add(Text.literal("  sig " + sig.getKey() + "  count=" + active
+							+ "  mult=" + io.github.durdeuvlad.lifepath.skill
+									.DiminishingReturns.multiplierFor((int) active)));
+				}
+			}
+		}
 		return List.copyOf(lines);
 	}
 

@@ -53,6 +53,8 @@ public final class PlayerCharacterData {
 					.optionalFieldOf("resources", Map.of()).forGetter(d -> d.resources),
 			Codec.unboundedMap(Identifier.CODEC, Codec.LONG)
 					.optionalFieldOf("cooldowns", Map.of()).forGetter(d -> d.cooldowns),
+			Codec.unboundedMap(Codec.STRING, Codec.LONG.listOf())
+					.optionalFieldOf("action_signatures", Map.of()).forGetter(d -> d.actionSignatures),
 			Codec.INT.optionalFieldOf("data_version", 0).forGetter(d -> d.dataVersion)
 	).apply(instance, PlayerCharacterData::fromCodec));
 
@@ -67,6 +69,7 @@ public final class PlayerCharacterData {
 	private final List<Identifier> unlocks = new ArrayList<>();
 	private final Map<Identifier, ResourceState> resources = new LinkedHashMap<>();
 	private final Map<Identifier, Long> cooldowns = new LinkedHashMap<>();
+	private final Map<String, List<Long>> actionSignatures = new LinkedHashMap<>();
 	private int dataVersion = LifepathMod.DATA_VERSION;
 
 	/** Fresh default data for a brand-new character. */
@@ -85,6 +88,7 @@ public final class PlayerCharacterData {
 		unlocks.clear();
 		resources.clear();
 		cooldowns.clear();
+		actionSignatures.clear();
 		dataVersion = LifepathMod.DATA_VERSION;
 	}
 
@@ -98,6 +102,7 @@ public final class PlayerCharacterData {
 			List<Identifier> unlocks,
 			Map<Identifier, ResourceState> resources,
 			Map<Identifier, Long> cooldowns,
+			Map<String, List<Long>> actionSignatures,
 			int dataVersion) {
 		PlayerCharacterData data = new PlayerCharacterData();
 		data.speciesId = speciesId.orElse(null);
@@ -109,6 +114,7 @@ public final class PlayerCharacterData {
 		data.unlocks.addAll(unlocks);
 		data.resources.putAll(resources);
 		data.cooldowns.putAll(cooldowns);
+		actionSignatures.forEach((sig, times) -> data.actionSignatures.put(sig, new ArrayList<>(times)));
 		data.dataVersion = dataVersion;
 		return data;
 	}
@@ -204,6 +210,24 @@ public final class PlayerCharacterData {
 
 	public void removeCooldown(Identifier abilityId) {
 		cooldowns.remove(abilityId);
+	}
+
+	/**
+	 * Rolling-window action timestamps per repetition signature (M3-4).
+	 * Read view is unmodifiable; mutate via {@link #setActionTimestamps}.
+	 */
+	public Map<String, List<Long>> actionSignatures() {
+		Map<String, List<Long>> view = new LinkedHashMap<>();
+		actionSignatures.forEach((k, v) -> view.put(k, Collections.unmodifiableList(v)));
+		return Collections.unmodifiableMap(view);
+	}
+
+	public void setActionTimestamps(String signature, List<Long> timestamps) {
+		if (timestamps.isEmpty()) {
+			actionSignatures.remove(signature);
+		} else {
+			actionSignatures.put(Objects.requireNonNull(signature), new ArrayList<>(timestamps));
+		}
 	}
 
 	public void clearExpiredCooldowns(long nowEpochMs) {
