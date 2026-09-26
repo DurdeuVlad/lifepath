@@ -113,6 +113,20 @@ public final class PlayerCharacterData {
 		return new PlayerCharacterData();
 	}
 
+	/** Restores every field to fresh-default state in place (admin reset). */
+	public void reset() {
+		speciesId = null;
+		specializationId = null;
+		skills.clear();
+		traits.clear();
+		conditions.clear();
+		attunements.clear();
+		unlocks.clear();
+		resources.clear();
+		cooldowns.clear();
+		dataVersion = LifepathMod.DATA_VERSION;
+	}
+
 	private static PlayerCharacterData fromCodec(
 			Optional<Identifier> speciesId,
 			Optional<Identifier> specializationId,
