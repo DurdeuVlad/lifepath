@@ -11,6 +11,7 @@ import io.github.durdeuvlad.lifepath.content.LevelCurveDefinition;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
+import io.github.durdeuvlad.lifepath.content.XpSourceDefinition;
 import io.github.durdeuvlad.lifepath.reload.ReloadManager;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +57,8 @@ public final class LifepathContent {
 			new ContentRegistry<>(LifepathMod.id("skill"));
 	private static final ContentRegistry<LevelCurveDefinition> LEVEL_CURVES =
 			new ContentRegistry<>(LifepathMod.id("level_curve"));
+	private static final ContentRegistry<XpSourceDefinition> XP_SOURCES =
+			new ContentRegistry<>(LifepathMod.id("xp_source"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -87,6 +90,9 @@ public final class LifepathContent {
 		ReloadManager.registerData(LifepathMod.id("level_curve"),
 				manager -> loadDomain(manager, "skill/curve", LevelCurveDefinition.LevelCurveFile.CODEC,
 						LevelCurveDefinition::fromFile, LEVEL_CURVES));
+		ReloadManager.registerData(LifepathMod.id("xp_source"),
+				manager -> loadDomain(manager, "xp_source", XpSourceDefinition.XpSourceFile.CODEC,
+						XpSourceDefinition::fromFile, XP_SOURCES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateReferences());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -108,6 +114,10 @@ public final class LifepathContent {
 		return LEVEL_CURVES;
 	}
 
+	public static ContentRegistry<XpSourceDefinition> xpSources() {
+		return XP_SOURCES;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (abilities, traits,
@@ -120,6 +130,7 @@ public final class LifepathContent {
 			case "specialization" -> SPECIALIZATIONS.contains(id);
 			case "skill" -> SKILLS.contains(id);
 			case "level_curve" -> LEVEL_CURVES.contains(id);
+			case "xp_source" -> XP_SOURCES.contains(id);
 			default -> true;
 		};
 	}
@@ -232,6 +243,9 @@ public final class LifepathContent {
 				recordRefs("skill", def.id(), milestone.effectRefs(), "ability");
 			}
 		}
+		for (XpSourceDefinition def : XP_SOURCES.all().values()) {
+			recordRef("xp_source", def.id(), Optional.of(def.skill()), "skill");
+		}
 	}
 
 	private static void recordRefs(String domain, Identifier source,
@@ -258,6 +272,7 @@ public final class LifepathContent {
 			case "specialization" -> SPECIALIZATIONS;
 			case "skill" -> SKILLS;
 			case "level_curve" -> LEVEL_CURVES;
+			case "xp_source" -> XP_SOURCES;
 			default -> null;
 		};
 	}

@@ -27,7 +27,8 @@ import org.junit.jupiter.api.Test;
 class SkillXpServiceTest {
 	private static final Identifier SKILL = Identifier.of("lifepath", "mining");
 	private static final Identifier CURVE = Identifier.of("lifepath", "test_curve");
-	private static final ActivityEvent SRC = ActivityEvent.of(Identifier.of("lifepath", "test"), null);
+	private static final ActivityEvent SRC = ActivityEvent.of(
+			Identifier.of("lifepath", "test"), Identifier.of("minecraft", "stone"));
 
 	@BeforeEach
 	void setUp() {
