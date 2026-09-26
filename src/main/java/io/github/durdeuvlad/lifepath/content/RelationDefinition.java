@@ -72,7 +72,7 @@ public record RelationDefinition(Identifier id, List<Rule> rules) {
 		return null;
 	}
 
-	/** {@code {"rules": [{"entity": "#lifepath:undead", "disposition": "neutral"}]}} */
+	/** {@code {"rules": [{"entity": "#example:kin", "disposition": "neutral"}]}} */
 	public record RelationFile(List<Rule> rules) {
 		public static final Codec<RelationFile> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Rule.CODEC.listOf().fieldOf("rules").forGetter(RelationFile::rules)

@@ -23,7 +23,7 @@ public record DietDefinition(Identifier id, List<IdTagRef> allowed) {
 		return new DietDefinition(id, file.allowed());
 	}
 
-	/** {@code {"allowed": ["#lifepath:undead_foods", "minecraft:golden_apple"]}} */
+	/** {@code {"allowed": ["#example:foods", "minecraft:golden_apple"]}} */
 	public record DietFile(List<IdTagRef> allowed) {
 		public static final Codec<DietFile> CODEC = RecordCodecBuilder.create(i -> i.group(
 				IdTagRef.CODEC.listOf().fieldOf("allowed").forGetter(DietFile::allowed)
