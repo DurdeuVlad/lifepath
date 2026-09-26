@@ -18,6 +18,7 @@ import net.minecraft.util.Identifier;
 public record SpeciesDefinition(
 		Identifier id,
 		String displayName,
+		Optional<String> description,
 		Visibility visibility,
 		Selection selection,
 		List<Identifier> passiveAbilities,
@@ -26,6 +27,17 @@ public record SpeciesDefinition(
 		List<Identifier> resources,
 		Optional<Identifier> dietRules,
 		Optional<Identifier> mobDispositions) {
+
+	/** Convenience for call sites predating {@code description} (M5-1). */
+	public SpeciesDefinition(Identifier id, String displayName, Visibility visibility,
+			Selection selection, List<Identifier> passiveAbilities,
+			List<Identifier> activeAbilities, Map<Identifier, Aptitude> minAptitudes,
+			List<Identifier> resources, Optional<Identifier> dietRules,
+			Optional<Identifier> mobDispositions) {
+		this(id, displayName, Optional.empty(), visibility, selection,
+				passiveAbilities, activeAbilities, minAptitudes, resources,
+				dietRules, mobDispositions);
+	}
 
 	/** How the species appears in selection UI. */
 	public enum Visibility {
@@ -50,14 +62,19 @@ public record SpeciesDefinition(
 	 * not decoded from JSON.
 	 */
 	public static SpeciesDefinition fromFile(Identifier id, SpeciesDefinitionFile file) {
-		return new SpeciesDefinition(id, file.displayName(), file.visibility(), file.selection(),
-				file.passiveAbilities(), file.activeAbilities(), file.minAptitudes(), file.resources(),
-				file.dietRules(), file.mobDispositions());
+		return new SpeciesDefinition(id, file.displayName(), file.description(),
+				file.visibility(), file.selection(),
+				file.passiveAbilities(), file.activeAbilities(), file.minAptitudes(),
+				file.resources(), file.dietRules(), file.mobDispositions());
 	}
 
-	/** JSON shape of {@code data/<ns>/species/<name>.json} (id excluded). */
+	/**
+	 * JSON shape of {@code data/<ns>/species/<name>.json} (id excluded).
+	 * {@code description} is the identity text the selection UX shows (M6).
+	 */
 	public record SpeciesDefinitionFile(
 			String displayName,
+			Optional<String> description,
 			Visibility visibility,
 			Selection selection,
 			List<Identifier> passiveAbilities,
@@ -69,6 +86,7 @@ public record SpeciesDefinition(
 
 		public static final Codec<SpeciesDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SpeciesDefinitionFile::displayName),
+				Codec.STRING.optionalFieldOf("description").forGetter(SpeciesDefinitionFile::description),
 				Visibility.CODEC.optionalFieldOf("visibility", Visibility.NORMAL).forGetter(SpeciesDefinitionFile::visibility),
 				Selection.CODEC.optionalFieldOf("selection", Selection.OPEN).forGetter(SpeciesDefinitionFile::selection),
 				Identifier.CODEC.listOf().optionalFieldOf("passive_abilities", List.of()).forGetter(SpeciesDefinitionFile::passiveAbilities),
