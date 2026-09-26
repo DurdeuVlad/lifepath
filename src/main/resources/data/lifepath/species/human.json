@@ -1,5 +1,6 @@
 {
 	"display_name": "Human",
+	"description": "No innate gifts, no hidden burdens — Humans are the baseline. What they become is earned entirely through skill and specialization.",
 	"visibility": "normal",
 	"selection": "open"
 }
