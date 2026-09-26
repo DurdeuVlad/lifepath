@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.Aptitude;
-import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.SkillProgress;
+import io.github.durdeuvlad.lifepath.skill.Aptitude;
+import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.Test;
 

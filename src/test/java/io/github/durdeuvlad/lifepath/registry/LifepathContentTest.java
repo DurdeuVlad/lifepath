@@ -82,7 +82,7 @@ class LifepathContentTest {
 				new SpeciesDefinition(Identifier.of("lifepath", "human"), "Human",
 						SpeciesDefinition.Visibility.NORMAL, SpeciesDefinition.Selection.OPEN,
 						List.of(Identifier.of("lifepath", "fae_grace")), List.of(),
-						Map.of(minAptSkill, io.github.durdeuvlad.lifepath.character.PlayerCharacterData.Aptitude.B),
+						Map.of(minAptSkill, io.github.durdeuvlad.lifepath.skill.Aptitude.B),
 						List.of(Identifier.of("lifepath", "mana")),
 						java.util.Optional.empty(), java.util.Optional.empty()));
 		LifepathContent.specializations().register(Identifier.of("lifepath", "wanderer"),
