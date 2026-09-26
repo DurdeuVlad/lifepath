@@ -267,20 +267,15 @@ final class BuiltinActions {
 			if (res == null || target.data() == null) {
 				return;
 			}
-			var cur = target.data().resources().get(res);
-			if (cur == null) {
-				return;
-			}
-			double next;
+			ServerPlayerEntity sp = target.entity() instanceof ServerPlayerEntity p
+					? p : null;
 			if (hasNumber(params, "set_to")) {
-				next = num(params, "set_to", cur.current());
+				io.github.durdeuvlad.lifepath.resource.ResourceService.setTo(
+						target.data(), sp, res, num(params, "set_to", 0.0), ctx.now());
 			} else {
-				next = cur.current() + num(params, "delta", 0.0);
+				io.github.durdeuvlad.lifepath.resource.ResourceService.modify(
+						target.data(), sp, res, num(params, "delta", 0.0), ctx.now());
 			}
-			next = Math.max(cur.min(), Math.min(cur.max(), next));
-			target.data().setResource(res,
-					new io.github.durdeuvlad.lifepath.character.PlayerCharacterData
-							.ResourceState(next, cur.min(), cur.max()));
 		});
 
 		register("play_sound", (target, ctx, params) -> {

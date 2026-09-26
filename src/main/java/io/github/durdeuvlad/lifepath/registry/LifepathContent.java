@@ -62,6 +62,8 @@ public final class LifepathContent {
 			new ContentRegistry<>(LifepathMod.id("xp_source"));
 	private static final ContentRegistry<AbilityDefinition> ABILITIES =
 			new ContentRegistry<>(LifepathMod.id("ability"));
+	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.ResourceDefinition>
+			RESOURCES = new ContentRegistry<>(LifepathMod.id("resource"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -102,6 +104,12 @@ public final class LifepathContent {
 		ReloadManager.registerData(LifepathMod.id("ability"),
 				manager -> loadDomain(manager, "ability", AbilityDefinition.AbilityFile.CODEC,
 						LifepathContent::decodeAbility, ABILITIES));
+		// Resource defs: band actions must only name registered action types
+		// (same load-time contract as ability files).
+		ReloadManager.registerData(LifepathMod.id("resource"),
+				manager -> loadDomain(manager, "resource",
+						io.github.durdeuvlad.lifepath.content.ResourceDefinition.ResourceFile.CODEC,
+						LifepathContent::decodeResource, RESOURCES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateReferences());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -131,6 +139,11 @@ public final class LifepathContent {
 		return ABILITIES;
 	}
 
+	public static ContentRegistry<io.github.durdeuvlad.lifepath.content.ResourceDefinition>
+			resources() {
+		return RESOURCES;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (traits, conditions,
@@ -145,6 +158,7 @@ public final class LifepathContent {
 			case "level_curve" -> LEVEL_CURVES.contains(id);
 			case "xp_source" -> XP_SOURCES.contains(id);
 			case "ability" -> ABILITIES.contains(id);
+			case "resource" -> RESOURCES.contains(id);
 			default -> true;
 		};
 	}
@@ -162,6 +176,33 @@ public final class LifepathContent {
 		if (!unknown.isEmpty()) {
 			throw new IllegalArgumentException(
 					"ability " + id + " uses unknown spec node types " + unknown);
+		}
+		return def;
+	}
+
+	/**
+	 * Resource decode + validation (M4-5): shape/bounds checks run in
+	 * {@code ResourceDefinition.fromFile}; band actions additionally must name
+	 * registered action types (the same contract as ability spec nodes).
+	 */
+	public static io.github.durdeuvlad.lifepath.content.ResourceDefinition decodeResource(
+			Identifier id,
+			io.github.durdeuvlad.lifepath.content.ResourceDefinition.ResourceFile file) {
+		var def = io.github.durdeuvlad.lifepath.content.ResourceDefinition.fromFile(id, file);
+		java.util.List<Identifier> unknown = new ArrayList<>();
+		if (io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.isInitialized()) {
+			for (var band : def.bands()) {
+				for (var node : band.actions()) {
+					if (io.github.durdeuvlad.lifepath.ability.AbilityVocabulary
+							.action(node.type()) == null) {
+						unknown.add(node.type());
+					}
+				}
+			}
+		}
+		if (!unknown.isEmpty()) {
+			throw new IllegalArgumentException(
+					"resource " + id + " band actions use unknown types " + unknown);
 		}
 		return def;
 	}
@@ -308,6 +349,7 @@ public final class LifepathContent {
 			case "level_curve" -> LEVEL_CURVES;
 			case "xp_source" -> XP_SOURCES;
 			case "ability" -> ABILITIES;
+			case "resource" -> RESOURCES;
 			default -> null;
 		};
 	}

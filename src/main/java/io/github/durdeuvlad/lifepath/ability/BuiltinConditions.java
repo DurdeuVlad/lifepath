@@ -211,12 +211,16 @@ public final class BuiltinConditions {
 		register("resource_threshold", (ctx, params) -> {
 			Identifier res = id(params, "resource");
 			String op = str(params, "op");
-			if (res == null || op == null) {
+			if (res == null || op == null || !hasNumber(params, "value")) {
 				return false;
 			}
-			var state = ctx.data().resources().get(res);
-			return state != null && hasNumber(params, "value")
-					&& compare(op, state.current(), num(params, "value", 0));
+			// Unmaterialized resources resolve to their definition's default.
+			double cur = io.github.durdeuvlad.lifepath.resource.ResourceService
+					.current(ctx.data(), res);
+			boolean known = ctx.data().resources().containsKey(res)
+					|| io.github.durdeuvlad.lifepath.registry.LifepathContent
+							.resources().get(res) != null;
+			return known && compare(op, cur, num(params, "value", 0));
 		});
 	}
 

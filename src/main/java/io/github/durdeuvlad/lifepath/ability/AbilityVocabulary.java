@@ -107,6 +107,11 @@ public final class AbilityVocabulary {
 
 	private static boolean initialized;
 
+	/** Whether the built-in vocabulary has been registered (load-time validators gate on this). */
+	public static boolean isInitialized() {
+		return initialized;
+	}
+
 	/** Registers the built-in vocabulary. Idempotent. */
 	public static void init() {
 		if (initialized) {
@@ -120,8 +125,9 @@ public final class AbilityVocabulary {
 			if (res == null) {
 				return false;
 			}
-			var state = ctx.data().resources().get(res);
-			return state != null && state.current() >= num(params, "min", 0.0);
+			// Unmaterialized resources read as their definition's default.
+			return io.github.durdeuvlad.lifepath.resource.ResourceService
+					.current(ctx.data(), res) >= num(params, "min", 0.0);
 		});
 
 		registerTarget(LifepathMod.id("self"), (ctx, params) ->
@@ -144,13 +150,12 @@ public final class AbilityVocabulary {
 			if (res == null || delta == 0.0 || target.data() == null) {
 				return;
 			}
-			var cur = target.data().resources().get(res);
-			if (cur == null) {
-				return;
-			}
-			double next = Math.max(cur.min(), Math.min(cur.max(), cur.current() + delta));
-			target.data().setResource(res,
-					new PlayerCharacterData.ResourceState(next, cur.min(), cur.max()));
+			// Routes through ResourceService: def-bounds clamp, band
+			// transitions, delta sync — never a raw map write.
+			io.github.durdeuvlad.lifepath.resource.ResourceService.modify(
+					target.data(),
+					target.entity() instanceof ServerPlayerEntity sp ? sp : null,
+					res, delta, ctx.now());
 		});
 		BuiltinConditions.init(); // M4-2 primitive vocabulary
 
