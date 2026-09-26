@@ -58,6 +58,7 @@ public final class AbilityEngine {
 		// (namespaced key — ability state stays in the generic maps per spec).
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK
 				.register(server -> {
+					BuiltinActions.onServerTick(server);
 					int interval = passiveIntervalTicks();
 					if (interval <= 0 || ++ticks % interval != 0) {
 						return;
@@ -217,7 +218,7 @@ public final class AbilityEngine {
 	public static Outcome evaluate(PlayerCharacterData data,
 			@Nullable ServerPlayerEntity self, AbilityDefinition def, long now,
 			double interactionSeconds) {
-		EvalContext ctx = new EvalContext(self, data, now);
+		EvalContext ctx = new EvalContext(self, data, now, def.id());
 		if (!conditionsMet(ctx, def)) {
 			return debug(def, Outcome.CONDITIONS_FAILED);
 		}
