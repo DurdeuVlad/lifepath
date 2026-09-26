@@ -232,7 +232,7 @@ public final class PlayerCharacterData {
 		}
 	}
 
-	/** Single-key read for the per-award hot path — avoids the deep view copy. */
+	/** Single-key read for the per-award hot path - avoids the deep view copy. */
 	public List<Long> actionTimestamps(String signature) {
 		return Collections.unmodifiableList(
 				actionSignatures.getOrDefault(signature, List.of()));
@@ -240,14 +240,14 @@ public final class PlayerCharacterData {
 
 	/**
 	 * Sweeps every signature list to entries after {@code cutoffEpochMs},
-	 * dropping emptied keys — stale signatures otherwise accumulate forever.
+	 * dropping emptied keys - stale signatures otherwise accumulate forever.
 	 */
 	public void pruneActionSignatures(long cutoffEpochMs) {
 		actionSignatures.values().forEach(times -> times.removeIf(t -> t <= cutoffEpochMs));
 		actionSignatures.values().removeIf(List::isEmpty);
 	}
 
-	/** Clears the ledger — used on sync snapshots; the client never sees it. */
+	/** Clears the ledger - used on sync snapshots; the client never sees it. */
 	public void clearActionSignatures() {
 		actionSignatures.clear();
 	}

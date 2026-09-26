@@ -1,0 +1,295 @@
+package io.github.durdeuvlad.lifepath.ability;
+
+import io.github.durdeuvlad.lifepath.LifepathMod;
+import io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.EvalContext;
+import io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.TargetContext;
+import io.github.durdeuvlad.lifepath.character.CharacterManager;
+import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
+import io.github.durdeuvlad.lifepath.config.LifepathConfig;
+import io.github.durdeuvlad.lifepath.content.AbilityDefinition;
+import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
+import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
+import io.github.durdeuvlad.lifepath.event.ActivityDispatcher;
+import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
+import io.github.durdeuvlad.lifepath.network.c2s.ActivateAbilityPayload;
+import io.github.durdeuvlad.lifepath.registry.LifepathContent;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * The ability engine (M4-1, GAMEDESIGN §12): evaluates composed abilities —
+ * trigger → conditions (all-of + any-of) → targets → cost/cooldown → actions.
+ *
+ * <p><b>Triggers:</b> PASSIVE re-evaluates at {@code abilities.toml}
+ * {@code passive_interval_ticks}; EVENT fires off the M2-3 activity bus; ACTIVE
+ * arrives via {@code C2S lifepath:ability/activate} and is fully re-validated
+ * server-side (ownership, cooldown, conditions) — a forged packet does nothing.
+ *
+ * <p><b>Ownership</b> is derived, never stored: the union of the character's
+ * species passive/active refs, specialization signature refs, and
+ * trait/condition/attunement id refs (those content domains land later; ids in
+ * the lists that resolve to ability definitions already count).
+ *
+ * <p>Evaluation failures are DEBUG-logged; malformed files fail at load time.
+ */
+public final class AbilityEngine {
+	private AbilityEngine() {}
+
+	public enum Outcome {
+		EXECUTED, NOT_OWNED, ON_COOLDOWN, COST_UNMET, CONDITIONS_FAILED,
+		NO_TARGETS, UNKNOWN_ABILITY, WRONG_TRIGGER
+	}
+
+	private static long ticks;
+	private static boolean initialized;
+
+	public static void init() {
+		if (initialized) {
+			return;
+		}
+		initialized = true;
+		AbilityVocabulary.init();
+		// PASSIVE: coarse engine tick (config); each ability's own
+		// interval_ticks is honored via a schedule marker in the cooldown map
+		// (namespaced key — ability state stays in the generic maps per spec).
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK
+				.register(server -> {
+					int interval = passiveIntervalTicks();
+					if (interval <= 0 || ++ticks % interval != 0) {
+						return;
+					}
+					long now = System.currentTimeMillis();
+					for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+						runPassiveSweep(CharacterManager.getCharacter(player), player, now);
+					}
+				});
+		// EVENT: one bus listener; per-event filtering keeps the domain data-driven.
+		ActivityDispatcher.registerAny(event -> {
+			ServerPlayerEntity player = event.player();
+			if (player == null) {
+				return;
+			}
+			handleEvent(CharacterManager.getCharacter(player), player, event.type(),
+					System.currentTimeMillis());
+		});
+		// ACTIVE: server re-validates the request end-to-end.
+		LifepathNetworking.onC2S(ActivateAbilityPayload.ID, (payload, ctx) ->
+				ctx.server().execute(() -> tryActivate(ctx.player(), payload.abilityId())));
+	}
+
+	/**
+	 * The derived owned-ability id set: species passive+active refs +
+	 * specialization signature refs + any trait/condition/attunement/unlock id
+	 * that resolves to an ability definition. Missing defs contribute nothing.
+	 */
+	public static Set<Identifier> ownedAbilities(PlayerCharacterData data) {
+		Set<Identifier> owned = new LinkedHashSet<>();
+		if (data.speciesId() != null) {
+			SpeciesDefinition species = LifepathContent.species().get(data.speciesId());
+			if (species != null) {
+				owned.addAll(species.passiveAbilities());
+				owned.addAll(species.activeAbilities());
+			}
+		}
+		if (data.specializationId() != null) {
+			SpecializationDefinition spec =
+					LifepathContent.specializations().get(data.specializationId());
+			if (spec != null) {
+				owned.addAll(spec.signatureRefs());
+			}
+		}
+		for (Identifier id : data.traits()) {
+			owned.add(id);
+		}
+		for (Identifier id : data.conditions()) {
+			owned.add(id);
+		}
+		for (Identifier id : data.attunements()) {
+			owned.add(id);
+		}
+		for (Identifier id : data.unlocks()) {
+			owned.add(id);
+		}
+		return owned;
+	}
+
+	/**
+	 * PASSIVE sweep for one player: honors each ability's {@code interval_ticks}
+	 * via a namespaced schedule marker in the cooldown map (generic state —
+	 * no ability-specific fields on the model).
+	 */
+	static void runPassiveSweep(PlayerCharacterData data,
+			@Nullable ServerPlayerEntity player, long now) {
+		for (Identifier id : ownedAbilities(data)) {
+			AbilityDefinition def = LifepathContent.abilities().get(id);
+			if (def == null || def.trigger().kind() != AbilityDefinition.Kind.PASSIVE) {
+				continue;
+			}
+			Identifier due = scheduleKey(def.id());
+			Long dueAt = data.cooldowns().get(due);
+			if (dueAt != null && dueAt > now) {
+				continue;
+			}
+			data.setCooldown(due, now + Math.max(1, def.trigger().intervalTicks()) * 50L);
+			if (evaluate(data, player, def, now) == Outcome.EXECUTED && player != null) {
+				CharacterManager.markDirty(player);
+			}
+		}
+	}
+
+	/**
+	 * EVENT path: evaluates every owned EVENT ability whose trigger lists
+	 * {@code eventType}. One dispatch keeps the domain data-driven — event
+	 * types are plain identifiers, never Java branches.
+	 */
+	static void handleEvent(PlayerCharacterData data,
+			@Nullable ServerPlayerEntity player, Identifier eventType, long now) {
+		for (Identifier id : ownedAbilities(data)) {
+			AbilityDefinition def = LifepathContent.abilities().get(id);
+			if (def != null && def.trigger().kind() == AbilityDefinition.Kind.EVENT
+					&& def.trigger().events().contains(eventType)
+					&& evaluate(data, player, def, now) == Outcome.EXECUTED && player != null) {
+				CharacterManager.markDirty(player);
+			}
+		}
+	}
+
+	/** Server-side activation for a C2S request — full validation, never trusts. */
+	public static Outcome tryActivate(ServerPlayerEntity player, Identifier abilityId) {
+		Outcome outcome = tryActivate(CharacterManager.getCharacter(player), player,
+				abilityId, System.currentTimeMillis());
+		if (outcome == Outcome.EXECUTED) {
+			CharacterManager.markDirty(player);
+		}
+		return outcome;
+	}
+
+	/**
+	 * Data-path activation core (tests + the packet handler): ownership,
+	 * trigger kind, cooldown, conditions, cost — then execute.
+	 */
+	public static Outcome tryActivate(PlayerCharacterData data,
+			@Nullable ServerPlayerEntity self, Identifier abilityId, long now) {
+		if (!ownedAbilities(data).contains(abilityId)) {
+			return Outcome.NOT_OWNED;
+		}
+		AbilityDefinition def = LifepathContent.abilities().get(abilityId);
+		if (def == null) {
+			return Outcome.UNKNOWN_ABILITY;
+		}
+		if (def.trigger().kind() != AbilityDefinition.Kind.ACTIVE) {
+			return Outcome.WRONG_TRIGGER;
+		}
+		return evaluate(data, self, def, now);
+	}
+
+	/**
+	 * The evaluation pipeline: conditions (all-of then any-of) → cooldown →
+	 * cost → resolve targets → run actions per target → spend cost, stamp
+	 * cooldown, apply passive resource interactions.
+	 */
+	public static Outcome evaluate(PlayerCharacterData data,
+			@Nullable ServerPlayerEntity self, AbilityDefinition def, long now) {
+		EvalContext ctx = new EvalContext(self, data, now);
+		if (!conditionsMet(ctx, def)) {
+			return debug(def, Outcome.CONDITIONS_FAILED);
+		}
+		Long onCooldownUntil = data.cooldowns().get(def.id());
+		if (onCooldownUntil != null && onCooldownUntil > now) {
+			return debug(def, Outcome.ON_COOLDOWN);
+		}
+		if (def.cost().isPresent()) {
+			AbilityDefinition.Cost cost = def.cost().get();
+			var res = data.resources().get(cost.resource());
+			if (res == null || res.current() < cost.amount()) {
+				return debug(def, Outcome.COST_UNMET);
+			}
+		}
+		var resolver = AbilityVocabulary.target(def.target().type());
+		if (resolver == null) {
+			return debug(def, Outcome.NO_TARGETS);
+		}
+		List<TargetContext> targets = resolver.resolve(ctx, def.target().raw());
+		if (targets.isEmpty()) {
+			return debug(def, Outcome.NO_TARGETS);
+		}
+		for (TargetContext t : targets) {
+			for (AbilityDefinition.SpecNode action : def.actions()) {
+				var exec = AbilityVocabulary.action(action.type());
+				if (exec == null) {
+					LifepathMod.LOGGER.debug("ability {} unknown action {}", def.id(), action.type());
+					continue;
+				}
+				exec.run(t, ctx, action.raw());
+			}
+		}
+		def.cost().ifPresent(cost -> {
+			var res = data.resources().get(cost.resource());
+			data.setResource(cost.resource(), new PlayerCharacterData.ResourceState(
+					res.current() - cost.amount(), res.min(), res.max()));
+		});
+		def.cooldown().ifPresent(cd ->
+				data.setCooldown(def.id(), now + (long) (cd.seconds() * 1000.0)));
+		applyResourceInteractions(data, def, now);
+		return Outcome.EXECUTED;
+	}
+
+	private static void applyResourceInteractions(PlayerCharacterData data,
+			AbilityDefinition def, long now) {
+		if (def.resourceInteractions().isEmpty()) {
+			return;
+		}
+		double seconds = Math.max(0.0, def.trigger().intervalTicks()) / 20.0;
+		for (AbilityDefinition.ResourceInteraction ri : def.resourceInteractions()) {
+			var res = data.resources().get(ri.resource());
+			if (res == null) {
+				continue;
+			}
+			double next = Math.max(res.min(), Math.min(res.max(),
+					res.current() + ri.perSecond() * seconds));
+			data.setResource(ri.resource(),
+					new PlayerCharacterData.ResourceState(next, res.min(), res.max()));
+		}
+	}
+
+	private static boolean conditionsMet(EvalContext ctx, AbilityDefinition def) {
+		for (AbilityDefinition.SpecNode cond : def.conditions().all()) {
+			var eval = AbilityVocabulary.condition(cond.type());
+			if (eval == null || !eval.test(ctx, cond.raw())) {
+				return false;
+			}
+		}
+		if (!def.conditions().any().isEmpty()) {
+			for (AbilityDefinition.SpecNode cond : def.conditions().any()) {
+				var eval = AbilityVocabulary.condition(cond.type());
+				if (eval != null && eval.test(ctx, cond.raw())) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+
+	private static Outcome debug(AbilityDefinition def, Outcome outcome) {
+		if ((Boolean) LifepathConfig.getOrDefault(
+				LifepathConfig.GENERAL, "debug_logging", Boolean.FALSE)) {
+			LifepathMod.LOGGER.info("ability {} -> {}", def.id(), outcome);
+		}
+		return outcome;
+	}
+
+	/** Cooldown-map key used as the "next passive eval" schedule marker. */
+	static Identifier scheduleKey(Identifier abilityId) {
+		return Identifier.of("lifepath", "schedule/" + abilityId.toString().replace(':', '_'));
+	}
+
+	private static int passiveIntervalTicks() {
+		return ((Number) LifepathConfig.getOrDefault(
+				LifepathMod.id("abilities"), "passive_interval_ticks", 20)).intValue();
+	}
+}

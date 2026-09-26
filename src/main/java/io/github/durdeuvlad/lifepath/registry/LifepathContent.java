@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.ContentIndex;
 import io.github.durdeuvlad.lifepath.character.persistence.CharacterPersistence;
+import io.github.durdeuvlad.lifepath.content.AbilityDefinition;
 import io.github.durdeuvlad.lifepath.content.LevelCurveDefinition;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
@@ -46,7 +47,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Also installs the real {@link ContentIndex}: species/specialization/skill
  * existence is answered from these registries; domains with no registry yet
- * (abilities, traits, …) answer permissively until their milestone lands.
+ * (traits, conditions, attunements, …) answer permissively until their milestone lands.
  */
 public final class LifepathContent {
 	private static final ContentRegistry<SpeciesDefinition> SPECIES =
@@ -59,6 +60,8 @@ public final class LifepathContent {
 			new ContentRegistry<>(LifepathMod.id("level_curve"));
 	private static final ContentRegistry<XpSourceDefinition> XP_SOURCES =
 			new ContentRegistry<>(LifepathMod.id("xp_source"));
+	private static final ContentRegistry<AbilityDefinition> ABILITIES =
+			new ContentRegistry<>(LifepathMod.id("ability"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -93,6 +96,9 @@ public final class LifepathContent {
 		ReloadManager.registerData(LifepathMod.id("xp_source"),
 				manager -> loadDomain(manager, "xp_source", XpSourceDefinition.XpSourceFile.CODEC,
 						XpSourceDefinition::fromFile, XP_SOURCES));
+		ReloadManager.registerData(LifepathMod.id("ability"),
+				manager -> loadDomain(manager, "ability", AbilityDefinition.AbilityFile.CODEC,
+						AbilityDefinition::fromFile, ABILITIES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateReferences());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -118,11 +124,15 @@ public final class LifepathContent {
 		return XP_SOURCES;
 	}
 
+	public static ContentRegistry<AbilityDefinition> abilities() {
+		return ABILITIES;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
-	 * answer definitively; domains without a registry yet (abilities, traits,
-	 * conditions, attunements, resources, …) answer permissively so nothing
-	 * gets dropped before its own milestone lands.
+	 * answer definitively; domains without a registry yet (traits, conditions,
+	 * attunements, resources, …) answer permissively so nothing gets dropped
+	 * before its own milestone lands.
 	 */
 	public static boolean exists(String domain, Identifier id) {
 		return switch (domain) {
@@ -131,6 +141,7 @@ public final class LifepathContent {
 			case "skill" -> SKILLS.contains(id);
 			case "level_curve" -> LEVEL_CURVES.contains(id);
 			case "xp_source" -> XP_SOURCES.contains(id);
+			case "ability" -> ABILITIES.contains(id);
 			default -> true;
 		};
 	}
@@ -214,7 +225,7 @@ public final class LifepathContent {
 	 * Runs AFTER the domain loaders (registration order): records every
 	 * cross-domain reference the freshly loaded definitions make. A ref whose
 	 * target domain has a registry is recorded only when missing there; a ref
-	 * into a domain with no registry yet (abilities, traits, …) is recorded as
+	 * into a domain with no registry yet (traits, attunements, …) is recorded as
 	 * pending — {@link #unresolvedReferences()} is the M7-5 validation input.
 	 */
 	static void validateReferences() {
@@ -276,6 +287,7 @@ public final class LifepathContent {
 			case "skill" -> SKILLS;
 			case "level_curve" -> LEVEL_CURVES;
 			case "xp_source" -> XP_SOURCES;
+			case "ability" -> ABILITIES;
 			default -> null;
 		};
 	}

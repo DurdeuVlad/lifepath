@@ -117,6 +117,16 @@ public final class SkillXpService {
 		return result;
 	}
 
+	/**
+	 * Data-path award for engine services (ability actions, admin tooling)
+	 * that operate on a character model directly. Mutates {@code data};
+	 * callers mark dirty/sync when a player is attached.
+	 */
+	public static XpResult awardXp(PlayerCharacterData data, Identifier skillId,
+			double amount, ActivityEvent source) {
+		return awardXpCore(data, skillId, amount, source, null);
+	}
+
 	/** Data-only award path used by {@link #awardXp} and unit tests (no player). */
 	static XpResult awardXpCore(PlayerCharacterData data, Identifier skillId,
 			double amount, ActivityEvent source) {

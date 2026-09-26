@@ -139,6 +139,11 @@ public class LifepathMod implements ModInitializer {
 				.define("band_5_rate", 0.35, v -> v >= 0 && v <= 100,
 						"Levels lost per real day inside band 5 (91–100).")
 				.build());
+		LifepathConfig.define(id("abilities"), ConfigSpec.builder()
+				.define("passive_interval_ticks", 20, v -> v >= 1 && v <= 1200,
+						"Engine tick interval for PASSIVE abilities (each ability's"
+								+ " own interval_ticks is additionally honored).")
+				.build());
 		LifepathConfig.define(DiminishingReturns.CONFIG, ConfigSpec.builder()
 				.define("enabled", true,
 						"Diminishing returns on repeated identical actions (GAMEDESIGN §11.1).")
@@ -175,6 +180,12 @@ public class LifepathMod implements ModInitializer {
 		CharacterManager.init();
 		SkillXpService.init();
 		SkillDecayService.init();
+		// Payload type must register before AbilityEngine.init() installs its
+		// receiver (onC2S rejects unregistered types).
+		LifepathNetworking.registerC2S(
+				io.github.durdeuvlad.lifepath.network.c2s.ActivateAbilityPayload.ID,
+				io.github.durdeuvlad.lifepath.network.c2s.ActivateAbilityPayload.PACKET_CODEC);
+		io.github.durdeuvlad.lifepath.ability.AbilityEngine.init();
 		XpSourceRouter.init();
 		VanillaGameplayProducers.init();
 		io.github.durdeuvlad.lifepath.compat.ExternalAdapterRegistry.init();
