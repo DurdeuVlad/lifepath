@@ -11,6 +11,7 @@ import io.github.durdeuvlad.lifepath.network.s2c.CharacterSyncPayload;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.registry.RegistryBootstrap;
 import io.github.durdeuvlad.lifepath.reload.ReloadManager;
+import io.github.durdeuvlad.lifepath.skill.SkillXpService;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
@@ -63,6 +64,10 @@ public class LifepathMod implements ModInitializer {
 						"First level of the Master band.")
 				.define("band_legendary", 95, value -> value > 0 && value <= 100,
 						"First level of the Legendary band.")
+				.define("global_xp_multiplier", 1.0,
+						value -> value instanceof Number n && n.doubleValue() >= 0 && n.doubleValue() <= 1000,
+						"Global XP multiplier applied by the lifepath:global_multiplier modifier."
+								+ " 0 disables all XP gain; sane values are 0.1–10.")
 				.build());
 
 		ReloadManager.register(id("engine_config"), LifepathConfig::reload);
@@ -78,6 +83,7 @@ public class LifepathMod implements ModInitializer {
 		LifepathContent.init();
 		LifepathNetworking.registerS2C(CharacterSyncPayload.ID, CharacterSyncPayload.PACKET_CODEC);
 		CharacterManager.init();
+		SkillXpService.init();
 	}
 
 	public static Identifier id(String path) {
