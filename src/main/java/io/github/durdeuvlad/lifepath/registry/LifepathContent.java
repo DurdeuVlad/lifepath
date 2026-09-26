@@ -96,9 +96,21 @@ public final class LifepathContent {
 		ReloadManager.registerData(LifepathMod.id("xp_source"),
 				manager -> loadDomain(manager, "xp_source", XpSourceDefinition.XpSourceFile.CODEC,
 						XpSourceDefinition::fromFile, XP_SOURCES));
+		// Ability files must only name registered vocabulary types (M4-2
+		// contract) — an unknown condition/action/target fails the file with
+		// an error naming the ability instead of silently no-op'ing at eval.
 		ReloadManager.registerData(LifepathMod.id("ability"),
 				manager -> loadDomain(manager, "ability", AbilityDefinition.AbilityFile.CODEC,
-						AbilityDefinition::fromFile, ABILITIES));
+						(id, file) -> {
+							AbilityDefinition def = AbilityDefinition.fromFile(id, file);
+							var unknown = io.github.durdeuvlad.lifepath.ability
+									.AbilityVocabulary.unknownNodeTypes(def);
+							if (!unknown.isEmpty()) {
+								throw new IllegalArgumentException(
+										"ability " + id + " uses unknown spec node types " + unknown);
+							}
+							return def;
+						}, ABILITIES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateReferences());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);

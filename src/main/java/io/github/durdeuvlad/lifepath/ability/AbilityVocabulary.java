@@ -133,6 +133,8 @@ public final class AbilityVocabulary {
 			target.data().setResource(res,
 					new PlayerCharacterData.ResourceState(next, cur.min(), cur.max()));
 		});
+		BuiltinConditions.init(); // M4-2 primitive vocabulary
+
 		registerAction(LifepathMod.id("debug_log"), (target, ctx, params) -> {
 			var el = params.get("message");
 			LifepathMod.LOGGER.info("[ability] {}",
@@ -153,11 +155,46 @@ public final class AbilityVocabulary {
 				? el.getAsDouble() : def;
 	}
 
+	/**
+	 * Load-time validation for ability files (M4-2 contract): every spec node's
+	 * {@code type} must resolve to a registered condition/target/action —
+	 * unknown types fail the file (naming the ability) rather than silently
+	 * fail-closing forever. Returns the list of unknown types; empty when the
+	 * vocabulary isn't initialized (data-path tests that never ran {@link #init}).
+	 */
+	public static java.util.List<Identifier> unknownNodeTypes(
+			io.github.durdeuvlad.lifepath.content.AbilityDefinition def) {
+		if (!initialized) {
+			return java.util.List.of();
+		}
+		java.util.List<Identifier> unknown = new java.util.ArrayList<>();
+		for (var node : def.conditions().all()) {
+			if (condition(node.type()) == null) {
+				unknown.add(node.type());
+			}
+		}
+		for (var node : def.conditions().any()) {
+			if (condition(node.type()) == null) {
+				unknown.add(node.type());
+			}
+		}
+		if (target(def.target().type()) == null) {
+			unknown.add(def.target().type());
+		}
+		for (var node : def.actions()) {
+			if (action(node.type()) == null) {
+				unknown.add(node.type());
+			}
+		}
+		return unknown;
+	}
+
 	/** Test hook: clears registrations + init flag. Not for production use. */
 	public static void resetForTests() {
 		CONDITIONS.clear();
 		ACTIONS.clear();
 		TARGETS.clear();
 		initialized = false;
+		BuiltinConditions.resetForTests();
 	}
 }
