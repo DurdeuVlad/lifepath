@@ -70,6 +70,12 @@ public final class CharacterCommands {
 
 	private static int inspect(ServerCommandSource source, ServerPlayerEntity target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
+		// Lazy decay trigger (M3-3): inspection shows current, decayed values.
+		if (io.github.durdeuvlad.lifepath.skill.SkillDecayService.applyLazyAll(
+				data, System.currentTimeMillis()) > 0) {
+			CharacterManager.markDirty(target);
+			CharacterManager.syncCharacter(target);
+		}
 		source.sendFeedback(() -> Text.literal("Lifepath character: "
 				+ target.getName().getString() + " (" + target.getUuid() + ")"), false);
 		for (Text line : describe(data, System.currentTimeMillis())) {
