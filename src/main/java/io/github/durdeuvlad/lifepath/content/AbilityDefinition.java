@@ -2,7 +2,6 @@ package io.github.durdeuvlad.lifepath.content;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
@@ -26,6 +25,7 @@ import net.minecraft.util.Identifier;
 public record AbilityDefinition(
 		Identifier id,
 		String displayName,
+		boolean enabled,
 		Trigger trigger,
 		ConditionSet conditions,
 		SpecNode target,
@@ -35,9 +35,9 @@ public record AbilityDefinition(
 		List<ResourceInteraction> resourceInteractions) {
 
 	public static AbilityDefinition fromFile(Identifier id, AbilityFile file) {
-		return new AbilityDefinition(id, file.displayName(), file.trigger(),
-				file.conditions(), file.target(), file.actions(), file.cost(),
-				file.cooldown(), file.resourceInteractions());
+		return new AbilityDefinition(id, file.displayName(), file.enabled(),
+				file.trigger(), file.conditions(), file.target(), file.actions(),
+				file.cost(), file.cooldown(), file.resourceInteractions());
 	}
 
 	/** Trigger kinds — all three are load-bearing, see {@link Kind}. */
@@ -136,9 +136,15 @@ public record AbilityDefinition(
 		).apply(i, ResourceInteraction::new));
 	}
 
-	/** JSON shape of {@code data/<ns>/ability/<name>.json} (id excluded). */
+	/**
+	 * JSON shape of {@code data/<ns>/ability/<name>.json} (id excluded).
+	 * {@code enabled=false} keeps the definition registered — references
+	 * resolve, ownership counts — but the engine returns DISABLED on every
+	 * trigger path. Full schema: {@code docs/ABILITIES.md}.
+	 */
 	public record AbilityFile(
 			String displayName,
+			boolean enabled,
 			Trigger trigger,
 			ConditionSet conditions,
 			SpecNode target,
@@ -149,6 +155,7 @@ public record AbilityDefinition(
 
 		public static final Codec<AbilityFile> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("display_name").forGetter(AbilityFile::displayName),
+				Codec.BOOL.optionalFieldOf("enabled", true).forGetter(AbilityFile::enabled),
 				Trigger.CODEC.fieldOf("trigger").forGetter(AbilityFile::trigger),
 				ConditionSet.CODEC.optionalFieldOf("conditions", ConditionSet.NONE)
 						.forGetter(AbilityFile::conditions),

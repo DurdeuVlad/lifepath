@@ -1,0 +1,6 @@
+{
+  "display_name": "Test: AoE target",
+  "trigger": {"type": "active"},
+  "target": {"type": "lifepath:entities_in_radius", "radius": 5},
+  "actions": [{"type": "lifepath:highlight_entities", "duration_ticks": 60}]
+}
