@@ -23,7 +23,8 @@ import org.jetbrains.annotations.Nullable;
  *   <li>{@code smithing}: sourceId = <b>output item id</b> (repetition signature keys on
  *       the produced item); tags = output item tags + workstation id +
  *       {@code lifepath:smithing_workstations}; attr {@code workstation} + extras</li>
- *   <li>{@code fishing}: sourceId = loot item id; attr {@code rarity}</li>
+ *   <li>{@code fishing}: sourceId = loot item id; tags = loot item tags
+ *       (rarity classified by tags like {@code lifepath:fishing_treasure})</li>
  *   <li>{@code crafting}: sourceId = recipe/output id (stub shape)</li>
  *   <li>{@code combat}: sourceId = entity type id (stub shape)</li>
  * </ul>
@@ -84,15 +85,22 @@ public final class ActivityEvents {
 				Set.copyOf(tags), cause, now(), attrs);
 	}
 
+	/**
+	 * Canonical fishing event — sourceId = caught item id, tags = caught item
+	 * tags (rarity classification comes from tags like
+	 * {@code lifepath:fishing_treasure}, not a string attr). Extras merge into
+	 * attributes.
+	 */
 	public static ActivityEvent fishing(ServerPlayerEntity player, Identifier lootId,
-			@Nullable String rarity) {
-		return fishing(player, lootId, rarity, ActivityEvent.Cause.PLAYER);
+			Set<Identifier> lootTags, Map<String, String> extraAttrs) {
+		return fishing(player, lootId, lootTags, extraAttrs, ActivityEvent.Cause.PLAYER);
 	}
 
 	public static ActivityEvent fishing(ServerPlayerEntity player, Identifier lootId,
-			@Nullable String rarity, ActivityEvent.Cause cause) {
-		return new ActivityEvent(player, ActivityTypes.FISHING, lootId, Set.of(),
-				cause, now(), rarity == null ? Map.of() : Map.of("rarity", rarity));
+			Set<Identifier> lootTags, Map<String, String> extraAttrs,
+			ActivityEvent.Cause cause) {
+		return new ActivityEvent(player, ActivityTypes.FISHING, lootId,
+				Set.copyOf(lootTags), cause, now(), Map.copyOf(extraAttrs));
 	}
 
 	public static ActivityEvent crafting(ServerPlayerEntity player, Identifier recipeOrOutputId) {

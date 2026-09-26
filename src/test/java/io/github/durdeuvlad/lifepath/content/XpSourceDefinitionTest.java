@@ -171,6 +171,23 @@ class XpSourceDefinitionTest {
 	}
 
 	@Test
+	void fishingSourceWeightsJunkBelowFishBelowTreasure() throws Exception {
+		Path file = Path.of("src/main/resources/data/lifepath/xp_source/fishing.json");
+		var def = XpSourceDefinition.fromFile(Identifier.of("lifepath", "fishing"),
+				XpSourceDefinition.XpSourceFile.CODEC.parse(JsonOps.INSTANCE,
+						JsonParser.parseString(Files.readString(file))).result().orElseThrow());
+		double junk = def.resolve(Identifier.of("minecraft", "stick"),
+				Set.of(Identifier.of("lifepath", "fishing_junk"))).amount();
+		double fish = def.resolve(Identifier.of("minecraft", "cod"),
+				Set.of(Identifier.of("minecraft", "fishes"))).amount();
+		double treasure = def.resolve(Identifier.of("minecraft", "saddle"),
+				Set.of(Identifier.of("lifepath", "fishing_treasure"))).amount();
+		assertTrue(junk < fish && fish < treasure,
+				"fishing weights must order junk < common fish < treasure");
+		assertEquals(0.30, def.resolve(Identifier.of("minecraft", "air"), Set.of()).amount());
+	}
+
+	@Test
 	void miningSourceRequiresMinableTag() throws Exception {
 		Path file = Path.of("src/main/resources/data/lifepath/xp_source/mining.json");
 		var def = XpSourceDefinition.fromFile(Identifier.of("lifepath", "mining"),
