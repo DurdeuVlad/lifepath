@@ -1,0 +1,11 @@
+{
+	"activity": "lifepath:fishing",
+	"skill": "lifepath:fishing",
+	"player_caused_only": true,
+	"base_xp": 0.3,
+	"per_tag": {
+		"lifepath:fishing_treasure": 2.5,
+		"lifepath:fishing_junk": 0.15,
+		"minecraft:fishes": 0.6
+	}
+}

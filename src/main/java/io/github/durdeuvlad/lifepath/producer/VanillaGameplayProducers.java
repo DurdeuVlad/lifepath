@@ -170,6 +170,33 @@ public final class VanillaGameplayProducers {
 				Map.of("count", Integer.toString(output.getCount()))));
 	}
 
+	/**
+	 * Fishing catch, called by {@code mixin.FishingBobberEntityMixin} for each
+	 * spawned loot stack. sourceId = caught item id → repetition signatures
+	 * distinguish junk spam; caught-item tags carry vanilla/classification
+	 * tags ({@code minecraft:fishes}, {@code lifepath:fishing_treasure},
+	 * {@code lifepath:fishing_junk}) for data-side weighting.
+	 */
+	public static void onFishCaught(net.minecraft.entity.player.PlayerEntity player,
+			net.minecraft.item.ItemStack caught) {
+		if (!(player instanceof ServerPlayerEntity serverPlayer) || caught.isEmpty()) {
+			return;
+		}
+		Set<Identifier> itemTags = caught.streamTags()
+				.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
+		// Enchanted catches are treasure-pool items even when their item type
+		// is also junk-listed (the enchanted fishing_rod overlaps both pools;
+		// item tags are component-blind). Treasure must precede junk in the
+		// xp_source per_tag order.
+		if (caught.hasEnchantments()) {
+			itemTags.add(LifepathMod.id("fishing_treasure"));
+		}
+		Identifier itemId = net.minecraft.registry.Registries.ITEM.getId(caught.getItem());
+		ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents.fishing(
+				serverPlayer, itemId, itemTags,
+				Map.of("count", Integer.toString(caught.getCount()))));
+	}
+
 	private static void publishHarvest(ServerPlayerEntity player, BlockState state) {
 		publishHarvest(player, state,
 				net.minecraft.registry.Registries.BLOCK.getId(state.getBlock()),
