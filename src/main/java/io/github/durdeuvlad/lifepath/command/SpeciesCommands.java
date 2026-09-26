@@ -83,7 +83,8 @@ public final class SpeciesCommands {
 						: " \"" + def.displayName() + "\""
 								+ " passive=" + def.passiveAbilities().size()
 								+ " active=" + def.activeAbilities().size()
-								+ " resources=" + def.resources().size())), false);
+								+ " resources=" + def.resources().size()
+								+ def.description().map(d -> " — " + d).orElse(""))), false);
 		return Command.SINGLE_SUCCESS;
 	}
 

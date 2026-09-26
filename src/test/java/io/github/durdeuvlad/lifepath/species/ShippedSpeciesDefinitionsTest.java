@@ -40,6 +40,10 @@ class ShippedSpeciesDefinitionsTest {
 		ActivityDispatcher.resetForTests();
 		io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.resetForTests();
 		io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.init();
+		// ContentRegistry.register rejects duplicates — clear defensively
+		// because sibling test classes have demonstrated registry leaks.
+		LifepathContent.species().clear();
+		LifepathContent.specializations().clear();
 	}
 
 	@AfterEach
@@ -53,9 +57,10 @@ class ShippedSpeciesDefinitionsTest {
 	private static SpeciesDefinition loadShipped(String name) throws Exception {
 		var parsed = SpeciesDefinition.SpeciesDefinitionFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString(
-						Files.readString(SPECIES_DIR.resolve(name + ".json"))))
-				.result().orElseThrow(() -> new AssertionError(name + " failed to parse"));
-		return SpeciesDefinition.fromFile(LifepathMod.id(name), parsed);
+						Files.readString(SPECIES_DIR.resolve(name + ".json"))));
+		var file = parsed.result().orElseThrow(() -> new AssertionError(
+				name + " must parse: " + parsed.error().orElse(null)));
+		return SpeciesDefinition.fromFile(LifepathMod.id(name), file);
 	}
 
 	@Test
