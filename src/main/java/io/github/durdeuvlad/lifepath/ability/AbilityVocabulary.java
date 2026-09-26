@@ -26,7 +26,11 @@ import org.jetbrains.annotations.Nullable;
 public final class AbilityVocabulary {
 	private AbilityVocabulary() {}
 
-	/** Evaluation context handed to every evaluator. */
+	/**
+	 * Evaluation context handed to every evaluator. {@link #self()} is null on
+	 * data paths (unit tests, headless evaluation) — entity-requiring
+	 * evaluators must null-check it rather than NPE.
+	 */
 	public record EvalContext(@Nullable ServerPlayerEntity self,
 			PlayerCharacterData data, long now) {}
 
@@ -121,27 +125,32 @@ public final class AbilityVocabulary {
 			if (res == null || delta == 0.0) {
 				return;
 			}
-			var cur = ctx.data().resources().get(res);
+			var cur = target.data().resources().get(res);
 			if (cur == null) {
 				return;
 			}
 			double next = Math.max(cur.min(), Math.min(cur.max(), cur.current() + delta));
-			ctx.data().setResource(res,
+			target.data().setResource(res,
 					new PlayerCharacterData.ResourceState(next, cur.min(), cur.max()));
 		});
-		registerAction(LifepathMod.id("debug_log"), (target, ctx, params) ->
-				LifepathMod.LOGGER.info("[ability] {}", params.has("message")
-						? params.get("message").getAsString() : "(no message)"));
+		registerAction(LifepathMod.id("debug_log"), (target, ctx, params) -> {
+			var el = params.get("message");
+			LifepathMod.LOGGER.info("[ability] {}",
+					el != null && el.isJsonPrimitive() ? el.getAsString() : "(no message)");
+		});
 	}
 
 	@Nullable
 	static Identifier id(JsonObject params, String key) {
-		return params.has(key) ? Identifier.tryParse(params.get(key).getAsString()) : null;
+		var el = params.get(key);
+		return el != null && el.isJsonPrimitive() && el.getAsJsonPrimitive().isString()
+				? Identifier.tryParse(el.getAsString()) : null;
 	}
 
 	static double num(JsonObject params, String key, double def) {
-		return params.has(key) && params.get(key).isJsonPrimitive()
-				? params.get(key).getAsDouble() : def;
+		var el = params.get(key);
+		return el != null && el.isJsonPrimitive() && el.getAsJsonPrimitive().isNumber()
+				? el.getAsDouble() : def;
 	}
 
 	/** Test hook: clears registrations + init flag. Not for production use. */

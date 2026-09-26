@@ -23,7 +23,10 @@ public class LifepathClient implements ClientModInitializer {
 
 		ClientLifepathNetworking.onS2C(CharacterSyncPayload.ID, (payload, context) ->
 				context.client().execute(() -> ClientCharacterState.apply(payload)));
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientCharacterState.clear());
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			ClientCharacterState.clear();
+			ClientAbilityState.clear();
+		});
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> ClientCharacterState.clear());
 
 		// M4-1: rebindable ability key (default G) — sends a C2S activation

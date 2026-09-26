@@ -36,9 +36,19 @@ public final class ClientAbilityState {
 			LifepathMod.LOGGER.debug("ability key pressed with nothing selected");
 			return false;
 		}
+		// send() throws IllegalStateException when the client isn't in a game —
+		// a keypress during disconnect/unload must degrade to a no-op.
+		if (net.minecraft.client.MinecraftClient.getInstance().getNetworkHandler() == null) {
+			return false;
+		}
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
 				new io.github.durdeuvlad.lifepath.network.c2s
 						.ActivateAbilityPayload(selected));
 		return true;
+	}
+
+	/** Clears the selection — called on disconnect so ids don't cross servers. */
+	public static void clear() {
+		selected = null;
 	}
 }

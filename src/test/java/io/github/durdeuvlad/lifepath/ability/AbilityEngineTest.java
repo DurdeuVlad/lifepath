@@ -36,6 +36,7 @@ class AbilityEngineTest {
 	void setUp() {
 		LifepathContent.abilities().clear();
 		LifepathContent.species().clear();
+		LifepathContent.specializations().clear();
 		AbilityVocabulary.resetForTests();
 		fired = new AtomicInteger();
 		// Test vocabulary: a flag-flipping action + a param-controlled condition.
@@ -52,6 +53,7 @@ class AbilityEngineTest {
 		AbilityDefinition.AbilityFile file = AbilityDefinition.AbilityFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString(json))
 				.result().orElseThrow();
+		LifepathContent.abilities().clear(); // re-registration inside one test
 		LifepathContent.abilities().register(ABILITY,
 				AbilityDefinition.fromFile(ABILITY, file));
 	}
@@ -366,6 +368,87 @@ class AbilityEngineTest {
 		// 20 ticks = 1s → +10, clamped to max 100.
 		AbilityEngine.runPassiveSweep(data, null, 1_000L);
 		assertEquals(100.0, data.resources().get(stamina).current());
+	}
+
+	@Test
+	void throwingEvaluatorsFailClosedAndNeverPropagate() {
+		// A buggy datapack node can never take the tick down: conditions fail
+		// closed, resolvers yield no targets, actions log + skip.
+		AbilityVocabulary.registerCondition(LifepathMod.id("boom_condition"),
+				(ctx, params) -> { throw new IllegalStateException("bad params"); });
+		AbilityVocabulary.registerTarget(LifepathMod.id("boom_target"),
+				(ctx, params) -> { throw new IllegalStateException("bad params"); });
+		AbilityVocabulary.registerAction(LifepathMod.id("boom_action"),
+				(target, ctx, params) -> { throw new IllegalStateException("bad params"); });
+
+		registerAbility("""
+				{"display_name": "Throwing", "trigger": {"type": "active"},
+				 "conditions": {"all": [{"type": "lifepath:boom_condition"}]},
+				 "target": {"type": "lifepath:self"},
+				 "actions": [{"type": "lifepath:test_fire"}]}
+				""");
+		speciesWith(List.of(), List.of(ABILITY));
+		PlayerCharacterData data = characterOfSpecies();
+		assertEquals(Outcome.CONDITIONS_FAILED,
+				AbilityEngine.tryActivate(data, null, ABILITY, 1_000L));
+
+		registerAbility("""
+				{"display_name": "ThrowingTarget", "trigger": {"type": "active"},
+				 "target": {"type": "lifepath:boom_target"},
+				 "actions": [{"type": "lifepath:test_fire"}]}
+				""");
+		assertEquals(Outcome.NO_TARGETS,
+				AbilityEngine.tryActivate(data, null, ABILITY, 1_000L));
+
+		registerAbility("""
+				{"display_name": "ThrowingAction", "trigger": {"type": "active"},
+				 "target": {"type": "lifepath:self"},
+				 "actions": [{"type": "lifepath:boom_action"},
+				             {"type": "lifepath:test_fire"}]}
+				""");
+		// The throwing action is skipped; the sibling still runs.
+		assertEquals(Outcome.EXECUTED,
+				AbilityEngine.tryActivate(data, null, ABILITY, 1_000L));
+		assertEquals(1, fired.get());
+	}
+
+	@Test
+	void wrongTypedSpecParamsDegradeInsteadOfThrowing() {
+		// Raw JsonObject params are unvalidated at parse — evaluators must
+		// survive object/array/non-numeric garbage.
+		AbilityVocabulary.init();
+		var ctx = new AbilityVocabulary.EvalContext(null, PlayerCharacterData.createDefault(), 0L);
+		var hasResource = AbilityVocabulary.condition(LifepathMod.id("has_resource"));
+		assertFalse(hasResource.test(ctx, JsonParser.parseString(
+				"{\"resource\": {\"a\": 1}, \"min\": \"high\"}").getAsJsonObject()));
+		var delta = AbilityVocabulary.action(LifepathMod.id("resource_delta"));
+		delta.run(new AbilityVocabulary.TargetContext(null, ctx.data()), ctx,
+				JsonParser.parseString("{\"resource\": [1,2], \"amount\": \"x\"}").getAsJsonObject());
+	}
+
+	@Test
+	void codecRejectsInvalidNumbers() {
+		// Negative cost would be a resource GENERATOR; negative cooldown means
+		// "no cooldown"; NaN per_second would poison a persisted resource.
+		assertTrue(AbilityDefinition.AbilityFile.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+				{"display_name": "NegCost", "trigger": {"type": "active"},
+				 "cost": {"resource": "lifepath:stamina", "amount": -5.0},
+				 "target": {"type": "lifepath:self"}, "actions": []}
+				""")).isError());
+		assertTrue(AbilityDefinition.AbilityFile.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+				{"display_name": "NegCd", "trigger": {"type": "active"},
+				 "cooldown": {"seconds": -1.0},
+				 "target": {"type": "lifepath:self"}, "actions": []}
+				""")).isError());
+		assertTrue(AbilityDefinition.AbilityFile.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+				{"display_name": "NaN", "trigger": {"type": "passive"},
+				 "resource_interactions": [{"resource": "lifepath:stamina", "per_second": NaN}],
+				 "target": {"type": "lifepath:self"}, "actions": []}
+				""")).isError());
+		assertTrue(AbilityDefinition.AbilityFile.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+				{"display_name": "ZeroInterval", "trigger": {"type": "passive", "interval_ticks": 0},
+				 "target": {"type": "lifepath:self"}, "actions": []}
+				""")).isError());
 	}
 
 	@Test

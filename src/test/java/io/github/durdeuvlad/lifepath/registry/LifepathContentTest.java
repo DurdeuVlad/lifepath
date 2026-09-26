@@ -22,6 +22,7 @@ class LifepathContentTest {
 		LifepathContent.species().clear();
 		LifepathContent.specializations().clear();
 		LifepathContent.skills().clear();
+		LifepathContent.abilities().clear();
 		LifepathContent.validateReferences();
 	}
 

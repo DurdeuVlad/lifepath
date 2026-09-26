@@ -57,7 +57,8 @@ public record AbilityDefinition(
 	public record Trigger(Kind kind, int intervalTicks, List<Identifier> events) {
 		public static final Codec<Trigger> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Kind.CODEC.fieldOf("type").forGetter(Trigger::kind),
-				Codec.INT.optionalFieldOf("interval_ticks", 20).forGetter(Trigger::intervalTicks),
+				Codec.intRange(1, Integer.MAX_VALUE)
+						.optionalFieldOf("interval_ticks", 20).forGetter(Trigger::intervalTicks),
 				Identifier.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(Trigger::events)
 		).apply(i, Trigger::new));
 	}
@@ -81,31 +82,49 @@ public record AbilityDefinition(
 		public static final Codec<SpecNode> CODEC = Codec.PASSTHROUGH.flatXmap(
 				dyn -> {
 					JsonElement el = dyn.convert(JsonOps.INSTANCE).getValue();
-					if (!el.isJsonObject() || !el.getAsJsonObject().has("type")) {
-						return DataResult.error(() -> "spec node needs a 'type' field");
+					if (!el.isJsonObject()) {
+						return DataResult.error(() -> "spec node must be an object");
 					}
 					JsonObject raw = el.getAsJsonObject();
-					Identifier id = Identifier.tryParse(raw.get("type").getAsString());
+					JsonElement typeEl = raw.get("type");
+					if (typeEl == null || !typeEl.isJsonPrimitive()
+							|| !typeEl.getAsJsonPrimitive().isString()) {
+						return DataResult.error(() -> "spec node needs a string 'type' field");
+					}
+					Identifier id = Identifier.tryParse(typeEl.getAsString());
 					if (id == null) {
-						return DataResult.error(() -> "bad spec node type " + raw.get("type"));
+						return DataResult.error(() -> "bad spec node type " + typeEl);
 					}
 					return DataResult.success(new SpecNode(id, raw));
 				},
 				node -> DataResult.success(new Dynamic<>(JsonOps.INSTANCE, node.raw())));
 	}
 
+	/**
+	 * Finite-positive double — {@code Codec.doubleRange} alone admits NaN
+	 * (every comparison fails), which would poison a persisted resource.
+	 */
+	private static final Codec<Double> POSITIVE_DOUBLE = Codec.DOUBLE.validate(
+			d -> Double.isFinite(d) && d > 0
+					? DataResult.success(d)
+					: DataResult.error(() -> "value must be finite and > 0"));
+	private static final Codec<Double> FINITE_DOUBLE = Codec.DOUBLE.validate(
+			d -> Double.isFinite(d)
+					? DataResult.success(d)
+					: DataResult.error(() -> "value must be finite"));
+
 	/** Resource gate: {@code current >= amount} required, then spent. */
 	public record Cost(Identifier resource, double amount) {
 		public static final Codec<Cost> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Identifier.CODEC.fieldOf("resource").forGetter(Cost::resource),
-				Codec.DOUBLE.fieldOf("amount").forGetter(Cost::amount)
+				POSITIVE_DOUBLE.fieldOf("amount").forGetter(Cost::amount)
 		).apply(i, Cost::new));
 	}
 
-	/** Cooldown in seconds; stored on the character's cooldown map. */
+	/** Cooldown in seconds (must be > 0; omit the field for no cooldown). */
 	public record Cooldown(double seconds) {
 		public static final Codec<Cooldown> CODEC = RecordCodecBuilder.create(i -> i.group(
-				Codec.DOUBLE.fieldOf("seconds").forGetter(Cooldown::seconds)
+				POSITIVE_DOUBLE.fieldOf("seconds").forGetter(Cooldown::seconds)
 		).apply(i, Cooldown::new));
 	}
 
@@ -113,7 +132,7 @@ public record AbilityDefinition(
 	public record ResourceInteraction(Identifier resource, double perSecond) {
 		public static final Codec<ResourceInteraction> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Identifier.CODEC.fieldOf("resource").forGetter(ResourceInteraction::resource),
-				Codec.DOUBLE.fieldOf("per_second").forGetter(ResourceInteraction::perSecond)
+				FINITE_DOUBLE.fieldOf("per_second").forGetter(ResourceInteraction::perSecond)
 		).apply(i, ResourceInteraction::new));
 	}
 

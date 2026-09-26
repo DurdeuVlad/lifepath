@@ -78,7 +78,14 @@ public final class AbilityEngine {
 		});
 		// ACTIVE: server re-validates the request end-to-end.
 		LifepathNetworking.onC2S(ActivateAbilityPayload.ID, (payload, ctx) ->
-				ctx.server().execute(() -> tryActivate(ctx.player(), payload.abilityId())));
+				ctx.server().execute(() -> {
+					ServerPlayerEntity player = ctx.player();
+					// The queued task can run after a disconnect — resolving a
+					// character for an offline entity would leak a cache entry.
+					if (ctx.server().getPlayerManager().getPlayer(player.getUuid()) == player) {
+						tryActivate(player, payload.abilityId());
+					}
+				}));
 	}
 
 	/**
@@ -129,14 +136,22 @@ public final class AbilityEngine {
 			if (def == null || def.trigger().kind() != AbilityDefinition.Kind.PASSIVE) {
 				continue;
 			}
+			long intervalMs = Math.max(1, def.trigger().intervalTicks()) * 50L;
 			Identifier due = scheduleKey(def.id());
 			Long dueAt = data.cooldowns().get(due);
 			if (dueAt != null && dueAt > now) {
 				continue;
 			}
-			data.setCooldown(due, now + Math.max(1, def.trigger().intervalTicks()) * 50L);
-			if (evaluate(data, player, def, now) == Outcome.EXECUTED && player != null) {
-				CharacterManager.markDirty(player);
+			// Elapsed real time since the previous eval (marker stores next-due,
+			// so last-run ≈ dueAt − interval) — resource_interactions scale on
+			// true elapsed time, not the nominal interval.
+			double elapsedSeconds = dueAt != null
+					? Math.max(0.0, (now - (dueAt - intervalMs)) / 1000.0)
+					: intervalMs / 1000.0;
+			data.setCooldown(due, now + intervalMs);
+			if (evaluate(data, player, def, now, elapsedSeconds) == Outcome.EXECUTED
+					&& player != null) {
+				CharacterManager.changed(player);
 			}
 		}
 	}
@@ -152,8 +167,9 @@ public final class AbilityEngine {
 			AbilityDefinition def = LifepathContent.abilities().get(id);
 			if (def != null && def.trigger().kind() == AbilityDefinition.Kind.EVENT
 					&& def.trigger().events().contains(eventType)
-					&& evaluate(data, player, def, now) == Outcome.EXECUTED && player != null) {
-				CharacterManager.markDirty(player);
+					&& evaluate(data, player, def, now, 0.0) == Outcome.EXECUTED
+					&& player != null) {
+				CharacterManager.changed(player);
 			}
 		}
 	}
@@ -163,7 +179,7 @@ public final class AbilityEngine {
 		Outcome outcome = tryActivate(CharacterManager.getCharacter(player), player,
 				abilityId, System.currentTimeMillis());
 		if (outcome == Outcome.EXECUTED) {
-			CharacterManager.markDirty(player);
+			CharacterManager.changed(player);
 		}
 		return outcome;
 	}
@@ -184,16 +200,23 @@ public final class AbilityEngine {
 		if (def.trigger().kind() != AbilityDefinition.Kind.ACTIVE) {
 			return Outcome.WRONG_TRIGGER;
 		}
-		return evaluate(data, self, def, now);
+		return evaluate(data, self, def, now, 0.0);
 	}
 
 	/**
 	 * The evaluation pipeline: conditions (all-of then any-of) → cooldown →
 	 * cost → resolve targets → run actions per target → spend cost, stamp
-	 * cooldown, apply passive resource interactions.
+	 * cooldown, apply resource interactions. Vocabulary evaluators run behind
+	 * exception isolation — a buggy datapack spec node can never take the
+	 * server tick down (it logs and fails closed instead).
+	 *
+	 * @param interactionSeconds elapsed seconds for {@code resource_interactions}
+	 *        scaling — supplied by the PASSIVE sweep from its schedule marker;
+	 *        other trigger kinds pass 0 (interactions are a passive concept).
 	 */
 	public static Outcome evaluate(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity self, AbilityDefinition def, long now) {
+			@Nullable ServerPlayerEntity self, AbilityDefinition def, long now,
+			double interactionSeconds) {
 		EvalContext ctx = new EvalContext(self, data, now);
 		if (!conditionsMet(ctx, def)) {
 			return debug(def, Outcome.CONDITIONS_FAILED);
@@ -213,8 +236,15 @@ public final class AbilityEngine {
 		if (resolver == null) {
 			return debug(def, Outcome.NO_TARGETS);
 		}
-		List<TargetContext> targets = resolver.resolve(ctx, def.target().raw());
-		if (targets.isEmpty()) {
+		List<TargetContext> targets;
+		try {
+			targets = resolver.resolve(ctx, def.target().raw());
+		} catch (Exception e) {
+			LifepathMod.LOGGER.error("ability {} target resolver {} threw", def.id(),
+					def.target().type(), e);
+			return debug(def, Outcome.NO_TARGETS);
+		}
+		if (targets == null || targets.isEmpty()) {
 			return debug(def, Outcome.NO_TARGETS);
 		}
 		for (TargetContext t : targets) {
@@ -224,26 +254,35 @@ public final class AbilityEngine {
 					LifepathMod.LOGGER.debug("ability {} unknown action {}", def.id(), action.type());
 					continue;
 				}
-				exec.run(t, ctx, action.raw());
+				try {
+					exec.run(t, ctx, action.raw());
+				} catch (Exception e) {
+					LifepathMod.LOGGER.error("ability {} action {} threw", def.id(),
+							action.type(), e);
+				}
 			}
 		}
 		def.cost().ifPresent(cost -> {
 			var res = data.resources().get(cost.resource());
-			data.setResource(cost.resource(), new PlayerCharacterData.ResourceState(
-					res.current() - cost.amount(), res.min(), res.max()));
+			// An action may have drained/removed the resource — re-read, clamp.
+			if (res != null) {
+				double left = Math.max(res.min(), Math.min(res.max(), res.current() - cost.amount()));
+				data.setResource(cost.resource(),
+						new PlayerCharacterData.ResourceState(left, res.min(), res.max()));
+			}
 		});
 		def.cooldown().ifPresent(cd ->
 				data.setCooldown(def.id(), now + (long) (cd.seconds() * 1000.0)));
-		applyResourceInteractions(data, def, now);
+		applyResourceInteractions(data, def, interactionSeconds);
 		return Outcome.EXECUTED;
 	}
 
+	/** Passive-only by contract: scales {@code per_second} by elapsed real time. */
 	private static void applyResourceInteractions(PlayerCharacterData data,
-			AbilityDefinition def, long now) {
-		if (def.resourceInteractions().isEmpty()) {
+			AbilityDefinition def, double seconds) {
+		if (def.resourceInteractions().isEmpty() || seconds <= 0.0) {
 			return;
 		}
-		double seconds = Math.max(0.0, def.trigger().intervalTicks()) / 20.0;
 		for (AbilityDefinition.ResourceInteraction ri : def.resourceInteractions()) {
 			var res = data.resources().get(ri.resource());
 			if (res == null) {
@@ -259,20 +298,31 @@ public final class AbilityEngine {
 	private static boolean conditionsMet(EvalContext ctx, AbilityDefinition def) {
 		for (AbilityDefinition.SpecNode cond : def.conditions().all()) {
 			var eval = AbilityVocabulary.condition(cond.type());
-			if (eval == null || !eval.test(ctx, cond.raw())) {
+			if (eval == null || !testSafely(def, cond, eval, ctx)) {
 				return false;
 			}
 		}
 		if (!def.conditions().any().isEmpty()) {
 			for (AbilityDefinition.SpecNode cond : def.conditions().any()) {
 				var eval = AbilityVocabulary.condition(cond.type());
-				if (eval != null && eval.test(ctx, cond.raw())) {
+				if (eval != null && testSafely(def, cond, eval, ctx)) {
 					return true;
 				}
 			}
 			return false;
 		}
 		return true;
+	}
+
+	/** A throwing condition fails closed — a bad spec node can never crash the tick. */
+	private static boolean testSafely(AbilityDefinition def, AbilityDefinition.SpecNode cond,
+			AbilityVocabulary.ConditionEvaluator eval, EvalContext ctx) {
+		try {
+			return eval.test(ctx, cond.raw());
+		} catch (Exception e) {
+			LifepathMod.LOGGER.error("ability {} condition {} threw", def.id(), cond.type(), e);
+			return false;
+		}
 	}
 
 	private static Outcome debug(AbilityDefinition def, Outcome outcome) {
@@ -283,9 +333,16 @@ public final class AbilityEngine {
 		return outcome;
 	}
 
-	/** Cooldown-map key used as the "next passive eval" schedule marker. */
+	/**
+	 * Cooldown-map key for the "next passive eval" marker: {@code schedule/<ns>/<path>}
+	 * keeps namespace and path losslessly distinct (unlike a {@code :}→{@code _}
+	 * rewrite, which collides e.g. {@code a:b_c} with {@code a_b:c}). The
+	 * {@code schedule/} prefix is the sentinel {@code CharacterPersistence}'s
+	 * sanitize skips — these are engine bookkeeping, not ability cooldowns.
+	 */
 	static Identifier scheduleKey(Identifier abilityId) {
-		return Identifier.of("lifepath", "schedule/" + abilityId.toString().replace(':', '_'));
+		return Identifier.of("lifepath",
+				"schedule/" + abilityId.getNamespace() + "/" + abilityId.getPath());
 	}
 
 	private static int passiveIntervalTicks() {

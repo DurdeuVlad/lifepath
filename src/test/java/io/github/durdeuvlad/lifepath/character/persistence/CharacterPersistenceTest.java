@@ -52,6 +52,25 @@ class CharacterPersistenceTest {
 	}
 
 	@Test
+	void scheduleMarkersSurviveSanitize() {
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		Identifier marker = Identifier.of("lifepath", "schedule/lifepath/passive_x");
+		Identifier real = Identifier.of("lifepath", "real_ability");
+		data.setCooldown(marker, 123L);
+		data.setCooldown(real, 456L);
+		CharacterPersistence.setContentIndex((domain, id) -> false); // strictest: all unknown
+		try {
+			PlayerCharacterData sanitized = CharacterPersistence.deserialize(
+					CharacterPersistence.serialize(data));
+			// Engine bookkeeping survives; the unknown ability cooldown drops.
+			assertTrue(sanitized.cooldowns().containsKey(marker));
+			assertTrue(!sanitized.cooldowns().containsKey(real));
+		} finally {
+			CharacterPersistence.setContentIndex(ContentIndex.PERMISSIVE);
+		}
+	}
+
+	@Test
 	void unknownContentIdsAreDroppedOnLoad() {
 		PlayerCharacterData data = sampleData();
 		CharacterPersistence.setContentIndex(new ContentIndex() {

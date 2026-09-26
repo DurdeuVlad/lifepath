@@ -112,6 +112,11 @@ public final class CharacterPersistence {
 			}
 		}
 		for (Identifier id : new ArrayList<>(data.cooldowns().keySet())) {
+			// `schedule/*` keys are the ability engine's passive-eval markers —
+			// engine bookkeeping, not ability references (M4-1).
+			if (id.getPath().startsWith("schedule/")) {
+				continue;
+			}
 			if (unknown("ability", id)) {
 				drop("ability", id);
 				data.removeCooldown(id);
