@@ -1,0 +1,26 @@
+package io.github.durdeuvlad.lifepath.client.network;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.network.packet.CustomPayload;
+
+/**
+ * Client-side counterpart of {@code LifepathNetworking}: registers receivers for
+ * S2C payload types (state sync for UI/HUD). C2S sends use
+ * {@code ClientPlayNetworking.send(payload)} at call sites.
+ *
+ * <p>Lives in the client sourceset so the dedicated server never class-loads
+ * {@code ClientPlayNetworking}.
+ */
+@Environment(EnvType.CLIENT)
+public final class ClientLifepathNetworking {
+	private ClientLifepathNetworking() {
+	}
+
+	/** Registers the client-side receiver for an S2C payload type. */
+	public static <T extends CustomPayload> void onS2C(
+			CustomPayload.Id<T> id, ClientPlayNetworking.PlayPayloadHandler<T> handler) {
+		ClientPlayNetworking.registerGlobalReceiver(id, handler);
+	}
+}

@@ -1,5 +1,6 @@
 package io.github.durdeuvlad.lifepath;
 
+import io.github.durdeuvlad.lifepath.command.LifepathCommands;
 import io.github.durdeuvlad.lifepath.config.ConfigSpec;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.registry.RegistryBootstrap;
@@ -38,6 +39,8 @@ public class LifepathMod implements ModInitializer {
 		ReloadManager.register(id("engine_config"), LifepathConfig::reload);
 		ReloadManager.init();
 		LifepathConfig.loadAll();
+
+		LifepathCommands.init();
 
 		RegistryBootstrap.bootstrap();
 	}

@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * One reload lifecycle entrypoint for all engine/data systems. Systems register
@@ -54,16 +55,31 @@ public final class ReloadManager {
 		initialized = true;
 	}
 
-	/** Runs every registered reloader. Called by datapack reload and {@code /lifepath reload}. */
-	public static void reloadAll() {
+	/** Outcome of one registered reloader for reporting (e.g. {@code /lifepath reload}). */
+	public record ReloadResult(Identifier id, boolean success, @Nullable String error) {
+	}
+
+	/**
+	 * Runs every registered reloader in registration order. Called by datapack
+	 * reload and {@code /lifepath reload}.
+	 *
+	 * @return one {@link ReloadResult} per registered reloader, in run order;
+	 *         a failing reloader is logged as ERROR, marked unsuccessful, and
+	 *         never aborts the rest.
+	 */
+	public static java.util.List<ReloadResult> reloadAll() {
+		java.util.List<ReloadResult> results = new java.util.ArrayList<>();
 		for (Map.Entry<Identifier, Runnable> reloader : RELOADERS.entrySet()) {
 			try {
 				reloader.getValue().run();
 				LifepathMod.LOGGER.info("reloaded {}", reloader.getKey());
+				results.add(new ReloadResult(reloader.getKey(), true, null));
 			} catch (Exception e) {
 				LifepathMod.LOGGER.error("reloader {} failed; continuing", reloader.getKey(), e);
+				results.add(new ReloadResult(reloader.getKey(), false, String.valueOf(e.getMessage())));
 			}
 		}
+		return java.util.List.copyOf(results);
 	}
 
 	/**

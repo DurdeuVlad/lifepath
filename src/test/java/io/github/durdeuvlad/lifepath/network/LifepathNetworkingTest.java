@@ -1,0 +1,16 @@
+package io.github.durdeuvlad.lifepath.network;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import io.github.durdeuvlad.lifepath.LifepathMod;
+import net.minecraft.network.packet.CustomPayload;
+import org.junit.jupiter.api.Test;
+
+class LifepathNetworkingTest {
+
+	@Test
+	void payloadIdWrapsChannelIdentifier() {
+		CustomPayload.Id<CustomPayload> id = LifepathNetworking.payloadId(LifepathMod.id("test/dummy"));
+		assertEquals(LifepathMod.id("test/dummy"), id.id());
+	}
+}
