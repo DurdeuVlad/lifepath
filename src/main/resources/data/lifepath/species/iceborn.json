@@ -1,0 +1,17 @@
+{
+	"display_name": "Iceborn",
+	"description": "Children of the cold. Iceborn carry a temperature meter — frost and ice keep them sharp and quick to mend, while heat, fire, and lava drag them toward sluggish weakness and burning.",
+	"visibility": "normal",
+	"selection": "open",
+	"resources": ["lifepath:temperature"],
+	"passive_abilities": [
+		"lifepath:iceborn_cold_biome",
+		"lifepath:iceborn_ice_nearby",
+		"lifepath:iceborn_arid_heat",
+		"lifepath:iceborn_heat_sources",
+		"lifepath:iceborn_lava_nearby",
+		"lifepath:iceborn_coolant",
+		"lifepath:iceborn_overheat"
+	],
+	"active_abilities": ["lifepath:iceborn_frost_walk"]
+}
