@@ -11,10 +11,10 @@ class LifepathModTest {
 
 	@Test
 	void idUsesLifepathNamespace() {
-		Identifier id = LifepathMod.id("species/sylvian");
+		Identifier id = LifepathMod.id("test/dummy");
 		assertEquals("lifepath", id.getNamespace());
-		assertEquals("species/sylvian", id.getPath());
-		assertEquals("lifepath:species/sylvian", id.toString());
+		assertEquals("test/dummy", id.getPath());
+		assertEquals("lifepath:test/dummy", id.toString());
 	}
 
 	@Test

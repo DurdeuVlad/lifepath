@@ -62,13 +62,8 @@ java {
 	targetCompatibility = JavaVersion.VERSION_21
 }
 
-jar {
-	def projectName = project.name
-	inputs.property "projectName", projectName
-
-	from("LICENSE") {
-		rename { "${it}_$projectName"}
-	}
+base {
+	archivesName = archives_base_name
 }
 
 // configure the maven publication
