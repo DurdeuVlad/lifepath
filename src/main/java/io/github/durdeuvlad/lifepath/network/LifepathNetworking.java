@@ -16,8 +16,9 @@ import net.minecraft.util.Identifier;
  * Payload channel identifiers use {@code lifepath:<system>/<name>} via
  * {@link LifepathMod#id}.
  *
- * <p>Type registration ({@link #registerS2C}/{@link #registerC2S}) must happen on
- * BOTH logical sides during mod init; receivers are environment-specific:
+ * <p>Type registration ({@link #registerS2C}/{@link #registerC2S}) must happen in
+ * the common sourceset so both environments share the codec; receivers are
+ * environment-specific:
  * C2S handlers register here (server), S2C handlers register in
  * {@code client/network/ClientLifepathNetworking} via {@code ClientPlayNetworking}.
  *
@@ -45,9 +46,18 @@ public final class LifepathNetworking {
 		PayloadTypeRegistry.playC2S().register(id, codec);
 	}
 
-	/** Registers the server-side receiver for a C2S payload type. Common code only. */
+	/**
+	 * Registers the server-side receiver for a C2S payload type. Common code only.
+	 *
+	 * @throws IllegalArgumentException if the payload type was not registered via
+	 *         {@link #registerC2S} first
+	 * @throws IllegalStateException    if a receiver is already registered for the type
+	 *         (duplicate registration is a bug — the first would silently win)
+	 */
 	public static <T extends CustomPayload> void onC2S(
 			CustomPayload.Id<T> id, ServerPlayNetworking.PlayPayloadHandler<T> handler) {
-		ServerPlayNetworking.registerGlobalReceiver(id, handler);
+		if (!ServerPlayNetworking.registerGlobalReceiver(id, handler)) {
+			throw new IllegalStateException("duplicate C2S receiver for payload " + id.id());
+		}
 	}
 }

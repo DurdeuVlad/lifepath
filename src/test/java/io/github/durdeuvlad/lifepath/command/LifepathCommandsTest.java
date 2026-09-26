@@ -3,7 +3,7 @@ package io.github.durdeuvlad.lifepath.command;
 import static net.minecraft.server.command.CommandManager.literal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -36,13 +36,15 @@ class LifepathCommandsTest {
 		LifepathCommands.init();
 
 		// Brigadier defaults requirement to s -> true, so version accepts a null
-		// source while reload carries an explicit (source-dependent) gate.
+		// source; reload's gate dereferences the source (hasPermissionLevel) and
+		// therefore throws NPE on null — proving a real source-dependent gate,
+		// not merely a different predicate instance.
 		assertTrue(childNamed("version").canUse(null));
-		assertTrue(childNamed("reload").getRequirement() != childNamed("version").getRequirement());
+		assertThrows(NullPointerException.class, () -> childNamed("reload").canUse(null));
 	}
 
 	@Test
-	void contributedSubcommandsJoinTheTreeInOrder() {
+	void contributedSubcommandsJoinTheTree() {
 		LifepathCommands.register(literal("alpha"));
 		LifepathCommands.register(literal("beta"));
 

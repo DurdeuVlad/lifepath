@@ -18,9 +18,16 @@ public final class ClientLifepathNetworking {
 	private ClientLifepathNetworking() {
 	}
 
-	/** Registers the client-side receiver for an S2C payload type. */
+	/**
+	 * Registers the client-side receiver for an S2C payload type.
+	 *
+	 * @throws IllegalStateException if a receiver is already registered for the
+	 *         type (duplicate registration is a bug — the first would silently win)
+	 */
 	public static <T extends CustomPayload> void onS2C(
 			CustomPayload.Id<T> id, ClientPlayNetworking.PlayPayloadHandler<T> handler) {
-		ClientPlayNetworking.registerGlobalReceiver(id, handler);
+		if (!ClientPlayNetworking.registerGlobalReceiver(id, handler)) {
+			throw new IllegalStateException("duplicate S2C receiver for payload " + id.id());
+		}
 	}
 }

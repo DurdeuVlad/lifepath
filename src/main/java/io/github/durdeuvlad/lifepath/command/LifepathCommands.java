@@ -2,6 +2,7 @@ package io.github.durdeuvlad.lifepath.command;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.github.durdeuvlad.lifepath.LifepathMod;
@@ -33,8 +34,19 @@ public final class LifepathCommands {
 	private LifepathCommands() {
 	}
 
-	/** Contributes a subcommand tree under {@code /lifepath}. Registration order is preserved. */
+	/**
+	 * Contributes a subcommand tree under {@code /lifepath}. Registration order is preserved.
+	 *
+	 * @throws IllegalArgumentException if another subcommand already claims the same
+	 *         literal name (brigadier would silently merge them)
+	 */
 	public static void register(LiteralArgumentBuilder<ServerCommandSource> subcommand) {
+		String name = subcommand.getLiteral();
+		for (LiteralArgumentBuilder<ServerCommandSource> existing : SUBCOMMANDS) {
+			if (existing.getLiteral().equals(name)) {
+				throw new IllegalArgumentException("duplicate /lifepath subcommand literal: " + name);
+			}
+		}
 		SUBCOMMANDS.add(subcommand);
 	}
 
@@ -62,7 +74,7 @@ public final class LifepathCommands {
 		source.sendFeedback(() -> Text.literal(
 				"Lifepath " + LifepathMod.modVersion() + " (data version " + LifepathMod.DATA_VERSION + ")"),
 				false);
-		return 1;
+		return Command.SINGLE_SUCCESS;
 	}
 
 	private static int reload(ServerCommandSource source) {
@@ -79,8 +91,8 @@ public final class LifepathCommands {
 		int failureCount = failures;
 		source.sendFeedback(() -> Text.literal(
 				"Lifepath reload finished: " + results.size() + " reloadables, " + failureCount + " failed"),
-				false);
-		return failureCount == 0 ? 1 : 0;
+				true);
+		return failureCount == 0 ? Command.SINGLE_SUCCESS : 0;
 	}
 
 	/** Test hook: clears contributed subcommands and the init flag. Not for production use. */
@@ -89,10 +101,11 @@ public final class LifepathCommands {
 		initialized = false;
 	}
 
-	/** Test hook: rebuilds the root tree as {@link #registerRoot} would. */
+	/** Builds the root tree; bare {@code /lifepath} defaults to version output. */
 	static LiteralArgumentBuilder<ServerCommandSource> buildRoot() {
-		LiteralArgumentBuilder<ServerCommandSource> root = literal("lifepath");
-		for (LiteralArgumentBuilder<ServerCommandSource> subcommand : SUBCOMMANDS) {
+		LiteralArgumentBuilder<ServerCommandSource> root = literal("lifepath")
+				.executes(ctx -> version(ctx.getSource()));
+		for (LiteralArgumentBuilder<ServerCommandSource> subcommand : new ArrayList<>(SUBCOMMANDS)) {
 			root.then(subcommand);
 		}
 		return root;

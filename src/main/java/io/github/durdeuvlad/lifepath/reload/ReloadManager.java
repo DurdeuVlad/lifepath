@@ -1,7 +1,9 @@
 package io.github.durdeuvlad.lifepath.reload;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
@@ -66,9 +68,12 @@ public final class ReloadManager {
 	 * @return one {@link ReloadResult} per registered reloader, in run order;
 	 *         a failing reloader is logged as ERROR, marked unsuccessful, and
 	 *         never aborts the rest.
+	 *         <p>Note: only {@link Exception} is contained — an {@link Error}
+	 *         still aborts the chain and propagates (deliberate: swallowing
+	 *         VM-level failures hides real corruption).
 	 */
-	public static java.util.List<ReloadResult> reloadAll() {
-		java.util.List<ReloadResult> results = new java.util.ArrayList<>();
+	public static List<ReloadResult> reloadAll() {
+		List<ReloadResult> results = new ArrayList<>();
 		for (Map.Entry<Identifier, Runnable> reloader : RELOADERS.entrySet()) {
 			try {
 				reloader.getValue().run();
@@ -76,10 +81,11 @@ public final class ReloadManager {
 				results.add(new ReloadResult(reloader.getKey(), true, null));
 			} catch (Exception e) {
 				LifepathMod.LOGGER.error("reloader {} failed; continuing", reloader.getKey(), e);
-				results.add(new ReloadResult(reloader.getKey(), false, String.valueOf(e.getMessage())));
+				String detail = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+				results.add(new ReloadResult(reloader.getKey(), false, detail));
 			}
 		}
-		return java.util.List.copyOf(results);
+		return List.copyOf(results);
 	}
 
 	/**
