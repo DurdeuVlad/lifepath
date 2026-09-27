@@ -1,0 +1,233 @@
+package io.github.durdeuvlad.lifepath.species;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.google.gson.JsonParser;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import io.github.durdeuvlad.lifepath.LifepathMod;
+import io.github.durdeuvlad.lifepath.ability.AbilityEngine;
+import io.github.durdeuvlad.lifepath.ability.AbilityVocabulary;
+import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
+import io.github.durdeuvlad.lifepath.content.AbilityDefinition;
+import io.github.durdeuvlad.lifepath.content.DietDefinition;
+import io.github.durdeuvlad.lifepath.content.RelationDefinition;
+import io.github.durdeuvlad.lifepath.content.ResourceDefinition;
+import io.github.durdeuvlad.lifepath.content.SkillDefinition;
+import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
+import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
+import io.github.durdeuvlad.lifepath.content.XpSourceDefinition;
+import io.github.durdeuvlad.lifepath.event.ActivityDispatcher;
+import io.github.durdeuvlad.lifepath.registry.LifepathContent;
+import io.github.durdeuvlad.lifepath.specialization.SpecializationService;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+import net.minecraft.util.Identifier;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+/**
+ * M5-5: the vertical slice as executable content completeness — every shipped
+ * file in every domain parses through the real codec path, and every
+ * cross-reference between domains resolves against the registries (mirroring
+ * live load order: resources before abilities). The four known dangling
+ * specialization signatures are pinned as the allowed-defect set so any NEW
+ * dangling reference fails this test.
+ */
+class VerticalSliceTest {
+	private static final Path DATA = Path.of("src/main/resources/data/lifepath");
+
+	/** The four spec signature abilities the slice references but never shipped — tracked defect. */
+	private static final Set<Identifier> KNOWN_DANGLING_SIGNATURES = Set.of(
+			LifepathMod.id("deepvein_sense_i"),
+			LifepathMod.id("bountiful_harvest_i"),
+			LifepathMod.id("patient_waters_i"),
+			LifepathMod.id("forge_mastery_i"));
+
+	private PlayerCharacterData data;
+
+	@BeforeEach
+	void setUp() {
+		data = PlayerCharacterData.createDefault();
+		ActivityDispatcher.resetForTests();
+		AbilityVocabulary.resetForTests();
+		AbilityVocabulary.init();
+		LifepathContent.species().clear();
+		LifepathContent.specializations().clear();
+		LifepathContent.skills().clear();
+		LifepathContent.xpSources().clear();
+		LifepathContent.resources().clear();
+		LifepathContent.abilities().clear();
+		LifepathContent.diets().clear();
+		LifepathContent.relations().clear();
+	}
+
+	@AfterEach
+	void tearDown() {
+		ActivityDispatcher.resetForTests();
+		AbilityVocabulary.resetForTests();
+		LifepathContent.species().clear();
+		LifepathContent.specializations().clear();
+		LifepathContent.skills().clear();
+		LifepathContent.xpSources().clear();
+		LifepathContent.resources().clear();
+		LifepathContent.abilities().clear();
+		LifepathContent.diets().clear();
+		LifepathContent.relations().clear();
+	}
+
+	private static <T> T decodeFile(String domain, String name, Codec<T> codec)
+			throws Exception {
+		return codec.parse(JsonOps.INSTANCE, JsonParser.parseString(Files.readString(
+						DATA.resolve(domain + "/" + name + ".json"))))
+				.result().orElseThrow(() -> new AssertionError(
+						domain + "/" + name + " failed to parse"));
+	}
+
+	private static List<String> names(String domain) throws Exception {
+		try (Stream<Path> files = Files.list(DATA.resolve(domain))) {
+			return files.filter(p -> p.toString().endsWith(".json"))
+					.map(p -> p.getFileName().toString().replace(".json", ""))
+					.sorted().toList();
+		}
+	}
+
+	/** Loads every shipped definition into the registries, in live load order. */
+	private void loadEverything() throws Exception {
+		for (String n : names("skill"))
+			LifepathContent.skills().register(LifepathMod.id(n),
+					SkillDefinition.fromFile(LifepathMod.id(n),
+							decodeFile("skill", n, SkillDefinition.SkillDefinitionFile.CODEC)));
+		for (String n : names("xp_source"))
+			LifepathContent.xpSources().register(LifepathMod.id(n),
+					XpSourceDefinition.fromFile(LifepathMod.id(n),
+							decodeFile("xp_source", n, XpSourceDefinition.XpSourceFile.CODEC)));
+		for (String n : names("resource"))
+			LifepathContent.resources().register(LifepathMod.id(n),
+					LifepathContent.decodeResource(LifepathMod.id(n),
+							decodeFile("resource", n, ResourceDefinition.ResourceFile.CODEC)));
+		for (String n : names("ability"))
+			LifepathContent.abilities().register(LifepathMod.id(n),
+					LifepathContent.decodeAbility(LifepathMod.id(n),
+							decodeFile("ability", n, AbilityDefinition.AbilityFile.CODEC)));
+		for (String n : names("diet"))
+			LifepathContent.diets().register(LifepathMod.id(n),
+					DietDefinition.fromFile(LifepathMod.id(n),
+							decodeFile("diet", n, DietDefinition.DietFile.CODEC)));
+		for (String n : names("relation"))
+			LifepathContent.relations().register(LifepathMod.id(n),
+					RelationDefinition.fromFile(LifepathMod.id(n),
+							decodeFile("relation", n, RelationDefinition.RelationFile.CODEC)));
+		for (String n : names("species"))
+			LifepathContent.species().register(LifepathMod.id(n),
+					SpeciesDefinition.fromFile(LifepathMod.id(n),
+							decodeFile("species", n, SpeciesDefinition.SpeciesDefinitionFile.CODEC)));
+		for (String n : names("specialization"))
+			LifepathContent.specializations().register(LifepathMod.id(n),
+					SpecializationDefinition.fromFile(LifepathMod.id(n),
+							decodeFile("specialization", n,
+									SpecializationDefinition.SpecializationDefinitionFile.CODEC)));
+	}
+
+	@Test
+	void milestoneContentChecklist() throws Exception {
+		loadEverything();
+		for (String s : List.of("human", "sylvian", "iceborn", "undead"))
+			assertTrue(LifepathContent.species().contains(LifepathMod.id(s)),
+					"missing species " + s);
+		for (String s : List.of("miner", "farmer", "blacksmith", "fisherman"))
+			assertTrue(LifepathContent.specializations().contains(LifepathMod.id(s)),
+					"missing specialization " + s);
+		for (String s : List.of("mining", "farming", "smithing", "fishing"))
+			assertTrue(LifepathContent.skills().contains(LifepathMod.id(s)),
+					"missing skill " + s);
+		assertEquals(4, LifepathContent.species().size());
+	}
+
+	@Test
+	void everyCrossReferenceResolvesOrIsTracked() throws Exception {
+		loadEverything();
+		Set<Identifier> dangling = new HashSet<>();
+		for (SpeciesDefinition sp : LifepathContent.species().all().values()) {
+			for (Identifier a : Stream.concat(
+					sp.passiveAbilities().stream(), sp.activeAbilities().stream()).toList())
+				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
+			for (Identifier r : sp.resources())
+				if (!LifepathContent.resources().contains(r)) dangling.add(r);
+			sp.dietRules().ifPresent(d -> {
+				if (!LifepathContent.diets().contains(d)) dangling.add(d);
+			});
+			sp.mobDispositions().ifPresent(d -> {
+				if (!LifepathContent.relations().contains(d)) dangling.add(d);
+			});
+			sp.minAptitudes().keySet().forEach(s -> {
+				if (!LifepathContent.skills().contains(s)) dangling.add(s);
+			});
+		}
+		for (SpecializationDefinition spec : LifepathContent.specializations().all().values()) {
+			for (Identifier a : spec.signatureRefs())
+				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
+			Set<Identifier> skillRefs = new HashSet<>();
+			skillRefs.addAll(spec.startingSkills().keySet());
+			skillRefs.addAll(spec.aptitudes().keySet());
+			skillRefs.addAll(spec.xpModifiers().keySet());
+			skillRefs.addAll(spec.decayModifiers().keySet());
+			skillRefs.addAll(spec.protectedFloors().keySet());
+			skillRefs.forEach(s -> {
+				if (!LifepathContent.skills().contains(s)) dangling.add(s);
+			});
+		}
+		for (XpSourceDefinition xs : LifepathContent.xpSources().all().values())
+			if (!LifepathContent.skills().contains(xs.skill())) dangling.add(xs.skill());
+
+		assertEquals(KNOWN_DANGLING_SIGNATURES, dangling,
+				"only the tracked spec-signature gap may dangle");
+	}
+
+	@Test
+	void speciesAndSpecsComposeOrthogonally() throws Exception {
+		loadEverything();
+		for (Identifier speciesId : List.of(LifepathMod.id("human"),
+				LifepathMod.id("sylvian"), LifepathMod.id("iceborn"),
+				LifepathMod.id("undead"))) {
+			SpeciesDefinition species = LifepathContent.species().get(speciesId);
+			Set<Identifier> innate = new HashSet<>();
+			innate.addAll(species.passiveAbilities());
+			innate.addAll(species.activeAbilities());
+			for (Identifier specId : List.of(LifepathMod.id("miner"),
+					LifepathMod.id("farmer"), LifepathMod.id("blacksmith"),
+					LifepathMod.id("fisherman"))) {
+				PlayerCharacterData d = PlayerCharacterData.createDefault();
+				d.setSpeciesId(speciesId);
+				assertEquals(SpecializationService.ApplyResult.APPLIED,
+						SpecializationService.apply(d, specId));
+				Set<Identifier> owned = AbilityEngine.ownedAbilities(d);
+				assertTrue(owned.containsAll(innate),
+						speciesId + " lost innate abilities under " + specId);
+				// Species and specialization are orthogonal axes: every pair
+				// composes with no species-specific gating.
+			}
+		}
+	}
+
+	@Test
+	void signatureAbilityGapIsGraceful() throws Exception {
+		loadEverything();
+		PlayerCharacterData d = PlayerCharacterData.createDefault();
+		d.setSpeciesId(LifepathMod.id("human"));
+		assertEquals(SpecializationService.ApplyResult.APPLIED,
+				SpecializationService.apply(d, LifepathMod.id("miner")));
+		// The dangling signature is a tracked content gap — apply succeeds and
+		// eval paths skip the missing ability instead of crashing.
+		assertFalse(LifepathContent.abilities()
+				.contains(LifepathMod.id("deepvein_sense_i")));
+	}
+}
