@@ -3,8 +3,9 @@
 > Project: Lifepath  
 > Target: Minecraft 1.21.1 / Fabric  
 > Document purpose: High-level implementation roadmap for human developers and AI coding agents  
-> Status: Living execution plan — M0–M9 and M10-1/M10-2 delivered; M10-3 (this
-> document's companion docs) through M11 remain. Exit-gate phrasing below
+> Status: Living execution plan — M0–M10 delivered and beta RC `1.0.0-beta.1`
+> built; M10.5 (real-player validation), M12 (icons-over-text UX — gates the
+> public release go/no-go), and M11 (distribution & listing) remain. Exit-gate phrasing below
 > describes *targets*; shipped reality is enumerated in `docs/API.md`,
 > `docs/DATAPACK_API.md`, `docs/CONFIGURATION.md`, `docs/ADMIN_COMMANDS.md`,
 > and `docs/MIGRATIONS.md`.  
@@ -1064,6 +1065,7 @@ M8   Core Content Expansion
 M9   Advanced Character Systems
 M10  1.0 Stabilization
 M10.5 Public Beta / Release Candidate
+M12  UX Improvement — Icons over Text
 M11  Distribution, Branding & CurseForge Release
 ```
 
@@ -1093,6 +1095,8 @@ M9
 M10
  ↓
 M10.5
+ ↓
+M12  (icons-over-text UX; gates the LP-REL-010 go/no-go)
  ↓
 M11
 ```
