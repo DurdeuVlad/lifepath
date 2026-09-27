@@ -46,6 +46,8 @@ import net.minecraft.util.Identifier;
 public final class LifepathConfig {
 	/** The always-present base config file ({@code config/lifepath/general.toml}). */
 	public static final Identifier GENERAL = LifepathMod.id("general");
+	/** Client-side presentation options (HUD etc.) — generated client.toml. */
+	public static final Identifier CLIENT = LifepathMod.id("client");
 
 	private static final Map<Identifier, ConfigSpec> SPECS = new LinkedHashMap<>();
 	private static volatile Map<Identifier, Map<String, Object>> VALUES = Map.of();

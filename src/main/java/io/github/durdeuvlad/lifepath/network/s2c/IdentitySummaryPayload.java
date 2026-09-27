@@ -26,7 +26,23 @@ import net.minecraft.network.packet.CustomPayload;
  */
 public record IdentitySummaryPayload(IdentityCore identity,
 		List<String> specFocus,
-		Map<String, List<String>> sections) implements CustomPayload {
+		Map<String, List<String>> sections,
+		Map<String, String> abilityNames,
+		List<ResourceDisplay> resourceDisplays) implements CustomPayload {
+
+	/** Static display info for one resource def (M6-3 HUD). */
+	public record ResourceDisplay(String id, String name, double defaultValue,
+			int restBandIndex, List<String> bandNames) {
+		static final PacketCodec<RegistryByteBuf, ResourceDisplay> CODEC =
+				PacketCodec.tuple(
+						PacketCodecs.STRING, ResourceDisplay::id,
+						PacketCodecs.STRING, ResourceDisplay::name,
+						PacketCodecs.DOUBLE, ResourceDisplay::defaultValue,
+						PacketCodecs.INTEGER, ResourceDisplay::restBandIndex,
+						PacketCodecs.STRING.collect(PacketCodecs.toList()),
+								ResourceDisplay::bandNames,
+						ResourceDisplay::new);
+	}
 
 	/** Species/specialization identity strings ("" = unset). */
 	public record IdentityCore(String speciesId, String speciesName,
@@ -52,12 +68,17 @@ public record IdentitySummaryPayload(IdentityCore identity,
 					PacketCodecs.map(java.util.HashMap::new, PacketCodecs.STRING,
 							PacketCodecs.STRING.collect(PacketCodecs.toList())),
 							IdentitySummaryPayload::sections,
+					PacketCodecs.map(java.util.HashMap::new, PacketCodecs.STRING,
+							PacketCodecs.STRING), IdentitySummaryPayload::abilityNames,
+					ResourceDisplay.CODEC.collect(PacketCodecs.toList()),
+							IdentitySummaryPayload::resourceDisplays,
 					IdentitySummaryPayload::new);
 
 	/** Empty payload — used when the character has no identity content yet. */
 	public static IdentitySummaryPayload empty() {
 		return new IdentitySummaryPayload(
-				new IdentityCore("", "", "", "", ""), List.of(), Map.of());
+				new IdentityCore("", "", "", "", ""), List.of(), Map.of(),
+				Map.of(), List.of());
 	}
 
 	@Override

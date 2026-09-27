@@ -95,6 +95,11 @@ public final class ClientCharacterState {
 		return RESOURCE_BANDS.getOrDefault(resourceId, -1);
 	}
 
+	/** All known resource band indices (M6-3 HUD) — read-only view. */
+	public static java.util.Map<net.minecraft.util.Identifier, Integer> resourceBands() {
+		return java.util.Collections.unmodifiableMap(RESOURCE_BANDS);
+	}
+
 	/**
 	 * Applies a single-cooldown delta (M4-4 {@code CooldownUpdatePayload}) to
 	 * the read-model snapshot so HUD state stays fresh between full syncs.

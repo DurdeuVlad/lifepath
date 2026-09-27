@@ -42,8 +42,15 @@ import org.jetbrains.annotations.Nullable;
  * recursion-capped; when the cap trips the value write has already landed —
  * world-side effects of the resting band are skipped for that pass (logged).
  */
-public record ResourceDefinition(Identifier id, double min, double max,
+public record ResourceDefinition(Identifier id, String displayName,
+		double min, double max,
 		double defaultValue, double regenPerSecond, List<Band> bands) {
+
+	/** Back-compatible constructor — display name defaults to the id path. */
+	public ResourceDefinition(Identifier id, double min, double max,
+			double defaultValue, double regenPerSecond, List<Band> bands) {
+		this(id, id.getPath(), min, max, defaultValue, regenPerSecond, bands);
+	}
 
 	/**
 	 * A sustained band status effect: {@code effect} id + {@code duration_ticks}
@@ -67,26 +74,35 @@ public record ResourceDefinition(Identifier id, double min, double max,
 							: DataResult.error(() -> "range must be [lo, hi] finite doubles"),
 					DataResult::success);
 
-	/** Inclusive {@code [lo, hi]} meter range + sustained effects + entry actions. */
-	public record Band(double lo, double hi, List<BandEffect> effects,
+	/** Inclusive {@code [lo, hi]} meter range + sustained effects + entry actions.
+	 * {@code name} is a display string for HUD/UI band labels (M6-3). */
+	public record Band(String name, double lo, double hi, List<BandEffect> effects,
 			List<SpecNode> actions) {
+		public Band(double lo, double hi, List<BandEffect> effects,
+				List<SpecNode> actions) {
+			this("", lo, hi, effects, actions);
+		}
+
 		public static final Codec<Band> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.STRING.optionalFieldOf("name", "").forGetter(Band::name),
 				RANGE.fieldOf("range").forGetter(b -> List.of(b.lo(), b.hi())),
 				BandEffect.CODEC.listOf().optionalFieldOf("effects", List.of())
 						.forGetter(Band::effects),
 				SpecNode.CODEC.listOf().optionalFieldOf("actions", List.of())
 						.forGetter(Band::actions))
-				.apply(i, (range, effects, actions) -> new Band(range.get(0), range.get(1),
-						effects, actions)));
+				.apply(i, (name, range, effects, actions) -> new Band(name,
+						range.get(0), range.get(1), effects, actions)));
 	}
 
 	/** The datapack file shape for {@code data/<ns>/resource/<name>.json}. */
-	public record ResourceFile(double min, double max, double defaultValue,
-			double regenPerSecond, List<Band> bands) {
+	public record ResourceFile(String displayName, double min, double max,
+			double defaultValue, double regenPerSecond, List<Band> bands) {
 		private static final Codec<Double> BOUNDED_DOUBLE =
 				Codec.doubleRange(-1.0e9, 1.0e9);
 
 		public static final Codec<ResourceFile> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.STRING.optionalFieldOf("display_name", "")
+						.forGetter(ResourceFile::displayName),
 				BOUNDED_DOUBLE.fieldOf("min").forGetter(ResourceFile::min),
 				BOUNDED_DOUBLE.fieldOf("max").forGetter(ResourceFile::max),
 				BOUNDED_DOUBLE.optionalFieldOf("default")
@@ -95,8 +111,8 @@ public record ResourceDefinition(Identifier id, double min, double max,
 						.forGetter(ResourceFile::regenPerSecond),
 				Band.CODEC.listOf().optionalFieldOf("bands", List.of())
 						.forGetter(ResourceFile::bands))
-				.apply(i, (min, max, def, regen, bands) -> new ResourceFile(min, max,
-						def.orElse(min), regen, bands)));
+				.apply(i, (name, min, max, def, regen, bands) -> new ResourceFile(name,
+						min, max, def.orElse(min), regen, bands)));
 	}
 
 	/**
@@ -124,7 +140,9 @@ public record ResourceDefinition(Identifier id, double min, double max,
 			}
 			prevHi = b.hi();
 		}
-		return new ResourceDefinition(id, file.min(), file.max(), file.defaultValue(),
+		return new ResourceDefinition(id,
+				file.displayName().isEmpty() ? id.getPath() : file.displayName(),
+				file.min(), file.max(), file.defaultValue(),
 				file.regenPerSecond(), sorted);
 	}
 

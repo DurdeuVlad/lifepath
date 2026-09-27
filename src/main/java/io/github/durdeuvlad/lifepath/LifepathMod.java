@@ -178,6 +178,16 @@ public class LifepathMod implements ModInitializer {
 				.define("tier_3_multiplier", 0.1, v -> v >= 0 && v <= 10,
 						"XP multiplier for counts above tier_2_count.")
 				.build());
+		LifepathConfig.define(LifepathConfig.CLIENT, ConfigSpec.builder()
+				.define("hud_enabled", true,
+						"Show the Lifepath HUD overlay (resources, cooldowns).")
+				.define("hud_position", "top_left",
+						v -> java.util.List.of("top_left", "top_right",
+								"bottom_left", "bottom_right").contains(v),
+						"HUD anchor corner: top_left|top_right|bottom_left|bottom_right.")
+				.define("hud_scale", 1.0, v -> v >= 0.5 && v <= 2.0,
+						"HUD render scale multiplier (readable at GUI scales 1-4).")
+				.build());
 
 		ReloadManager.register(id("engine_config"), LifepathConfig::reload);
 		ReloadManager.init();
