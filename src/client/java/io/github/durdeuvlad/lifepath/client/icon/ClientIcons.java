@@ -46,6 +46,22 @@ public final class ClientIcons {
 	}
 
 	/**
+	 * String form of {@link #resolve(String, Optional)} for icon refs that
+	 * arrive on the wire (payloads carry the normalized id as a string,
+	 * "" = none). Malformed wire values degrade to empty — the refs were
+	 * already validated server-side, so a bad string means packet corruption
+	 * and is handled like "no icon" rather than warned about.
+	 */
+	public static Optional<Identifier> resolve(String domain,
+			@Nullable String iconRef) {
+		if (iconRef == null || iconRef.isEmpty()) {
+			return Optional.empty();
+		}
+		Identifier id = Identifier.tryParse(iconRef);
+		return id != null ? resolve(domain, Optional.of(id)) : Optional.empty();
+	}
+
+	/**
 	 * The decision, isolated from {@link MinecraftClient} so unit tests run
 	 * without a client environment.
 	 */

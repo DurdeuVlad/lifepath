@@ -106,8 +106,8 @@ public final class HudModel {
 				continue;
 			}
 			String idStr = e.getKey().toString();
-			String label = identity.abilityNames().getOrDefault(idStr,
-					e.getKey().getPath());
+			IdentitySummaryPayload.Entry ability = identity.abilities().get(idStr);
+			String label = ability != null ? ability.name() : e.getKey().getPath();
 			rows.add(new CooldownRow(idStr, label, left));
 		}
 		rows.sort(Comparator.comparingDouble(CooldownRow::secondsLeft));
@@ -117,7 +117,8 @@ public final class HudModel {
 
 	private static List<String> stateRows(IdentitySummaryPayload identity) {
 		List<String> conditions = identity.sections()
-				.getOrDefault(IdentitySummary.SECTION_CONDITIONS, List.of());
+				.getOrDefault(IdentitySummary.SECTION_CONDITIONS, List.of())
+				.stream().map(IdentitySummaryPayload.Entry::name).toList();
 		return conditions.size() > MAX_STATE_ROWS
 				? conditions.subList(0, MAX_STATE_ROWS) : conditions;
 	}

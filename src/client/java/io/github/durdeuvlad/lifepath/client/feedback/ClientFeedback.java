@@ -88,9 +88,10 @@ public final class ClientFeedback {
 			if (e.getValue() <= now) {
 				it.remove();
 				if (client.player != null) {
-					String name = ClientCharacterState.identity()
-							.abilityNames().getOrDefault(e.getKey().toString(),
-									e.getKey().getPath());
+					var ability = ClientCharacterState.identity()
+							.abilities().get(e.getKey().toString());
+					String name = ability != null
+							? ability.name() : e.getKey().getPath();
 					client.player.sendMessage(Text.translatable(
 							"feedback.lifepath.ability_ready", name,
 							abilityKey.getBoundKeyLocalizedText()), true);

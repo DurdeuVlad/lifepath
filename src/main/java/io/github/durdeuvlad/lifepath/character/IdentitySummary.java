@@ -28,7 +28,7 @@ public final class IdentitySummary {
 
 	/** Builds the display summary for {@code data}; never null. */
 	public static IdentitySummaryPayload build(PlayerCharacterData data) {
-		String speciesId = "", speciesName = "", speciesDesc = "";
+		String speciesId = "", speciesName = "", speciesDesc = "", speciesIcon = "";
 		SpeciesDefinition species = null;
 		if (data.speciesId() != null) {
 			speciesId = data.speciesId().toString();
@@ -37,11 +37,12 @@ public final class IdentitySummary {
 					? species.displayName() : data.speciesId().getPath();
 			if (species != null) {
 				speciesDesc = species.description().orElse("");
+				speciesIcon = species.icon().map(Identifier::toString).orElse("");
 			}
 		}
 
-		String specId = "", specName = "";
-		List<String> focus = List.of();
+		String specId = "", specName = "", specIcon = "";
+		List<IdentitySummaryPayload.Entry> focus = List.of();
 		if (data.specializationId() != null) {
 			specId = data.specializationId().toString();
 			SpecializationDefinition spec =
@@ -49,22 +50,23 @@ public final class IdentitySummary {
 			specName = spec != null
 					? spec.displayName() : data.specializationId().getPath();
 			if (spec != null) {
+				specIcon = spec.icon().map(Identifier::toString).orElse("");
 				focus = spec.startingSkills().keySet().stream()
-						.map(IdentitySummary::displayName).toList();
+						.map(IdentitySummary::entry).toList();
 			}
 		}
 
-		Map<String, List<String>> sections = new LinkedHashMap<>();
-		sections.put(SECTION_CONDITIONS, namesOf(data.conditions()));
-		sections.put(SECTION_ATTUNEMENTS, namesOf(data.attunements()));
-		sections.put(SECTION_TRAITS, namesOf(data.traits()));
+		Map<String, List<IdentitySummaryPayload.Entry>> sections = new LinkedHashMap<>();
+		sections.put(SECTION_CONDITIONS, entriesOf(data.conditions()));
+		sections.put(SECTION_ATTUNEMENTS, entriesOf(data.attunements()));
+		sections.put(SECTION_TRAITS, entriesOf(data.traits()));
 
-		// M6-3: display names for every ability the character owns — the HUD's
+		// M6-3: display info for every ability the character owns — the HUD's
 		// cooldown rows label by id; plus static resource display info.
-		Map<String, String> abilityNames = new LinkedHashMap<>();
+		Map<String, IdentitySummaryPayload.Entry> abilities = new LinkedHashMap<>();
 		for (Identifier id : io.github.durdeuvlad.lifepath.ability.AbilityEngine
 				.ownedAbilities(data)) {
-			abilityNames.put(id.toString(), displayName(id));
+			abilities.put(id.toString(), entry(id));
 		}
 		List<IdentitySummaryPayload.ResourceDisplay> resourceDisplays =
 				new ArrayList<>();
@@ -96,8 +98,8 @@ public final class IdentitySummary {
 
 		return new IdentitySummaryPayload(
 				new IdentitySummaryPayload.IdentityCore(speciesId, speciesName,
-						speciesDesc, specId, specName),
-				focus, sections, abilityNames, resourceDisplays);
+						speciesDesc, speciesIcon, specId, specName, specIcon),
+				focus, sections, abilities, resourceDisplays);
 	}
 
 	/**
@@ -129,11 +131,50 @@ public final class IdentitySummary {
 		return id.getPath();
 	}
 
-	private static List<String> namesOf(List<Identifier> ids) {
-		List<String> names = new ArrayList<>(ids.size());
-		for (Identifier id : ids) {
-			names.add(displayName(id));
+	/**
+	 * Icon texture ref for any content id (M12-1): the def's {@code icon},
+	 * resolved through the same domain chain as {@link #displayName} so a
+	 * name and its icon can never disagree about which def they came from.
+	 * Empty when the def declares none or the id resolves to nothing.
+	 */
+	public static String iconRef(Identifier id) {
+		var ability = LifepathContent.abilities().get(id);
+		if (ability != null) {
+			return ability.icon().map(Identifier::toString).orElse("");
 		}
-		return names;
+		var skill = LifepathContent.skills().get(id);
+		if (skill != null) {
+			return skill.icon().map(Identifier::toString).orElse("");
+		}
+		var condition = LifepathContent.conditions().get(id);
+		if (condition != null) {
+			return condition.icon().map(Identifier::toString).orElse("");
+		}
+		var attunement = LifepathContent.attunements().get(id);
+		if (attunement != null) {
+			return attunement.icon().map(Identifier::toString).orElse("");
+		}
+		// Same terminal as displayName(): specialization/resource icons ride
+		// their own payload fields (IdentityCore, ResourceDisplay), never
+		// through entry() — stopping here keeps the name/icon chains equal.
+		var species = LifepathContent.species().get(id);
+		if (species != null) {
+			return species.icon().map(Identifier::toString).orElse("");
+		}
+		return "";
+	}
+
+	/** One displayable reference: id + resolved name + icon ref ("" none). */
+	public static IdentitySummaryPayload.Entry entry(Identifier id) {
+		return new IdentitySummaryPayload.Entry(id.toString(), displayName(id),
+				iconRef(id));
+	}
+
+	private static List<IdentitySummaryPayload.Entry> entriesOf(List<Identifier> ids) {
+		List<IdentitySummaryPayload.Entry> entries = new ArrayList<>(ids.size());
+		for (Identifier id : ids) {
+			entries.add(entry(id));
+		}
+		return entries;
 	}
 }

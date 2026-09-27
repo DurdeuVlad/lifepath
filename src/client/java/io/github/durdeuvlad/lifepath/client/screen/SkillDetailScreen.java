@@ -1,5 +1,7 @@
 package io.github.durdeuvlad.lifepath.client.screen;
 
+import io.github.durdeuvlad.lifepath.client.icon.ClientIcons;
+import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload;
 import io.github.durdeuvlad.lifepath.network.s2c.SkillsSummaryPayload.SkillCard;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,6 +42,13 @@ public class SkillDetailScreen extends Screen {
 		context.fill(left - 4, top - 4, left + panelW + 4, top + panelH + 4, PANEL_EDGE);
 		context.fill(left - 3, top - 3, left + panelW + 3, top + panelH + 3, PANEL);
 
+		// M12-2: skill icon sits beside the centered title — zero vertical
+		// cost, and an absent icon leaves just the title.
+		int titleW = textRenderer.getWidth(card.display().name());
+		ClientIcons.resolve("skill", card.display().icon())
+				.ifPresent(tex -> context.drawTexture(tex,
+						width / 2 - titleW / 2 - 20, top + 1,
+						0, 0, 16, 16, 16, 16));
 		context.drawCenteredTextWithShadow(textRenderer, card.display().name(),
 				width / 2, top + 4, ACCENT);
 		int y = top + 20;
@@ -70,8 +79,22 @@ public class SkillDetailScreen extends Screen {
 		if (!card.details().bonuses().isEmpty()) {
 			y = section(context, left, y + 4,
 					Text.translatable("screen.lifepath.skill.bonuses"));
-			for (String b : card.details().bonuses()) {
-				y = line(context, left, y, Text.literal("· " + b), TEXT);
+			for (IdentitySummaryPayload.Entry b : card.details().bonuses()) {
+				// Badge icon when the referenced def declares one (abilities
+				// are the common milestone effect); bullet when not — rows
+				// without art must not look broken.
+				var icon = ClientIcons.resolve("ability", b.icon());
+				if (icon.isPresent()) {
+					// 9-arg form: 8x8 box sampling the full 16x16 sprite.
+					context.drawTexture(icon.get(), left + 6, y + 1,
+							8, 8, 0, 0, 16, 16, 16, 16);
+					context.drawTextWithShadow(textRenderer,
+							Text.literal(b.name()), left + 17, y + 1, TEXT);
+				} else {
+					context.drawTextWithShadow(textRenderer,
+							Text.literal("· " + b.name()), left + 6, y + 1, TEXT);
+				}
+				y += 10;
 			}
 		}
 
