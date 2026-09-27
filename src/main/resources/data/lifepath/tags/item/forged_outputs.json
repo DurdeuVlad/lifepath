@@ -1,0 +1,8 @@
+{
+	"replace": false,
+	"values": [
+		"#lifepath:smithing_tools",
+		{ "id": "overgeared:tool_cast", "required": false },
+		{ "id": "overgeared:weapon_cast", "required": false }
+	]
+}

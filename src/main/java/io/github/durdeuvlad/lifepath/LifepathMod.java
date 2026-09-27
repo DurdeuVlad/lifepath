@@ -234,6 +234,8 @@ public class LifepathMod implements ModInitializer {
 				io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload.PACKET_CODEC);
 		XpSourceRouter.init();
 		VanillaGameplayProducers.init();
+		// M7-1: adapters arrive via the lifepath:adapter entrypoint seam —
+		// core never names an external mod (grep-clean compat boundary).
 		io.github.durdeuvlad.lifepath.compat.ExternalAdapterRegistry.init();
 	}
 

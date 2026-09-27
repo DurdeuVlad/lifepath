@@ -20,6 +20,9 @@
 		],
 		"client": [
 			"io.github.durdeuvlad.lifepath.client.LifepathClient"
+		],
+		"lifepath:adapter": [
+			"io.github.durdeuvlad.lifepath.compat.overgeared.OvergearedCompat"
 		]
 	},
 	"mixins": [

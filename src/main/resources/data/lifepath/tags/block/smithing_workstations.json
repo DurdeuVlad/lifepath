@@ -4,6 +4,8 @@
 		"minecraft:smithing_table",
 		"minecraft:anvil",
 		"minecraft:chipped_anvil",
-		"minecraft:damaged_anvil"
+		"minecraft:damaged_anvil",
+		{ "id": "overgeared:smithing_anvil", "required": false },
+		{ "id": "overgeared:stone_anvil", "required": false }
 	]
 }
