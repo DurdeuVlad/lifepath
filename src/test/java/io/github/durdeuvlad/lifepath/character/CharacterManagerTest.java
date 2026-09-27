@@ -40,4 +40,37 @@ class CharacterManagerTest {
 		assertEquals(Identifier.of("lifepath", "other"), snapshot.speciesId());
 		assertEquals(data.skills(), snapshot.skills());
 	}
+
+	@Test
+	void snapshotForSyncDoesNotSeeLaterMutations() {
+		// M7-2: a snapshot taken mid-tick must not observe mutations applied
+		// to the live model afterwards (the deep-copy guarantee).
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setCooldown(Identifier.of("lifepath", "a"), 5000L);
+
+		PlayerCharacterData snapshot = CharacterManager.snapshotForSync(data, 0L);
+		data.setCooldown(Identifier.of("lifepath", "b"), 5000L);
+		data.setSpeciesId(Identifier.of("lifepath", "iceborn"));
+
+		assertFalse(snapshot.cooldowns().containsKey(
+				Identifier.of("lifepath", "b")));
+		org.junit.jupiter.api.Assertions.assertNull(snapshot.speciesId());
+	}
+
+	@Test
+	void snapshotForSyncStripsScheduleKeysAndLedger() {
+		// M7-2: server bookkeeping never reaches the wire.
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setCooldown(Identifier.of("lifepath", "schedule/mining"), 5000L);
+		data.setCooldown(Identifier.of("lifepath", "real_cd"), 5000L);
+		data.setActionTimestamps("sig/mining",
+				new java.util.ArrayList<>(java.util.List.of(1L)));
+
+		PlayerCharacterData snapshot = CharacterManager.snapshotForSync(data, 0L);
+		assertTrue(snapshot.cooldowns().containsKey(
+				Identifier.of("lifepath", "real_cd")));
+		assertFalse(snapshot.cooldowns().keySet().stream().anyMatch(
+				io.github.durdeuvlad.lifepath.ability.CooldownService::isScheduleKey));
+		assertTrue(snapshot.actionSignatures().isEmpty());
+	}
 }
