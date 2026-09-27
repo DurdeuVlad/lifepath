@@ -1,0 +1,22 @@
+{
+	"display_name": "Laborer",
+	"starting_skills": {
+		"lifepath:athletics": 15,
+		"lifepath:mining": 15
+	},
+	"aptitudes": {
+		"lifepath:athletics": "b",
+		"lifepath:mining": "b"
+	},
+	"xp_modifiers": {
+		"lifepath:athletics": 1.25,
+		"lifepath:mining": 1.25
+	},
+	"decay_modifiers": {
+		"lifepath:athletics": 0.25,
+		"lifepath:mining": 0.25
+	},
+	"protected_floors": {
+		"lifepath:athletics": 25
+	}
+}

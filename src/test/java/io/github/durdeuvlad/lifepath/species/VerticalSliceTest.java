@@ -144,7 +144,9 @@ class VerticalSliceTest {
 				"hellborn", "anima", "dwarf", "goliath"))
 			assertTrue(LifepathContent.species().contains(LifepathMod.id(s)),
 					"missing species " + s);
-		for (String s : List.of("miner", "farmer", "blacksmith", "fisherman"))
+		for (String s : List.of("miner", "farmer", "blacksmith", "fisherman",
+				"lumberjack", "hunter", "engineer", "herbalist", "cook",
+				"explorer", "laborer"))
 			assertTrue(LifepathContent.specializations().contains(LifepathMod.id(s)),
 					"missing specialization " + s);
 		for (String s : List.of("mining", "farming", "smithing", "fishing",
@@ -203,9 +205,8 @@ class VerticalSliceTest {
 			Set<Identifier> innate = new HashSet<>();
 			innate.addAll(species.passiveAbilities());
 			innate.addAll(species.activeAbilities());
-			for (Identifier specId : List.of(LifepathMod.id("miner"),
-					LifepathMod.id("farmer"), LifepathMod.id("blacksmith"),
-					LifepathMod.id("fisherman"))) {
+			// Every registered specialization — new presets get this check for free.
+			for (Identifier specId : LifepathContent.specializations().all().keySet()) {
 				PlayerCharacterData d = PlayerCharacterData.createDefault();
 				d.setSpeciesId(speciesId);
 				assertEquals(SpecializationService.ApplyResult.APPLIED,
