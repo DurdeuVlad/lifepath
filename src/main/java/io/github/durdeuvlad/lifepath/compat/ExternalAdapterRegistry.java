@@ -22,6 +22,18 @@ public final class ExternalAdapterRegistry {
 			return;
 		}
 		initialized = true;
+		// M7-1: third-party adapters self-describe via the "lifepath:adapter"
+		// entrypoint in their fabric.mod.json — integration without Lifepath
+		// referencing a single foreign class.
+		try {
+			for (ExternalActivityAdapter adapter : net.fabricmc.loader.api
+					.FabricLoader.getInstance().getEntrypoints("lifepath:adapter",
+							ExternalActivityAdapter.class)) {
+				register(adapter);
+			}
+		} catch (Throwable t) {
+			LifepathMod.LOGGER.error("lifepath:adapter entrypoint discovery failed", t);
+		}
 		for (ExternalActivityAdapter adapter : ADAPTERS) {
 			Identifier id = safeId(adapter);
 			try {
