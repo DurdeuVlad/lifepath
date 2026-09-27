@@ -56,22 +56,23 @@ base {
 	archivesName = 'lifepath-common'
 }
 
-// M13-3 acceptance gate: common must never import a loader API. Runs under
-// check (and therefore build and CI); keep it cheap — a line scan, not a
-// compile-time processor.
+// M13-3 acceptance gate: common must never import a loader API — Fabric or
+// NeoForge (M13-4 extended the scan). Runs under check (and therefore build
+// and CI); keep it cheap — a line scan, not a compile-time processor.
 def verifyNoFabricImports = tasks.register('verifyNoFabricImports') {
 	doLast {
 		def offenders = []
 		fileTree(dir: 'src', includes: ['**/*.java']).each { f ->
 			f.eachLine { line ->
-				if (line.contains('net.fabric')) {
+				if (line.contains('net.fabric') || line.contains('net.neoforged')) {
 					offenders << "${f.path}: ${line.trim()}"
 				}
 			}
 		}
 		if (!offenders.isEmpty()) {
 			throw new GradleException(
-					'common/ must not reference net.fabric* APIs:\n' + offenders.join('\n'))
+					'common/ must not reference loader APIs (net.fabric*, net.neoforged*):\n'
+					+ offenders.join('\n'))
 		}
 	}
 }

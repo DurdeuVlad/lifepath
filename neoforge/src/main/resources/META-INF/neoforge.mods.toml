@@ -1,0 +1,33 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="LGPL-3.0-only"
+issueTrackerURL="https://github.com/DurdeuVlad/lifepath/issues"
+
+[[mods]]
+	modId="lifepath"
+	version="${version}"
+	displayName="Lifepath"
+	authors="DurdeuVlad"
+	description='''Independent character progression framework: species, specializations, skills, aptitudes, decay, abilities.'''
+	logoFile="assets/lifepath/icon.png"
+
+# Mixin configs live in this module (loader wiring); the mixin classes live
+# in common/.
+[[mixins]]
+	config="lifepath.mixins.json"
+[[mixins]]
+	config="lifepath.client.mixins.json"
+
+[[dependencies.lifepath]]
+	modId="neoforge"
+	type="required"
+	versionRange="[21.1,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.lifepath]]
+	modId="minecraft"
+	type="required"
+	versionRange="[1.21.1,1.22)"
+	ordering="NONE"
+	side="BOTH"

@@ -1,0 +1,102 @@
+plugins {
+	id 'net.neoforged.moddev' version "${mdg_version}"
+}
+
+// M13-4: NeoForge 1.21.1 module. NeoForge runs Mojang official mappings
+// natively — common's named output is consumed directly, no remap step.
+neoForge {
+	version = "${neoforge_version}"
+
+	runs {
+		client {
+			client()
+			// Auto-join the dev dedicated server for live verification
+			// (issue #136) — pairs with online-mode=false in run/server.properties.
+			programArguments.addAll('--quickPlayMultiplayer', 'localhost:25565')
+		}
+		client2 {
+			client()
+			// Second distinct player for two-client sync sanity checks.
+			programArguments.addAll('--username', 'Dev2',
+					'--uuid', '380df991-f603-344c-a090-369bad2a924b',
+					'--quickPlayMultiplayer', 'localhost:25565')
+		}
+		server {
+			server()
+		}
+	}
+
+	mods {
+		lifepath {
+			// One mod file spanning all three sourceSets: neoforge adapters
+			// plus common's main and client outputs (mixin classes live there).
+			sourceSet sourceSets.main
+			sourceSet project(':common').sourceSets.main
+			sourceSet project(':common').sourceSets.client
+		}
+	}
+}
+
+sourceSets {
+	main {
+		// Merge common's resources (datapack data/, assets/) into this
+		// module's output so FML's mod-file discovery sees one root holding
+		// both neoforge.mods.toml and the shared content — mirrored by the
+		// jar merge below for production.
+		resources {
+			srcDir project(':common').sourceSets.main.resources.srcDirs
+			srcDir project(':common').sourceSets.client.resources.srcDirs
+		}
+		compileClasspath += project(':common').sourceSets.main.output
+		compileClasspath += project(':common').sourceSets.client.output
+		runtimeClasspath += project(':common').sourceSets.main.output
+		runtimeClasspath += project(':common').sourceSets.client.output
+	}
+}
+
+dependencies {
+	// TOML config parsing (bundled jar-in-jar — night-config ships JiJ
+	// metadata designed for Forge/NeoForge).
+	jarJar(implementation("com.electronwill.night-config:toml:3.8.4")) {
+		version { strictly '[3.8.4]' }
+	}
+	jarJar(implementation("com.electronwill.night-config:core:3.8.4")) {
+		version { strictly '[3.8.4]' }
+	}
+}
+
+tasks.named('jar') {
+	// Merge common's classes + resources into the NeoForge jar (fat jar —
+	// NeoForge's runtime is Mojmap, so common's named output goes in as-is).
+	from({
+		project(':common').sourceSets.main.output
+	}, {
+		project(':common').sourceSets.client.output
+	}) {
+		duplicatesStrategy = 'exclude'
+	}
+	// LGPL-3.0 §4(b): object code must ship with copies of both the LGPL
+	// and the GPL it extends; NOTICE carries the copyright statement.
+	from rootProject.files("LICENSE", "LICENSE.GPL", "NOTICE")
+}
+
+tasks.withType(ProcessResources).configureEach {
+	inputs.property "version", project.version
+	filesMatching("META-INF/neoforge.mods.toml") {
+		expand "version": project.version
+	}
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+base {
+	archivesName = "${archives_base_name}"
+}
+
+// Artifact name contract (issue #136): lifepath-<ver>-neoforge.jar
+tasks.named('jar') {
+	archiveClassifier = 'neoforge'
+}
