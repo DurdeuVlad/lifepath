@@ -1,0 +1,15 @@
+{
+	"key.categories.lifepath": "Lifepath",
+	"key.lifepath.ability": "Use Ability",
+	"key.lifepath.character": "Character Screen",
+	"screen.lifepath.character.title": "Character",
+	"screen.lifepath.character.species": "Your species",
+	"screen.lifepath.character.no_species": "No species chosen yet",
+	"screen.lifepath.character.specialization": "Specialization",
+	"screen.lifepath.character.no_specialization": "No specialization chosen yet",
+	"screen.lifepath.character.focus": "Focus: %s",
+	"screen.lifepath.character.conditions": "Conditions",
+	"screen.lifepath.character.attunements": "Attunements",
+	"screen.lifepath.character.traits": "Traits",
+	"screen.lifepath.character.none": "None"
+}

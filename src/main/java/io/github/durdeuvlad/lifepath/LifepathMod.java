@@ -194,6 +194,9 @@ public class LifepathMod implements ModInitializer {
 		LifepathContent.init();
 		LifepathNetworking.registerS2C(CharacterSyncPayload.ID, CharacterSyncPayload.PACKET_CODEC);
 		LifepathNetworking.registerS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload.ID,
+				io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload.PACKET_CODEC);
+		LifepathNetworking.registerS2C(
 				io.github.durdeuvlad.lifepath.network.s2c.HighlightEntitiesPayload.ID,
 				io.github.durdeuvlad.lifepath.network.s2c.HighlightEntitiesPayload.PACKET_CODEC);
 		LifepathNetworking.registerS2C(

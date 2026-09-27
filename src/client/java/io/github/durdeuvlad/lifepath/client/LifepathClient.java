@@ -28,6 +28,11 @@ public class LifepathClient implements ClientModInitializer {
 						ClientHighlights.add(payload.entityIds(), payload.durationTicks())));
 		ClientLifepathNetworking.onS2C(CharacterSyncPayload.ID, (payload, context) ->
 				context.client().execute(() -> ClientCharacterState.apply(payload)));
+		// M6-1: server-resolved identity strings for the character screen.
+		ClientLifepathNetworking.onS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload.ID,
+				(payload, context) -> context.client().execute(() ->
+						ClientCharacterState.applyIdentity(payload)));
 		// M4-4: cooldown deltas keep the client read-model fresh between
 		// full snapshots (advisory — the server re-validates every eval).
 		ClientLifepathNetworking.onS2C(
@@ -54,9 +59,21 @@ public class LifepathClient implements ClientModInitializer {
 		KeyBinding abilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 				"key.lifepath.ability", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G,
 				"key.categories.lifepath"));
+		// M6-1: character screen key (default C) — opens the read-only
+		// identity hub; the screen renders synced state, never mutates it.
+		KeyBinding characterKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+				"key.lifepath.character", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_C,
+				"key.categories.lifepath"));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (abilityKey.wasPressed()) {
 				ClientAbilityState.requestActivation();
+			}
+			while (characterKey.wasPressed()) {
+				if (client.currentScreen == null) {
+					client.setScreen(
+							new io.github.durdeuvlad.lifepath.client.screen
+									.CharacterScreen());
+				}
 			}
 			ClientHighlights.tick(client);
 		});
