@@ -1,0 +1,11 @@
+{
+	"display_name": "Blood Frenzy",
+	"trigger": {"type": "passive", "interval_ticks": 40},
+	"conditions": {"all": [{"type": "lifepath:resource_threshold",
+	                        "resource": "lifepath:blood", "op": "<=", "value": 25}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect", "effect": "minecraft:strength", "duration": 100, "amplifier": 1},
+		{"type": "lifepath:apply_effect", "effect": "minecraft:speed", "duration": 100, "amplifier": 0}
+	]
+}

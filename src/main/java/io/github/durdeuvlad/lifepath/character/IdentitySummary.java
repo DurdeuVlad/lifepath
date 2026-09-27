@@ -113,6 +113,10 @@ public final class IdentitySummary {
 		if (skill != null) {
 			return skill.displayName();
 		}
+		var condition = LifepathContent.conditions().get(id);
+		if (condition != null) {
+			return condition.displayName();
+		}
 		return id.getPath();
 	}
 

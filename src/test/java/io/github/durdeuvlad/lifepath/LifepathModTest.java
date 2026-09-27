@@ -24,6 +24,6 @@ class LifepathModTest {
 
 	@Test
 	void dataVersionStartsAtOne() {
-		assertEquals(1, LifepathMod.DATA_VERSION);
+		assertEquals(2, LifepathMod.DATA_VERSION);
 	}
 }

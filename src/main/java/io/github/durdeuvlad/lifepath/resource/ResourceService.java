@@ -143,6 +143,13 @@ public final class ResourceService {
 		if (species != null) {
 			owned.addAll(species.resources());
 		}
+		// M9-1: held conditions declare their own resources (e.g. blood).
+		for (Identifier condId : data.conditions()) {
+			var cond = LifepathContent.conditions().get(condId);
+			if (cond != null) {
+				owned.addAll(cond.resources());
+			}
+		}
 		boolean changed = false;
 		for (Identifier id : owned) {
 			ResourceDefinition def = LifepathContent.resources().get(id);

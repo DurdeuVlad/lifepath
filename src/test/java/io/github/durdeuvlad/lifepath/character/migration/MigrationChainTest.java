@@ -29,7 +29,7 @@ class MigrationChainTest {
 
 		NbtCompound migrated = CharacterMigrations.migrate(raw);
 
-		assertEquals(1, migrated.getInt("data_version"));
+		assertEquals(io.github.durdeuvlad.lifepath.LifepathMod.DATA_VERSION, migrated.getInt("data_version"));
 	}
 
 	@Test

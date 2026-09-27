@@ -1,0 +1,29 @@
+{
+	"min": 0,
+	"max": 100,
+	"default": 60,
+	"regen_per_second": -0.1,
+	"display_name": "Blood",
+	"bands": [
+		{
+			"range": [0, 15],
+			"name": "Starving",
+			"effects": [
+				{"effect": "minecraft:weakness", "duration_ticks": 100, "amplifier": 1},
+				{"effect": "minecraft:slowness", "duration_ticks": 100}
+			]
+		},
+		{
+			"range": [16, 40],
+			"name": "Thirsty",
+			"effects": [
+				{"effect": "minecraft:weakness", "duration_ticks": 100}
+			]
+		},
+		{
+			"range": [41, 100],
+			"name": "Sated",
+			"effects": []
+		}
+	]
+}

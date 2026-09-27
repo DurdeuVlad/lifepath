@@ -69,6 +69,8 @@ public final class LifepathContent {
 			DIETS = new ContentRegistry<>(LifepathMod.id("diet"));
 	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.RelationDefinition>
 			RELATIONS = new ContentRegistry<>(LifepathMod.id("relation"));
+	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.ConditionDefinition>
+			CONDITIONS = new ContentRegistry<>(LifepathMod.id("condition"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -126,6 +128,12 @@ public final class LifepathContent {
 				manager -> loadDomain(manager, "relation",
 						io.github.durdeuvlad.lifepath.content.RelationDefinition.RelationFile.CODEC,
 						io.github.durdeuvlad.lifepath.content.RelationDefinition::fromFile, RELATIONS));
+		// Acquired conditions (M9-1): must see abilities/resources/diets —
+		// loads after those domains, before the validation pass.
+		ReloadManager.registerData(LifepathMod.id("condition"),
+				manager -> loadDomain(manager, "condition",
+						io.github.durdeuvlad.lifepath.content.ConditionDefinition.ConditionFile.CODEC,
+						io.github.durdeuvlad.lifepath.content.ConditionDefinition::fromFile, CONDITIONS));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateAll());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -168,6 +176,10 @@ public final class LifepathContent {
 		return RELATIONS;
 	}
 
+	public static ContentRegistry<io.github.durdeuvlad.lifepath.content.ConditionDefinition> conditions() {
+		return CONDITIONS;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (traits, conditions,
@@ -185,6 +197,7 @@ public final class LifepathContent {
 			case "resource" -> RESOURCES.contains(id);
 			case "diet" -> DIETS.contains(id);
 			case "relation" -> RELATIONS.contains(id);
+			case "condition" -> CONDITIONS.contains(id);
 			default -> true;
 		};
 	}
@@ -276,6 +289,8 @@ public final class LifepathContent {
 			io.github.durdeuvlad.lifepath.event.ActivityTypes.FISHING,
 			io.github.durdeuvlad.lifepath.event.ActivityTypes.CRAFTING,
 			io.github.durdeuvlad.lifepath.event.ActivityTypes.COMBAT,
+			io.github.durdeuvlad.lifepath.event.ActivityTypes.ARCHERY,
+			io.github.durdeuvlad.lifepath.event.ActivityTypes.DEFENCE,
 			io.github.durdeuvlad.lifepath.resource.ResourceService.BAND_ENTER,
 			io.github.durdeuvlad.lifepath.resource.ResourceService.BAND_EXIT);
 
@@ -517,6 +532,21 @@ public final class LifepathContent {
 		}
 		for (XpSourceDefinition def : XP_SOURCES.all().values()) {
 			recordRef(issues, "xp_source", def.id(), Optional.of(def.skill()), "skill");
+		}
+		for (var def : CONDITIONS.all().values()) {
+			recordRefs(issues, "condition", def.id(), def.abilities(), "ability");
+			recordRefs(issues, "condition", def.id(), def.resources(), "resource");
+			recordRef(issues, "condition", def.id(), def.dietRules(), "diet");
+			for (var stage : def.stages()) {
+				recordRefs(issues, "condition", def.id(), stage.abilities(), "ability");
+				for (Identifier event : stage.advanceEvents()) {
+					if (!KNOWN_EVENT_TYPES.contains(event)) {
+						LifepathMod.LOGGER.warn("condition {} stage {} advances on "
+								+ "unknown event type {} — typo? it may never fire",
+								def.id(), stage.id(), event);
+					}
+				}
+			}
 		}
 	}
 

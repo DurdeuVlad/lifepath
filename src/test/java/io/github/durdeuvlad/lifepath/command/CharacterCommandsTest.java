@@ -82,7 +82,7 @@ class CharacterCommandsTest {
 		assertTrue(all.contains("lifepath:u1"));
 		assertTrue(all.contains("5.0/0.0-10.0"));
 		assertTrue(all.contains("expires in 500ms"));
-		assertTrue(all.contains("data_version: 1"));
+		assertTrue(all.contains("data_version: " + io.github.durdeuvlad.lifepath.LifepathMod.DATA_VERSION));
 	}
 
 	@Test

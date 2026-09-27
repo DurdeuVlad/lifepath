@@ -1,0 +1,9 @@
+{
+	"display_name": "Drain",
+	"trigger": {"type": "event", "events": ["lifepath:combat"]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:modify_resource", "resource": "lifepath:blood", "delta": 25.0},
+		{"type": "lifepath:spawn_particle", "particle": "minecraft:damage_indicator", "count": 8}
+	]
+}
