@@ -45,12 +45,11 @@ import org.junit.jupiter.api.Test;
 class VerticalSliceTest {
 	private static final Path DATA = Path.of("src/main/resources/data/lifepath");
 
-	/** The four spec signature abilities the slice references but never shipped — tracked defect. */
-	private static final Set<Identifier> KNOWN_DANGLING_SIGNATURES = Set.of(
-			LifepathMod.id("deepvein_sense_i"),
-			LifepathMod.id("bountiful_harvest_i"),
-			LifepathMod.id("patient_waters_i"),
-			LifepathMod.id("forge_mastery_i"));
+	/**
+	 * Dangling refs the slice is allowed to have. Empty since #96 — the spec
+	 * signature abilities shipped; any NEW dangling reference fails the test.
+	 */
+	private static final Set<Identifier> KNOWN_DANGLING_SIGNATURES = Set.of();
 
 	private PlayerCharacterData data;
 
@@ -219,15 +218,16 @@ class VerticalSliceTest {
 	}
 
 	@Test
-	void signatureAbilityGapIsGraceful() throws Exception {
+	void specSignatureAbilitiesResolveAndApply() throws Exception {
 		loadEverything();
 		PlayerCharacterData d = PlayerCharacterData.createDefault();
 		d.setSpeciesId(LifepathMod.id("human"));
 		assertEquals(SpecializationService.ApplyResult.APPLIED,
 				SpecializationService.apply(d, LifepathMod.id("miner")));
-		// The dangling signature is a tracked content gap — apply succeeds and
-		// eval paths skip the missing ability instead of crashing.
-		assertFalse(LifepathContent.abilities()
+		// The signature is a real owned ability once its file ships (#96).
+		assertTrue(LifepathContent.abilities()
+				.contains(LifepathMod.id("deepvein_sense_i")));
+		assertTrue(AbilityEngine.ownedAbilities(d)
 				.contains(LifepathMod.id("deepvein_sense_i")));
 	}
 }

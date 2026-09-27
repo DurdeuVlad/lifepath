@@ -1,0 +1,11 @@
+{
+	"display_name": "Deepvein Sense I",
+	"trigger": {"type": "passive", "interval_ticks": 40},
+	"conditions": {"all": [{"type": "lifepath:block_nearby",
+	                        "block": "#lifepath:valuable_ores", "radius": 8}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect",
+		 "effect": "minecraft:haste", "duration": 80, "amplifier": 0}
+	]
+}
