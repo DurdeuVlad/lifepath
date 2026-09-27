@@ -24,7 +24,11 @@ import net.minecraft.util.Identifier;
 public final class DiminishingReturns {
 	public static final Identifier CONFIG = LifepathMod.id("diminishing");
 	public static final Identifier MODIFIER_ID = LifepathMod.id("diminishing_returns");
-	/** Hard cap per signature — a flood of spam can't grow the list unboundedly. */
+	/**
+	 * In-code fallback for {@code signature_cap}; the persistence bound in
+	 * {@link PlayerCharacterData} also caps decoded lists at this size, so the
+	 * config key is validator-bound to it.
+	 */
 	static final int CAP = 4096;
 
 	private DiminishingReturns() {}
@@ -39,7 +43,7 @@ public final class DiminishingReturns {
 		List<Long> times = new ArrayList<>(data.actionTimestamps(signature));
 		long cutoff = now - windowMs;
 		times.removeIf(t -> t <= cutoff);
-		if (times.size() < CAP) {
+		if (times.size() < cap()) {
 			times.add(now);
 		}
 		data.setActionTimestamps(signature, times);
@@ -77,6 +81,11 @@ public final class DiminishingReturns {
 
 	public static boolean enabled() {
 		return (Boolean) LifepathConfig.getOrDefault(CONFIG, "enabled", Boolean.TRUE);
+	}
+
+	/** Per-signature ledger cap — {@code diminishing.toml signature_cap}. */
+	static int cap() {
+		return intKey("signature_cap", CAP);
 	}
 
 	public static long windowMs() {

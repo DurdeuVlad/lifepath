@@ -59,7 +59,7 @@ public final class AbilityEngine {
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK
 				.register(server -> {
 					BuiltinActions.onServerTick(server);
-					int interval = passiveIntervalTicks();
+					int interval = abilitiesEnabled() ? passiveIntervalTicks() : 0;
 					if (interval <= 0 || ++ticks % interval != 0) {
 						return;
 					}
@@ -170,6 +170,9 @@ public final class AbilityEngine {
 	 */
 	static void handleEvent(PlayerCharacterData data,
 			@Nullable ServerPlayerEntity player, Identifier eventType, long now) {
+		if (!abilitiesEnabled()) {
+			return;
+		}
 		for (Identifier id : ownedAbilities(data)) {
 			AbilityDefinition def = LifepathContent.abilities().get(id);
 			if (def != null && def.trigger().kind() == AbilityDefinition.Kind.EVENT
@@ -204,6 +207,9 @@ public final class AbilityEngine {
 	static float modifyIncomingDamage(PlayerCharacterData data,
 			@Nullable ServerPlayerEntity player, AbilityVocabulary.DamageInfo info,
 			float amount) {
+		if (!abilitiesEnabled()) {
+			return amount;
+		}
 		float modified = amount;
 		long now = System.currentTimeMillis();
 		for (Identifier id : ownedAbilities(data)) {
@@ -242,6 +248,9 @@ public final class AbilityEngine {
 	 */
 	public static Outcome tryActivate(PlayerCharacterData data,
 			@Nullable ServerPlayerEntity self, Identifier abilityId, long now) {
+		if (!abilitiesEnabled()) {
+			return Outcome.DISABLED;
+		}
 		if (!ownedAbilities(data).contains(abilityId)) {
 			return Outcome.NOT_OWNED;
 		}
@@ -403,5 +412,15 @@ public final class AbilityEngine {
 	private static int passiveIntervalTicks() {
 		return ((Number) LifepathConfig.getOrDefault(
 				LifepathMod.id("abilities"), "passive_interval_ticks", 20)).intValue();
+	}
+
+	/**
+	 * Master switch ({@code abilities.toml enabled}): gates the passive sweep,
+	 * event dispatch, activation, and damage modifiers — an operator kill
+	 * switch that leaves character state untouched.
+	 */
+	public static boolean abilitiesEnabled() {
+		return (Boolean) LifepathConfig.getOrDefault(
+				LifepathMod.id("abilities"), "enabled", Boolean.TRUE);
 	}
 }

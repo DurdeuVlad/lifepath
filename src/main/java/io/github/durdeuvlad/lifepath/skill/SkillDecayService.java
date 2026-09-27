@@ -137,9 +137,10 @@ public final class SkillDecayService {
 
 	/**
 	 * Pure decay math: the fractional level after the decay window, BEFORE
-	 * the floor clamp and xp mapping. Exposed for tests.
+	 * the floor clamp and xp mapping. Public for the M7-4 debug command's
+	 * decay projection.
 	 */
-	static double decayedFractionalLevel(SkillProgress cur, SkillDefinition def,
+	public static double decayedFractionalLevel(SkillProgress cur, SkillDefinition def,
 			PlayerCharacterData data, long now) {
 		double frac = fractionalLevel(def, cur);
 		// Grace is consumed ONCE per idle period (anchored on meaningful use);
