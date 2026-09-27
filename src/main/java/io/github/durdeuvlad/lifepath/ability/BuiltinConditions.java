@@ -65,7 +65,9 @@ public final class BuiltinConditions {
 			return p != null && dim != null
 					&& p.getWorld().getRegistryKey().getValue().equals(dim);
 		});
-		register("block_nearby", (ctx, params) -> {
+		register("block_nearby", (ctx, params) ->
+				io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
+						"scan.block_nearby", () -> {
 			ServerPlayerEntity p = ctx.self();
 			String idOrTag = str(params, "block");
 			if (p == null || idOrTag == null) {
@@ -89,8 +91,10 @@ public final class BuiltinConditions {
 				}
 			}
 			return false;
-		});
-		register("entity_nearby", (ctx, params) -> {
+		}));
+		register("entity_nearby", (ctx, params) ->
+				io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
+						"scan.entity_nearby", () -> {
 			ServerPlayerEntity p = ctx.self();
 			String idOrTag = str(params, "entity");
 			if (p == null || idOrTag == null) {
@@ -108,7 +112,7 @@ public final class BuiltinConditions {
 							&& (!livingOnly || e instanceof LivingEntity)
 							&& e.squaredDistanceTo(p) <= r2
 							&& type.test(e)).isEmpty();
-		});
+		}));
 		// Time-of-day thresholds, not World.isDay()/isNight() — the latter read
 		// ambient darkness and lie during thunderstorms (night at noon) or in
 		// fixed-time dimensions (never either).
