@@ -33,6 +33,11 @@ public class LifepathClient implements ClientModInitializer {
 				io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload.ID,
 				(payload, context) -> context.client().execute(() ->
 						ClientCharacterState.applyIdentity(payload)));
+		// M6-2: per-skill display cards for the skills screens.
+		ClientLifepathNetworking.onS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.SkillsSummaryPayload.ID,
+				(payload, context) -> context.client().execute(() ->
+						ClientCharacterState.applySkills(payload)));
 		// M4-4: cooldown deltas keep the client read-model fresh between
 		// full snapshots (advisory — the server re-validates every eval).
 		ClientLifepathNetworking.onS2C(

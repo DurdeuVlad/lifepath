@@ -16,12 +16,22 @@ import net.minecraft.util.Identifier;
 public record SkillDefinition(
 		Identifier id,
 		String displayName,
+		String description,
+		String improveHint,
 		Category category,
 		int maxLevel,
 		Optional<Identifier> levelCurve,
 		List<Milestone> milestones,
 		List<Identifier> xpSources,
 		Optional<Identifier> passiveScaling) {
+
+	/** Back-compatible constructor for call sites that don't set UI strings. */
+	public SkillDefinition(Identifier id, String displayName, Category category,
+			int maxLevel, Optional<Identifier> levelCurve, List<Milestone> milestones,
+			List<Identifier> xpSources, Optional<Identifier> passiveScaling) {
+		this(id, displayName, "", "", category, maxLevel, levelCurve, milestones,
+				xpSources, passiveScaling);
+	}
 
 	/** Broad grouping used for UI and balance bucketing. */
 	public enum Category {
@@ -42,13 +52,16 @@ public record SkillDefinition(
 	}
 
 	public static SkillDefinition fromFile(Identifier id, SkillDefinitionFile file) {
-		return new SkillDefinition(id, file.displayName(), file.category(), file.maxLevel(),
+		return new SkillDefinition(id, file.displayName(), file.description(),
+				file.improveHint(), file.category(), file.maxLevel(),
 				file.levelCurve(), file.milestones(), file.xpSources(), file.passiveScaling());
 	}
 
 	/** JSON shape of {@code data/<ns>/skill/<name>.json} (id excluded). */
 	public record SkillDefinitionFile(
 			String displayName,
+			String description,
+			String improveHint,
 			Category category,
 			int maxLevel,
 			Optional<Identifier> levelCurve,
@@ -58,6 +71,8 @@ public record SkillDefinition(
 
 		public static final Codec<SkillDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SkillDefinitionFile::displayName),
+				Codec.STRING.optionalFieldOf("description", "").forGetter(SkillDefinitionFile::description),
+				Codec.STRING.optionalFieldOf("improve_hint", "").forGetter(SkillDefinitionFile::improveHint),
 				Category.CODEC.fieldOf("category").forGetter(SkillDefinitionFile::category),
 				Codec.intRange(1, 10000).optionalFieldOf("max_level", 100).forGetter(SkillDefinitionFile::maxLevel),
 				Identifier.CODEC.optionalFieldOf("level_curve").forGetter(SkillDefinitionFile::levelCurve),

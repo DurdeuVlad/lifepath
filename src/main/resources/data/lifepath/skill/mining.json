@@ -1,5 +1,29 @@
 {
 	"display_name": "Mining",
+	"description": "Breaking natural stone, ore, and deep rock.",
+	"improve_hint": "Mine valuable natural blocks and ores.",
 	"category": "gathering",
-	"max_level": 100
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.mining.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.mining.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.mining.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.mining.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.mining.milestone.95"
+		}
+	]
 }

@@ -175,6 +175,10 @@ public final class CharacterManager {
 			// M6-1: display strings ride the same funnel so identity text is
 			// fresh after join/respawn/dimension change/mutation.
 			ServerPlayNetworking.send(player, IdentitySummary.build(data));
+			// M6-2: per-skill display cards ride the same funnel.
+			ServerPlayNetworking.send(player,
+					io.github.durdeuvlad.lifepath.skill.SkillSummary.build(data,
+							System.currentTimeMillis()));
 		} catch (Exception e) {
 			LifepathMod.LOGGER.error("failed to send character sync to {}", player.getUuid(), e);
 		}

@@ -1,5 +1,29 @@
 {
 	"display_name": "Fishing",
+	"description": "Drawing fish, junk, and treasure from still water.",
+	"improve_hint": "Cast a fishing rod and wait for the bobber.",
 	"category": "gathering",
-	"max_level": 100
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.fishing.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.fishing.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.fishing.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.fishing.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.fishing.milestone.95"
+		}
+	]
 }

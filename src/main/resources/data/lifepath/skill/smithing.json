@@ -1,5 +1,29 @@
 {
 	"display_name": "Smithing",
+	"description": "Working metal at anvils and smithing tables.",
+	"improve_hint": "Forge, repair, and upgrade gear at an anvil or smithing table.",
 	"category": "crafting",
-	"max_level": 100
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.smithing.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.smithing.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.smithing.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.smithing.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.smithing.milestone.95"
+		}
+	]
 }

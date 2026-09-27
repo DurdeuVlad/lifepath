@@ -69,7 +69,7 @@ public final class IdentitySummary {
 	 * Display name for any content id: ability → {@code displayName}, skill →
 	 * {@code displayName}, else the id path. Never throws on unknown content.
 	 */
-	static String displayName(Identifier id) {
+	public static String displayName(Identifier id) {
 		var ability = LifepathContent.abilities().get(id);
 		if (ability != null) {
 			return ability.displayName();
