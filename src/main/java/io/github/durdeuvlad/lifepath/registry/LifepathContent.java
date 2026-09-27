@@ -127,7 +127,7 @@ public final class LifepathContent {
 						io.github.durdeuvlad.lifepath.content.RelationDefinition.RelationFile.CODEC,
 						io.github.durdeuvlad.lifepath.content.RelationDefinition::fromFile, RELATIONS));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
-				manager -> validateReferences());
+				manager -> validateAll());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
 	}
 
@@ -455,62 +455,221 @@ public final class LifepathContent {
 		return Identifier.of(fileId.getNamespace(), stripped);
 	}
 
+	/** The most recent validation pass's report (startup or reload — same path). */
+	public static ValidationReport lastValidationReport() {
+		return LAST_REPORT;
+	}
+
+	private static ValidationReport LAST_REPORT = new ValidationReport(List.of());
+
 	/**
-	 * Runs AFTER the domain loaders (registration order): records every
-	 * cross-domain reference the freshly loaded definitions make. A ref whose
-	 * target domain has a registry is recorded only when missing there; a ref
-	 * into a domain with no registry yet (traits, attunements, …) is recorded as
-	 * pending — {@link #unresolvedReferences()} is the M7-5 validation input.
+	 * M7-5 full validation pass — runs AFTER the domain loaders (registration
+	 * order) on startup and {@code /reload} alike. Collects EVERY issue into
+	 * {@link #LAST_REPORT}: unresolved cross-domain refs (file+field+target
+	 * named), structural range checks on loaded defs, within-file duplicate
+	 * refs, and dependency cycles over the reference graph. The grouped
+	 * summary is logged; the command source surfaces it via
+	 * {@link #lastValidationReport()} on {@code /lifepath reload}.
 	 */
-	static void validateReferences() {
+	public static ValidationReport validateAll() {
+		List<ValidationReport.Issue> issues = new ArrayList<>();
+		validateReferences(issues);
+		validateStructures(issues);
+		detectCycles(issues);
+		ValidationReport report = new ValidationReport(List.copyOf(issues));
+		LAST_REPORT = report;
+		if (report.issues().isEmpty()) {
+			LifepathMod.LOGGER.info("{}", report.summaryLine());
+		} else {
+			LifepathMod.LOGGER.warn("{}", report.summaryLine());
+			for (String line : report.detailLines()) {
+				LifepathMod.LOGGER.warn("{}", line);
+			}
+		}
+		return report;
+	}
+
+	private static void validateReferences(List<ValidationReport.Issue> issues) {
 		UNRESOLVED.clear();
 		for (SpeciesDefinition def : SPECIES.all().values()) {
-			recordRefs("species", def.id(), def.passiveAbilities(), "ability");
-			recordRefs("species", def.id(), def.activeAbilities(), "ability");
-			recordRefs("species", def.id(), def.minAptitudes().keySet(), "skill");
-			recordRefs("species", def.id(), def.resources(), "resource");
-			recordRef("species", def.id(), def.dietRules(), "diet");
-			recordRef("species", def.id(), def.mobDispositions(), "relation");
+			recordRefs(issues, "species", def.id(), def.passiveAbilities(), "ability");
+			recordRefs(issues, "species", def.id(), def.activeAbilities(), "ability");
+			recordRefs(issues, "species", def.id(), def.minAptitudes().keySet(), "skill");
+			recordRefs(issues, "species", def.id(), def.resources(), "resource");
+			recordRef(issues, "species", def.id(), def.dietRules(), "diet");
+			recordRef(issues, "species", def.id(), def.mobDispositions(), "relation");
 		}
 		for (SpecializationDefinition def : SPECIALIZATIONS.all().values()) {
-			recordRefs("specialization", def.id(), def.startingSkills().keySet(), "skill");
-			recordRefs("specialization", def.id(), def.aptitudes().keySet(), "skill");
-			recordRefs("specialization", def.id(), def.xpModifiers().keySet(), "skill");
-			recordRefs("specialization", def.id(), def.decayModifiers().keySet(), "skill");
-			recordRefs("specialization", def.id(), def.protectedFloors().keySet(), "skill");
-			recordRefs("specialization", def.id(), def.signatureRefs(), "ability");
+			recordRefs(issues, "specialization", def.id(), def.startingSkills().keySet(), "skill");
+			recordRefs(issues, "specialization", def.id(), def.aptitudes().keySet(), "skill");
+			recordRefs(issues, "specialization", def.id(), def.xpModifiers().keySet(), "skill");
+			recordRefs(issues, "specialization", def.id(), def.decayModifiers().keySet(), "skill");
+			recordRefs(issues, "specialization", def.id(), def.protectedFloors().keySet(), "skill");
+			recordRefs(issues, "specialization", def.id(), def.signatureRefs(), "ability");
 		}
 		for (SkillDefinition def : SKILLS.all().values()) {
-			recordRef("skill", def.id(), def.levelCurve(), "level_curve");
-			recordRefs("skill", def.id(), def.xpSources(), "xp_source");
-			recordRef("skill", def.id(), def.passiveScaling(), "scaling");
+			recordRef(issues, "skill", def.id(), def.levelCurve(), "level_curve");
+			recordRefs(issues, "skill", def.id(), def.xpSources(), "xp_source");
+			recordRef(issues, "skill", def.id(), def.passiveScaling(), "scaling");
 			for (SkillDefinition.Milestone milestone : def.milestones()) {
-				recordRefs("skill", def.id(), milestone.effectRefs(), "ability");
+				recordRefs(issues, "skill", def.id(), milestone.effectRefs(), "ability");
 			}
 		}
 		for (XpSourceDefinition def : XP_SOURCES.all().values()) {
-			recordRef("xp_source", def.id(), Optional.of(def.skill()), "skill");
+			recordRef(issues, "xp_source", def.id(), Optional.of(def.skill()), "skill");
 		}
 	}
 
-	private static void recordRefs(String domain, Identifier source,
-			Iterable<Identifier> refs, String targetDomain) {
+	private static void recordRefs(List<ValidationReport.Issue> issues, String domain,
+			Identifier source, Iterable<Identifier> refs, String targetDomain) {
 		for (Identifier ref : refs) {
-			recordRef(domain, source, Optional.of(ref), targetDomain);
+			recordRef(issues, domain, source, Optional.of(ref), targetDomain);
 		}
 	}
 
-	private static void recordRef(String domain, Identifier source,
-			Optional<Identifier> ref, String targetDomain) {
+	private static void recordRef(List<ValidationReport.Issue> issues, String domain,
+			Identifier source, Optional<Identifier> ref, String targetDomain) {
 		ref.ifPresent(id -> {
 			ContentRegistry<?> registry = registryFor(targetDomain);
 			if (registry == null || !registry.contains(id)) {
 				UNRESOLVED.add(new UnresolvedReference(domain, source, id, targetDomain));
-				LifepathMod.LOGGER.warn(
-						"{}:{} references unknown {} '{}' (typo? missing file? pending domain?)",
-						domain, source, targetDomain, id);
+				issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+						domain, source, "ref->" + targetDomain,
+						"references missing " + targetDomain + " '" + id + "'"));
 			}
 		});
+	}
+
+	/**
+	 * Structural checks on already-loaded defs — the issues a per-file codec
+	 * cannot see because they compare fields or reference other defs.
+	 */
+	private static void validateStructures(List<ValidationReport.Issue> issues) {
+		for (SpeciesDefinition def : SPECIES.all().values()) {
+			var overlap = new java.util.HashSet<>(def.passiveAbilities());
+			overlap.retainAll(def.activeAbilities());
+			for (Identifier dup : overlap) {
+				issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+						"species", def.id(), "passive_abilities/active_abilities",
+						dup + " listed in BOTH passive and active — it would evaluate twice"));
+			}
+			duplicates("species", def.id(), "passive_abilities", def.passiveAbilities(), issues);
+			duplicates("species", def.id(), "active_abilities", def.activeAbilities(), issues);
+		}
+		for (SpecializationDefinition def : SPECIALIZATIONS.all().values()) {
+			def.startingSkills().forEach((skill, level) -> {
+				SkillDefinition sd = SKILLS.get(skill);
+				if (sd != null && (level < 0 || level > sd.maxLevel())) {
+					issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+							"specialization", def.id(), "starting_skills." + skill,
+							"level " + level + " outside [0," + sd.maxLevel() + "]"));
+				}
+			});
+			def.protectedFloors().forEach((skill, floor) -> {
+				SkillDefinition sd = SKILLS.get(skill);
+				if (floor < 0 || (sd != null && floor > sd.maxLevel())) {
+					issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+							"specialization", def.id(), "protected_floors." + skill,
+							"floor " + floor + " outside [0," + (sd == null ? "?" : sd.maxLevel()) + "]"));
+				}
+			});
+			duplicates("specialization", def.id(), "signature_abilities", def.signatureRefs(), issues);
+		}
+		for (SkillDefinition def : SKILLS.all().values()) {
+			if (def.maxLevel() <= 0 || def.maxLevel() > 100) {
+				issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+						"skill", def.id(), "max_level",
+						"max_level " + def.maxLevel() + " outside [1,100]"));
+			}
+			java.util.Set<Integer> seen = new java.util.HashSet<>();
+			for (SkillDefinition.Milestone m : def.milestones()) {
+				if (m.level() <= 0 || m.level() > def.maxLevel()) {
+					issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+							"skill", def.id(), "milestones[].level",
+							"milestone level " + m.level() + " outside (0," + def.maxLevel() + "]"));
+				}
+				if (!seen.add(m.level())) {
+					issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+							"skill", def.id(), "milestones[].level",
+							"duplicate milestone level " + m.level()));
+				}
+			}
+		}
+	}
+
+	private static void duplicates(String domain, Identifier file, String field,
+			List<Identifier> refs, List<ValidationReport.Issue> issues) {
+		java.util.Set<Identifier> seen = new java.util.HashSet<>();
+		for (Identifier ref : refs) {
+			if (!seen.add(ref)) {
+				issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+						domain, file, field, "duplicate reference " + ref));
+			}
+		}
+	}
+
+	/**
+	 * Cycle detection over the recursion-capable edge: a resource band's
+	 * {@code modify_resource} entry action targeting ANOTHER resource. A→B→A
+	 * would ping-pong band transitions on the tick loop; flag the cycle
+	 * loudly so the author breaks it (data fix, not engine clamp).
+	 */
+	private static void detectCycles(List<ValidationReport.Issue> issues) {
+		Map<Identifier, java.util.Set<Identifier>> edges = new java.util.HashMap<>();
+		for (var def : RESOURCES.all().values()) {
+			for (var band : def.bands()) {
+				for (var node : band.actions()) {
+					if (node.type().equals(LifepathMod.id("modify_resource"))) {
+						var el = node.raw().get("resource");
+						if (el != null && el.isJsonPrimitive() && el.getAsJsonPrimitive().isString()
+								&& !el.getAsString().startsWith("#")) {
+							Identifier target = Identifier.tryParse(el.getAsString());
+							if (target != null && RESOURCES.contains(target)) {
+								edges.computeIfAbsent(def.id(), k -> new java.util.HashSet<>())
+										.add(target);
+							}
+						}
+					}
+				}
+			}
+		}
+		// DFS over the resource->resource graph; report each back-edge target.
+		java.util.Set<Identifier> visited = new java.util.HashSet<>();
+		java.util.Set<Identifier> stack = new java.util.HashSet<>();
+		java.util.List<Identifier> path = new java.util.ArrayList<>();
+		java.util.Set<String> reported = new java.util.HashSet<>();
+		for (Identifier start : edges.keySet()) {
+			dfsCycles(start, edges, visited, stack, path, reported, issues);
+		}
+	}
+
+	private static void dfsCycles(Identifier at,
+			Map<Identifier, java.util.Set<Identifier>> edges,
+			java.util.Set<Identifier> visited, java.util.Set<Identifier> stack,
+			java.util.List<Identifier> path, java.util.Set<String> reported,
+			List<ValidationReport.Issue> issues) {
+		if (stack.contains(at)) {
+			int from = path.indexOf(at);
+			String cycle = String.join(" -> ",
+					path.subList(from, path.size()).stream().map(Identifier::toString).toList())
+					+ " -> " + at;
+			if (reported.add(cycle)) {
+				issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
+						"resource", at, "bands[].actions[modify_resource]",
+						"cyclic band-action chain: " + cycle));
+			}
+			return;
+		}
+		if (!visited.add(at)) {
+			return;
+		}
+		stack.add(at);
+		path.add(at);
+		for (Identifier next : edges.getOrDefault(at, java.util.Set.of())) {
+			dfsCycles(next, edges, visited, stack, path, reported, issues);
+		}
+		path.remove(path.size() - 1);
+		stack.remove(at);
 	}
 
 	@Nullable

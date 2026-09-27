@@ -23,7 +23,7 @@ class LifepathContentTest {
 		LifepathContent.specializations().clear();
 		LifepathContent.skills().clear();
 		LifepathContent.abilities().clear();
-		LifepathContent.validateReferences();
+		LifepathContent.validateAll();
 	}
 
 	@Test
@@ -92,7 +92,7 @@ class LifepathContentTest {
 						Map.of(skillId, 2, missingSkill, 1), Map.of(), Map.of(), Map.of(), Map.of(),
 						List.of()));
 
-		LifepathContent.validateReferences();
+		LifepathContent.validateAll();
 
 		var unresolved = LifepathContent.unresolvedReferences();
 		// ability ref + resource ref + missing skill + missing min-aptitude skill = 4;
