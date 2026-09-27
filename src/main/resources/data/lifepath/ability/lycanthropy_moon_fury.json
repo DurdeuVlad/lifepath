@@ -1,10 +1,32 @@
 {
 	"display_name": "Moon Fury",
-	"trigger": {"type": "passive", "interval_ticks": 60},
-	"conditions": {"all": [{"type": "lifepath:night"}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/lycanthropy_moon_fury",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 60
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:night"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect", "effect": "minecraft:strength", "duration": 140, "amplifier": 0},
-		{"type": "lifepath:apply_effect", "effect": "minecraft:speed", "duration": 140, "amplifier": 0}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 140,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 140,
+			"amplifier": 0
+		}
 	]
 }

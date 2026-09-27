@@ -1,5 +1,6 @@
 {
 	"display_name": "Miner",
+	"icon": "specialization/miner",
 	"starting_skills": {
 		"lifepath:mining": 20
 	},
@@ -11,10 +12,12 @@
 		"lifepath:mining": 1.35
 	},
 	"decay_modifiers": {
-		"lifepath:mining": 0.30
+		"lifepath:mining": 0.3
 	},
 	"protected_floors": {
 		"lifepath:mining": 30
 	},
-	"signature": ["lifepath:deepvein_sense_i"]
+	"signature": [
+		"lifepath:deepvein_sense_i"
+	]
 }

@@ -1,5 +1,6 @@
 {
 	"display_name": "Defence",
+	"icon": "skill/defence",
 	"description": "Enduring blows and wearing the fight.",
 	"improve_hint": "Survive attacks from hostile creatures.",
 	"category": "physical",

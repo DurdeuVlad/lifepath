@@ -1,7 +1,10 @@
 {
 	"display_name": "Lycanthropy",
+	"icon": "condition/lycanthropy",
 	"description": "A moon curse carried by a wolf's bite. Power swells at night and the beast grows stronger with each hunt.",
-	"abilities": ["lifepath:lycanthropy_moon_fury"],
+	"abilities": [
+		"lifepath:lycanthropy_moon_fury"
+	],
 	"stages": [
 		{
 			"id": "dormant",
@@ -9,21 +12,38 @@
 		},
 		{
 			"id": "moonbound",
-			"abilities": ["lifepath:lycanthropy_feral_senses"],
-			"advance_events": ["lifepath:combat"],
+			"abilities": [
+				"lifepath:lycanthropy_feral_senses"
+			],
+			"advance_events": [
+				"lifepath:combat"
+			],
 			"advance_count": 5
 		},
 		{
 			"id": "feral",
-			"abilities": ["lifepath:lycanthropy_full_moon"]
+			"abilities": [
+				"lifepath:lycanthropy_full_moon"
+			]
 		}
 	],
 	"acquisition": [
-		{"type": "attack", "entity": "#lifepath:wolves", "chance": 0.35},
-		{"type": "admin"}
+		{
+			"type": "attack",
+			"entity": "#lifepath:wolves",
+			"chance": 0.35
+		},
+		{
+			"type": "admin"
+		}
 	],
 	"cures": [
-		{"type": "item", "item": "minecraft:enchanted_golden_apple"},
-		{"type": "admin"}
+		{
+			"type": "item",
+			"item": "minecraft:enchanted_golden_apple"
+		},
+		{
+			"type": "admin"
+		}
 	]
 }

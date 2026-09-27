@@ -1,23 +1,32 @@
 {
 	"display_name": "Vampirism",
+	"icon": "condition/vampirism",
 	"description": "A blood curse caught from a bloodsucker's bite. Feeds on kills, burns in daylight, and deepens the longer it goes unfed.",
 	"abilities": [
 		"lifepath:vampirism_sun_sickness",
 		"lifepath:vampirism_night_eyes"
 	],
 	"diet_rules": "lifepath:blood",
-	"resources": ["lifepath:blood"],
+	"resources": [
+		"lifepath:blood"
+	],
 	"stages": [
 		{
 			"id": "fledgling",
-			"advance_events": ["lifepath:combat"],
+			"advance_events": [
+				"lifepath:combat"
+			],
 			"advance_count": 3,
 			"advance_after_seconds": 1200
 		},
 		{
 			"id": "ravenous",
-			"abilities": ["lifepath:vampirism_blood_frenzy"],
-			"advance_events": ["lifepath:combat"],
+			"abilities": [
+				"lifepath:vampirism_blood_frenzy"
+			],
+			"advance_events": [
+				"lifepath:combat"
+			],
 			"advance_count": 6
 		},
 		{
@@ -29,11 +38,22 @@
 		}
 	],
 	"acquisition": [
-		{"type": "attack", "entity": "#lifepath:bloodsuckers", "chance": 0.35},
-		{"type": "admin"}
+		{
+			"type": "attack",
+			"entity": "#lifepath:bloodsuckers",
+			"chance": 0.35
+		},
+		{
+			"type": "admin"
+		}
 	],
 	"cures": [
-		{"type": "item", "item": "minecraft:golden_apple"},
-		{"type": "admin"}
+		{
+			"type": "item",
+			"item": "minecraft:golden_apple"
+		},
+		{
+			"type": "admin"
+		}
 	]
 }

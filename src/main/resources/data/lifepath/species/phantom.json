@@ -1,5 +1,6 @@
 {
 	"display_name": "Phantom",
+	"icon": "species/phantom",
 	"description": "Void-affiliated beings who alternate between material and immaterial states. While phased, arrows pass through them and they drift - but sunlight destabilizes the veil.",
 	"visibility": "hidden",
 	"selection": "unlocked",

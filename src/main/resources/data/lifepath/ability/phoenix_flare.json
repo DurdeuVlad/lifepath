@@ -1,5 +1,6 @@
 {
 	"display_name": "Flare",
+	"icon": "ability/phoenix_flare",
 	"trigger": {
 		"type": "active"
 	},

@@ -1,12 +1,28 @@
 {
 	"display_name": "Forge Mastery I",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"conditions": {"all": [{"type": "lifepath:block_nearby",
-	                        "block": "#lifepath:smithing_workstations",
-	                        "radius": 6}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/forge_mastery_i",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#lifepath:smithing_workstations",
+				"radius": 6
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect",
-		 "effect": "minecraft:fire_resistance", "duration": 80, "amplifier": 0}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:fire_resistance",
+			"duration": 80,
+			"amplifier": 0
+		}
 	]
 }

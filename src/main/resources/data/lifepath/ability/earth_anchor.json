@@ -1,10 +1,20 @@
 {
 	"display_name": "Anchor",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/earth_anchor",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:modify_attribute",
-		 "attribute": "minecraft:generic.knockback_resistance",
-		 "operation": "add_value", "value": 0.4, "duration_ticks": 100}
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.knockback_resistance",
+			"operation": "add_value",
+			"value": 0.4,
+			"duration_ticks": 100
+		}
 	]
 }

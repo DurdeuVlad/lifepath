@@ -1,14 +1,35 @@
 {
 	"display_name": "Forest Affinity",
-	"trigger": {"type": "passive", "interval_ticks": 20},
-	"conditions": {"all": [{"type": "lifepath:biome_tag", "tag": "#minecraft:is_forest"}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/sylvian_forest_affinity",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 20
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:biome_tag",
+				"tag": "#minecraft:is_forest"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:modify_attribute",
-		 "attribute": "minecraft:generic.movement_speed",
-		 "operation": "add_multiplied_total", "value": 0.10, "duration_ticks": 60},
-		{"type": "lifepath:modify_attribute",
-		 "attribute": "minecraft:generic.armor",
-		 "operation": "add_value", "value": 2.0, "duration_ticks": 60}
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.movement_speed",
+			"operation": "add_multiplied_total",
+			"value": 0.1,
+			"duration_ticks": 60
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.armor",
+			"operation": "add_value",
+			"value": 2.0,
+			"duration_ticks": 60
+		}
 	]
 }

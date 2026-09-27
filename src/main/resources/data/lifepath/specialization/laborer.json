@@ -1,5 +1,6 @@
 {
 	"display_name": "Laborer",
+	"icon": "specialization/laborer",
 	"starting_skills": {
 		"lifepath:athletics": 15,
 		"lifepath:mining": 15
@@ -18,7 +19,6 @@
 	},
 	"protected_floors": {
 		"lifepath:athletics": 25
-	}
-,
+	},
 	"capacity_multiplier": 1.4
 }

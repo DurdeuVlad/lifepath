@@ -1,5 +1,6 @@
 {
 	"display_name": "Engineer",
+	"icon": "specialization/engineer",
 	"starting_skills": {
 		"lifepath:engineering": 20,
 		"lifepath:smithing": 10

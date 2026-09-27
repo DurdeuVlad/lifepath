@@ -1,5 +1,6 @@
 {
 	"display_name": "Exile from the Sky",
+	"icon": "ability/celestial_exile",
 	"trigger": {
 		"type": "passive",
 		"interval_ticks": 40

@@ -1,5 +1,6 @@
 {
 	"display_name": "Engineering",
+	"icon": "skill/engineering",
 	"description": "Assembling mechanisms, tools, and devices.",
 	"improve_hint": "Craft items at a crafting table.",
 	"category": "crafting",

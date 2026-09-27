@@ -1,6 +1,19 @@
 {
 	"display_name": "Hollow Bones",
-	"trigger": {"type": "damage_taken", "multiplier": 1.3},
-	"conditions": {"all": [{"type": "lifepath:damage_type", "id": "#minecraft:is_fall"}]},
-	"target": {"type": "lifepath:self"}
+	"icon": "ability/anima_hollow_bones",
+	"trigger": {
+		"type": "damage_taken",
+		"multiplier": 1.3
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:damage_type",
+				"id": "#minecraft:is_fall"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	}
 }

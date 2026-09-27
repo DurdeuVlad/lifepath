@@ -1,6 +1,19 @@
 {
 	"display_name": "Thunderous Step",
-	"trigger": {"type": "damage_taken", "multiplier": 1.15},
-	"conditions": {"all": [{"type": "lifepath:damage_type", "id": "#minecraft:is_fall"}]},
-	"target": {"type": "lifepath:self"}
+	"icon": "ability/goliath_thunderous_step",
+	"trigger": {
+		"type": "damage_taken",
+		"multiplier": 1.15
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:damage_type",
+				"id": "#minecraft:is_fall"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	}
 }

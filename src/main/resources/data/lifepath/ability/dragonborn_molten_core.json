@@ -1,10 +1,32 @@
 {
 	"display_name": "Molten Core",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"conditions": {"all": [{"type": "lifepath:on_fire"}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/dragonborn_molten_core",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:on_fire"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect", "effect": "minecraft:regeneration", "duration": 100, "amplifier": 0},
-		{"type": "lifepath:apply_effect", "effect": "minecraft:strength", "duration": 100, "amplifier": 0}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:regeneration",
+			"duration": 100,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 100,
+			"amplifier": 0
+		}
 	]
 }

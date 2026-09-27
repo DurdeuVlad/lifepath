@@ -1,5 +1,6 @@
 {
 	"display_name": "Sylvian",
+	"icon": "species/sylvian",
 	"description": "Nature-aligned. Forests make them quicker and hardier, vegetation carries their stride, flowers cleanse them — but arid lands weaken them and the undead cut deeper.",
 	"visibility": "normal",
 	"selection": "open",
@@ -11,5 +12,7 @@
 		"lifepath:sylvian_arid_nausea",
 		"lifepath:sylvian_necrotic_vulnerability"
 	],
-	"active_abilities": ["lifepath:sylvian_verdant_bloom"]
+	"active_abilities": [
+		"lifepath:sylvian_verdant_bloom"
+	]
 }

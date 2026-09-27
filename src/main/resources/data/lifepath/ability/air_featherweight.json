@@ -1,6 +1,19 @@
 {
 	"display_name": "Featherweight",
-	"trigger": {"type": "damage_taken", "multiplier": 0.3},
-	"conditions": {"all": [{"type": "lifepath:damage_type", "id": "#minecraft:is_fall"}]},
-	"target": {"type": "lifepath:self"}
+	"icon": "ability/air_featherweight",
+	"trigger": {
+		"type": "damage_taken",
+		"multiplier": 0.3
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:damage_type",
+				"id": "#minecraft:is_fall"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	}
 }

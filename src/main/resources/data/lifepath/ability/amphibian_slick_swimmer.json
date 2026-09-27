@@ -1,9 +1,26 @@
 {
 	"display_name": "Slick Swimmer",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"conditions": {"all": [{"type": "lifepath:submerged"}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/amphibian_slick_swimmer",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:submerged"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect", "effect": "minecraft:dolphins_grace", "duration": 100, "amplifier": 0}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:dolphins_grace",
+			"duration": 100,
+			"amplifier": 0
+		}
 	]
 }

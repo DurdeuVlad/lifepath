@@ -1,5 +1,6 @@
 {
 	"display_name": "Cooking",
+	"icon": "skill/cooking",
 	"description": "Preparing meals, provisions, and fine foods.",
 	"improve_hint": "Craft meals and food items.",
 	"category": "crafting",

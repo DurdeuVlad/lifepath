@@ -1,8 +1,19 @@
 {
 	"display_name": "Leap",
-	"trigger": {"type": "passive", "interval_ticks": 60},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/air_leap",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 60
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect", "effect": "minecraft:jump_boost", "duration": 140, "amplifier": 0}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:jump_boost",
+			"duration": 140,
+			"amplifier": 0
+		}
 	]
 }

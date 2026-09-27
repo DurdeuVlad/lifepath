@@ -1,5 +1,6 @@
 {
 	"display_name": "Hellborn",
+	"icon": "species/hellborn",
 	"description": "Infernal blood, nether-born. Piglins treat them as kin, fire barely singes them, and the Nether itself lends them strength — but standing water quenches their flame. They can ignite foes around them.",
 	"visibility": "normal",
 	"selection": "open",
@@ -9,5 +10,7 @@
 		"lifepath:hellborn_nether_vigor",
 		"lifepath:hellborn_water_aversion"
 	],
-	"active_abilities": ["lifepath:hellborn_immolate"]
+	"active_abilities": [
+		"lifepath:hellborn_immolate"
+	]
 }

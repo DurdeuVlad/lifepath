@@ -1,5 +1,6 @@
 {
 	"display_name": "Radiance",
+	"icon": "ability/celestial_radiance",
 	"trigger": {
 		"type": "passive",
 		"interval_ticks": 40

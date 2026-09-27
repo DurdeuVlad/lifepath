@@ -1,6 +1,18 @@
 {
 	"display_name": "Stone Skin",
-	"trigger": {"type": "damage_taken", "multiplier": 0.85},
-	"conditions": {"all": [{"type": "lifepath:always"}]},
-	"target": {"type": "lifepath:self"}
+	"icon": "ability/earth_stone_skin",
+	"trigger": {
+		"type": "damage_taken",
+		"multiplier": 0.85
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:always"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	}
 }

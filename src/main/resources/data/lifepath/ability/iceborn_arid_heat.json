@@ -1,10 +1,26 @@
 {
 	"display_name": "Arid Heat",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"conditions": {"all": [{"type": "lifepath:biome_tag", "tag": "#lifepath:arid"}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/iceborn_arid_heat",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:biome_tag",
+				"tag": "#lifepath:arid"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:modify_resource",
-		 "resource": "lifepath:temperature", "delta": 0.4}
+		{
+			"type": "lifepath:modify_resource",
+			"resource": "lifepath:temperature",
+			"delta": 0.4
+		}
 	]
 }

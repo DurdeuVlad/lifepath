@@ -1,5 +1,6 @@
 {
 	"display_name": "Hunter",
+	"icon": "specialization/hunter",
 	"starting_skills": {
 		"lifepath:hunting": 20,
 		"lifepath:athletics": 10

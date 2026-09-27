@@ -1,6 +1,19 @@
 {
 	"display_name": "Fire Blood",
-	"trigger": {"type": "damage_taken", "multiplier": 0.0},
-	"conditions": {"all": [{"type": "lifepath:damage_type", "id": "#minecraft:is_fire"}]},
-	"target": {"type": "lifepath:self"}
+	"icon": "ability/dragonborn_fire_blood",
+	"trigger": {
+		"type": "damage_taken",
+		"multiplier": 0.0
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:damage_type",
+				"id": "#minecraft:is_fire"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	}
 }

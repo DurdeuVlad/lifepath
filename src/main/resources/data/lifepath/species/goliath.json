@@ -1,15 +1,19 @@
 {
 	"display_name": "Goliath",
+	"icon": "species/goliath",
 	"description": "Large of body and stronger for it — Athletics aptitude can't fall below B. Their frame towers and hits harder, and a warcry rattles foes — but arrows find them easier and falls land harder.",
 	"visibility": "normal",
 	"selection": "open",
-	"min_aptitudes": {"lifepath:athletics": "b"},
+	"min_aptitudes": {
+		"lifepath:athletics": "b"
+	},
 	"passive_abilities": [
 		"lifepath:goliath_large_frame",
 		"lifepath:goliath_big_target",
 		"lifepath:goliath_thunderous_step"
 	],
-	"active_abilities": ["lifepath:goliath_warcry"]
-,
+	"active_abilities": [
+		"lifepath:goliath_warcry"
+	],
 	"capacity_multiplier": 1.5
 }

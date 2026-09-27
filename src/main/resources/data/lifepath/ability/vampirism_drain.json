@@ -1,9 +1,25 @@
 {
 	"display_name": "Drain",
-	"trigger": {"type": "event", "events": ["lifepath:combat"]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/vampirism_drain",
+	"trigger": {
+		"type": "event",
+		"events": [
+			"lifepath:combat"
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:modify_resource", "resource": "lifepath:blood", "delta": 25.0},
-		{"type": "lifepath:spawn_particle", "particle": "minecraft:damage_indicator", "count": 8}
+		{
+			"type": "lifepath:modify_resource",
+			"resource": "lifepath:blood",
+			"delta": 25.0
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:damage_indicator",
+			"count": 8
+		}
 	]
 }

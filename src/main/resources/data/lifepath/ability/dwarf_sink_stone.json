@@ -1,10 +1,32 @@
 {
 	"display_name": "Sink Like Stone",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"conditions": {"all": [{"type": "lifepath:submerged"}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/dwarf_sink_stone",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:submerged"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect", "effect": "minecraft:slowness", "duration": 100, "amplifier": 1},
-		{"type": "lifepath:apply_effect", "effect": "minecraft:mining_fatigue", "duration": 100, "amplifier": 0}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:slowness",
+			"duration": 100,
+			"amplifier": 1
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:mining_fatigue",
+			"duration": 100,
+			"amplifier": 0
+		}
 	]
 }

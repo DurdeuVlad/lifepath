@@ -1,15 +1,24 @@
 {
 	"display_name": "Earth",
+	"icon": "attunement/earth",
 	"description": "The mountain accepts those who dig long enough. Stone-hard skin and an anchor's stance come with the bond.",
 	"abilities": [
 		"lifepath:earth_stone_skin",
 		"lifepath:earth_anchor"
 	],
 	"acquisition": [
-		{"type": "event", "event": "lifepath:mining", "chance": 0.02},
-		{"type": "admin"}
+		{
+			"type": "event",
+			"event": "lifepath:mining",
+			"chance": 0.02
+		},
+		{
+			"type": "admin"
+		}
 	],
 	"removal": [
-		{"type": "admin"}
+		{
+			"type": "admin"
+		}
 	]
 }

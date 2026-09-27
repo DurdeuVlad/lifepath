@@ -1,13 +1,27 @@
 {
 	"display_name": "Large Frame",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/goliath_large_frame",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:modify_attribute",
-		 "attribute": "minecraft:generic.scale",
-		 "operation": "add_multiplied_total", "value": 0.12, "duration_ticks": 100},
-		{"type": "lifepath:modify_attribute",
-		 "attribute": "minecraft:generic.attack_damage",
-		 "operation": "add_value", "value": 1.0, "duration_ticks": 100}
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.scale",
+			"operation": "add_multiplied_total",
+			"value": 0.12,
+			"duration_ticks": 100
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.attack_damage",
+			"operation": "add_value",
+			"value": 1.0,
+			"duration_ticks": 100
+		}
 	]
 }

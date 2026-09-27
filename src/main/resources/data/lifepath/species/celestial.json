@@ -1,5 +1,6 @@
 {
 	"display_name": "Celestial",
+	"icon": "species/celestial",
 	"description": "Beings with divine affinity. Sunlight restores them, falls mean nothing, and they can smite the undead - but the Nether is an exile far from the heavens.",
 	"visibility": "hidden",
 	"selection": "unlocked",

@@ -1,12 +1,29 @@
 {
 	"display_name": "Death Sight",
-	"trigger": {"type": "active"},
-	"conditions": {"all": [{"type": "lifepath:night"}]},
-	"target": {"type": "lifepath:entities_in_radius",
-	           "radius": 15, "living_only": true},
+	"icon": "ability/undead_death_sight",
+	"trigger": {
+		"type": "active"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:night"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:entities_in_radius",
+		"radius": 15,
+		"living_only": true
+	},
 	"actions": [
-		{"type": "lifepath:highlight_entities",
-		 "duration_ticks": 160, "visibility": "self"}
+		{
+			"type": "lifepath:highlight_entities",
+			"duration_ticks": 160,
+			"visibility": "self"
+		}
 	],
-	"cooldown": {"seconds": 60}
+	"cooldown": {
+		"seconds": 60
+	}
 }

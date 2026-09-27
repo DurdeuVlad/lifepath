@@ -1,5 +1,6 @@
 {
 	"display_name": "Blacksmith",
+	"icon": "specialization/blacksmith",
 	"starting_skills": {
 		"lifepath:smithing": 20,
 		"lifepath:mining": 10,
