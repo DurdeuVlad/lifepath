@@ -32,7 +32,9 @@ final class BuiltinTargets {
 		}
 		initialized = true;
 
-		AbilityVocabulary.registerTarget(LifepathMod.id("entities_in_radius"), (ctx, params) -> {
+		AbilityVocabulary.registerTarget(LifepathMod.id("entities_in_radius"), (ctx, params) ->
+				io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
+						"scan.entities_in_radius", () -> {
 			var p = ctx.self();
 			String idOrTag = BuiltinConditions.str(params, "entity");
 			if (p == null) {
@@ -56,9 +58,11 @@ final class BuiltinTargets {
 				}
 			}
 			return out;
-		});
+		}));
 
-		AbilityVocabulary.registerTarget(LifepathMod.id("blocks_in_radius"), (ctx, params) -> {
+		AbilityVocabulary.registerTarget(LifepathMod.id("blocks_in_radius"), (ctx, params) ->
+				io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
+						"scan.blocks_in_radius", () -> {
 			var p = ctx.self();
 			String idOrTag = BuiltinConditions.str(params, "block");
 			if (p == null || idOrTag == null) {
@@ -88,7 +92,7 @@ final class BuiltinTargets {
 				}
 			}
 			return out;
-		});
+		}));
 	}
 
 	@org.jetbrains.annotations.Nullable

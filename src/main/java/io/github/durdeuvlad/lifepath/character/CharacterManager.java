@@ -135,8 +135,9 @@ public final class CharacterManager {
 		});
 		// Lazy decay trigger (M3-3): offline elapsed time is charged once here —
 		// deterministic because the window anchors on persisted timestamps.
-		if (io.github.durdeuvlad.lifepath.feedback.FeedbackService
-				.applyDecayWithFeedback(player, System.currentTimeMillis()) > 0) {
+		if (io.github.durdeuvlad.lifepath.perf.PerfCounters.time("decay.login_batch",
+				() -> io.github.durdeuvlad.lifepath.feedback.FeedbackService
+						.applyDecayWithFeedback(player, System.currentTimeMillis())) > 0) {
 			markDirty(player);
 		}
 		syncCharacter(player);
@@ -185,15 +186,28 @@ public final class CharacterManager {
 	public static void syncCharacter(ServerPlayerEntity player) {
 		PlayerCharacterData data = getCharacter(player);
 		try {
-			ServerPlayNetworking.send(player,
-					new CharacterSyncPayload(snapshotForSync(data, System.currentTimeMillis())));
+			PlayerCharacterData snapshot =
+					snapshotForSync(data, System.currentTimeMillis());
+			// M7-3: payload size in bytes rides the counters alongside the
+			// send timing so the report has both volume and cost per sync.
+			io.github.durdeuvlad.lifepath.perf.PerfCounters.record(
+					"sync.payload_bytes",
+					PlayerCharacterData.CODEC.encodeStart(
+							net.minecraft.nbt.NbtOps.INSTANCE, snapshot)
+							.result().map(net.minecraft.nbt.NbtElement::getSizeInBytes)
+							.orElse(0));
+			io.github.durdeuvlad.lifepath.perf.PerfCounters.time("sync.character",
+					() -> ServerPlayNetworking.send(player,
+							new CharacterSyncPayload(snapshot)));
 			// M6-1: display strings ride the same funnel so identity text is
 			// fresh after join/respawn/dimension change/mutation.
-			ServerPlayNetworking.send(player, IdentitySummary.build(data));
+			io.github.durdeuvlad.lifepath.perf.PerfCounters.time("sync.identity",
+					() -> ServerPlayNetworking.send(player, IdentitySummary.build(data)));
 			// M6-2: per-skill display cards ride the same funnel.
-			ServerPlayNetworking.send(player,
-					io.github.durdeuvlad.lifepath.skill.SkillSummary.build(data,
-							System.currentTimeMillis()));
+			io.github.durdeuvlad.lifepath.perf.PerfCounters.time("sync.skills",
+					() -> ServerPlayNetworking.send(player,
+							io.github.durdeuvlad.lifepath.skill.SkillSummary.build(data,
+									System.currentTimeMillis())));
 			// M6-4: identity/condition deltas become feedback events — the
 			// funnel covers every mutation path, so no caller needs to
 			// remember to notify.

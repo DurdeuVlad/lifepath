@@ -54,8 +54,9 @@ public final class SkillDecayService {
 			ticksSinceMaintenance = 0;
 			long now = System.currentTimeMillis();
 			for (var player : server.getPlayerManager().getPlayerList()) {
-				int changed = io.github.durdeuvlad.lifepath.feedback
-						.FeedbackService.applyDecayWithFeedback(player, now);
+				int changed = io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
+						"decay.maintenance_batch", () -> io.github.durdeuvlad.lifepath.feedback
+								.FeedbackService.applyDecayWithFeedback(player, now));
 				if (changed > 0) {
 					CharacterManager.markDirty(player);
 					CharacterManager.syncCharacter(player);

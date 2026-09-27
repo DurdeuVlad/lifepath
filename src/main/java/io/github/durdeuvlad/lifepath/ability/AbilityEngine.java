@@ -65,7 +65,9 @@ public final class AbilityEngine {
 					}
 					long now = System.currentTimeMillis();
 					for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-						runPassiveSweep(CharacterManager.getCharacter(player), player, now);
+						io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
+								"ability.passive_sweep", () -> runPassiveSweep(
+										CharacterManager.getCharacter(player), player, now));
 					}
 				});
 		// EVENT: one bus listener; per-event filtering keeps the domain data-driven.

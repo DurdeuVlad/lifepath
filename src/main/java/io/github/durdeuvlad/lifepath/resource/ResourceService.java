@@ -86,7 +86,9 @@ public final class ResourceService {
 			double dtSeconds = interval / 20.0;
 			for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
 				try {
-					tickPlayer(CharacterManager.getCharacter(player), player, now, dtSeconds);
+					io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
+							"resource.sweep", () -> tickPlayer(
+									CharacterManager.getCharacter(player), player, now, dtSeconds));
 				} catch (Exception e) {
 					LifepathMod.LOGGER.error("resource sweep failed for {}", player.getUuid(), e);
 				}
@@ -189,8 +191,10 @@ public final class ResourceService {
 			// last so client + bus state resolve to the resting value.
 			if (player != null) {
 				try {
-					ServerPlayNetworking.send(player, new ResourceUpdatePayload(
-							resourceId, next, lo, hi, toBand));
+					io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
+							"sync.resource_update", () -> ServerPlayNetworking.send(
+									player, new ResourceUpdatePayload(
+											resourceId, next, lo, hi, toBand)));
 				} catch (Exception e) {
 					LifepathMod.LOGGER.error("resource {} sync failed", resourceId, e);
 				}
