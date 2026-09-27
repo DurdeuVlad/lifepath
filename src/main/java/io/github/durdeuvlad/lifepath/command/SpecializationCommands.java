@@ -98,15 +98,11 @@ public final class SpecializationCommands {
 		CharacterManager.syncCharacter(target);
 		LifepathMod.LOGGER.info("admin action: {} set {} ({}) specialization to {}",
 				source.getName(), target.getName().getString(), target.getUuid(), specId);
+		// The recipient's notice (name + non-lockout line) rides the M6-4
+		// spec_assigned feedback emitted by the sync diff above — no
+		// duplicate literal here.
 		source.sendFeedback(() -> Text.literal("set " + target.getName().getString()
 				+ " specialization to " + specId), true);
-		// M6-4 consequence preview: the recipient is told what this means.
-		SpecializationDefinition def = LifepathContent.specializations().get(specId);
-		if (def != null && target != null) {
-			target.sendMessage(Text.literal("Specialization: " + def.displayName()
-					+ " — a starting focus, not a lock: you can still train"
-					+ " every skill."), false);
-		}
 		return Command.SINGLE_SUCCESS;
 	}
 
