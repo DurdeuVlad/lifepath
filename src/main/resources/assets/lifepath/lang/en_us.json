@@ -118,5 +118,18 @@
 	"screen.lifepath.skills.empty": "No skills yet — they'll appear as you play",
 	"screen.lifepath.skills.level": "Level %s",
 	"screen.lifepath.skills.title": "Skills",
-	"screen.lifepath.skills.xp": "%s / %s XP"
+	"screen.lifepath.skills.xp": "%s / %s XP",
+	"tag.item.lifepath.cookable_foods": "Cookable Foods",
+	"tag.item.lifepath.coolants": "Coolants",
+	"tag.item.lifepath.fishing_junk": "Fishing Junk",
+	"tag.item.lifepath.fishing_treasure": "Fishing Treasure",
+	"tag.item.lifepath.forged_outputs": "Forged Outputs",
+	"tag.item.lifepath.scholarly": "Scholarly Items",
+	"tag.item.lifepath.smithing_materials": "Smithing Materials",
+	"tag.item.lifepath.smithing_tier_diamond": "Diamond-tier Smithing",
+	"tag.item.lifepath.smithing_tier_gold": "Gold-tier Smithing",
+	"tag.item.lifepath.smithing_tier_iron": "Iron-tier Smithing",
+	"tag.item.lifepath.smithing_tier_netherite": "Netherite-tier Smithing",
+	"tag.item.lifepath.smithing_tools": "Smithing Tools",
+	"tag.item.lifepath.undead_foods": "Undead Foods"
 }
