@@ -1,5 +1,6 @@
 {
 	"display_name": "Cook",
+	"icon": "specialization/cook",
 	"starting_skills": {
 		"lifepath:cooking": 20,
 		"lifepath:farming": 15,

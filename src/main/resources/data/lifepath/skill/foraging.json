@@ -1,5 +1,6 @@
 {
 	"display_name": "Foraging",
+	"icon": "skill/foraging",
 	"description": "Gathering wood, leaves, and wild plants.",
 	"improve_hint": "Gather wild plants, berries, leaves, and shoots.",
 	"category": "gathering",

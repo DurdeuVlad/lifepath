@@ -1,5 +1,6 @@
 {
 	"display_name": "Phoenix",
+	"icon": "species/phoenix",
 	"description": "Descendants of the first Phoenix - fire does not touch them, flame itself mends them, and they can immolate and rise again. Water quenches the inner fire.",
 	"visibility": "hidden",
 	"selection": "unlocked",

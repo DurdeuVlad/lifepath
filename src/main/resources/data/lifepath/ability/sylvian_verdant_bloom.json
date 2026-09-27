@@ -1,8 +1,22 @@
 {
 	"display_name": "Verdant Bloom",
-	"trigger": {"type": "active"},
-	"target": {"type": "lifepath:blocks_in_radius",
-	           "block": "#lifepath:growable", "radius": 7, "limit": 96},
-	"actions": [{"type": "lifepath:grow_blocks", "growth_rolls": 3}],
-	"cooldown": {"seconds": 240}
+	"icon": "ability/sylvian_verdant_bloom",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:blocks_in_radius",
+		"block": "#lifepath:growable",
+		"radius": 7,
+		"limit": 96
+	},
+	"actions": [
+		{
+			"type": "lifepath:grow_blocks",
+			"growth_rolls": 3
+		}
+	],
+	"cooldown": {
+		"seconds": 240
+	}
 }

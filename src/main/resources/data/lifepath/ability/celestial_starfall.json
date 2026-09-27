@@ -1,5 +1,6 @@
 {
 	"display_name": "Starfall",
+	"icon": "ability/celestial_starfall",
 	"trigger": {
 		"type": "damage_taken",
 		"multiplier": 0.0

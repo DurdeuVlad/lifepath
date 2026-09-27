@@ -1,11 +1,28 @@
 {
 	"display_name": "Arid Intolerance",
-	"trigger": {"type": "passive", "interval_ticks": 20},
-	"conditions": {"all": [{"type": "lifepath:biome_tag", "tag": "#lifepath:arid"}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/sylvian_arid_slow",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 20
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:biome_tag",
+				"tag": "#lifepath:arid"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:modify_attribute",
-		 "attribute": "minecraft:generic.movement_speed",
-		 "operation": "add_multiplied_total", "value": -0.15, "duration_ticks": 60}
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.movement_speed",
+			"operation": "add_multiplied_total",
+			"value": -0.15,
+			"duration_ticks": 60
+		}
 	]
 }

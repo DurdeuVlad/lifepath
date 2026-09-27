@@ -53,5 +53,6 @@
 			"name": "Overheating"
 		}
 	],
-	"display_name": "Temperature"
+	"display_name": "Temperature",
+	"icon": "resource/temperature"
 }

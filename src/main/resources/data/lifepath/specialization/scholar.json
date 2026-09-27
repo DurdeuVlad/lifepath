@@ -1,5 +1,6 @@
 {
 	"display_name": "Scholar",
+	"icon": "specialization/scholar",
 	"starting_skills": {
 		"lifepath:scholarship": 20,
 		"lifepath:engineering": 10

@@ -1,10 +1,33 @@
 {
 	"display_name": "Void Attunement",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"conditions": {"all": [{"type": "lifepath:dimension", "id": "minecraft:the_end"}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/enderian_void_attunement",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:dimension",
+				"id": "minecraft:the_end"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect", "effect": "minecraft:speed", "duration": 100, "amplifier": 0},
-		{"type": "lifepath:apply_effect", "effect": "minecraft:strength", "duration": 100, "amplifier": 0}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 100,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 100,
+			"amplifier": 0
+		}
 	]
 }

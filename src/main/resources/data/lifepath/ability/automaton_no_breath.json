@@ -1,6 +1,19 @@
 {
 	"display_name": "Hollow Hull",
-	"trigger": {"type": "damage_taken", "multiplier": 0.0},
-	"conditions": {"all": [{"type": "lifepath:damage_type", "id": "minecraft:drown"}]},
-	"target": {"type": "lifepath:self"}
+	"icon": "ability/automaton_no_breath",
+	"trigger": {
+		"type": "damage_taken",
+		"multiplier": 0.0
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:damage_type",
+				"id": "minecraft:drown"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	}
 }

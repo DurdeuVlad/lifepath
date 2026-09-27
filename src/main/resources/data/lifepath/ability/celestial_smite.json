@@ -1,5 +1,6 @@
 {
 	"display_name": "Smite",
+	"icon": "ability/celestial_smite",
 	"trigger": {
 		"type": "active"
 	},

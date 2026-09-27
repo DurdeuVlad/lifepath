@@ -1,5 +1,6 @@
 {
 	"display_name": "Explorer",
+	"icon": "specialization/explorer",
 	"starting_skills": {
 		"lifepath:athletics": 15,
 		"lifepath:foraging": 15

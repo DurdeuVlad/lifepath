@@ -1,6 +1,7 @@
 {
 	"display_name": "Woodcutting",
-	"description": "Felling timber of every kind \u2014 from oak to nether stems.",
+	"icon": "skill/woodcutting",
+	"description": "Felling timber of every kind — from oak to nether stems.",
 	"improve_hint": "Chop logs and wood.",
 	"category": "gathering",
 	"max_level": 100,

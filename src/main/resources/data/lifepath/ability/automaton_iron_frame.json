@@ -1,13 +1,27 @@
 {
 	"display_name": "Iron Frame",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/automaton_iron_frame",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:modify_attribute",
-		 "attribute": "minecraft:generic.armor",
-		 "operation": "add_value", "value": 4.0, "duration_ticks": 100},
-		{"type": "lifepath:modify_attribute",
-		 "attribute": "minecraft:generic.knockback_resistance",
-		 "operation": "add_value", "value": 0.3, "duration_ticks": 100}
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.armor",
+			"operation": "add_value",
+			"value": 4.0,
+			"duration_ticks": 100
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.knockback_resistance",
+			"operation": "add_value",
+			"value": 0.3,
+			"duration_ticks": 100
+		}
 	]
 }

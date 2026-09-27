@@ -1,11 +1,32 @@
 {
 	"display_name": "Stoneform",
-	"trigger": {"type": "active"},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/dwarf_stoneform",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect", "effect": "minecraft:resistance", "duration": 100, "amplifier": 1},
-		{"type": "lifepath:apply_effect", "effect": "minecraft:slowness", "duration": 100, "amplifier": 0},
-		{"type": "lifepath:spawn_particle", "particle": "minecraft:crit", "count": 12}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 100,
+			"amplifier": 1
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:slowness",
+			"duration": 100,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:crit",
+			"count": 12
+		}
 	],
-	"cooldown": {"seconds": 240}
+	"cooldown": {
+		"seconds": 240
+	}
 }

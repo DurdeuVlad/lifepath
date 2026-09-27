@@ -1,5 +1,6 @@
 {
 	"display_name": "Lumberjack",
+	"icon": "specialization/lumberjack",
 	"starting_skills": {
 		"lifepath:woodcutting": 20,
 		"lifepath:foraging": 10

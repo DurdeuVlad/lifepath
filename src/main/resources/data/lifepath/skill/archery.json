@@ -1,5 +1,6 @@
 {
 	"display_name": "Archery",
+	"icon": "skill/archery",
 	"description": "Striking true with bow and crossbow at range.",
 	"improve_hint": "Defeat creatures with arrows and bolts.",
 	"category": "physical",

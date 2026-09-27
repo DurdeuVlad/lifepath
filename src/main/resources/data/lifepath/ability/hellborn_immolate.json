@@ -1,9 +1,21 @@
 {
 	"display_name": "Immolate",
-	"trigger": {"type": "active"},
-	"target": {"type": "lifepath:entities_in_radius", "radius": 5, "living_only": true},
+	"icon": "ability/hellborn_immolate",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:entities_in_radius",
+		"radius": 5,
+		"living_only": true
+	},
 	"actions": [
-		{"type": "lifepath:ignite", "duration_ticks": 80}
+		{
+			"type": "lifepath:ignite",
+			"duration_ticks": 80
+		}
 	],
-	"cooldown": {"seconds": 120}
+	"cooldown": {
+		"seconds": 120
+	}
 }

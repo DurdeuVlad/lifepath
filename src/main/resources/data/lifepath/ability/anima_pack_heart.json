@@ -1,11 +1,34 @@
 {
 	"display_name": "Pack Heart",
-	"trigger": {"type": "passive", "interval_ticks": 60},
-	"conditions": {"all": [{"type": "lifepath:entity_nearby",
-	                        "entity": "#lifepath:animals", "radius": 8}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/anima_pack_heart",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 60
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "#lifepath:animals",
+				"radius": 8
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:apply_effect", "effect": "minecraft:regeneration", "duration": 120, "amplifier": 0},
-		{"type": "lifepath:apply_effect", "effect": "minecraft:speed", "duration": 120, "amplifier": 0}
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:regeneration",
+			"duration": 120,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 0
+		}
 	]
 }

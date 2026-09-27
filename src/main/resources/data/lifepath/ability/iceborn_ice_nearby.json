@@ -1,11 +1,27 @@
 {
 	"display_name": "Ice Resonance",
-	"trigger": {"type": "passive", "interval_ticks": 40},
-	"conditions": {"all": [{"type": "lifepath:block_nearby",
-	                        "block": "#minecraft:ice", "radius": 3}]},
-	"target": {"type": "lifepath:self"},
+	"icon": "ability/iceborn_ice_nearby",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:ice",
+				"radius": 3
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
 	"actions": [
-		{"type": "lifepath:modify_resource",
-		 "resource": "lifepath:temperature", "delta": -0.6}
+		{
+			"type": "lifepath:modify_resource",
+			"resource": "lifepath:temperature",
+			"delta": -0.6
+		}
 	]
 }

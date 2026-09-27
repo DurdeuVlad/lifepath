@@ -1,5 +1,6 @@
 {
 	"display_name": "Hunting",
+	"icon": "skill/hunting",
 	"description": "Tracking and slaying game for meat, hides, and trophies.",
 	"improve_hint": "Hunt animals for their bounty.",
 	"category": "gathering",

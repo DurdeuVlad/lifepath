@@ -1,5 +1,6 @@
 {
 	"display_name": "Farmer",
+	"icon": "specialization/farmer",
 	"starting_skills": {
 		"lifepath:farming": 20
 	},
@@ -10,10 +11,12 @@
 		"lifepath:farming": 1.35
 	},
 	"decay_modifiers": {
-		"lifepath:farming": 0.30
+		"lifepath:farming": 0.3
 	},
 	"protected_floors": {
 		"lifepath:farming": 30
 	},
-	"signature": ["lifepath:bountiful_harvest_i"]
+	"signature": [
+		"lifepath:bountiful_harvest_i"
+	]
 }

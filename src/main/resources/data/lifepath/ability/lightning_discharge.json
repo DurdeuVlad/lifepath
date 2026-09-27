@@ -1,11 +1,31 @@
 {
 	"display_name": "Discharge",
-	"trigger": {"type": "active"},
-	"target": {"type": "lifepath:entities_in_radius", "radius": 4, "living_only": true},
+	"icon": "ability/lightning_discharge",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:entities_in_radius",
+		"radius": 4,
+		"living_only": true
+	},
 	"actions": [
-		{"type": "lifepath:damage", "amount": 4.0, "source": "magic"},
-		{"type": "lifepath:spawn_particle", "particle": "minecraft:electric_spark", "count": 24},
-		{"type": "lifepath:play_sound", "sound": "minecraft:entity.lightning_bolt.thunder"}
+		{
+			"type": "lifepath:damage",
+			"amount": 4.0,
+			"source": "magic"
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:electric_spark",
+			"count": 24
+		},
+		{
+			"type": "lifepath:play_sound",
+			"sound": "minecraft:entity.lightning_bolt.thunder"
+		}
 	],
-	"cooldown": {"seconds": 45}
+	"cooldown": {
+		"seconds": 45
+	}
 }

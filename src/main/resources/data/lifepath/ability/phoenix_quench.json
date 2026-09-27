@@ -1,5 +1,6 @@
 {
 	"display_name": "Quenched Flame",
+	"icon": "ability/phoenix_quench",
 	"trigger": {
 		"type": "passive",
 		"interval_ticks": 40
