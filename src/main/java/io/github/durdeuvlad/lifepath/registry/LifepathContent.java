@@ -71,6 +71,8 @@ public final class LifepathContent {
 			RELATIONS = new ContentRegistry<>(LifepathMod.id("relation"));
 	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.ConditionDefinition>
 			CONDITIONS = new ContentRegistry<>(LifepathMod.id("condition"));
+	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.AttunementDefinition>
+			ATTUNEMENTS = new ContentRegistry<>(LifepathMod.id("attunement"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -134,6 +136,11 @@ public final class LifepathContent {
 				manager -> loadDomain(manager, "condition",
 						io.github.durdeuvlad.lifepath.content.ConditionDefinition.ConditionFile.CODEC,
 						io.github.durdeuvlad.lifepath.content.ConditionDefinition::fromFile, CONDITIONS));
+		// Acquired attunements (M9-2): refs abilities — load order same caveat.
+		ReloadManager.registerData(LifepathMod.id("attunement"),
+				manager -> loadDomain(manager, "attunement",
+						io.github.durdeuvlad.lifepath.content.AttunementDefinition.AttunementFile.CODEC,
+						io.github.durdeuvlad.lifepath.content.AttunementDefinition::fromFile, ATTUNEMENTS));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateAll());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -180,6 +187,10 @@ public final class LifepathContent {
 		return CONDITIONS;
 	}
 
+	public static ContentRegistry<io.github.durdeuvlad.lifepath.content.AttunementDefinition> attunements() {
+		return ATTUNEMENTS;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (traits, conditions,
@@ -198,6 +209,7 @@ public final class LifepathContent {
 			case "diet" -> DIETS.contains(id);
 			case "relation" -> RELATIONS.contains(id);
 			case "condition" -> CONDITIONS.contains(id);
+			case "attunement" -> ATTUNEMENTS.contains(id);
 			default -> true;
 		};
 	}
@@ -546,6 +558,18 @@ public final class LifepathContent {
 								def.id(), stage.id(), event);
 					}
 				}
+			}
+		}
+		for (var def : ATTUNEMENTS.all().values()) {
+			recordRefs(issues, "attunement", def.id(), def.abilities(), "ability");
+			for (var rule : def.acquisition()) {
+				rule.event().ifPresent(event -> {
+					if (!KNOWN_EVENT_TYPES.contains(event)) {
+						LifepathMod.LOGGER.warn("attunement {} acquires on unknown "
+								+ "event type {} — typo? it may never fire",
+								def.id(), event);
+					}
+				});
 			}
 		}
 	}

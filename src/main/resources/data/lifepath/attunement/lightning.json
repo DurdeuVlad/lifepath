@@ -1,0 +1,16 @@
+{
+	"display_name": "Lightning",
+	"description": "Struck by the storm and changed by it. Lightning no longer harms you — and in a thunderstorm, it answers.",
+	"abilities": [
+		"lifepath:lightning_grounded",
+		"lifepath:lightning_storm_charge",
+		"lifepath:lightning_discharge"
+	],
+	"acquisition": [
+		{"type": "damage", "damage_type": "#minecraft:is_lightning", "chance": 0.6},
+		{"type": "admin"}
+	],
+	"removal": [
+		{"type": "admin"}
+	]
+}

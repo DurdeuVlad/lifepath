@@ -87,6 +87,9 @@ public final class AbilityEngine {
 			// M9-1: advance_events count toward condition stage progress.
 			io.github.durdeuvlad.lifepath.condition.ConditionService
 					.onActivity(data, player, event, System.currentTimeMillis());
+			// M9-2: event-type attunement acquisition rolls on the same event.
+			io.github.durdeuvlad.lifepath.attunement.AttunementService
+					.onActivity(data, player, event, System.currentTimeMillis());
 		});
 		// ACTIVE: server re-validates the request end-to-end.
 		LifepathNetworking.onC2S(ActivateAbilityPayload.ID, (payload, ctx) ->
@@ -133,9 +136,10 @@ public final class AbilityEngine {
 		// stage abilities (condition ids in data are NOT ability ids).
 		owned.addAll(io.github.durdeuvlad.lifepath.condition.ConditionService
 				.activeAbilities(data));
-		for (Identifier id : data.attunements()) {
-			owned.add(id);
-		}
+		// M9-2: attunements resolve through their service too — held
+		// attunement ids are not ability ids either.
+		owned.addAll(io.github.durdeuvlad.lifepath.attunement.AttunementService
+				.activeAbilities(data));
 		for (Identifier id : data.unlocks()) {
 			owned.add(id);
 		}

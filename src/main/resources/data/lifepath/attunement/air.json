@@ -1,0 +1,15 @@
+{
+	"display_name": "Air",
+	"description": "An affinity with wind and sky, earned by releasing a phantom membrane to the open air. Falls soften; the leap lengthens.",
+	"abilities": [
+		"lifepath:air_featherweight",
+		"lifepath:air_leap"
+	],
+	"acquisition": [
+		{"type": "item", "item": "minecraft:phantom_membrane", "consume": true},
+		{"type": "admin"}
+	],
+	"removal": [
+		{"type": "admin"}
+	]
+}
