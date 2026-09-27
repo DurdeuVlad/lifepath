@@ -1,0 +1,11 @@
+{
+	"display_name": "Beast Soothe",
+	"trigger": {"type": "active"},
+	"target": {"type": "lifepath:entities_in_radius", "entity": "#lifepath:animals",
+	           "radius": 8, "living_only": true},
+	"actions": [
+		{"type": "lifepath:heal", "amount": 4.0},
+		{"type": "lifepath:spawn_particle", "particle": "minecraft:heart", "count": 6}
+	],
+	"cooldown": {"seconds": 60}
+}

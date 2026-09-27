@@ -1,0 +1,7 @@
+{
+	"display_name": "Athletics",
+	"description": "Raw physical exertion — the strength and stamina won by fighting, surviving, and pushing the body.",
+	"improve_hint": "Defeat hostile creatures in combat.",
+	"category": "physical",
+	"max_level": 100
+}

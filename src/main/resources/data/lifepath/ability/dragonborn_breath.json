@@ -1,0 +1,10 @@
+{
+	"display_name": "Dragon Breath",
+	"trigger": {"type": "active"},
+	"target": {"type": "lifepath:entities_in_radius", "radius": 6, "living_only": true},
+	"actions": [
+		{"type": "lifepath:ignite", "duration_ticks": 100},
+		{"type": "lifepath:damage", "amount": 3.0, "source": "fire"}
+	],
+	"cooldown": {"seconds": 90}
+}

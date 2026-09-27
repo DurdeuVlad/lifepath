@@ -249,7 +249,9 @@ public final class BuiltinConditions {
 		});
 		register("damage_type", (ctx, params) -> {
 			var damage = ctx.damage();
-			String idOrTag = str(params, "type");
+			// Param is "id" — "type" is the SpecNode discriminator and would
+			// collide into a duplicate JSON key (M8-1 latent bug fix).
+			String idOrTag = str(params, "id");
 			if (damage == null || damage.source() == null || idOrTag == null) {
 				return false;
 			}

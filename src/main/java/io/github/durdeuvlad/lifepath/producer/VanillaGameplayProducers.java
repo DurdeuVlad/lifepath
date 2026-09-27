@@ -69,6 +69,22 @@ public final class VanillaGameplayProducers {
 		}
 		initialized = true;
 		PlayerBlockBreakEvents.AFTER.register(VanillaGameplayProducers::onBlockBroken);
+		// M8-1: kill events feed the lifepath:combat activity (athletics etc.).
+		// The fired entity is the killer — same player-only boundary as
+		// block-break (a wolf/golem kill is not the player's exertion).
+		net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY
+				.register((world, entity, killedEntity) -> {
+					if (!(entity instanceof ServerPlayerEntity killer)) {
+						return;
+					}
+					Identifier typeId = net.minecraft.registry.Registries.ENTITY_TYPE
+							.getId(killedEntity.getType());
+					Set<Identifier> entityTags = killedEntity.getType().getRegistryEntry()
+							.streamTags().map(TagKey::id)
+							.collect(Collectors.toCollection(HashSet::new));
+					ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents
+							.combat(killer, typeId, entityTags, ActivityEvent.Cause.PLAYER));
+				});
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
 			if (world.isClient() || !(player instanceof ServerPlayerEntity serverPlayer)) {
 				return ActionResult.PASS;

@@ -1,0 +1,11 @@
+{
+	"display_name": "Void Step",
+	"trigger": {"type": "active"},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:random_teleport", "range": 12, "attempts": 24},
+		{"type": "lifepath:play_sound", "sound": "minecraft:entity.enderman.teleport"},
+		{"type": "lifepath:spawn_particle", "particle": "minecraft:portal", "count": 32}
+	],
+	"cooldown": {"seconds": 30}
+}

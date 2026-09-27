@@ -1,0 +1,12 @@
+{
+	"display_name": "Overclock",
+	"trigger": {"type": "active"},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect", "effect": "minecraft:speed", "duration": 160, "amplifier": 1},
+		{"type": "lifepath:apply_effect", "effect": "minecraft:haste", "duration": 160, "amplifier": 1},
+		{"type": "lifepath:play_sound", "sound": "minecraft:block.piston.extend"},
+		{"type": "lifepath:spawn_particle", "particle": "minecraft:crit", "count": 16}
+	],
+	"cooldown": {"seconds": 240}
+}
