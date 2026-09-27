@@ -1,0 +1,22 @@
+{
+	"display_name": "Explorer",
+	"starting_skills": {
+		"lifepath:athletics": 15,
+		"lifepath:foraging": 15
+	},
+	"aptitudes": {
+		"lifepath:athletics": "b",
+		"lifepath:foraging": "b"
+	},
+	"xp_modifiers": {
+		"lifepath:athletics": 1.25,
+		"lifepath:foraging": 1.25
+	},
+	"decay_modifiers": {
+		"lifepath:athletics": 0.25,
+		"lifepath:foraging": 0.25
+	},
+	"protected_floors": {
+		"lifepath:athletics": 25
+	}
+}

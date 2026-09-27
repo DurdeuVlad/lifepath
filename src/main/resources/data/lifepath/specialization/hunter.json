@@ -1,0 +1,20 @@
+{
+	"display_name": "Hunter",
+	"starting_skills": {
+		"lifepath:athletics": 20,
+		"lifepath:fishing": 10
+	},
+	"aptitudes": {
+		"lifepath:athletics": "a",
+		"lifepath:fishing": "c"
+	},
+	"xp_modifiers": {
+		"lifepath:athletics": 1.35
+	},
+	"decay_modifiers": {
+		"lifepath:athletics": 0.3
+	},
+	"protected_floors": {
+		"lifepath:athletics": 30
+	}
+}

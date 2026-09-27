@@ -1,0 +1,22 @@
+{
+	"display_name": "Herbalist",
+	"starting_skills": {
+		"lifepath:foraging": 20,
+		"lifepath:farming": 15
+	},
+	"aptitudes": {
+		"lifepath:foraging": "a",
+		"lifepath:farming": "b"
+	},
+	"xp_modifiers": {
+		"lifepath:foraging": 1.3,
+		"lifepath:farming": 1.15
+	},
+	"decay_modifiers": {
+		"lifepath:foraging": 0.25,
+		"lifepath:farming": 0.25
+	},
+	"protected_floors": {
+		"lifepath:foraging": 30
+	}
+}
