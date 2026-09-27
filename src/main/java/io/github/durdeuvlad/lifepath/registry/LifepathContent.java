@@ -73,6 +73,9 @@ public final class LifepathContent {
 			CONDITIONS = new ContentRegistry<>(LifepathMod.id("condition"));
 	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.AttunementDefinition>
 			ATTUNEMENTS = new ContentRegistry<>(LifepathMod.id("attunement"));
+	/** M9-3: each item_weight file contributes an {@code id|#tag → weight} map. */
+	private static final ContentRegistry<Map<String, Double>>
+			ITEM_WEIGHTS = new ContentRegistry<>(LifepathMod.id("item_weight"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -141,6 +144,13 @@ public final class LifepathContent {
 				manager -> loadDomain(manager, "attunement",
 						io.github.durdeuvlad.lifepath.content.AttunementDefinition.AttunementFile.CODEC,
 						io.github.durdeuvlad.lifepath.content.AttunementDefinition::fromFile, ATTUNEMENTS));
+		// Encumbrance (M9-3): flat {"item|#tag": weight} maps, merged at query.
+		ReloadManager.registerData(LifepathMod.id("item_weight"),
+				manager -> loadDomain(manager, "item_weight",
+						com.mojang.serialization.Codec.unboundedMap(
+								com.mojang.serialization.Codec.STRING,
+								com.mojang.serialization.Codec.DOUBLE),
+						(id, map) -> map, ITEM_WEIGHTS));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateAll());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -189,6 +199,11 @@ public final class LifepathContent {
 
 	public static ContentRegistry<io.github.durdeuvlad.lifepath.content.AttunementDefinition> attunements() {
 		return ATTUNEMENTS;
+	}
+
+	/** Merged {@code item|#tag → weight} tables keyed by file id (M9-3). */
+	public static ContentRegistry<Map<String, Double>> itemWeights() {
+		return ITEM_WEIGHTS;
 	}
 
 	/**

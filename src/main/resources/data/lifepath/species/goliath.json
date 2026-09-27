@@ -10,4 +10,6 @@
 		"lifepath:goliath_thunderous_step"
 	],
 	"active_abilities": ["lifepath:goliath_warcry"]
+,
+	"capacity_multiplier": 1.5
 }

@@ -186,6 +186,19 @@ public class LifepathMod implements ModInitializer {
 						"Anti-exploit bound: max timestamps kept per action"
 								+ " signature. Capped at the persistence bound (4096).")
 				.build());
+		LifepathConfig.define(io.github.durdeuvlad.lifepath.encumbrance.EncumbranceService.CONFIG,
+				ConfigSpec.builder()
+				.define("enabled", true,
+						"Encumbrance: inventory weight drives the lifepath:load resource bands (M9-3).")
+				.define("capacity", 200.0, v -> v > 0 && v <= 1.0e6,
+						"Base carry capacity before species/spec multipliers. "
+								+ "Load% = total weight / capacity * 100.")
+				.define("default_item_weight", 1.0, v -> v >= 0 && v <= 1.0e4,
+						"Weight per item for stacks with no item_weight entry.")
+				.define("scan_interval_ticks", 40, v -> v >= 10 && v <= 1200,
+						"Inventory scan cadence — cheap-calculation rule: "
+								+ "bands react within this window, never per-tick.")
+				.build());
 		LifepathConfig.define(LifepathConfig.CLIENT, ConfigSpec.builder()
 				.define("hud_enabled", true,
 						"Show the Lifepath HUD overlay (resources, cooldowns).")
@@ -208,6 +221,7 @@ public class LifepathMod implements ModInitializer {
 		io.github.durdeuvlad.lifepath.command.DebugCommands.init();
 		io.github.durdeuvlad.lifepath.command.ConditionCommands.init();
 		io.github.durdeuvlad.lifepath.command.AttunementCommands.init();
+		io.github.durdeuvlad.lifepath.encumbrance.EncumbranceService.init();
 
 		RegistryBootstrap.register(id("character_attachments"), CharacterAttachments::init);
 		RegistryBootstrap.bootstrap();

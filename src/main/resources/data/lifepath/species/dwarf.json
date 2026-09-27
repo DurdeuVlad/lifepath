@@ -10,4 +10,6 @@
 		"lifepath:dwarf_sink_stone"
 	],
 	"active_abilities": ["lifepath:dwarf_stoneform"]
+,
+	"capacity_multiplier": 1.15
 }

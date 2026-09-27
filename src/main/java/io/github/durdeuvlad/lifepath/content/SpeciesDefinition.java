@@ -26,7 +26,8 @@ public record SpeciesDefinition(
 		Map<Identifier, Aptitude> minAptitudes,
 		List<Identifier> resources,
 		Optional<Identifier> dietRules,
-		Optional<Identifier> mobDispositions) {
+		Optional<Identifier> mobDispositions,
+		double capacityMultiplier) {
 
 	/** Convenience for call sites predating {@code description} (M5-1). */
 	public SpeciesDefinition(Identifier id, String displayName, Visibility visibility,
@@ -36,7 +37,7 @@ public record SpeciesDefinition(
 			Optional<Identifier> mobDispositions) {
 		this(id, displayName, Optional.empty(), visibility, selection,
 				passiveAbilities, activeAbilities, minAptitudes, resources,
-				dietRules, mobDispositions);
+				dietRules, mobDispositions, 1.0);
 	}
 
 	/** How the species appears in selection UI. */
@@ -65,7 +66,8 @@ public record SpeciesDefinition(
 		return new SpeciesDefinition(id, file.displayName(), file.description(),
 				file.visibility(), file.selection(),
 				file.passiveAbilities(), file.activeAbilities(), file.minAptitudes(),
-				file.resources(), file.dietRules(), file.mobDispositions());
+				file.resources(), file.dietRules(), file.mobDispositions(),
+				file.capacityMultiplier());
 	}
 
 	/**
@@ -82,7 +84,8 @@ public record SpeciesDefinition(
 			Map<Identifier, Aptitude> minAptitudes,
 			List<Identifier> resources,
 			Optional<Identifier> dietRules,
-			Optional<Identifier> mobDispositions) {
+			Optional<Identifier> mobDispositions,
+			double capacityMultiplier) {
 
 		public static final Codec<SpeciesDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SpeciesDefinitionFile::displayName),
@@ -94,7 +97,8 @@ public record SpeciesDefinition(
 				Codec.unboundedMap(Identifier.CODEC, Aptitude.CODEC).optionalFieldOf("min_aptitudes", Map.of()).forGetter(SpeciesDefinitionFile::minAptitudes),
 				Identifier.CODEC.listOf().optionalFieldOf("resources", List.of()).forGetter(SpeciesDefinitionFile::resources),
 				Identifier.CODEC.optionalFieldOf("diet_rules").forGetter(SpeciesDefinitionFile::dietRules),
-				Identifier.CODEC.optionalFieldOf("mob_dispositions").forGetter(SpeciesDefinitionFile::mobDispositions)
+				Identifier.CODEC.optionalFieldOf("mob_dispositions").forGetter(SpeciesDefinitionFile::mobDispositions),
+			Codec.doubleRange(0.0, 100.0).optionalFieldOf("capacity_multiplier", 1.0).forGetter(SpeciesDefinitionFile::capacityMultiplier)
 		).apply(instance, SpeciesDefinitionFile::new));
 	}
 }
