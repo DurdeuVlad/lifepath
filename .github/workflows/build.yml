@@ -42,6 +42,19 @@ jobs:
             echo "::error::version skew between gradle.properties and mod metadata"
             exit 1
           fi
+          # upload-artifact's if-no-files-found only trips on zero matches —
+          # assert each of the four release artifacts explicitly.
+          for f in \
+            "fabric/build/libs/lifepath-$ver-fabric.jar" \
+            "fabric/build/libs/lifepath-$ver-fabric-sources.jar" \
+            "neoforge/build/libs/lifepath-$ver-neoforge.jar" \
+            "neoforge/build/libs/lifepath-$ver-neoforge-sources.jar"; do
+            if [ ! -f "$f" ]; then
+              echo "::error::missing expected artifact $f"
+              exit 1
+            fi
+          done
+          echo "all four loader artifacts present"
 
       - name: Upload mod jars
         uses: actions/upload-artifact@v4

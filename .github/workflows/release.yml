@@ -47,6 +47,16 @@ jobs:
             echo "::error::version skew between mod metadata files"
             exit 1
           fi
+          for f in \
+            "fabric/build/libs/lifepath-$ver-fabric.jar" \
+            "fabric/build/libs/lifepath-$ver-fabric-sources.jar" \
+            "neoforge/build/libs/lifepath-$ver-neoforge.jar" \
+            "neoforge/build/libs/lifepath-$ver-neoforge-sources.jar"; do
+            if [ ! -f "$f" ]; then
+              echo "::error::missing expected artifact $f"
+              exit 1
+            fi
+          done
 
       - name: Checksum
         run: |
