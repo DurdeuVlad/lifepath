@@ -221,6 +221,7 @@ public class LifepathMod implements ModInitializer {
 		io.github.durdeuvlad.lifepath.command.DebugCommands.init();
 		io.github.durdeuvlad.lifepath.command.ConditionCommands.init();
 		io.github.durdeuvlad.lifepath.command.AttunementCommands.init();
+		io.github.durdeuvlad.lifepath.command.UnlockCommands.init();
 		io.github.durdeuvlad.lifepath.encumbrance.EncumbranceService.init();
 
 		RegistryBootstrap.register(id("character_attachments"), CharacterAttachments::init);

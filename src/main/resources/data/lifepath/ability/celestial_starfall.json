@@ -1,0 +1,18 @@
+{
+	"display_name": "Starfall",
+	"trigger": {
+		"type": "damage_taken",
+		"multiplier": 0.0
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:damage_type",
+				"id": "#minecraft:is_fall"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	}
+}

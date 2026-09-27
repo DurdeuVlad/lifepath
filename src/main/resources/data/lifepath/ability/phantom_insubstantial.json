@@ -1,0 +1,24 @@
+{
+	"display_name": "Insubstantial",
+	"trigger": {
+		"type": "damage_taken",
+		"multiplier": 0.0
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:resource_threshold",
+				"resource": "lifepath:phantom_form",
+				"op": ">=",
+				"value": 1
+			},
+			{
+				"type": "lifepath:damage_type",
+				"id": "#minecraft:is_projectile"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	}
+}

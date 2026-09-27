@@ -121,6 +121,11 @@ public final class IdentitySummary {
 		if (attunement != null) {
 			return attunement.displayName();
 		}
+		// M9-4: unlocks[] holds species ids — show the species name, not a path.
+		var species = LifepathContent.species().get(id);
+		if (species != null) {
+			return species.displayName();
+		}
 		return id.getPath();
 	}
 

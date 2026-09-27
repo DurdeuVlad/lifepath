@@ -11,7 +11,8 @@
 		"SmithingScreenHandlerMixin",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
-		"TargetPredicateMixin"
+		"TargetPredicateMixin",
+		"PlayerAdvancementTrackerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

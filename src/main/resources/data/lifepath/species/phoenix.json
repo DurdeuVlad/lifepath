@@ -1,0 +1,15 @@
+{
+	"display_name": "Phoenix",
+	"description": "Descendants of the first Phoenix - fire does not touch them, flame itself mends them, and they can immolate and rise again. Water quenches the inner fire.",
+	"visibility": "hidden",
+	"selection": "unlocked",
+	"passive_abilities": [
+		"lifepath:phoenix_fire_blood",
+		"lifepath:phoenix_warmth",
+		"lifepath:phoenix_quench"
+	],
+	"active_abilities": [
+		"lifepath:phoenix_rise",
+		"lifepath:phoenix_flare"
+	]
+}

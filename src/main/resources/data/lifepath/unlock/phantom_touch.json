@@ -1,0 +1,19 @@
+{
+	"display_name": "Touch of the Void",
+	"description": "Walk into the End, or hunt its outcasts, and the veil thins.",
+	"unlocks": [
+		"lifepath:phantom"
+	],
+	"sources": [
+		{
+			"type": "advancement",
+			"advancement": "minecraft:story/enter_the_end"
+		},
+		{
+			"type": "event",
+			"event": "lifepath:combat",
+			"subject": "minecraft:phantom",
+			"chance": 0.05
+		}
+	]
+}

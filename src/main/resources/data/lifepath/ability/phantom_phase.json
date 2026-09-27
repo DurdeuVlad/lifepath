@@ -1,0 +1,27 @@
+{
+	"display_name": "Phase",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:toggle_resource",
+			"resource": "lifepath:phantom_form"
+		},
+		{
+			"type": "lifepath:play_sound",
+			"sound": "minecraft:entity.phantom.ambient"
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:soul",
+			"count": 24
+		}
+	],
+	"cooldown": {
+		"seconds": 10
+	}
+}

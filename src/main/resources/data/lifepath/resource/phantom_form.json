@@ -1,0 +1,8 @@
+{
+	"display_name": "Phantom Form",
+	"min": 0,
+	"max": 1,
+	"default": 0,
+	"regen_per_second": 0.0,
+	"bands": []
+}

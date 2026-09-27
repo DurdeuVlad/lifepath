@@ -76,6 +76,8 @@ public final class LifepathContent {
 	/** M9-3: each item_weight file contributes an {@code id|#tag → weight} map. */
 	private static final ContentRegistry<Map<String, Double>>
 			ITEM_WEIGHTS = new ContentRegistry<>(LifepathMod.id("item_weight"));
+	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.UnlockDefinition>
+			UNLOCKS = new ContentRegistry<>(LifepathMod.id("unlock"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
@@ -151,6 +153,11 @@ public final class LifepathContent {
 								com.mojang.serialization.Codec.STRING,
 								com.mojang.serialization.Codec.DOUBLE),
 						(id, map) -> map, ITEM_WEIGHTS));
+		// Unlock grants (M9-4): sources fire -> unlocks[] content ids land.
+		ReloadManager.registerData(LifepathMod.id("unlock"),
+				manager -> loadDomain(manager, "unlock",
+						io.github.durdeuvlad.lifepath.content.UnlockDefinition.UnlockFile.CODEC,
+						io.github.durdeuvlad.lifepath.content.UnlockDefinition::fromFile, UNLOCKS));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateAll());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -206,6 +213,10 @@ public final class LifepathContent {
 		return ITEM_WEIGHTS;
 	}
 
+	public static ContentRegistry<io.github.durdeuvlad.lifepath.content.UnlockDefinition> unlocks() {
+		return UNLOCKS;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (traits, conditions,
@@ -225,6 +236,13 @@ public final class LifepathContent {
 			case "relation" -> RELATIONS.contains(id);
 			case "condition" -> CONDITIONS.contains(id);
 			case "attunement" -> ATTUNEMENTS.contains(id);
+			case "unlock" -> UNLOCKS.contains(id);
+			// M9-4: unlocks[] holds gated CONTENT ids (species today), not def
+			// ids — an entry is known iff it names gated content directly or a
+			// surviving def still grants it.
+			case "unlock_content" -> SPECIES.contains(id)
+					|| UNLOCKS.all().values().stream()
+							.anyMatch(def -> def.unlocks().contains(id));
 			default -> true;
 		};
 	}
@@ -583,6 +601,33 @@ public final class LifepathContent {
 						LifepathMod.LOGGER.warn("attunement {} acquires on unknown "
 								+ "event type {} — typo? it may never fire",
 								def.id(), event);
+					}
+				});
+			}
+		}
+		for (var def : UNLOCKS.all().values()) {
+			// Unlockable content today is species (selection:"unlocked") —
+			// other domains warn rather than error since the field is generic.
+			for (Identifier ref : def.unlocks()) {
+				if (!SPECIES.contains(ref)) {
+					LifepathMod.LOGGER.warn("unlock {} names {} — not a species "
+							+ "id; it only gates selection when a locked species "
+							+ "carries it", def.id(), ref);
+				} else if (ABILITIES.contains(ref)) {
+					// Ambiguity: ownedAbilities resolves held unlock ids
+					// against the ability registry — a species id that is
+					// ALSO an ability id would grant that ability silently.
+					LifepathMod.LOGGER.warn("unlock {} names {} — that id is both "
+							+ "a species and an ability; granting it also owns "
+							+ "the ability. Rename one to keep them distinct.",
+							def.id(), ref);
+				}
+			}
+			for (var rule : def.sources()) {
+				rule.event().ifPresent(event -> {
+					if (!KNOWN_EVENT_TYPES.contains(event)) {
+						LifepathMod.LOGGER.warn("unlock {} grants on unknown event "
+								+ "type {} — typo? it may never fire", def.id(), event);
 					}
 				});
 			}

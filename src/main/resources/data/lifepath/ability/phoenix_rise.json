@@ -1,0 +1,31 @@
+{
+	"display_name": "Rise",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:heal",
+			"amount": 6.0
+		},
+		{
+			"type": "lifepath:ignite",
+			"duration_ticks": 100
+		},
+		{
+			"type": "lifepath:play_sound",
+			"sound": "minecraft:item.firecharge.use"
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:flame",
+			"count": 48
+		}
+	],
+	"cooldown": {
+		"seconds": 300
+	}
+}

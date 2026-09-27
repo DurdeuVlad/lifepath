@@ -1,0 +1,26 @@
+{
+	"display_name": "Exile from the Sky",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:dimension",
+				"id": "minecraft:the_nether"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:weakness",
+			"duration": 100,
+			"amplifier": 0
+		}
+	]
+}

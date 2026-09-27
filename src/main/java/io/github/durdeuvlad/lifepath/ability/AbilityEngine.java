@@ -90,6 +90,9 @@ public final class AbilityEngine {
 			// M9-2: event-type attunement acquisition rolls on the same event.
 			io.github.durdeuvlad.lifepath.attunement.AttunementService
 					.onActivity(data, player, event, System.currentTimeMillis());
+			// M9-4: event-type unlock sources roll on the same event.
+			io.github.durdeuvlad.lifepath.unlock.UnlockService
+					.onActivity(data, player, event, System.currentTimeMillis());
 		});
 		// ACTIVE: server re-validates the request end-to-end.
 		LifepathNetworking.onC2S(ActivateAbilityPayload.ID, (payload, ctx) ->

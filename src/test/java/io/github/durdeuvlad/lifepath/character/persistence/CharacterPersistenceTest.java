@@ -96,6 +96,34 @@ class CharacterPersistenceTest {
 		}
 	}
 
+	/**
+	 * M9-4: unlocks[] holds gated-content ids (species), so a granted unlock
+	 * must survive relog while the gated content still exists — the
+	 * {@code unlock_content} domain, not the ability registry, is its home.
+	 */
+	@Test
+	void heldUnlockSurvivesRelogWhenGatedContentExists() {
+		PlayerCharacterData data = sampleData();
+		CharacterPersistence.setContentIndex(new ContentIndex() {
+			@Override
+			public boolean exists(String domain, Identifier id) {
+				// Everything gone except skill/species — and unlock_content,
+				// which the real index resolves via species or granting defs.
+				return "skill".equals(domain) || "species".equals(domain)
+						|| "unlock_content".equals(domain);
+			}
+		});
+		try {
+			PlayerCharacterData sanitized = CharacterPersistence.deserialize(
+					CharacterPersistence.serialize(data));
+			assertTrue(sanitized.unlocks()
+					.contains(Identifier.of("lifepath", "u1")),
+					"a held unlock id must survive relog while its content exists");
+		} finally {
+			CharacterPersistence.setContentIndex(ContentIndex.PERMISSIVE);
+		}
+	}
+
 	@Test
 	void knownSkillWithBrokenInvariantsIsRepairedOnLoad() {
 		Identifier skill = Identifier.of("lifepath", "test_skill");

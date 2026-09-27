@@ -1,0 +1,24 @@
+{
+	"display_name": "Quenched Flame",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:submerged"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:damage",
+			"amount": 1.0,
+			"source": "drown"
+		}
+	]
+}
