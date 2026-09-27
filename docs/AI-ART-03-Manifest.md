@@ -27,5 +27,6 @@
 
 ### Blockers / Action Items
 - No known blockers remain for the requested Deliverables A and B.
-- Deliverable A was generated with the image generation tool, then reduced with nearest-neighbor sampling and discrete palette mapping; every target file was independently validated for PNG format and exact 16x16 dimensions.
-- Deliverable B remains staging-only under `art/chrome/`; no code, data, placeholder textures, or existing PNGs were modified.
+- Deliverable A was generated with the image generation tool, then reduced with nearest-neighbor sampling and discrete palette mapping; every target file was independently validated for PNG format and exact 16x16 dimensions. The large generated source files remain transient in the image-generation cache and are not part of the mod tree.
+- Deliverable B remains staging-only under `art/chrome/`; no code, data, placeholder textures, or existing PNGs were modified by this task.
+- Runtime 9-slice behavior was not exercised because the chrome kit is staging-only. No git commands were run, so repository-wide diff/commit scope was not used as evidence.

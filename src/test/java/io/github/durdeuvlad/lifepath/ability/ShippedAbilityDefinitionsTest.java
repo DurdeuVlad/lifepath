@@ -29,9 +29,9 @@ import org.junit.jupiter.api.Test;
  */
 class ShippedAbilityDefinitionsTest {
 	private static final Path ABILITY_DIR =
-			Path.of("src/main/resources/data/lifepath_test/ability");
+			Path.of("src/test/resources/data/lifepath_test/ability");
 	private static final Path RESOURCE_DIR =
-			Path.of("src/main/resources/data/lifepath_test/resource");
+			Path.of("src/test/resources/data/lifepath_test/resource");
 	private static final Identifier FOCUS =
 			Identifier.of("lifepath_test", "test_focus");
 

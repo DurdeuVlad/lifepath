@@ -1,43 +1,93 @@
 # Lifepath
 
-A standalone character progression mod for **Minecraft 1.21.1 / Fabric**.
+**Build a character by playing, not by picking from a list.** Lifepath is a
+character-progression mod for Minecraft 1.21.1 (Fabric) where who you are,
+what you focus on, and what you actually practice all matter — and mastery
+is something you maintain, not a checkbox you tick once.
 
-Species defines what a character *is*. Specialization defines what they *chose to focus on*. Skills record what they *actually practice*. Decay makes mastery something that must be maintained. Traits, conditions, attunements, and abilities compose on top — characters are developed through play, not picked from a list of finished builds.
+> **Status:** approaching 1.0 — feature-complete, in release-candidate
+> stabilization. Things may still shift before the first stable release.
 
-> **Status:** approaching 1.0 — feature-complete through M9, in M10 stabilization (API frozen, migrations documented). Not yet released.
+## The three pillars
 
-## Documentation
+- **Species is what you are.** Fifteen species — from amphibian to undead —
+  each with its own innate traits and abilities. Species defines your
+  starting canvas.
+- **Specialization is your starting focus — it does not lock you out of
+  anything.** Thirteen trades (Blacksmith, Hunter, Scholar, …) give you
+  aptitude and a protected skill floor. A Blacksmith reaches Smithing
+  mastery faster and can't fall below it — but anyone can learn anything.
+- **Skills are what you actually practice.** Thirteen skills level by doing:
+  mine ores to improve Mining, cook to improve Cooking. Skill milestones
+  unlock new abilities as you climb.
+
+## How progression works
+
+- Your **aptitude** in a skill (D through S) shapes how fast you learn it
+  and how slowly it fades — your species and specialization set the
+  starting aptitudes, nothing else.
+- Skills decay **only if you stop using them**, only after a grace period,
+  and mostly at high mastery — you never wake up having forgotten the
+  basics. Your specialization's **protected floor** means your trade skills
+  can't decay below their guaranteed level.
+- Everything is driven by ordinary play: XP comes from doing the activity
+  the skill is about.
+
+## What you'll see
+
+- A **character screen** with your species, specialization, traits,
+  conditions, and attunements — each with its own icon.
+- A **skills screen** showing every skill, its level band, and its milestone
+  progress; click through for detail.
+- A **HUD** with resource bars and cooldown/state icons, kept out of the way.
+- All server-authoritative: progress is owned by the world, safe on
+  dedicated servers, and persists across deaths.
+
+## Install
+
+1. Install **Fabric Loader** 0.16.10+ for **Minecraft 1.21.1**.
+2. Install **Fabric API** 0.116.0+ in your `mods` folder.
+3. Drop the Lifepath JAR into `mods` — on **both** the client and the
+   server (the server owns your character's progress).
+4. Java 21 required.
+
+## First minutes
+
+1. Start a world and open the character screen (default key: check the
+   vanilla key-bind menu under "Lifepath").
+2. Pick a species — read the hover text, pick the one whose fantasy you
+   want.
+3. Pick a specialization — it's a head start, not a contract.
+4. Go play. Skills level from play; watch them grow on the skills screen.
+
+## Compatibility
+
+Lifepath is **standalone** — no Origins, no other progression mod required.
+It's designed to sit underneath content mods that provide gameplay loops:
+an **Overgeared-style integration adapter** ships in the jar and activates
+only if a compatible partner mod is present (today it is dormant — see
+`docs/COMPAT.md` for the honest state).
+
+## Support
+
+- Bugs and feedback: [GitHub Issues](https://github.com/DurdeuVlad/lifepath/issues)
+- Datapack authors and server admins: the `docs/` folder covers the full
+  content API, configuration, and admin commands.
+
+## For datapack authors & admins
 
 | Document | Contents |
 |---|---|
-| [docs/GAMEDESIGN.md](docs/GAMEDESIGN.md) | Foundational design: character model, species, specializations, skills, aptitudes, decay, ability engine, UX — *design intent; shipped reality below* |
-| [docs/TIMELINE.md](docs/TIMELINE.md) | Milestone plan M0–M11, architecture contracts, execution rules, agent contract |
-| [docs/API.md](docs/API.md) | 1.0 API freeze: the enumerated public surface (data domains, ids, commands, config keys, wire ids, extension points, saved-data schema) |
-| [docs/DATAPACK_API.md](docs/DATAPACK_API.md) | Datapack-author API: every content domain's schema, matching model, and a worked example |
-| [docs/ABILITIES.md](docs/ABILITIES.md) | Ability-vocabulary reference: every condition/action/target primitive and its params |
-| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Every `config/lifepath/*.toml` file, key, default, range, effect, and reload behavior |
-| [docs/ADMIN_COMMANDS.md](docs/ADMIN_COMMANDS.md) | The full `/lifepath` command tree, permissions, and examples |
-| [docs/MIGRATIONS.md](docs/MIGRATIONS.md) | Save-compatibility rules: the dataVersion chain, removed-id fallbacks, how to add the next migration |
-| [docs/RELEASE_MATRIX.md](docs/RELEASE_MATRIX.md) | M10-4 evidence: the nine stabilization tests and seven 1.0 release criteria, per-cell verdicts |
-| [docs/RELEASE_ENGINEERING.md](docs/RELEASE_ENGINEERING.md) | Build/versioning/changelog/CI — reproducible release process |
-| [docs/MULTIPLAYER.md](docs/MULTIPLAYER.md) | Server-authoritative correctness: sync, persistence, respawn ownership |
-| [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Profiling harness and explicit tick budgets |
-| [docs/COMPAT.md](docs/COMPAT.md) | External-mod compatibility validation (Origins/Apoli absent, graceful degradation) |
-| [docs/RELEASE_ISSUES.md](docs/RELEASE_ISSUES.md) | Public-release & branding issue backlog (LP-REL-001…010) |
-
-## Core contracts
-
-- **Java = mechanics · Data = content · Config = balance** — the primary architectural separation.
-- **Server-authoritative progression** — the server owns character state, XP, cooldowns, unlocks.
-- **Composable primitives** — no bespoke Java class per species/skill/ability.
-- **Zero-confusion UX** — normal gameplay must not require a wiki.
-- **Integration-first compatibility** — external mods provide gameplay loops; Lifepath provides the progression layer. Overgeared is the reference Smithing case.
-
-## Roadmap
-
-`M0` Foundation → `M1` Character Core → `M2` Skill Framework → `M3` Progression & Decay → `M4` Ability Engine → `M5` Vertical Slice → `M6` UI → `M7` Hardening → `M8` Content Expansion → `M9` Advanced Systems → `M10` Stabilization → `M10.5` Beta/RC → `M11` CurseForge Release.
-
-Full details, deliverables, and exit gates: [docs/TIMELINE.md](docs/TIMELINE.md).
+| [docs/GAMEDESIGN.md](docs/GAMEDESIGN.md) | Design intent: character model, species, skills, decay, ability engine |
+| [docs/API.md](docs/API.md) | The frozen 1.0 public surface: domains, ids, commands, config keys, wire ids |
+| [docs/DATAPACK_API.md](docs/DATAPACK_API.md) | Content schema for every domain + worked example |
+| [docs/ABILITIES.md](docs/ABILITIES.md) | Ability primitive vocabulary (conditions/actions/targets) |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Every config key, default, range, and reload behavior |
+| [docs/ADMIN_COMMANDS.md](docs/ADMIN_COMMANDS.md) | The `/lifepath` command tree |
+| [docs/MIGRATIONS.md](docs/MIGRATIONS.md) | Save-compatibility rules |
+| [docs/COMPAT.md](docs/COMPAT.md) | External-mod compatibility validation |
+| [docs/TIMELINE.md](docs/TIMELINE.md) | Milestone plan M0–M11 and execution contracts |
+| [docs/VISUAL_IDENTITY.md](docs/VISUAL_IDENTITY.md) | The art contract for generated assets |
 
 ## Tech
 
@@ -48,7 +98,4 @@ Minecraft 1.21.1 · Fabric Loader · Java 21 · Gradle
 Copyright (C) 2026 Vlad Durdeu — see `NOTICE`.
 
 **LGPL-3.0-only** — full text in `LICENSE`, plus the GPL-3.0 it extends in
-`LICENSE.GPL` (both ship inside the jar, per LGPL-3.0 §4(b)). Selected by
-the maintainer under M11-2: weak copyleft keeps the framework source-open
-while still permitting use in modpacks and alongside proprietary launch
-tooling.
+`LICENSE.GPL`.
