@@ -45,4 +45,4 @@ Minecraft 1.21.1 · Fabric Loader · Java 21 · Gradle
 
 ## License
 
-Not yet selected — tracked under milestone M11.
+LGPL-3.0-only — see `LICENSE`. Selected by the maintainer under M11-2.

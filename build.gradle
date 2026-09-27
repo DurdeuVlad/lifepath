@@ -58,6 +58,10 @@ processResources {
 	}
 }
 
+tasks.jar {
+	from rootProject.file("LICENSE")
+}
+
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 21
 }
