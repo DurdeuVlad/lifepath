@@ -102,6 +102,14 @@ class VerticalSliceTest {
 
 	/** Loads every shipped definition into the registries, in live load order. */
 	private void loadEverything() throws Exception {
+		for (String n : names("skill"))
+			LifepathContent.skills().register(LifepathMod.id(n),
+					SkillDefinition.fromFile(LifepathMod.id(n),
+							decodeFile("skill", n, SkillDefinition.SkillDefinitionFile.CODEC)));
+		for (String n : names("xp_source"))
+			LifepathContent.xpSources().register(LifepathMod.id(n),
+					XpSourceDefinition.fromFile(LifepathMod.id(n),
+							decodeFile("xp_source", n, XpSourceDefinition.XpSourceFile.CODEC)));
 		for (String n : names("resource"))
 			LifepathContent.resources().register(LifepathMod.id(n),
 					LifepathContent.decodeResource(LifepathMod.id(n),
@@ -118,14 +126,6 @@ class VerticalSliceTest {
 			LifepathContent.relations().register(LifepathMod.id(n),
 					RelationDefinition.fromFile(LifepathMod.id(n),
 							decodeFile("relation", n, RelationDefinition.RelationFile.CODEC)));
-		for (String n : names("skill"))
-			LifepathContent.skills().register(LifepathMod.id(n),
-					SkillDefinition.fromFile(LifepathMod.id(n),
-							decodeFile("skill", n, SkillDefinition.SkillDefinitionFile.CODEC)));
-		for (String n : names("xp_source"))
-			LifepathContent.xpSources().register(LifepathMod.id(n),
-					XpSourceDefinition.fromFile(LifepathMod.id(n),
-							decodeFile("xp_source", n, XpSourceDefinition.XpSourceFile.CODEC)));
 		for (String n : names("species"))
 			LifepathContent.species().register(LifepathMod.id(n),
 					SpeciesDefinition.fromFile(LifepathMod.id(n),
