@@ -38,7 +38,10 @@ public final class IconRef {
 	public record Warning(String domain, Identifier file, String field, String message) {
 	}
 
-	private static final List<Warning> PENDING = new ArrayList<>();
+	// Domain loaders can run on parallel reload threads — synchronize;
+	// warnings are rare enough that contention is a non-issue.
+	private static final List<Warning> PENDING =
+			java.util.Collections.synchronizedList(new ArrayList<>());
 
 	private IconRef() {
 	}
@@ -78,9 +81,11 @@ public final class IconRef {
 	 * the CURRENT files' problems and never replays stale ones.
 	 */
 	public static List<Warning> drainWarnings() {
-		List<Warning> out = List.copyOf(PENDING);
-		PENDING.clear();
-		return out;
+		synchronized (PENDING) {
+			List<Warning> out = List.copyOf(PENDING);
+			PENDING.clear();
+			return out;
+		}
 	}
 
 	private static void warn(String domain, Identifier file, String message) {
