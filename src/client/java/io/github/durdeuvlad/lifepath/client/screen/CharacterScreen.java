@@ -1,6 +1,7 @@
 package io.github.durdeuvlad.lifepath.client.screen;
 
 import io.github.durdeuvlad.lifepath.client.character.ClientCharacterState;
+import io.github.durdeuvlad.lifepath.client.icon.ClientIcons;
 import io.github.durdeuvlad.lifepath.character.IdentitySummary;
 import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload;
 import java.util.List;
@@ -19,6 +20,13 @@ import net.minecraft.text.Text;
  * <p>Hierarchy (TIMELINE §1.3): identity first, then the actionable cards
  * (conditions/attunements/traits). Empty sections render explicit friendly
  * states rather than blank space.
+ *
+ * <p>M12-2: species/specialization render as icon + name hero rows and every
+ * significant id (conditions/attunements/traits) carries its badge icon —
+ * {@link ClientIcons} resolves declared texture → domain placeholder →
+ * none, so rows keep working while final art is pending. Names stay visible
+ * (icons augment, never replace); the species description moved to a hover
+ * tooltip over its hero row to keep the default view identity-at-a-glance.
  */
 @Environment(EnvType.CLIENT)
 public class CharacterScreen extends Screen {
@@ -67,13 +75,22 @@ public class CharacterScreen extends Screen {
 			y = line(context, left, y,
 					Text.translatable("screen.lifepath.character.no_species"), DIM);
 		} else {
-			y = line(context, left, y, Text.literal(core.speciesName()), TEXT);
-			if (!core.speciesDescription().isEmpty()) {
-				for (var wrapped : textRenderer.wrapLines(
-						Text.literal(core.speciesDescription()), panelW - 8)) {
-					context.drawTextWithShadow(textRenderer, wrapped, left, y, DIM);
-					y += 10;
-				}
+			int rowTop = y;
+			ClientIcons.resolve("species", core.speciesIcon())
+					.ifPresent(tex -> context.drawTexture(tex, left + 6, rowTop - 1,
+							0, 0, 16, 16, 16, 16));
+			context.drawTextWithShadow(textRenderer, Text.literal(core.speciesName()),
+					left + 26, rowTop + 4, TEXT);
+			y = rowTop + 18;
+			// M12-2: the description is displaced from the default view —
+			// hover the hero row to read it (name stays always-on).
+			if (!core.speciesDescription().isEmpty() && mouseX >= left
+					&& mouseX <= left + panelW && mouseY >= rowTop - 2
+					&& mouseY <= rowTop + 16) {
+				context.drawOrderedTooltip(textRenderer,
+						textRenderer.wrapLines(
+								Text.literal(core.speciesDescription()), panelW - 8),
+						mouseX, mouseY);
 			}
 		}
 
@@ -84,11 +101,18 @@ public class CharacterScreen extends Screen {
 			y = line(context, left, y,
 					Text.translatable("screen.lifepath.character.no_specialization"), DIM);
 		} else {
-			y = line(context, left, y, Text.literal(core.specName()), TEXT);
+			final int specRowY = y;
+			ClientIcons.resolve("specialization", core.specIcon())
+					.ifPresent(tex -> context.drawTexture(tex, left + 6,
+							specRowY - 1, 0, 0, 16, 16, 16, 16));
+			context.drawTextWithShadow(textRenderer, Text.literal(core.specName()),
+					left + 26, y + 4, TEXT);
+			y += 18;
 			if (!id.specFocus().isEmpty()) {
+				String focusNames = String.join(", ", id.specFocus().stream()
+						.map(IdentitySummaryPayload.Entry::name).toList());
 				y = line(context, left, y, Text.translatable(
-						"screen.lifepath.character.focus",
-						String.join(", ", id.specFocus())), DIM);
+						"screen.lifepath.character.focus", focusNames), DIM);
 			}
 		}
 		// M6-4 mandated line — a spec choice must never read as a lockout.
@@ -100,13 +124,13 @@ public class CharacterScreen extends Screen {
 
 		// --- Significant ids: conditions / attunements / traits ---
 		y = listSection(context, left, y + 4,
-				"screen.lifepath.character.conditions",
+				"screen.lifepath.character.conditions", "condition",
 				id.sections().getOrDefault(IdentitySummary.SECTION_CONDITIONS, List.of()));
 		y = listSection(context, left, y + 4,
-				"screen.lifepath.character.attunements",
+				"screen.lifepath.character.attunements", "attunement",
 				id.sections().getOrDefault(IdentitySummary.SECTION_ATTUNEMENTS, List.of()));
 		listSection(context, left, y + 4,
-				"screen.lifepath.character.traits",
+				"screen.lifepath.character.traits", "trait",
 				id.sections().getOrDefault(IdentitySummary.SECTION_TRAITS, List.of()));
 
 		// M6-4: visible keybind hints — the ability key is never discoverable
@@ -131,14 +155,22 @@ public class CharacterScreen extends Screen {
 	}
 
 	private int listSection(DrawContext context, int x, int y, String key,
-			List<String> entries) {
+			String domain, List<IdentitySummaryPayload.Entry> entries) {
 		y = section(context, x, y, Text.translatable(key));
 		if (entries.isEmpty()) {
 			return line(context, x, y,
 					Text.translatable("screen.lifepath.character.none"), DIM);
 		}
-		for (String name : entries) {
-			y = line(context, x, y, Text.literal(name), TEXT);
+		for (IdentitySummaryPayload.Entry e : entries) {
+			final int rowY = y;
+			// 9-arg overload: draw box 10x10 sampling the whole 16x16 sprite
+			// (the 8-arg form would crop, not scale).
+			ClientIcons.resolve(domain, e.icon())
+					.ifPresent(tex -> context.drawTexture(tex, x + 6, rowY,
+							10, 10, 0, 0, 16, 16, 16, 16));
+			context.drawTextWithShadow(textRenderer, Text.literal(e.name()),
+					x + 19, y + 1, TEXT);
+			y += 11;
 		}
 		return y;
 	}

@@ -3,6 +3,7 @@ package io.github.durdeuvlad.lifepath.skill;
 import io.github.durdeuvlad.lifepath.character.IdentitySummary;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
+import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload;
 import io.github.durdeuvlad.lifepath.network.s2c.SkillsSummaryPayload;
 import io.github.durdeuvlad.lifepath.network.s2c.SkillsSummaryPayload.SkillCard;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
@@ -57,11 +58,11 @@ public final class SkillSummary {
 
 		int nextLevel = 0;
 		String nextText = "";
-		List<String> bonuses = new ArrayList<>();
+		List<IdentitySummaryPayload.Entry> bonuses = new ArrayList<>();
 		for (SkillDefinition.Milestone m : def.milestones()) {
 			if (m.level() <= level) {
 				for (Identifier ref : m.effectRefs()) {
-					bonuses.add(IdentitySummary.displayName(ref));
+					bonuses.add(IdentitySummary.entry(ref));
 				}
 			} else if (nextLevel == 0 || m.level() < nextLevel) {
 				nextLevel = m.level();
@@ -71,7 +72,8 @@ public final class SkillSummary {
 
 		return new SkillCard(id.toString(),
 				new SkillCard.Display(def.displayName(), def.description(),
-						RankBands.bandFor(level).key(), apt.name(), def.improveHint()),
+						RankBands.bandFor(level).key(), apt.name(), def.improveHint(),
+						def.icon().map(Identifier::toString).orElse("")),
 				new SkillCard.Progress(level, xpIn, xpNeed, floor, graceEnd),
 				new SkillCard.Details(nextLevel, nextText, List.copyOf(bonuses)));
 	}

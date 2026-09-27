@@ -25,8 +25,10 @@ public record SkillsSummaryPayload(List<SkillCard> skills)
 	/** One skill's display card. */
 	public record SkillCard(String id, Display display, Progress progress,
 			Details details) {
+		/** {@code icon} is the normalized texture id from the def's
+		 * {@code icon} field, or "" when none (M12-1). */
 		public record Display(String name, String description, String rankKey,
-				String aptitude, String improveHint) {
+				String aptitude, String improveHint, String icon) {
 			static final PacketCodec<RegistryByteBuf, Display> CODEC =
 					PacketCodec.tuple(
 							PacketCodecs.STRING, Display::name,
@@ -34,6 +36,7 @@ public record SkillsSummaryPayload(List<SkillCard> skills)
 							PacketCodecs.STRING, Display::rankKey,
 							PacketCodecs.STRING, Display::aptitude,
 							PacketCodecs.STRING, Display::improveHint,
+							PacketCodecs.STRING, Display::icon,
 							Display::new);
 		}
 
@@ -50,12 +53,13 @@ public record SkillsSummaryPayload(List<SkillCard> skills)
 		}
 
 		public record Details(int nextMilestoneLevel, String nextMilestoneText,
-				List<String> bonuses) {
+				List<IdentitySummaryPayload.Entry> bonuses) {
 			static final PacketCodec<RegistryByteBuf, Details> CODEC =
 					PacketCodec.tuple(
 							PacketCodecs.INTEGER, Details::nextMilestoneLevel,
 							PacketCodecs.STRING, Details::nextMilestoneText,
-							PacketCodecs.STRING.collect(PacketCodecs.toList()),
+							IdentitySummaryPayload.Entry.CODEC
+									.collect(PacketCodecs.toList()),
 									Details::bonuses,
 							Details::new);
 		}

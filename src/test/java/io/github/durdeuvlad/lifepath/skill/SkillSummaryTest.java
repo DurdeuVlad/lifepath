@@ -43,9 +43,18 @@ class SkillSummaryTest {
 	}
 
 	private static SkillDefinition skill(String name) throws Exception {
+		return skill(name, null);
+	}
+
+	private static SkillDefinition skill(String name, String icon)
+			throws Exception {
+		var json = JsonParser.parseString(Files.readString(
+				DATA.resolve("skill/" + name + ".json"))).getAsJsonObject();
+		if (icon != null) {
+			json.addProperty("icon", icon);
+		}
 		var file = SkillDefinition.SkillDefinitionFile.CODEC
-				.parse(JsonOps.INSTANCE, JsonParser.parseString(Files.readString(
-						DATA.resolve("skill/" + name + ".json"))))
+				.parse(JsonOps.INSTANCE, json)
 				.result().orElseThrow();
 		return SkillDefinition.fromFile(LifepathMod.id(name), file);
 	}
@@ -66,6 +75,17 @@ class SkillSummaryTest {
 		assertEquals(20, c.details().nextMilestoneLevel());
 		assertEquals("lifepath.skill.mining.milestone.20",
 				c.details().nextMilestoneText());
+	}
+
+	@Test
+	void iconRefFlowsIntoDisplay() throws Exception {
+		// M12-2: a declared icon reaches the card as a normalized texture id;
+		// a def without one yields "" (client resolves the placeholder).
+		LifepathContent.skills().register(LifepathMod.id("mining"),
+				skill("mining", "skill/mining"));
+		SkillsSummaryPayload p = SkillSummary.build(data, System.currentTimeMillis());
+		assertEquals("lifepath:textures/gui/skill/mining.png",
+				p.skills().get(0).display().icon());
 	}
 
 	@Test

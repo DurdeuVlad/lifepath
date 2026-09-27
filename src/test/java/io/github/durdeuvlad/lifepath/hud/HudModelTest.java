@@ -22,12 +22,15 @@ class HudModelTest {
 	private static final Identifier ABIL = Identifier.of("lifepath:frost_nova");
 
 	private static IdentitySummaryPayload identity(List<ResourceDisplay> res,
-			Map<String, String> abilityNames) {
+			Map<String, IdentitySummaryPayload.Entry> abilities) {
 		return new IdentitySummaryPayload(
 				new IdentitySummaryPayload.IdentityCore("lifepath:iceborn",
-						"Iceborn", "", "", ""),
-				List.of(), Map.of("conditions", List.of("Chilled")), abilityNames,
-				res);
+						"Iceborn", "", "", "", "", ""),
+				List.of(),
+				Map.of("conditions",
+						List.of(new IdentitySummaryPayload.Entry(
+								"lifepath:chilled", "Chilled", ""))),
+				abilities, res);
 	}
 
 	private static ResourceDisplay tempDisplay(double def, int restBand,
@@ -109,7 +112,8 @@ class HudModelTest {
 		data.setCooldown(ABIL, 5_000L);
 		data.setCooldown(Identifier.of("lifepath:verdant_bloom"), 9_000L);
 		IdentitySummaryPayload id = identity(List.of(), Map.of(
-				"lifepath:frost_nova", "Frost Nova"));
+				"lifepath:frost_nova", new IdentitySummaryPayload.Entry(
+						"lifepath:frost_nova", "Frost Nova", "")));
 		HudModel.View v = HudModel.compute(id, data, Map.of(), 1_000L);
 		assertEquals(2, v.cooldowns().size());
 		assertEquals("Frost Nova", v.cooldowns().get(0).label()); // 4s left first

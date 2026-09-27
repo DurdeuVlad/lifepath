@@ -46,9 +46,18 @@ class IdentitySummaryTest {
 	}
 
 	private static SpeciesDefinition species(String name) throws Exception {
+		return species(name, null);
+	}
+
+	private static SpeciesDefinition species(String name, String icon)
+			throws Exception {
+		var json = JsonParser.parseString(Files.readString(
+				DATA.resolve("species/" + name + ".json"))).getAsJsonObject();
+		if (icon != null) {
+			json.addProperty("icon", icon);
+		}
 		var file = SpeciesDefinition.SpeciesDefinitionFile.CODEC
-				.parse(JsonOps.INSTANCE, JsonParser.parseString(Files.readString(
-						DATA.resolve("species/" + name + ".json"))))
+				.parse(JsonOps.INSTANCE, json)
 				.result().orElseThrow();
 		return SpeciesDefinition.fromFile(LifepathMod.id(name), file);
 	}
@@ -92,7 +101,7 @@ class IdentitySummaryTest {
 				"identity text flows to the client");
 		assertEquals("Miner", p.identity().specName());
 		// startingSkills resolves through the skill registry → display names.
-		assertTrue(p.specFocus().contains("Mining"),
+		assertTrue(p.specFocus().stream().anyMatch(e -> e.name().equals("Mining")),
 				"focus resolves skill display names: " + p.specFocus());
 	}
 
@@ -124,8 +133,9 @@ class IdentitySummaryTest {
 
 		IdentitySummaryPayload p = IdentitySummary.build(data);
 		var traits = p.sections().get(IdentitySummary.SECTION_TRAITS);
-		assertEquals("Death Sight", traits.get(0));
-		assertEquals("missing_trait", traits.get(1));
+		assertEquals("Death Sight", traits.get(0).name());
+		assertEquals("lifepath:undead_death_sight", traits.get(0).id());
+		assertEquals("missing_trait", traits.get(1).name());
 	}
 
 	@Test
@@ -165,7 +175,42 @@ class IdentitySummaryTest {
 		assertEquals(java.util.List.of("Cold", "Temperate"), rd.bandNames());
 		assertEquals(1, rd.restBandIndex()); // default 50 sits in [26,100]
 		assertEquals("Death Sight",
-				p.abilityNames().get("lifepath:undead_death_sight"));
+				p.abilities().get("lifepath:undead_death_sight").name());
+	}
+
+	@Test
+	void iconRefsFlowIntoEntriesAndCore() throws Exception {
+		// M12-2: every displayable reference carries its def's icon ref so
+		// the client can render icons without touching server registries.
+		LifepathContent.species().register(LifepathMod.id("sylvian"),
+				species("sylvian", "species/sylvian"));
+		data.setSpeciesId(LifepathMod.id("sylvian"));
+
+		var abilityJson = JsonParser.parseString(uncheckedRead(
+				"ability/undead_death_sight.json")).getAsJsonObject();
+		abilityJson.addProperty("icon", "ability/death_sight");
+		var abilityFile = io.github.durdeuvlad.lifepath.content.AbilityDefinition
+				.AbilityFile.CODEC.parse(JsonOps.INSTANCE, abilityJson)
+				.result().orElseThrow();
+		LifepathContent.abilities().register(LifepathMod.id("undead_death_sight"),
+				io.github.durdeuvlad.lifepath.content.AbilityDefinition
+						.fromFile(LifepathMod.id("undead_death_sight"), abilityFile));
+		data.addId(PlayerCharacterData.ListKind.TRAITS,
+				LifepathMod.id("undead_death_sight"));
+
+		IdentitySummaryPayload p = IdentitySummary.build(data);
+		assertEquals("lifepath:textures/gui/species/sylvian.png",
+				p.identity().speciesIcon());
+		// Owned abilities (traits) surface in the abilities map with icon.
+		var ability = p.abilities().get("lifepath:undead_death_sight");
+		assertEquals("lifepath:textures/gui/ability/death_sight.png",
+				ability.icon());
+		// The same reference in a section row carries the same icon.
+		var trait = p.sections().get(IdentitySummary.SECTION_TRAITS).get(0);
+		assertEquals(ability.icon(), trait.icon());
+		// A def without an icon field degrades to "" (no placeholder
+		// resolution on the wire — that is the client's job).
+		assertEquals("", p.identity().specIcon());
 	}
 
 	private static String uncheckedRead(String rel) {

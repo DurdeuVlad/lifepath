@@ -1,6 +1,7 @@
 package io.github.durdeuvlad.lifepath.client.screen;
 
 import io.github.durdeuvlad.lifepath.client.character.ClientCharacterState;
+import io.github.durdeuvlad.lifepath.client.icon.ClientIcons;
 import io.github.durdeuvlad.lifepath.network.s2c.SkillsSummaryPayload.SkillCard;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -65,14 +66,22 @@ public class SkillsScreen extends Screen {
 					context.fill(left, y - 1, left + panelW, y + ROW_H - 1,
 							0x22FFFFFF);
 				}
+				// M12-2: skill icon leads the row (declared → placeholder →
+				// none); the name + level text stay — icons augment, never
+				// replace. The gutter is reserved even when the icon is
+				// absent so rows keep one aligned column.
+				final int iconRowY = y;
+				ClientIcons.resolve("skill", c.display().icon())
+						.ifPresent(tex -> context.drawTexture(tex,
+								left + 6, iconRowY + 1, 0, 0, 16, 16, 16, 16));
 				context.drawTextWithShadow(textRenderer,
-						Text.literal(c.display().name()), left + 6, y, TEXT);
+						Text.literal(c.display().name()), left + 26, y, TEXT);
 				String levelText = Text.translatable(
 						"screen.lifepath.skills.level", c.progress().level())
 						.getString() + " · " + Text.translatable(
 								"lifepath.rank." + c.display().rankKey()).getString();
 				context.drawTextWithShadow(textRenderer, levelText,
-						left + 6, y + 9, DIM);
+						left + 26, y + 9, DIM);
 
 				// Progress bar: xpIn/xpNeed (0-need = max level → full bar).
 				int barX = left + panelW - 86;

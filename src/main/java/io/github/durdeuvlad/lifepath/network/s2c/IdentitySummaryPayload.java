@@ -21,14 +21,34 @@ import net.minecraft.network.packet.CustomPayload;
  * content degrades to the raw id path (e.g. {@code "undead"}) — the client
  * renders exactly what it receives, never mutates, never guesses.
  *
+ * <p>M12-1: every displayable reference rides in an {@link Entry}
+ * ({@code id + name + icon}) — {@code icon} is the normalized texture id
+ * resolved from the content def's {@code icon} field, or {@code ""} when the
+ * def declares none. The client falls back to placeholders per
+ * {@code ClientIcons}; a hidden species' icon never leaves the owner's
+ * payload either.
+ *
  * <p>Sent alongside {@link CharacterSyncPayload} — every sync trigger (join,
  * respawn, dimension change, mutation) therefore refreshes identity text.
  */
 public record IdentitySummaryPayload(IdentityCore identity,
-		List<String> specFocus,
-		Map<String, List<String>> sections,
-		Map<String, String> abilityNames,
+		List<Entry> specFocus,
+		Map<String, List<Entry>> sections,
+		Map<String, Entry> abilities,
 		List<ResourceDisplay> resourceDisplays) implements CustomPayload {
+
+	/**
+	 * One displayable content reference (M12-1): the content id, its
+	 * server-resolved display name, and its icon texture id ("" when none).
+	 */
+	public record Entry(String id, String name, String icon) {
+		public static final PacketCodec<RegistryByteBuf, Entry> CODEC =
+				PacketCodec.tuple(
+						PacketCodecs.STRING, Entry::id,
+						PacketCodecs.STRING, Entry::name,
+						PacketCodecs.STRING, Entry::icon,
+						Entry::new);
+	}
 
 	/** Static display info for one resource def (M6-3 HUD). */
 	public record ResourceDisplay(String id, String name, double defaultValue,
@@ -44,17 +64,30 @@ public record IdentitySummaryPayload(IdentityCore identity,
 						ResourceDisplay::new);
 	}
 
-	/** Species/specialization identity strings ("" = unset). */
+	/** Species/specialization identity strings ("" = unset; icons = "" none). */
 	public record IdentityCore(String speciesId, String speciesName,
-			String speciesDescription, String specId, String specName) {
+			String speciesDescription, String speciesIcon,
+			String specId, String specName, String specIcon) {
+		// Seven strings — past PacketCodec.tuple's arity, so write it out.
 		private static final PacketCodec<RegistryByteBuf, IdentityCore> CORE_CODEC =
-				PacketCodec.tuple(
-						PacketCodecs.STRING, IdentityCore::speciesId,
-						PacketCodecs.STRING, IdentityCore::speciesName,
-						PacketCodecs.STRING, IdentityCore::speciesDescription,
-						PacketCodecs.STRING, IdentityCore::specId,
-						PacketCodecs.STRING, IdentityCore::specName,
-						IdentityCore::new);
+				PacketCodec.ofStatic(
+						(buf, c) -> {
+							PacketCodecs.STRING.encode(buf, c.speciesId());
+							PacketCodecs.STRING.encode(buf, c.speciesName());
+							PacketCodecs.STRING.encode(buf, c.speciesDescription());
+							PacketCodecs.STRING.encode(buf, c.speciesIcon());
+							PacketCodecs.STRING.encode(buf, c.specId());
+							PacketCodecs.STRING.encode(buf, c.specName());
+							PacketCodecs.STRING.encode(buf, c.specIcon());
+						},
+						buf -> new IdentityCore(
+								PacketCodecs.STRING.decode(buf),
+								PacketCodecs.STRING.decode(buf),
+								PacketCodecs.STRING.decode(buf),
+								PacketCodecs.STRING.decode(buf),
+								PacketCodecs.STRING.decode(buf),
+								PacketCodecs.STRING.decode(buf),
+								PacketCodecs.STRING.decode(buf)));
 	}
 
 	public static final CustomPayload.Id<IdentitySummaryPayload> ID =
@@ -63,13 +96,13 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	public static final PacketCodec<RegistryByteBuf, IdentitySummaryPayload> PACKET_CODEC =
 			PacketCodec.tuple(
 					IdentityCore.CORE_CODEC, IdentitySummaryPayload::identity,
-					PacketCodecs.STRING.collect(PacketCodecs.toList()),
+					Entry.CODEC.collect(PacketCodecs.toList()),
 							IdentitySummaryPayload::specFocus,
 					PacketCodecs.map(java.util.HashMap::new, PacketCodecs.STRING,
-							PacketCodecs.STRING.collect(PacketCodecs.toList())),
+							Entry.CODEC.collect(PacketCodecs.toList())),
 							IdentitySummaryPayload::sections,
 					PacketCodecs.map(java.util.HashMap::new, PacketCodecs.STRING,
-							PacketCodecs.STRING), IdentitySummaryPayload::abilityNames,
+							Entry.CODEC), IdentitySummaryPayload::abilities,
 					ResourceDisplay.CODEC.collect(PacketCodecs.toList()),
 							IdentitySummaryPayload::resourceDisplays,
 					IdentitySummaryPayload::new);
@@ -77,7 +110,7 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	/** Empty payload — used when the character has no identity content yet. */
 	public static IdentitySummaryPayload empty() {
 		return new IdentitySummaryPayload(
-				new IdentityCore("", "", "", "", ""), List.of(), Map.of(),
+				new IdentityCore("", "", "", "", "", "", ""), List.of(), Map.of(),
 				Map.of(), List.of());
 	}
 
