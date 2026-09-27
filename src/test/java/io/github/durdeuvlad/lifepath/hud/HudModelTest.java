@@ -36,7 +36,7 @@ class HudModelTest {
 	private static ResourceDisplay tempDisplay(double def, int restBand,
 			List<String> bandNames) {
 		return new ResourceDisplay("lifepath:temperature", "Temperature", def,
-				restBand, bandNames);
+				restBand, bandNames, "lifepath:textures/gui/resource/temp.png");
 	}
 
 	@Test
@@ -56,8 +56,9 @@ class HudModelTest {
 		HudModel.View v = HudModel.compute(id, data, Map.of(TEMP, 1), 0);
 		assertTrue(v.resources().isEmpty());
 		assertTrue(v.cooldowns().isEmpty());
-		// conditions still surface as state rows
-		assertEquals(List.of("Chilled"), v.states());
+		// conditions still surface as state rows (name + icon)
+		assertEquals(1, v.states().size());
+		assertEquals("Chilled", v.states().get(0).name());
 	}
 
 	@Test
@@ -73,6 +74,7 @@ class HudModelTest {
 		assertEquals("Temperature", row.label());
 		assertEquals("Hot", row.bandName());
 		assertEquals(0.8, row.fraction(), 0.001);
+		assertEquals("lifepath:textures/gui/resource/temp.png", row.icon());
 	}
 
 	@Test
@@ -100,7 +102,8 @@ class HudModelTest {
 	void malformedResourceIdSkipped() {
 		PlayerCharacterData data = new PlayerCharacterData();
 		IdentitySummaryPayload id = identity(List.of(
-				new ResourceDisplay("not a valid id!!", "Bad", 0, 0, List.of())),
+				new ResourceDisplay("not a valid id!!", "Bad", 0, 0, List.of(),
+						"")),
 				Map.of());
 		assertTrue(HudModel.compute(id, data, Map.of(), 0)
 				.resources().isEmpty());
@@ -113,13 +116,18 @@ class HudModelTest {
 		data.setCooldown(Identifier.of("lifepath:verdant_bloom"), 9_000L);
 		IdentitySummaryPayload id = identity(List.of(), Map.of(
 				"lifepath:frost_nova", new IdentitySummaryPayload.Entry(
-						"lifepath:frost_nova", "Frost Nova", "")));
+						"lifepath:frost_nova", "Frost Nova",
+						"lifepath:textures/gui/ability/frost.png")));
 		HudModel.View v = HudModel.compute(id, data, Map.of(), 1_000L);
 		assertEquals(2, v.cooldowns().size());
 		assertEquals("Frost Nova", v.cooldowns().get(0).label()); // 4s left first
 		assertEquals(4.0, v.cooldowns().get(0).secondsLeft(), 0.001);
-		// unnamed ability falls back to its path
+		// M12-3: the row carries the ability's icon ref for the badge.
+		assertEquals("lifepath:textures/gui/ability/frost.png",
+				v.cooldowns().get(0).icon());
+		// unnamed ability falls back to its path, icon empty
 		assertEquals("verdant_bloom", v.cooldowns().get(1).label());
+		assertEquals("", v.cooldowns().get(1).icon());
 	}
 
 	@Test

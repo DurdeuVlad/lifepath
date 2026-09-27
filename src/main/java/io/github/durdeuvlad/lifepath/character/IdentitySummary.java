@@ -93,7 +93,8 @@ public final class IdentitySummary {
 			}
 			resourceDisplays.add(new IdentitySummaryPayload.ResourceDisplay(
 					rid.toString(), rdef.displayName(), rdef.defaultValue(),
-					restBand, bandNames));
+					restBand, bandNames,
+					rdef.icon().map(Identifier::toString).orElse("")));
 		}
 
 		return new IdentitySummaryPayload(

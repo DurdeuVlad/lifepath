@@ -50,9 +50,9 @@ public record IdentitySummaryPayload(IdentityCore identity,
 						Entry::new);
 	}
 
-	/** Static display info for one resource def (M6-3 HUD). */
+	/** Static display info for one resource def (M6-3 HUD; icon added M12-3). */
 	public record ResourceDisplay(String id, String name, double defaultValue,
-			int restBandIndex, List<String> bandNames) {
+			int restBandIndex, List<String> bandNames, String icon) {
 		static final PacketCodec<RegistryByteBuf, ResourceDisplay> CODEC =
 				PacketCodec.tuple(
 						PacketCodecs.STRING, ResourceDisplay::id,
@@ -61,6 +61,7 @@ public record IdentitySummaryPayload(IdentityCore identity,
 						PacketCodecs.INTEGER, ResourceDisplay::restBandIndex,
 						PacketCodecs.STRING.collect(PacketCodecs.toList()),
 								ResourceDisplay::bandNames,
+						PacketCodecs.STRING, ResourceDisplay::icon,
 						ResourceDisplay::new);
 	}
 

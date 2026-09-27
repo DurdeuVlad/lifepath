@@ -24,19 +24,29 @@ public final class HudModel {
 	static final int MAX_COOLDOWN_ROWS = 8;
 	static final int MAX_STATE_ROWS = 4;
 
-	/** One visible resource row. {@code bandName} may be empty (unnamed band). */
+	/**
+	 * One visible resource row. {@code bandName} may be empty (unnamed band);
+	 * {@code icon} is the def's icon ref ("" = none) for the row's badge.
+	 */
 	public record ResourceRow(String id, String label, double value, double min,
-			double max, double fraction, String bandName) {
+			double max, double fraction, String bandName, String icon) {
 	}
 
-	/** One visible cooldown row; {@code secondsLeft} is rounded up for display. */
+	/**
+	 * One visible cooldown row; {@code secondsLeft} is rounded up for display;
+	 * {@code icon} is the ability's icon ref ("" = none).
+	 */
 	public record CooldownRow(String abilityId, String label,
-			double secondsLeft) {
+			double secondsLeft, String icon) {
 	}
 
-	/** The full HUD view for one frame. */
+	/**
+	 * The full HUD view for one frame. {@code states} are the same
+	 * {@code Entry} (id + name + icon) records the payload carries, so the
+	 * renderer can badge each condition without re-resolving anything.
+	 */
 	public record View(List<ResourceRow> resources, List<CooldownRow> cooldowns,
-			List<String> states) {
+			List<IdentitySummaryPayload.Entry> states) {
 		public static final View EMPTY = new View(List.of(), List.of(), List.of());
 
 		public boolean isEmpty() {
@@ -92,7 +102,7 @@ public final class HudModel {
 					? rd.bandNames().get(band) : "";
 			String label = rd.name().isEmpty() ? id.getPath() : rd.name();
 			rows.add(new ResourceRow(rd.id(), label, st.current(), st.min(),
-					st.max(), fraction, bandName));
+					st.max(), fraction, bandName, rd.icon()));
 		}
 		return rows;
 	}
@@ -108,17 +118,18 @@ public final class HudModel {
 			String idStr = e.getKey().toString();
 			IdentitySummaryPayload.Entry ability = identity.abilities().get(idStr);
 			String label = ability != null ? ability.name() : e.getKey().getPath();
-			rows.add(new CooldownRow(idStr, label, left));
+			rows.add(new CooldownRow(idStr, label, left,
+					ability != null ? ability.icon() : ""));
 		}
 		rows.sort(Comparator.comparingDouble(CooldownRow::secondsLeft));
 		return rows.size() > MAX_COOLDOWN_ROWS
 				? rows.subList(0, MAX_COOLDOWN_ROWS) : rows;
 	}
 
-	private static List<String> stateRows(IdentitySummaryPayload identity) {
-		List<String> conditions = identity.sections()
-				.getOrDefault(IdentitySummary.SECTION_CONDITIONS, List.of())
-				.stream().map(IdentitySummaryPayload.Entry::name).toList();
+	private static List<IdentitySummaryPayload.Entry> stateRows(
+			IdentitySummaryPayload identity) {
+		List<IdentitySummaryPayload.Entry> conditions = identity.sections()
+				.getOrDefault(IdentitySummary.SECTION_CONDITIONS, List.of());
 		return conditions.size() > MAX_STATE_ROWS
 				? conditions.subList(0, MAX_STATE_ROWS) : conditions;
 	}
