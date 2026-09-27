@@ -1,0 +1,31 @@
+{
+	"display_name": "Smite",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:entities_in_radius",
+		"entity": "#minecraft:undead",
+		"radius": 6,
+		"living_only": true
+	},
+	"actions": [
+		{
+			"type": "lifepath:damage",
+			"amount": 8.0,
+			"source": "magic"
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:end_rod",
+			"count": 16
+		},
+		{
+			"type": "lifepath:play_sound",
+			"sound": "minecraft:entity.lightning_bolt.thunder"
+		}
+	],
+	"cooldown": {
+		"seconds": 60
+	}
+}

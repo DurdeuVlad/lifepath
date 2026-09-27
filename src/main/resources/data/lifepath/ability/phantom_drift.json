@@ -1,0 +1,35 @@
+{
+	"display_name": "Drifting Form",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:resource_threshold",
+				"resource": "lifepath:phantom_form",
+				"op": ">=",
+				"value": 1
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:slow_falling",
+			"duration": 100,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.movement_speed",
+			"operation": "add_multiplied_total",
+			"value": -0.1,
+			"duration_ticks": 100
+		}
+	]
+}

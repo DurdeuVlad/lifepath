@@ -1,0 +1,23 @@
+{
+	"display_name": "Kindled Warmth",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:on_fire"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:heal",
+			"amount": 0.5
+		}
+	]
+}

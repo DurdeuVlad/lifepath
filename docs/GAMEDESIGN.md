@@ -1070,7 +1070,11 @@ data/lifepath/ability/
 data/lifepath/trait/
 data/lifepath/condition/
 data/lifepath/attunement/
+data/lifepath/item_weight/
+data/lifepath/unlock/
 ```
+
+Unlock definitions (`data/lifepath/unlock/`): `{display_name, description?, unlocks:[content-id...], sources:[{type,...}]}`. When a source fires, every `unlocks[]` id lands in the character's `unlocks[]` — the list `selection:"unlocked"` species check. Source types: `item` (`item`, `consume?`, fires on use), `advancement` (`advancement` id), `event` (`event` activity type, `subject`/`tag` filters, `chance`), `admin` (`/lifepath unlock add`). Shipped: `phoenix_contract` (item: totem), `phantom_touch` (End advancement or phantom kills), `celestial_blessing` (admin only).
 
 The exact format can be finalized during architecture design.
 

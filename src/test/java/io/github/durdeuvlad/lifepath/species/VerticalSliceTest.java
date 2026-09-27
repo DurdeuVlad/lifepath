@@ -69,6 +69,7 @@ class VerticalSliceTest {
 		LifepathContent.relations().clear();
 		LifepathContent.conditions().clear();
 		LifepathContent.attunements().clear();
+		LifepathContent.unlocks().clear();
 	}
 
 	@AfterEach
@@ -85,6 +86,7 @@ class VerticalSliceTest {
 		LifepathContent.relations().clear();
 		LifepathContent.conditions().clear();
 		LifepathContent.attunements().clear();
+		LifepathContent.unlocks().clear();
 	}
 
 	private static <T> T decodeFile(String domain, String name, Codec<T> codec)
@@ -150,6 +152,12 @@ class VerticalSliceTest {
 							LifepathMod.id(n), decodeFile("attunement", n,
 									io.github.durdeuvlad.lifepath.content.AttunementDefinition
 											.AttunementFile.CODEC)));
+		for (String n : names("unlock"))
+			LifepathContent.unlocks().register(LifepathMod.id(n),
+					io.github.durdeuvlad.lifepath.content.UnlockDefinition.fromFile(
+							LifepathMod.id(n), decodeFile("unlock", n,
+									io.github.durdeuvlad.lifepath.content.UnlockDefinition
+											.UnlockFile.CODEC)));
 	}
 
 	@Test
@@ -157,7 +165,8 @@ class VerticalSliceTest {
 		loadEverything();
 		for (String s : List.of("human", "sylvian", "iceborn", "undead",
 				"enderian", "amphibian", "dragonborn", "automaton",
-				"hellborn", "anima", "dwarf", "goliath"))
+				"hellborn", "anima", "dwarf", "goliath",
+				"phoenix", "phantom", "celestial"))
 			assertTrue(LifepathContent.species().contains(LifepathMod.id(s)),
 					"missing species " + s);
 		for (String s : List.of("miner", "farmer", "blacksmith", "fisherman",
@@ -170,7 +179,7 @@ class VerticalSliceTest {
 				"hunting", "cooking", "archery", "defence", "scholarship"))
 			assertTrue(LifepathContent.skills().contains(LifepathMod.id(s)),
 					"missing skill " + s);
-		assertEquals(12, LifepathContent.species().size());
+		assertEquals(15, LifepathContent.species().size());
 		for (String s : List.of("vampirism", "lycanthropy"))
 			assertTrue(LifepathContent.conditions().contains(LifepathMod.id(s)),
 					"missing condition " + s);
@@ -235,9 +244,58 @@ class VerticalSliceTest {
 		for (var att : LifepathContent.attunements().all().values())
 			for (Identifier a : att.abilities())
 				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
+		// M9-4: unlock → gated-content refs resolve (today: species ids).
+		for (var unlock : LifepathContent.unlocks().all().values())
+			for (Identifier content : unlock.unlocks())
+				if (!LifepathContent.species().contains(content)) dangling.add(content);
 
 		assertEquals(KNOWN_DANGLING_SIGNATURES, dangling,
 				"only the tracked spec-signature gap may dangle");
+	}
+
+	/**
+	 * M9-4: the three special species are data-defined, hidden from the
+	 * picker, and gated on {@code selection:"unlocked"} — and every unlock
+	 * source type the framework supports ships a working example.
+	 */
+	@Test
+	void specialSpeciesAreHiddenAndUnlockGated() throws Exception {
+		loadEverything();
+		for (String s : List.of("phoenix", "phantom", "celestial")) {
+			SpeciesDefinition sp = LifepathContent.species().get(LifepathMod.id(s));
+			assertTrue(sp != null, "missing " + s);
+			assertEquals(SpeciesDefinition.Visibility.HIDDEN, sp.visibility(),
+					s + " must be hidden from the picker");
+			assertEquals(SpeciesDefinition.Selection.UNLOCKED, sp.selection(),
+					s + " must gate on a held unlock");
+		}
+		// Every special species is reachable through a data-declared unlock.
+		Set<Identifier> gated = new HashSet<>();
+		for (var u : LifepathContent.unlocks().all().values())
+			gated.addAll(u.unlocks());
+		for (String s : List.of("phoenix", "phantom", "celestial"))
+			assertTrue(gated.contains(LifepathMod.id(s)),
+					s + " has no unlock def granting it");
+		// One working example per source type the issue requires.
+		Set<String> sourceTypes = new HashSet<>();
+		for (var u : LifepathContent.unlocks().all().values())
+			for (var rule : u.sources())
+				sourceTypes.add(rule.type());
+		for (String t : List.of("item", "advancement", "event", "admin"))
+			assertTrue(sourceTypes.contains(t), "no unlock ships a " + t + " source");
+	}
+
+	/** M9-4: Phantom's phase toggle uses only existing generic primitives. */
+	@Test
+	void phantomPhaseToggleIsDataOnGenericPrimitives() throws Exception {
+		loadEverything();
+		SpeciesDefinition phantom = LifepathContent.species().get(LifepathMod.id("phantom"));
+		assertTrue(phantom != null);
+		// The toggle target materializes through the species resources list.
+		assertTrue(phantom.resources().contains(LifepathMod.id("phantom_form")));
+		AbilityDefinition phase = LifepathContent.abilities()
+				.get(LifepathMod.id("phantom_phase"));
+		assertTrue(phase != null, "missing phantom_phase ability");
 	}
 
 	@Test

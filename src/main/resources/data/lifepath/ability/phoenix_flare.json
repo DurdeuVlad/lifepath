@@ -1,0 +1,30 @@
+{
+	"display_name": "Flare",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:entities_in_radius",
+		"radius": 5,
+		"living_only": true
+	},
+	"actions": [
+		{
+			"type": "lifepath:ignite",
+			"duration_ticks": 100
+		},
+		{
+			"type": "lifepath:damage",
+			"amount": 3.0,
+			"source": "fire"
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:flame",
+			"count": 24
+		}
+	],
+	"cooldown": {
+		"seconds": 45
+	}
+}

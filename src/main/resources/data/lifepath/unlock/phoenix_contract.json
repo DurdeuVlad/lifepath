@@ -1,0 +1,14 @@
+{
+	"display_name": "Phoenix Contract",
+	"description": "Offer a Totem of Undying to bind yourself to the first Phoenix's line.",
+	"unlocks": [
+		"lifepath:phoenix"
+	],
+	"sources": [
+		{
+			"type": "item",
+			"item": "minecraft:totem_of_undying",
+			"consume": true
+		}
+	]
+}

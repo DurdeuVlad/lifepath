@@ -1,0 +1,12 @@
+{
+	"display_name": "Celestial Blessing",
+	"description": "Divine favor is granted, not found - only a keeper can bestow it.",
+	"unlocks": [
+		"lifepath:celestial"
+	],
+	"sources": [
+		{
+			"type": "admin"
+		}
+	]
+}

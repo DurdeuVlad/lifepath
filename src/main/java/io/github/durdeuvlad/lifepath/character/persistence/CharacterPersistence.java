@@ -167,7 +167,7 @@ public final class CharacterPersistence {
 				case TRAITS -> "trait";
 				case CONDITIONS -> "condition";
 				case ATTUNEMENTS -> "attunement";
-				case UNLOCKS -> "ability";
+				case UNLOCKS -> "unlock_content";
 			};
 			for (Identifier id : new ArrayList<>(data.list(list))) {
 				if (unknown(domain, id)) {

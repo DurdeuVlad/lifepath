@@ -323,6 +323,27 @@ final class BuiltinActions {
 			}
 		});
 
+		// Two-state resource flip (M9-4, Phantom form toggle): min ↔ max of the
+		// resource's definition range. No-op on unknown resources.
+		register("toggle_resource", (target, ctx, params) -> {
+			Identifier res = id(params, "resource");
+			if (res == null || target.data() == null) {
+				return;
+			}
+			var def = io.github.durdeuvlad.lifepath.registry.LifepathContent
+					.resources().get(res);
+			if (def == null) {
+				return;
+			}
+			double cur = io.github.durdeuvlad.lifepath.resource.ResourceService
+					.current(target.data(), res);
+			double mid = (def.min() + def.max()) / 2.0;
+			ServerPlayerEntity sp = target.entity() instanceof ServerPlayerEntity p
+					? p : null;
+			io.github.durdeuvlad.lifepath.resource.ResourceService.setTo(
+					target.data(), sp, res, cur >= mid ? def.min() : def.max(), ctx.now());
+		});
+
 		register("play_sound", (target, ctx, params) -> {
 			Identifier sound = id(params, "sound");
 			BlockPos pos = target.pos();

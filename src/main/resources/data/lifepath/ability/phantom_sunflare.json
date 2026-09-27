@@ -1,0 +1,35 @@
+{
+	"display_name": "Sunflare",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:resource_threshold",
+				"resource": "lifepath:phantom_form",
+				"op": ">=",
+				"value": 1
+			},
+			{
+				"type": "lifepath:daylight"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:damage",
+			"amount": 1.0,
+			"source": "fire"
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:smoke",
+			"count": 4
+		}
+	]
+}

@@ -97,6 +97,7 @@ reference and skipped by the content-ref scan.
 | `grant_xp` | `skill`, `amount` |
 | `resource_delta` | `resource`, `amount` |
 | `modify_resource` | `resource`, `delta` or `set_to` |
+| `toggle_resource` | `resource` — flips a two-state resource to min ↔ max (Phantom form toggle, M9-4); no-op on unknown resources |
 | `debug_log` | `message` |
 | `apply_effect` | `effect`, `duration` (ticks), `amplifier` |
 | `remove_effect` | `effect` (id or `#tag`) |

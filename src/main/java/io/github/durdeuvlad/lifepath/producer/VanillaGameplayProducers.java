@@ -150,6 +150,10 @@ public final class VanillaGameplayProducers {
 					io.github.durdeuvlad.lifepath.attunement.AttunementService
 							.onUseItem(serverPlayer, serverPlayer.getStackInHand(hand),
 									System.currentTimeMillis());
+					// M9-4: item-source unlock grants ride the same seam.
+					io.github.durdeuvlad.lifepath.unlock.UnlockService
+							.onUseItem(serverPlayer, serverPlayer.getStackInHand(hand),
+									System.currentTimeMillis());
 					return net.minecraft.util.TypedActionResult.pass(
 							serverPlayer.getStackInHand(hand));
 				});

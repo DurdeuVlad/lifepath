@@ -1,0 +1,14 @@
+{
+	"display_name": "Celestial",
+	"description": "Beings with divine affinity. Sunlight restores them, falls mean nothing, and they can smite the undead - but the Nether is an exile far from the heavens.",
+	"visibility": "hidden",
+	"selection": "unlocked",
+	"passive_abilities": [
+		"lifepath:celestial_radiance",
+		"lifepath:celestial_starfall",
+		"lifepath:celestial_exile"
+	],
+	"active_abilities": [
+		"lifepath:celestial_smite"
+	]
+}
