@@ -91,6 +91,12 @@ public class CharacterScreen extends Screen {
 						String.join(", ", id.specFocus())), DIM);
 			}
 		}
+		// M6-4 mandated line — a spec choice must never read as a lockout.
+		for (var wrapped : textRenderer.wrapLines(Text.translatable(
+				"screen.lifepath.character.spec_note"), panelW - 8)) {
+			context.drawTextWithShadow(textRenderer, wrapped, left + 6, y, DIM);
+			y += 10;
+		}
 
 		// --- Significant ids: conditions / attunements / traits ---
 		y = listSection(context, left, y + 4,
@@ -102,6 +108,16 @@ public class CharacterScreen extends Screen {
 		listSection(context, left, y + 4,
 				"screen.lifepath.character.traits",
 				id.sections().getOrDefault(IdentitySummary.SECTION_TRAITS, List.of()));
+
+		// M6-4: visible keybind hints — the ability key is never discoverable
+		// otherwise. Shows the ACTUAL bound key, not a hardcoded letter.
+		if (io.github.durdeuvlad.lifepath.client.LifepathClient.abilityKey != null) {
+			context.drawCenteredTextWithShadow(textRenderer,
+					Text.translatable("screen.lifepath.character.key_hint",
+							io.github.durdeuvlad.lifepath.client.LifepathClient
+									.abilityKey.getBoundKeyLocalizedText()),
+					width / 2, top + panelH - 30, DIM);
+		}
 	}
 
 	private int section(DrawContext context, int x, int y, Text label) {

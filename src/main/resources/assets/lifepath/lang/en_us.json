@@ -62,5 +62,21 @@
 	"lifepath.skill.fishing.milestone.60": "Fish rise to your lure",
 	"lifepath.skill.fishing.milestone.80": "The deep yields its secrets",
 	"lifepath.skill.fishing.milestone.95": "Master of the quiet water",
-	"hud.lifepath.cooldown": "%s: %ss"
+	"hud.lifepath.cooldown": "%s: %ss",
+	"feedback.lifepath.level_up": "%s reached level %s",
+	"feedback.lifepath.milestone": "%s milestone at level %s: %s",
+	"feedback.lifepath.species_assigned": "Species set: %s",
+	"feedback.lifepath.spec_assigned": "Specialization set: %s — a starting focus, not a lock: you can still train every skill",
+	"feedback.lifepath.condition_gained": "Gained: %s",
+	"feedback.lifepath.condition_lost": "Faded: %s",
+	"feedback.lifepath.decay": "%s slipped %s level(s) after time away — use it to relearn",
+	"feedback.lifepath.ability_denied": "%s — %s",
+	"feedback.lifepath.reason.cooldown": "on cooldown (%ss)",
+	"feedback.lifepath.reason.conditions": "conditions not met right now",
+	"feedback.lifepath.reason.cost": "not enough resource",
+	"feedback.lifepath.reason.unavailable": "not available",
+	"feedback.lifepath.ability_ready": "%s ready — press %s",
+	"screen.lifepath.character.key_hint": "Press %s to use your ability",
+	"screen.lifepath.character.spec_note": "A specialization is your starting focus — it does NOT lock you out of other skills.",
+	"screen.lifepath.skills.click_hint": "Click a skill for details"
 }

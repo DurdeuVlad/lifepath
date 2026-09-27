@@ -18,6 +18,10 @@ import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
 public class LifepathClient implements ClientModInitializer {
+	/** Bound keys — read by screens for visible-hint footers (M6-4). */
+	public static KeyBinding abilityKey;
+	public static KeyBinding characterKey;
+
 	@Override
 	public void onInitializeClient() {
 		LifepathMod.LOGGER.info("Lifepath client initializing (version {})", LifepathMod.modVersion());
@@ -56,8 +60,17 @@ public class LifepathClient implements ClientModInitializer {
 			ClientCharacterState.clear();
 			ClientAbilityState.clear();
 			ClientHighlights.clear();
+			io.github.durdeuvlad.lifepath.client.feedback.ClientFeedback.clear();
 		});
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> ClientCharacterState.clear());
+
+		// M6-4: feedback events — localized chat/actionbar; ready-watcher
+		// derives "ability ready" from the synced cooldown map.
+		ClientLifepathNetworking.onS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload.ID,
+				(payload, context) -> context.client().execute(() ->
+						io.github.durdeuvlad.lifepath.client.feedback
+								.ClientFeedback.handle(payload)));
 
 		// M6-3: HUD overlay — relevance-gated resources/cooldowns/states,
 		// read-only on synced state (config: client.toml hud_*).
@@ -66,12 +79,12 @@ public class LifepathClient implements ClientModInitializer {
 
 		// M4-1: rebindable ability key (default G) — sends a C2S activation
 		// request for the client-selected ability; the server validates all.
-		KeyBinding abilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		abilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 				"key.lifepath.ability", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G,
 				"key.categories.lifepath"));
 		// M6-1: character screen key (default C) — opens the read-only
 		// identity hub; the screen renders synced state, never mutates it.
-		KeyBinding characterKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		characterKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 				"key.lifepath.character", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_C,
 				"key.categories.lifepath"));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -86,6 +99,8 @@ public class LifepathClient implements ClientModInitializer {
 				}
 			}
 			ClientHighlights.tick(client);
+			io.github.durdeuvlad.lifepath.client.feedback.ClientFeedback
+					.tickReadyWatcher(client, abilityKey);
 		});
 	}
 }

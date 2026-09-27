@@ -84,7 +84,12 @@ public final class AbilityEngine {
 					// The queued task can run after a disconnect — resolving a
 					// character for an offline entity would leak a cache entry.
 					if (ctx.server().getPlayerManager().getPlayer(player.getUuid()) == player) {
-						tryActivate(player, payload.abilityId());
+						Outcome outcome = tryActivate(player, payload.abilityId());
+						if (outcome != Outcome.EXECUTED) {
+							io.github.durdeuvlad.lifepath.feedback.FeedbackService
+									.abilityDenied(player, payload.abilityId(),
+											outcome);
+						}
 					}
 				}));
 	}

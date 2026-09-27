@@ -228,6 +228,10 @@ public class LifepathMod implements ModInitializer {
 				io.github.durdeuvlad.lifepath.network.c2s.ActivateAbilityPayload.PACKET_CODEC);
 		io.github.durdeuvlad.lifepath.ability.AbilityEngine.init();
 		io.github.durdeuvlad.lifepath.resource.ResourceService.init();
+		io.github.durdeuvlad.lifepath.feedback.FeedbackService.init();
+		LifepathNetworking.registerS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload.ID,
+				io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload.PACKET_CODEC);
 		XpSourceRouter.init();
 		VanillaGameplayProducers.init();
 		io.github.durdeuvlad.lifepath.compat.ExternalAdapterRegistry.init();

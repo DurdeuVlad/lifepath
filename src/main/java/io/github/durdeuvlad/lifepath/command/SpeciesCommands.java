@@ -102,6 +102,12 @@ public final class SpeciesCommands {
 				source.getName(), target.getName().getString(), target.getUuid(), speciesId);
 		source.sendFeedback(() -> Text.literal("set " + target.getName().getString()
 				+ " species to " + speciesId), true);
+		// M6-4 consequence preview: species_assigned carries only the name —
+		// the recipient also gets the identity description line.
+		var def = LifepathContent.species().get(speciesId);
+		if (def != null && def.description().isPresent()) {
+			target.sendMessage(Text.literal(def.description().get()), false);
+		}
 		return Command.SINGLE_SUCCESS;
 	}
 
