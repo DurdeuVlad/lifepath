@@ -138,6 +138,41 @@ class AbilityEngineTest {
 	}
 
 	@Test
+	void autoActivationResolvesFirstOwnedActive() {
+		// Owned order puts the species passive first — AUTO must skip it and
+		// land on the active (WRONG_TRIGGER would prove it didn't).
+		registerAbility(PASSIVE_JSON);
+		Identifier active = LifepathMod.id("auto_pick");
+		AbilityDefinition.AbilityFile file = AbilityDefinition.AbilityFile.CODEC
+				.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+						{"display_name": "Active", "trigger": {"type": "active"},
+						 "target": {"type": "lifepath:self"},
+						 "actions": [{"type": "lifepath:test_fire"}]}
+						""")).result().orElseThrow();
+		LifepathContent.abilities().register(active,
+				AbilityDefinition.fromFile(active, file));
+		speciesWith(List.of(ABILITY), List.of(active));
+		PlayerCharacterData data = characterOfSpecies();
+
+		assertEquals(Outcome.EXECUTED, AbilityEngine.tryActivate(data, null,
+				io.github.durdeuvlad.lifepath.network.c2s
+						.ActivateAbilityPayload.AUTO, 1_000L));
+		assertEquals(1, fired.get());
+	}
+
+	@Test
+	void autoActivationRejectsWhenNothingActive() {
+		registerAbility(PASSIVE_JSON);
+		speciesWith(List.of(ABILITY), List.of());
+		PlayerCharacterData data = characterOfSpecies();
+
+		assertEquals(Outcome.NOT_OWNED, AbilityEngine.tryActivate(data, null,
+				io.github.durdeuvlad.lifepath.network.c2s
+						.ActivateAbilityPayload.AUTO, 1_000L));
+		assertEquals(0, fired.get());
+	}
+
+	@Test
 	void eventAbilityFiresOnlyOnListedEventTypes() {
 		registerAbility("""
 				{"display_name": "Event", "trigger": {"type": "event",

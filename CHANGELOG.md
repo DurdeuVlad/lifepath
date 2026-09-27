@@ -26,6 +26,9 @@ milestone M10 — every roadmap system below is shipped and exercised.
 - **Conditions & attunements** — staged conditions (Vampirism, Lycanthropy)
   and flat attunements (Air, Earth, Lightning), all data-defined.
 - **UI** — character screen, skill list/detail, HUD element, feedback events.
+  The character screen's Abilities list is clickable (ACTIVE rows bind the
+  ability key, passives are tagged/dimmed); pressing the key with nothing
+  bound auto-picks the first owned active ability server-side.
 - **Ops surface** — full `/lifepath` admin tree (`docs/ADMIN_COMMANDS.md`),
   9 config files (`docs/CONFIGURATION.md`), datapack API for every content
   domain (`docs/DATAPACK_API.md`), live content validation on boot/reload.

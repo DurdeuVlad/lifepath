@@ -33,8 +33,11 @@ class IdentitySummaryPayloadTest {
 								"lifepath:textures/gui/condition/chilled.png")),
 						"traits", List.of(
 								new Entry("lifepath:night_eyes", "Night Eyes", ""))),
-				Map.of("lifepath:frost_nova", new Entry("lifepath:frost_nova",
-						"Frost Nova", "lifepath:textures/gui/ability/frost.png")),
+				Map.of("lifepath:frost_nova",
+						new IdentitySummaryPayload.AbilityEntry(
+								"lifepath:frost_nova", "Frost Nova",
+								"lifepath:textures/gui/ability/frost.png",
+								true)),
 				List.of(new IdentitySummaryPayload.ResourceDisplay(
 						"lifepath:temperature", "Temperature", 50, 1,
 						List.of("Cold", "Hot"),

@@ -1,15 +1,15 @@
 package io.github.durdeuvlad.lifepath.client.ability;
 
-import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.client.character.ClientCharacterState;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Client-side ability activation state (M4-1). Holds the currently selected
- * ability id the keybind should fire — chosen by the M6 selection UI; until
- * then it stays null and keypresses are a logged no-op. The client NEVER
- * decides anything authoritative: the packet is a request the server fully
+ * ability id the keybind should fire — set by clicking an ability row in the
+ * character screen. With no selection the key sends the AUTO sentinel so the
+ * server picks the first owned ACTIVE ability. The client NEVER decides
+ * anything authoritative: the packet is a request the server fully
  * re-validates.
  */
 public final class ClientAbilityState {
@@ -22,28 +22,29 @@ public final class ClientAbilityState {
 		return selected;
 	}
 
-	/** The M6 UI will set this; exposed for that future seam and dev testing. */
+	/** Called by the character screen ability list; cleared on disconnect. */
 	public static void select(@Nullable Identifier abilityId) {
 		selected = abilityId;
 	}
 
 	/**
-	 * Sends an activation request for {@link #selected} if set. Returns true
-	 * when a request was actually sent.
+	 * Sends an activation request — the {@link #selected} ability, or the
+	 * AUTO sentinel so the server resolves the first owned ACTIVE ability
+	 * when nothing was picked. Returns true when a request was sent.
 	 */
 	public static boolean requestActivation() {
-		if (selected == null) {
-			LifepathMod.LOGGER.debug("ability key pressed with nothing selected");
-			return false;
-		}
 		// send() throws IllegalStateException when the client isn't in a game —
 		// a keypress during disconnect/unload must degrade to a no-op.
 		if (net.minecraft.client.MinecraftClient.getInstance().getNetworkHandler() == null) {
 			return false;
 		}
+		Identifier abilityId = selected != null
+				? selected
+				: io.github.durdeuvlad.lifepath.network.c2s
+						.ActivateAbilityPayload.AUTO;
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
 				new io.github.durdeuvlad.lifepath.network.c2s
-						.ActivateAbilityPayload(selected));
+						.ActivateAbilityPayload(abilityId));
 		return true;
 	}
 

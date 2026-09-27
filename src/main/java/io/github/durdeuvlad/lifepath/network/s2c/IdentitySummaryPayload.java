@@ -34,7 +34,7 @@ import net.minecraft.network.packet.CustomPayload;
 public record IdentitySummaryPayload(IdentityCore identity,
 		List<Entry> specFocus,
 		Map<String, List<Entry>> sections,
-		Map<String, Entry> abilities,
+		Map<String, AbilityEntry> abilities,
 		List<ResourceDisplay> resourceDisplays) implements CustomPayload {
 
 	/**
@@ -48,6 +48,22 @@ public record IdentitySummaryPayload(IdentityCore identity,
 						PacketCodecs.STRING, Entry::name,
 						PacketCodecs.STRING, Entry::icon,
 						Entry::new);
+	}
+
+	/**
+	 * An owned ability as the client sees it: Entry fields plus whether the
+	 * trigger kind is ACTIVE — the character screen needs this to offer the
+	 * click-to-bind affordance only on rows the key can actually fire.
+	 */
+	public record AbilityEntry(String id, String name, String icon,
+			boolean active) {
+		public static final PacketCodec<RegistryByteBuf, AbilityEntry> CODEC =
+				PacketCodec.tuple(
+						PacketCodecs.STRING, AbilityEntry::id,
+						PacketCodecs.STRING, AbilityEntry::name,
+						PacketCodecs.STRING, AbilityEntry::icon,
+						PacketCodecs.BOOL, AbilityEntry::active,
+						AbilityEntry::new);
 	}
 
 	/** Static display info for one resource def (M6-3 HUD; icon added M12-3). */
@@ -103,7 +119,7 @@ public record IdentitySummaryPayload(IdentityCore identity,
 							Entry.CODEC.collect(PacketCodecs.toList())),
 							IdentitySummaryPayload::sections,
 					PacketCodecs.map(java.util.HashMap::new, PacketCodecs.STRING,
-							Entry.CODEC), IdentitySummaryPayload::abilities,
+							AbilityEntry.CODEC), IdentitySummaryPayload::abilities,
 					ResourceDisplay.CODEC.collect(PacketCodecs.toList()),
 							IdentitySummaryPayload::resourceDisplays,
 					IdentitySummaryPayload::new);

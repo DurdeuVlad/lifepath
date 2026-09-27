@@ -1,9 +1,0 @@
-{
-  "min": 0,
-  "max": 100,
-  "default": 50,
-  "regen_per_second": 1.0,
-  "bands": [
-    {"range": [0, 25], "actions": [{"type": "lifepath:debug_log", "message": "test_focus low"}]}
-  ]
-}

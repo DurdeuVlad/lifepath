@@ -150,6 +150,22 @@ public final class AbilityEngine {
 	}
 
 	/**
+	 * First owned ability whose trigger kind is ACTIVE, in owned-set order —
+	 * species actives first, then specialization signatures, then
+	 * trait/condition/attunement/unlock ids. Null when the player owns none.
+	 */
+	@Nullable
+	private static Identifier firstOwnedActive(PlayerCharacterData data) {
+		for (Identifier id : ownedAbilities(data)) {
+			AbilityDefinition def = LifepathContent.abilities().get(id);
+			if (def != null && def.trigger().kind() == AbilityDefinition.Kind.ACTIVE) {
+				return id;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * PASSIVE sweep for one player: honors each ability's {@code interval_ticks}
 	 * via a namespaced schedule marker in the cooldown map (generic state —
 	 * no ability-specific fields on the model).
@@ -267,6 +283,12 @@ public final class AbilityEngine {
 			@Nullable ServerPlayerEntity self, Identifier abilityId, long now) {
 		if (!abilitiesEnabled()) {
 			return Outcome.DISABLED;
+		}
+		if (abilityId.equals(ActivateAbilityPayload.AUTO)) {
+			abilityId = firstOwnedActive(data);
+			if (abilityId == null) {
+				return Outcome.NOT_OWNED;
+			}
 		}
 		if (!ownedAbilities(data).contains(abilityId)) {
 			return Outcome.NOT_OWNED;

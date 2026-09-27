@@ -116,7 +116,8 @@ public final class HudModel {
 				continue;
 			}
 			String idStr = e.getKey().toString();
-			IdentitySummaryPayload.Entry ability = identity.abilities().get(idStr);
+			IdentitySummaryPayload.AbilityEntry ability =
+					identity.abilities().get(idStr);
 			String label = ability != null ? ability.name() : e.getKey().getPath();
 			rows.add(new CooldownRow(idStr, label, left,
 					ability != null ? ability.icon() : ""));

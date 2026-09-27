@@ -1,15 +1,18 @@
 package io.github.durdeuvlad.lifepath.client.screen;
 
+import io.github.durdeuvlad.lifepath.client.ability.ClientAbilityState;
 import io.github.durdeuvlad.lifepath.client.character.ClientCharacterState;
 import io.github.durdeuvlad.lifepath.client.icon.ClientIcons;
 import io.github.durdeuvlad.lifepath.character.IdentitySummary;
 import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 /**
  * M6-1 character screen — the identity hub ("what am I?"). Pure read model:
@@ -27,6 +30,11 @@ import net.minecraft.text.Text;
  * none, so rows keep working while final art is pending. Names stay visible
  * (icons augment, never replace); the species description moved to a hover
  * tooltip over its hero row to keep the default view identity-at-a-glance.
+ *
+ * <p>Abilities section: every owned ability renders with its icon; rows
+ * whose trigger kind is ACTIVE are clickable and bind the ability key —
+ * pressing it with nothing picked sends the server-side AUTO pick instead.
+ * Passives render dimmed and are never offered as targets.
  */
 @Environment(EnvType.CLIENT)
 public class CharacterScreen extends Screen {
@@ -35,6 +43,13 @@ public class CharacterScreen extends Screen {
 	private static final int DIM = 0xFF909090;
 	private static final int PANEL = 0xC0101015;
 	private static final int PANEL_EDGE = 0xFF3A3A44;
+	private static final int PANEL_W = 220;
+
+	/** Clickable active-ability rows, rebuilt every render pass. */
+	private final List<AbilityRow> abilityRows = new ArrayList<>();
+
+	/** Hit rect for one clickable ability row (screen coordinates). */
+	private record AbilityRow(String id, int x, int y, int w, int h) {}
 
 	public CharacterScreen() {
 		super(Text.translatable("screen.lifepath.character.title"));
@@ -46,7 +61,10 @@ public class CharacterScreen extends Screen {
 		addDrawableChild(net.minecraft.client.gui.widget.ButtonWidget.builder(
 				Text.translatable("screen.lifepath.character.skills_button"),
 				b -> client.setScreen(new SkillsScreen()))
-				.dimensions(width / 2 - 60, height / 2 + 88, 120, 18)
+				.dimensions(width / 2 - 60,
+						panelTop() + panelHeight(
+								ClientCharacterState.identity()) + 6,
+						120, 18)
 				.build());
 	}
 
@@ -54,9 +72,13 @@ public class CharacterScreen extends Screen {
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		renderBackground(context, mouseX, mouseY, delta);
 		int left = width / 2 - 110;
-		int top = height / 2 - 80;
-		int panelW = 220;
-		int panelH = 160;
+		int panelW = PANEL_W;
+		IdentitySummaryPayload id = ClientCharacterState.identity();
+		IdentitySummaryPayload.IdentityCore core = id.identity();
+		// The panel wraps measured content — sections flow past a fixed
+		// height, so it must grow or the key hint lands on the last rows.
+		int panelH = panelHeight(id);
+		int top = panelTop(panelH);
 		context.fill(left - 4, top - 4, left + panelW + 4, top + panelH + 4, PANEL_EDGE);
 		context.fill(left - 3, top - 3, left + panelW + 3, top + panelH + 3, PANEL);
 
@@ -64,8 +86,6 @@ public class CharacterScreen extends Screen {
 				Text.translatable("screen.lifepath.character.title"),
 				width / 2, top + 4, ACCENT);
 
-		IdentitySummaryPayload id = ClientCharacterState.identity();
-		IdentitySummaryPayload.IdentityCore core = id.identity();
 		int y = top + 22;
 
 		// --- Species (the identity hero line) ---
@@ -129,9 +149,54 @@ public class CharacterScreen extends Screen {
 		y = listSection(context, left, y + 4,
 				"screen.lifepath.character.attunements", "attunement",
 				id.sections().getOrDefault(IdentitySummary.SECTION_ATTUNEMENTS, List.of()));
-		listSection(context, left, y + 4,
+		y = listSection(context, left, y + 4,
 				"screen.lifepath.character.traits", "trait",
 				id.sections().getOrDefault(IdentitySummary.SECTION_TRAITS, List.of()));
+
+		// --- Abilities: click an ACTIVE row to bind the ability key ---
+		abilityRows.clear();
+		if (!id.abilities().isEmpty()) {
+			// A respec/species change can drop the bound ability — clear a
+			// stale pick so the key falls back to AUTO rather than failing
+			// silently. Guarded on non-empty: the pre-sync empty payload must
+			// never wipe a live selection.
+			Identifier selected = ClientAbilityState.selected();
+			if (selected != null
+					&& !id.abilities().containsKey(selected.toString())) {
+				ClientAbilityState.clear();
+				selected = null;
+			}
+			y = section(context, left, y + 4,
+					Text.translatable("screen.lifepath.character.abilities"));
+			for (IdentitySummaryPayload.AbilityEntry e
+					: id.abilities().values()) {
+				boolean sel = selected != null
+						&& e.id().equals(selected.toString());
+				final int rowY = y;
+				ClientIcons.resolve("ability", e.icon())
+						.ifPresent(tex -> context.drawTexture(tex, left + 6,
+								rowY, 10, 10, 0, 0, 16, 16, 16, 16));
+				Text label = e.active()
+						? Text.literal((sel ? "> " : "") + e.name())
+						: Text.translatable(
+								"screen.lifepath.character.ability_passive",
+								e.name());
+				context.drawTextWithShadow(textRenderer, label, left + 19,
+						y + 1, sel ? ACCENT : (e.active() ? TEXT : DIM));
+				if (e.active()) {
+					abilityRows.add(new AbilityRow(e.id(), left, y, panelW, 11));
+				}
+				y += 11;
+			}
+			if (selected == null
+					&& io.github.durdeuvlad.lifepath.client.LifepathClient
+							.abilityKey != null) {
+				y = line(context, left, y + 2, Text.translatable(
+						"screen.lifepath.character.abilities_hint",
+						io.github.durdeuvlad.lifepath.client.LifepathClient
+								.abilityKey.getBoundKeyLocalizedText()), DIM);
+			}
+		}
 
 		// M6-4: visible keybind hints — the ability key is never discoverable
 		// otherwise. Shows the ACTUAL bound key, not a hardcoded letter.
@@ -140,8 +205,66 @@ public class CharacterScreen extends Screen {
 					Text.translatable("screen.lifepath.character.key_hint",
 							io.github.durdeuvlad.lifepath.client.LifepathClient
 									.abilityKey.getBoundKeyLocalizedText()),
-					width / 2, top + panelH - 30, DIM);
+					width / 2, top + panelH - 14, DIM);
 		}
+	}
+
+	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		for (AbilityRow row : abilityRows) {
+			if (mouseX >= row.x() && mouseX < row.x() + row.w()
+					&& mouseY >= row.y() && mouseY < row.y() + row.h()) {
+				Identifier picked = Identifier.tryParse(row.id());
+				if (picked != null) {
+					ClientAbilityState.select(picked);
+					return true;
+				}
+			}
+		}
+		return super.mouseClicked(mouseX, mouseY, button);
+	}
+
+	private int panelTop() {
+		return panelTop(panelHeight(ClientCharacterState.identity()));
+	}
+
+	/** Center the grown panel vertically; clamp so it never starts off-screen. */
+	private int panelTop(int panelH) {
+		return Math.max(8, (height - panelH) / 2);
+	}
+
+	/**
+	 * Measured content height so the panel wraps whatever sections exist —
+	 * a fixed height either clipped rows or left the key hint floating over
+	 * text. Mirrors the render flow line-for-line.
+	 */
+	private int panelHeight(IdentitySummaryPayload id) {
+		IdentitySummaryPayload.IdentityCore core = id.identity();
+		int h = 22;                              // title gap
+		h += 11 + (core.speciesName().isEmpty() ? 11 : 18);
+		h += 4 + 11 + (core.specName().isEmpty() ? 11 : 18);
+		if (!core.specName().isEmpty() && !id.specFocus().isEmpty()) {
+			h += 11;
+		}
+		h += 10 * textRenderer.wrapLines(Text.translatable(
+				"screen.lifepath.character.spec_note"), PANEL_W - 8).size();
+		h += listHeight(id.sections().getOrDefault(
+				IdentitySummary.SECTION_CONDITIONS, List.of()));
+		h += listHeight(id.sections().getOrDefault(
+				IdentitySummary.SECTION_ATTUNEMENTS, List.of()));
+		h += listHeight(id.sections().getOrDefault(
+				IdentitySummary.SECTION_TRAITS, List.of()));
+		if (!id.abilities().isEmpty()) {
+			h += 4 + 11 + 11 * id.abilities().size();
+			if (ClientAbilityState.selected() == null) {
+				h += 13;                     // "click to bind" hint line
+			}
+		}
+		return h + 24;                           // key hint + bottom pad
+	}
+
+	private static int listHeight(List<?> entries) {
+		return 4 + 11 + 11 * Math.max(1, entries.size());
 	}
 
 	private int section(DrawContext context, int x, int y, Text label) {

@@ -1,7 +1,0 @@
-{
-  "display_name": "Test: active with cooldown",
-  "trigger": {"type": "active"},
-  "target": {"type": "lifepath:self"},
-  "actions": [{"type": "lifepath:debug_log", "message": "active fired"}],
-  "cooldown": {"seconds": 60}
-}

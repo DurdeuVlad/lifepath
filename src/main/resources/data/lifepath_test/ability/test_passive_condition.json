@@ -1,9 +1,0 @@
-{
-  "display_name": "Test: passive conditioned regen",
-  "trigger": {"type": "passive", "interval_ticks": 20},
-  "conditions": {"all": [{"type": "lifepath:has_resource",
-                          "resource": "lifepath_test:test_focus", "min": 10}]},
-  "target": {"type": "lifepath:self"},
-  "actions": [{"type": "lifepath:resource_delta",
-               "resource": "lifepath_test:test_focus", "amount": 1}]
-}

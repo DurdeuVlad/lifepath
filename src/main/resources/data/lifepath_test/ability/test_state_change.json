@@ -1,7 +1,0 @@
-{
-  "display_name": "Test: state-changing event ability",
-  "trigger": {"type": "event", "events": ["lifepath:mining"]},
-  "target": {"type": "lifepath:self"},
-  "actions": [{"type": "lifepath:modify_resource",
-               "resource": "lifepath_test:test_focus", "delta": 5}]
-}

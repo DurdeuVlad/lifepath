@@ -62,11 +62,18 @@ public final class IdentitySummary {
 		sections.put(SECTION_TRAITS, entriesOf(data.traits()));
 
 		// M6-3: display info for every ability the character owns — the HUD's
-		// cooldown rows label by id; plus static resource display info.
-		Map<String, IdentitySummaryPayload.Entry> abilities = new LinkedHashMap<>();
+		// cooldown rows label by id; the `active` flag lets the character
+		// screen offer click-to-bind only on rows the key can fire.
+		Map<String, IdentitySummaryPayload.AbilityEntry> abilities =
+				new LinkedHashMap<>();
 		for (Identifier id : io.github.durdeuvlad.lifepath.ability.AbilityEngine
 				.ownedAbilities(data)) {
-			abilities.put(id.toString(), entry(id));
+			var def = LifepathContent.abilities().get(id);
+			boolean active = def != null && def.trigger().kind()
+					== io.github.durdeuvlad.lifepath.content.AbilityDefinition
+							.Kind.ACTIVE;
+			abilities.put(id.toString(), new IdentitySummaryPayload.AbilityEntry(
+					id.toString(), displayName(id), iconRef(id), active));
 		}
 		List<IdentitySummaryPayload.ResourceDisplay> resourceDisplays =
 				new ArrayList<>();
