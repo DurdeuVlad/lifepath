@@ -67,6 +67,7 @@ class VerticalSliceTest {
 		LifepathContent.abilities().clear();
 		LifepathContent.diets().clear();
 		LifepathContent.relations().clear();
+		LifepathContent.conditions().clear();
 	}
 
 	@AfterEach
@@ -81,6 +82,7 @@ class VerticalSliceTest {
 		LifepathContent.abilities().clear();
 		LifepathContent.diets().clear();
 		LifepathContent.relations().clear();
+		LifepathContent.conditions().clear();
 	}
 
 	private static <T> T decodeFile(String domain, String name, Codec<T> codec)
@@ -134,6 +136,12 @@ class VerticalSliceTest {
 					SpecializationDefinition.fromFile(LifepathMod.id(n),
 							decodeFile("specialization", n,
 									SpecializationDefinition.SpecializationDefinitionFile.CODEC)));
+		for (String n : names("condition"))
+			LifepathContent.conditions().register(LifepathMod.id(n),
+					io.github.durdeuvlad.lifepath.content.ConditionDefinition.fromFile(
+							LifepathMod.id(n), decodeFile("condition", n,
+									io.github.durdeuvlad.lifepath.content.ConditionDefinition
+											.ConditionFile.CODEC)));
 	}
 
 	@Test
@@ -155,6 +163,9 @@ class VerticalSliceTest {
 			assertTrue(LifepathContent.skills().contains(LifepathMod.id(s)),
 					"missing skill " + s);
 		assertEquals(12, LifepathContent.species().size());
+		for (String s : List.of("vampirism", "lycanthropy"))
+			assertTrue(LifepathContent.conditions().contains(LifepathMod.id(s)),
+					"missing condition " + s);
 	}
 
 	@Test
@@ -192,6 +203,19 @@ class VerticalSliceTest {
 		}
 		for (XpSourceDefinition xs : LifepathContent.xpSources().all().values())
 			if (!LifepathContent.skills().contains(xs.skill())) dangling.add(xs.skill());
+		// M9-1: condition → ability/resource/diet refs resolve too.
+		for (var cond : LifepathContent.conditions().all().values()) {
+			for (Identifier a : cond.abilities())
+				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
+			for (var stage : cond.stages())
+				for (Identifier a : stage.abilities())
+					if (!LifepathContent.abilities().contains(a)) dangling.add(a);
+			for (Identifier r : cond.resources())
+				if (!LifepathContent.resources().contains(r)) dangling.add(r);
+			cond.dietRules().ifPresent(d -> {
+				if (!LifepathContent.diets().contains(d)) dangling.add(d);
+			});
+		}
 
 		assertEquals(KNOWN_DANGLING_SIGNATURES, dangling,
 				"only the tracked spec-signature gap may dangle");

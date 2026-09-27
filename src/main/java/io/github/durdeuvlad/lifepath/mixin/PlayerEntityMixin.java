@@ -27,6 +27,12 @@ public abstract class PlayerEntityMixin {
 	private void lifepath$dietGate(net.minecraft.entity.player.HungerManager manager,
 			FoodComponent food, Operation<Void> original,
 			World world, ItemStack stack, FoodComponent foodComponent) {
+		if ((Object) this instanceof ServerPlayerEntity player) {
+			// M9-1: item-type condition cures/acquisition resolve on the eaten
+			// stack regardless of whether the diet gate passes nutrition.
+			io.github.durdeuvlad.lifepath.condition.ConditionService
+					.onItemEaten(player, stack, System.currentTimeMillis());
+		}
 		if (!((Object) this instanceof ServerPlayerEntity player)
 				|| DietService.allows(CharacterManager.getCharacter(player), stack)) {
 			original.call(manager, food);

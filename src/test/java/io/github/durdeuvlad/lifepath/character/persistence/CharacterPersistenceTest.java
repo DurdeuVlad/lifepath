@@ -123,6 +123,37 @@ class CharacterPersistenceTest {
 	}
 
 	@Test
+	void v1ConditionListMigratesToV2StateMap() {
+		// v1 stored conditions as a list of bare id strings; v2 stores
+		// {id: {stage,…}}. The migration must preserve every held id at
+		// stage 0 and drop nothing.
+		NbtCompound raw = CharacterPersistence.serialize(sampleData());
+		raw.putInt("data_version", 1);
+		net.minecraft.nbt.NbtList legacy = new net.minecraft.nbt.NbtList();
+		legacy.add(net.minecraft.nbt.NbtString.of("lifepath:vampirism"));
+		legacy.add(net.minecraft.nbt.NbtString.of("lifepath:lycanthropy"));
+		raw.put("conditions", legacy);
+
+		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
+
+		assertEquals(2, decoded.conditionStates().size());
+		assertEquals(0, decoded.conditionState(Identifier.of("lifepath", "vampirism")).stage());
+		assertEquals(0, decoded.conditionState(Identifier.of("lifepath", "lycanthropy")).stage());
+	}
+
+	@Test
+	void emptyV1ConditionListMigratesCleanly() {
+		NbtCompound raw = CharacterPersistence.serialize(sampleData());
+		raw.putInt("data_version", 1);
+		raw.put("conditions", new net.minecraft.nbt.NbtList());
+
+		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
+
+		assertTrue(decoded.conditionStates().isEmpty());
+		assertEquals(LifepathMod.DATA_VERSION, decoded.dataVersion());
+	}
+
+	@Test
 	void migrationRunsBeforeDecode() {
 		// A v0 blob: no data_version, otherwise valid v1 shape.
 		NbtCompound raw = CharacterPersistence.serialize(sampleData());

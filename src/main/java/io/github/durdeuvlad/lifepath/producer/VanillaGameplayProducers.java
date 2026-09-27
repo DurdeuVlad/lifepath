@@ -112,6 +112,11 @@ public final class VanillaGameplayProducers {
 					ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents
 							.defence(victim, attackerId, attackerTags,
 									ActivityEvent.Cause.NON_PLAYER));
+					// M9-1: attack-type condition acquisition rides the same
+					// hostile-hit seam (vampirism bite, lycanthropy scratch).
+					io.github.durdeuvlad.lifepath.condition.ConditionService
+							.onDamagedBy(victim, attacker, victim.getWorld().getRandom(),
+									System.currentTimeMillis());
 				});
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
 			if (world.isClient() || !(player instanceof ServerPlayerEntity serverPlayer)) {

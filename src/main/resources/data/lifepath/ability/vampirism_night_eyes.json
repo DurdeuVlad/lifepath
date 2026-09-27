@@ -1,0 +1,9 @@
+{
+	"display_name": "Night Eyes",
+	"trigger": {"type": "passive", "interval_ticks": 60},
+	"conditions": {"all": [{"type": "lifepath:night"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect", "effect": "minecraft:night_vision", "duration": 300, "amplifier": 0}
+	]
+}

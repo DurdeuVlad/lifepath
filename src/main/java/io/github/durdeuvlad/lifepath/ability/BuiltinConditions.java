@@ -226,6 +226,21 @@ public final class BuiltinConditions {
 							.resources().get(res) != null;
 			return known && compare(op, cur, num(params, "value", 0));
 		});
+		// M9-1 condition primitives — gate abilities on held condition state.
+		register("has_condition", (ctx, params) -> {
+			Identifier cond = id(params, "condition");
+			return cond != null && ctx.data() != null
+					&& ctx.data().conditions().contains(cond);
+		});
+		register("condition_stage", (ctx, params) -> {
+			Identifier cond = id(params, "condition");
+			if (cond == null || ctx.data() == null) {
+				return false;
+			}
+			var st = ctx.data().conditionState(cond);
+			return st != null && compare(str(params, "op") != null ? str(params, "op") : ">=",
+					st.stage(), num(params, "stage", 0));
+		});
 		// M5-2 primitives: block occupancy + incoming-damage context.
 		register("inside_block", (ctx, params) -> {
 			ServerPlayerEntity p = ctx.self();

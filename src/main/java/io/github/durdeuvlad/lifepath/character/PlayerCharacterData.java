@@ -46,7 +46,10 @@ public final class PlayerCharacterData {
 			Codec.unboundedMap(Identifier.CODEC, SkillProgress.CODEC)
 					.optionalFieldOf("skills", Map.of()).forGetter(d -> d.skills),
 			Identifier.CODEC.listOf().optionalFieldOf("traits", List.of()).forGetter(d -> d.traits),
-			Identifier.CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(d -> d.conditions),
+			// M9-1: condition id -> stage state (v2 shape; v1 string lists are
+			// rewritten by the migration chain).
+			Codec.unboundedMap(Identifier.CODEC, io.github.durdeuvlad.lifepath.condition.ConditionState.CODEC)
+					.optionalFieldOf("conditions", Map.of()).forGetter(d -> d.conditions),
 			Identifier.CODEC.listOf().optionalFieldOf("attunements", List.of()).forGetter(d -> d.attunements),
 			Identifier.CODEC.listOf().optionalFieldOf("unlocks", List.of()).forGetter(d -> d.unlocks),
 			Codec.unboundedMap(Identifier.CODEC, ResourceState.CODEC)
@@ -64,7 +67,8 @@ public final class PlayerCharacterData {
 	private Identifier specializationId;
 	private final Map<Identifier, SkillProgress> skills = new LinkedHashMap<>();
 	private final List<Identifier> traits = new ArrayList<>();
-	private final List<Identifier> conditions = new ArrayList<>();
+	private final Map<Identifier, io.github.durdeuvlad.lifepath.condition.ConditionState> conditions =
+			new LinkedHashMap<>();
 	private final List<Identifier> attunements = new ArrayList<>();
 	private final List<Identifier> unlocks = new ArrayList<>();
 	private final Map<Identifier, ResourceState> resources = new LinkedHashMap<>();
@@ -97,7 +101,7 @@ public final class PlayerCharacterData {
 			Optional<Identifier> specializationId,
 			Map<Identifier, SkillProgress> skills,
 			List<Identifier> traits,
-			List<Identifier> conditions,
+			Map<Identifier, io.github.durdeuvlad.lifepath.condition.ConditionState> conditions,
 			List<Identifier> attunements,
 			List<Identifier> unlocks,
 			Map<Identifier, ResourceState> resources,
@@ -109,7 +113,7 @@ public final class PlayerCharacterData {
 		data.specializationId = specializationId.orElse(null);
 		data.skills.putAll(skills);
 		data.traits.addAll(traits);
-		data.conditions.addAll(conditions);
+		data.conditions.putAll(conditions);
 		data.attunements.addAll(attunements);
 		data.unlocks.addAll(unlocks);
 		data.resources.putAll(resources);
@@ -160,8 +164,28 @@ public final class PlayerCharacterData {
 		return Collections.unmodifiableList(traits);
 	}
 
+	/** Held condition ids (stage state lives in {@link #conditionState}). */
 	public List<Identifier> conditions() {
-		return Collections.unmodifiableList(conditions);
+		return List.copyOf(conditions.keySet());
+	}
+
+	@Nullable
+	public io.github.durdeuvlad.lifepath.condition.ConditionState conditionState(Identifier id) {
+		return conditions.get(id);
+	}
+
+	/** Mutable by {@code ConditionService} only — stage state changes are service-owned. */
+	public Map<Identifier, io.github.durdeuvlad.lifepath.condition.ConditionState> conditionStates() {
+		return Collections.unmodifiableMap(conditions);
+	}
+
+	public boolean putCondition(Identifier id,
+			io.github.durdeuvlad.lifepath.condition.ConditionState state) {
+		return conditions.put(Objects.requireNonNull(id), Objects.requireNonNull(state)) == null;
+	}
+
+	public boolean removeCondition(Identifier id) {
+		return conditions.remove(id) != null;
 	}
 
 	public List<Identifier> attunements() {
@@ -173,6 +197,12 @@ public final class PlayerCharacterData {
 	}
 
 	public boolean addId(ListKind list, Identifier id) {
+		// CONDITIONS is a map domain (stage state); the rest are flat lists.
+		if (list == ListKind.CONDITIONS) {
+			return putCondition(id,
+					io.github.durdeuvlad.lifepath.condition.ConditionState
+							.fresh(System.currentTimeMillis()));
+		}
 		List<Identifier> target = list.of(this);
 		if (target.contains(id)) {
 			return false;
@@ -182,11 +212,17 @@ public final class PlayerCharacterData {
 	}
 
 	public boolean removeId(ListKind list, Identifier id) {
+		if (list == ListKind.CONDITIONS) {
+			return removeCondition(id);
+		}
 		return list.of(this).remove(id);
 	}
 
 	/** Read-only view of one Identifier-list domain. */
 	public List<Identifier> list(ListKind list) {
+		if (list == ListKind.CONDITIONS) {
+			return List.copyOf(conditions.keySet());
+		}
 		return Collections.unmodifiableList(list.of(this));
 	}
 
@@ -269,9 +305,11 @@ public final class PlayerCharacterData {
 		TRAITS, CONDITIONS, ATTUNEMENTS, UNLOCKS;
 
 		private List<Identifier> of(PlayerCharacterData data) {
+			// CONDITIONS is unreachable here — addId/removeId/list special-case
+			// it (the enum still exists for ContentIndex domain naming).
 			return switch (this) {
 				case TRAITS -> data.traits;
-				case CONDITIONS -> data.conditions;
+				case CONDITIONS -> List.of();
 				case ATTUNEMENTS -> data.attunements;
 				case UNLOCKS -> data.unlocks;
 			};

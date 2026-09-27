@@ -29,6 +29,37 @@ public final class CharacterMigrations {
 					// This step exists to prove the chain executes end-to-end.
 				}
 			})
+			.step(new DataMigration() {
+				@Override
+				public int fromVersion() {
+					return 1;
+				}
+
+				@Override
+				public int toVersion() {
+					return 2;
+				}
+
+				@Override
+				public void migrate(NbtCompound data) {
+					// v1 stored `conditions` as a list of bare id strings
+					// (dead field — nothing ever granted them, but upgrade
+					// anyway). v2 stores a compound {id: {stage,…}}.
+					if (!(data.get("conditions") instanceof net.minecraft.nbt.NbtList old)
+							|| old.isEmpty()) {
+						data.put("conditions", new net.minecraft.nbt.NbtCompound());
+						return;
+					}
+					var map = new net.minecraft.nbt.NbtCompound();
+					for (int i = 0; i < old.size(); i++) {
+						String id = old.getString(i);
+						if (!id.isEmpty()) {
+							map.put(id, new net.minecraft.nbt.NbtCompound());
+						}
+					}
+					data.put("conditions", map);
+				}
+			})
 			.build();
 
 	private CharacterMigrations() {

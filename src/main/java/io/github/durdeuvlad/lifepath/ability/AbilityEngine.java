@@ -66,8 +66,14 @@ public final class AbilityEngine {
 					long now = System.currentTimeMillis();
 					for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
 						io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
-								"ability.passive_sweep", () -> runPassiveSweep(
-										CharacterManager.getCharacter(player), player, now));
+								"ability.passive_sweep", () -> {
+									var data = CharacterManager.getCharacter(player);
+									runPassiveSweep(data, player, now);
+									// M9-1: stage advance_after_seconds rides
+									// the same per-player sweep interval.
+									io.github.durdeuvlad.lifepath.condition.ConditionService
+											.tick(data, player, now);
+								});
 					}
 				});
 		// EVENT: one bus listener; per-event filtering keeps the domain data-driven.
@@ -76,8 +82,11 @@ public final class AbilityEngine {
 			if (player == null) {
 				return;
 			}
-			handleEvent(CharacterManager.getCharacter(player), player, event.type(),
-					System.currentTimeMillis());
+			var data = CharacterManager.getCharacter(player);
+			handleEvent(data, player, event.type(), System.currentTimeMillis());
+			// M9-1: advance_events count toward condition stage progress.
+			io.github.durdeuvlad.lifepath.condition.ConditionService
+					.onActivity(data, player, event, System.currentTimeMillis());
 		});
 		// ACTIVE: server re-validates the request end-to-end.
 		LifepathNetworking.onC2S(ActivateAbilityPayload.ID, (payload, ctx) ->
@@ -120,9 +129,10 @@ public final class AbilityEngine {
 		for (Identifier id : data.traits()) {
 			owned.add(id);
 		}
-		for (Identifier id : data.conditions()) {
-			owned.add(id);
-		}
+		// M9-1: conditions resolve through the service — base + cumulative
+		// stage abilities (condition ids in data are NOT ability ids).
+		owned.addAll(io.github.durdeuvlad.lifepath.condition.ConditionService
+				.activeAbilities(data));
 		for (Identifier id : data.attunements()) {
 			owned.add(id);
 		}

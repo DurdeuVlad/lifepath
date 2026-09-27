@@ -79,6 +79,8 @@ reference and skipped by the content-ref scan.
 | `attacker_entity` | `entity` (id or `#tag`) — matches `source.getAttacker()`; damage_taken only |
 | `damage_type` | `id` (id or `#tag` on the damage-type registry); damage_taken only |
 | `damage_amount` | `op`, `value` — compares the pre-modifier amount; damage_taken only |
+| `has_condition` | `condition` (condition-def id) — true while the character holds it |
+| `condition_stage` | `condition`, `stage`, `op`? (default `>=`) — compares the held stage index |
 
 ### Targets
 

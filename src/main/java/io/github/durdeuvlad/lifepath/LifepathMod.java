@@ -29,7 +29,8 @@ public class LifepathMod implements ModInitializer {
 	 * Schema version of persisted Lifepath character data. Bump whenever the
 	 * serialized shape changes; M1 migration code reads this to upgrade old saves.
 	 */
-	public static final int DATA_VERSION = 1;
+	/** v2: conditions become a condition-id → stage-state map (M9-1). */
+	public static final int DATA_VERSION = 2;
 
 	/**
 	 * Single engine logger (name {@code Lifepath}). Conventions: INFO for
@@ -205,6 +206,7 @@ public class LifepathMod implements ModInitializer {
 		io.github.durdeuvlad.lifepath.command.SpecializationCommands.init();
 		io.github.durdeuvlad.lifepath.command.SpeciesCommands.init();
 		io.github.durdeuvlad.lifepath.command.DebugCommands.init();
+		io.github.durdeuvlad.lifepath.command.ConditionCommands.init();
 
 		RegistryBootstrap.register(id("character_attachments"), CharacterAttachments::init);
 		RegistryBootstrap.bootstrap();
