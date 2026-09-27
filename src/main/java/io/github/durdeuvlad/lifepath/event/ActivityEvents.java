@@ -109,8 +109,14 @@ public final class ActivityEvents {
 
 	public static ActivityEvent crafting(ServerPlayerEntity player, Identifier recipeOrOutputId,
 			ActivityEvent.Cause cause) {
-		return new ActivityEvent(player, ActivityTypes.CRAFTING, recipeOrOutputId, Set.of(),
-				cause, now(), Map.of());
+		return crafting(player, recipeOrOutputId, Set.of(), Map.of(), cause);
+	}
+
+	public static ActivityEvent crafting(ServerPlayerEntity player, Identifier recipeOrOutputId,
+			Set<Identifier> outputTags, Map<String, String> extraAttrs,
+			ActivityEvent.Cause cause) {
+		return new ActivityEvent(player, ActivityTypes.CRAFTING, recipeOrOutputId,
+				Set.copyOf(outputTags), cause, now(), Map.copyOf(extraAttrs));
 	}
 
 	public static ActivityEvent combat(ServerPlayerEntity player, Identifier entityTypeId) {

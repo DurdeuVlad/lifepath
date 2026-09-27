@@ -1,0 +1,6 @@
+{
+	"activity": "lifepath:crafting",
+	"skill": "lifepath:engineering",
+	"player_caused_only": true,
+	"base_xp": 0.05
+}

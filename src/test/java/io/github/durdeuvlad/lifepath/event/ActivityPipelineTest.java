@@ -55,6 +55,17 @@ class ActivityPipelineTest {
 		assertTrue(s.tags().contains(id("smithing_workstations")));
 		assertTrue(s.tags().contains(id("smithing_tier_iron")));
 		assertEquals(ActivityEvent.Cause.PLAYER, s.cause());
+
+		// Crafting (engineering feed): same canonical shape — output id +
+		// item tags + count attr; emitted by CraftingResultSlotMixin.
+		ActivityEvent c = ActivityEvents.crafting(null,
+				Identifier.of("minecraft", "piston"),
+				Set.of(Identifier.of("minecraft", "redstone")), Map.of("count", "1"),
+				ActivityEvent.Cause.PLAYER);
+		assertEquals(ActivityTypes.CRAFTING, c.type());
+		assertEquals(Identifier.of("minecraft", "piston"), c.sourceId());
+		assertTrue(c.tags().contains(Identifier.of("minecraft", "redstone")));
+		assertEquals("1", c.attributes().get("count"));
 	}
 
 	@Test
