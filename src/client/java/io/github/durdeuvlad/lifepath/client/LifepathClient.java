@@ -59,6 +59,11 @@ public class LifepathClient implements ClientModInitializer {
 		});
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> ClientCharacterState.clear());
 
+		// M6-3: HUD overlay — relevance-gated resources/cooldowns/states,
+		// read-only on synced state (config: client.toml hud_*).
+		net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT
+				.register(io.github.durdeuvlad.lifepath.client.hud.LifepathHud::render);
+
 		// M4-1: rebindable ability key (default G) — sends a C2S activation
 		// request for the client-selected ability; the server validates all.
 		KeyBinding abilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(

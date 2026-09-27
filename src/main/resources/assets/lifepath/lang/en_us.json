@@ -61,5 +61,6 @@
 	"lifepath.skill.fishing.milestone.40": "You read the currents",
 	"lifepath.skill.fishing.milestone.60": "Fish rise to your lure",
 	"lifepath.skill.fishing.milestone.80": "The deep yields its secrets",
-	"lifepath.skill.fishing.milestone.95": "Master of the quiet water"
+	"lifepath.skill.fishing.milestone.95": "Master of the quiet water",
+	"hud.lifepath.cooldown": "%s: %ss"
 }

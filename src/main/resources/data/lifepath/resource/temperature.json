@@ -4,16 +4,54 @@
 	"default": 50,
 	"regen_per_second": 0.0,
 	"bands": [
-		{"range": [0, 25], "effects": [
-			{"effect": "minecraft:speed", "duration_ticks": 80},
-			{"effect": "minecraft:regeneration", "duration_ticks": 80}
-		]},
-		{"range": [71, 85], "effects": [
-			{"effect": "minecraft:slowness", "duration_ticks": 80}
-		]},
-		{"range": [86, 99], "effects": [
-			{"effect": "minecraft:weakness", "duration_ticks": 80},
-			{"effect": "minecraft:slowness", "duration_ticks": 80, "amplifier": 1}
-		]}
-	]
+		{
+			"range": [
+				0,
+				25
+			],
+			"effects": [
+				{
+					"effect": "minecraft:speed",
+					"duration_ticks": 80
+				},
+				{
+					"effect": "minecraft:regeneration",
+					"duration_ticks": 80
+				}
+			],
+			"name": "Cold-adapted"
+		},
+		{
+			"range": [
+				71,
+				85
+			],
+			"effects": [
+				{
+					"effect": "minecraft:slowness",
+					"duration_ticks": 80
+				}
+			],
+			"name": "Warming"
+		},
+		{
+			"range": [
+				86,
+				99
+			],
+			"effects": [
+				{
+					"effect": "minecraft:weakness",
+					"duration_ticks": 80
+				},
+				{
+					"effect": "minecraft:slowness",
+					"duration_ticks": 80,
+					"amplifier": 1
+				}
+			],
+			"name": "Overheating"
+		}
+	],
+	"display_name": "Temperature"
 }

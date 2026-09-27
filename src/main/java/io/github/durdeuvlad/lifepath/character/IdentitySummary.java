@@ -29,10 +29,10 @@ public final class IdentitySummary {
 	/** Builds the display summary for {@code data}; never null. */
 	public static IdentitySummaryPayload build(PlayerCharacterData data) {
 		String speciesId = "", speciesName = "", speciesDesc = "";
+		SpeciesDefinition species = null;
 		if (data.speciesId() != null) {
 			speciesId = data.speciesId().toString();
-			SpeciesDefinition species =
-					LifepathContent.species().get(data.speciesId());
+			species = LifepathContent.species().get(data.speciesId());
 			speciesName = species != null
 					? species.displayName() : data.speciesId().getPath();
 			if (species != null) {
@@ -59,10 +59,45 @@ public final class IdentitySummary {
 		sections.put(SECTION_ATTUNEMENTS, namesOf(data.attunements()));
 		sections.put(SECTION_TRAITS, namesOf(data.traits()));
 
+		// M6-3: display names for every ability the character owns — the HUD's
+		// cooldown rows label by id; plus static resource display info.
+		Map<String, String> abilityNames = new LinkedHashMap<>();
+		for (Identifier id : io.github.durdeuvlad.lifepath.ability.AbilityEngine
+				.ownedAbilities(data)) {
+			abilityNames.put(id.toString(), displayName(id));
+		}
+		List<IdentitySummaryPayload.ResourceDisplay> resourceDisplays =
+				new ArrayList<>();
+		java.util.Set<Identifier> resourceIds = new java.util.LinkedHashSet<>(
+				data.resources().keySet());
+		if (species != null) {
+			resourceIds.addAll(species.resources());
+		}
+		for (Identifier rid : resourceIds) {
+			var rdef = LifepathContent.resources().get(rid);
+			if (rdef == null) {
+				continue;
+			}
+			List<String> bandNames = rdef.bands().stream()
+					.map(io.github.durdeuvlad.lifepath.content.ResourceDefinition
+							.Band::name).toList();
+			int restBand = -1;
+			for (int i = 0; i < rdef.bands().size(); i++) {
+				var b = rdef.bands().get(i);
+				if (rdef.defaultValue() >= b.lo() && rdef.defaultValue() <= b.hi()) {
+					restBand = i;
+					break;
+				}
+			}
+			resourceDisplays.add(new IdentitySummaryPayload.ResourceDisplay(
+					rid.toString(), rdef.displayName(), rdef.defaultValue(),
+					restBand, bandNames));
+		}
+
 		return new IdentitySummaryPayload(
 				new IdentitySummaryPayload.IdentityCore(speciesId, speciesName,
 						speciesDesc, specId, specName),
-				focus, sections);
+				focus, sections, abilityNames, resourceDisplays);
 	}
 
 	/**

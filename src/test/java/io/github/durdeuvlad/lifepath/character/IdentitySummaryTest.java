@@ -33,12 +33,16 @@ class IdentitySummaryTest {
 		data = PlayerCharacterData.createDefault();
 		LifepathContent.species().clear();
 		LifepathContent.specializations().clear();
+		LifepathContent.resources().clear();
+		LifepathContent.abilities().clear();
 	}
 
 	@AfterEach
 	void tearDown() {
 		LifepathContent.species().clear();
 		LifepathContent.specializations().clear();
+		LifepathContent.resources().clear();
+		LifepathContent.abilities().clear();
 	}
 
 	private static SpeciesDefinition species(String name) throws Exception {
@@ -122,6 +126,46 @@ class IdentitySummaryTest {
 		var traits = p.sections().get(IdentitySummary.SECTION_TRAITS);
 		assertEquals("Death Sight", traits.get(0));
 		assertEquals("missing_trait", traits.get(1));
+	}
+
+	@Test
+	void resourceDisplaysAndAbilityNamesFlow() {
+		// M6-3: the HUD needs static resource display info + owned-ability
+		// names resolved server-side.
+		LifepathContent.resources().register(LifepathMod.id("temperature"),
+				new io.github.durdeuvlad.lifepath.content.ResourceDefinition(
+						LifepathMod.id("temperature"), "Temperature", 0, 100, 50,
+						0, java.util.List.of(
+								new io.github.durdeuvlad.lifepath.content
+										.ResourceDefinition.Band("Cold", 0, 25,
+												java.util.List.of(),
+												java.util.List.of()),
+								new io.github.durdeuvlad.lifepath.content
+										.ResourceDefinition.Band("Temperate", 26,
+												100, java.util.List.of(),
+												java.util.List.of()))));
+		data.setResource(LifepathMod.id("temperature"),
+				new PlayerCharacterData.ResourceState(80, 0, 100));
+		data.addId(PlayerCharacterData.ListKind.TRAITS,
+				LifepathMod.id("undead_death_sight"));
+		var abilityFile = io.github.durdeuvlad.lifepath.content.AbilityDefinition
+				.AbilityFile.CODEC.parse(JsonOps.INSTANCE,
+						JsonParser.parseString(uncheckedRead(
+								"ability/undead_death_sight.json")))
+				.result().orElseThrow();
+		LifepathContent.abilities().register(LifepathMod.id("undead_death_sight"),
+				io.github.durdeuvlad.lifepath.content.AbilityDefinition
+						.fromFile(LifepathMod.id("undead_death_sight"), abilityFile));
+
+		IdentitySummaryPayload p = IdentitySummary.build(data);
+		assertEquals(1, p.resourceDisplays().size());
+		var rd = p.resourceDisplays().get(0);
+		assertEquals("Temperature", rd.name());
+		assertEquals(50, rd.defaultValue(), 0.001);
+		assertEquals(java.util.List.of("Cold", "Temperate"), rd.bandNames());
+		assertEquals(1, rd.restBandIndex()); // default 50 sits in [26,100]
+		assertEquals("Death Sight",
+				p.abilityNames().get("lifepath:undead_death_sight"));
 	}
 
 	private static String uncheckedRead(String rel) {
