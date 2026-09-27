@@ -68,6 +68,7 @@ class VerticalSliceTest {
 		LifepathContent.diets().clear();
 		LifepathContent.relations().clear();
 		LifepathContent.conditions().clear();
+		LifepathContent.attunements().clear();
 	}
 
 	@AfterEach
@@ -83,6 +84,7 @@ class VerticalSliceTest {
 		LifepathContent.diets().clear();
 		LifepathContent.relations().clear();
 		LifepathContent.conditions().clear();
+		LifepathContent.attunements().clear();
 	}
 
 	private static <T> T decodeFile(String domain, String name, Codec<T> codec)
@@ -142,6 +144,12 @@ class VerticalSliceTest {
 							LifepathMod.id(n), decodeFile("condition", n,
 									io.github.durdeuvlad.lifepath.content.ConditionDefinition
 											.ConditionFile.CODEC)));
+		for (String n : names("attunement"))
+			LifepathContent.attunements().register(LifepathMod.id(n),
+					io.github.durdeuvlad.lifepath.content.AttunementDefinition.fromFile(
+							LifepathMod.id(n), decodeFile("attunement", n,
+									io.github.durdeuvlad.lifepath.content.AttunementDefinition
+											.AttunementFile.CODEC)));
 	}
 
 	@Test
@@ -166,6 +174,9 @@ class VerticalSliceTest {
 		for (String s : List.of("vampirism", "lycanthropy"))
 			assertTrue(LifepathContent.conditions().contains(LifepathMod.id(s)),
 					"missing condition " + s);
+		for (String s : List.of("air", "earth", "lightning"))
+			assertTrue(LifepathContent.attunements().contains(LifepathMod.id(s)),
+					"missing attunement " + s);
 	}
 
 	@Test
@@ -216,6 +227,10 @@ class VerticalSliceTest {
 				if (!LifepathContent.diets().contains(d)) dangling.add(d);
 			});
 		}
+		// M9-2: attunement → ability refs resolve too.
+		for (var att : LifepathContent.attunements().all().values())
+			for (Identifier a : att.abilities())
+				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
 
 		assertEquals(KNOWN_DANGLING_SIGNATURES, dangling,
 				"only the tracked spec-signature gap may dangle");

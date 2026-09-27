@@ -117,6 +117,10 @@ public final class IdentitySummary {
 		if (condition != null) {
 			return condition.displayName();
 		}
+		var attunement = LifepathContent.attunements().get(id);
+		if (attunement != null) {
+			return attunement.displayName();
+		}
 		return id.getPath();
 	}
 

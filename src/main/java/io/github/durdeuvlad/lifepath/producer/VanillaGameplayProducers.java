@@ -99,8 +99,15 @@ public final class VanillaGameplayProducers {
 		// the attacker is the cause. Environment/self damage can't train it.
 		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DAMAGE
 				.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
-					if (!(entity instanceof ServerPlayerEntity victim)
-							|| !(source.getAttacker() instanceof LivingEntity attacker)
+					if (!(entity instanceof ServerPlayerEntity victim)) {
+						return;
+					}
+					// M9-2: damage-source attunement rules run even without a
+					// living attacker (lightning strike, drowning, etc.).
+					io.github.durdeuvlad.lifepath.attunement.AttunementService
+							.onDamaged(victim, source, victim.getWorld().getRandom(),
+									System.currentTimeMillis());
+					if (!(source.getAttacker() instanceof LivingEntity attacker)
 							|| attacker == entity) {
 						return;
 					}
@@ -130,6 +137,22 @@ public final class VanillaGameplayProducers {
 			}
 			return ActionResult.PASS;
 		});
+		// M9-2: attunement ritual items — right-clicking an acquisition item
+		// (e.g. phantom membrane for Air) evaluates type:item rules. PASS
+		// always; consumption is handled by the service on success.
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT
+				.register((player, world, hand) -> {
+					if (world.isClient()
+							|| !(player instanceof ServerPlayerEntity serverPlayer)) {
+						return net.minecraft.util.TypedActionResult.pass(
+								player.getStackInHand(hand));
+					}
+					io.github.durdeuvlad.lifepath.attunement.AttunementService
+							.onUseItem(serverPlayer, serverPlayer.getStackInHand(hand),
+									System.currentTimeMillis());
+					return net.minecraft.util.TypedActionResult.pass(
+							serverPlayer.getStackInHand(hand));
+				});
 	}
 
 	private static void onBlockBroken(net.minecraft.world.World world,
