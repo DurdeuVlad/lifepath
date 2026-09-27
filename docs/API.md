@@ -31,7 +31,7 @@ skipped; unknown references warn and resolve to nothing. Datapack reload
 | `species` | SpeciesDefinition file: `display_name`, `description?`, `visibility` (`normal`\|`hidden`), `selection` (`open`\|`unlocked`\|`admin_only`), `passive_abilities[]`, `active_abilities[]`, `min_aptitudes{}`, `resources[]`, `diet_rules?`, `mob_dispositions?`, `capacity_multiplier` | abilities, resources, diet, relation, skill ids |
 | `specialization` | `display_name`, `description?`, `starting_skills{}`, `aptitudes{}`, `xp_modifiers{}`, `decay_modifiers{}`, `protected_floors{}`, `signature` (ability id or list), `capacity_multiplier` | skill, ability ids |
 | `skill` | `display_name`, `category` (`gathering`\|`crafting`\|`physical`\|`knowledge`), `max_level`, `level_curve`, `milestones[]` | level_curve id |
-| `level_curve` | curve definition (xp-per-level table/formula) | — |
+| `skill/curve` (domain id `level_curve`) | nested path: `data/<ns>/skill/curve/<name>.json` — `{ "thresholds": [0, ...] }` cumulative XP per level | — |
 | `xp_source` | activity → skill mapping with `required_tags`, `per_subject`, `per_tag` weighting | skill ids, activity type ids |
 | `ability` | `display_name`, `trigger` (`passive`/`active`/`event`/`damage_taken`), `conditions` SpecNode, `target` SpecNode, `actions[]`, `cooldown?`, `cost?`, `events[]` | ability vocabulary ids, resource/skill params |
 | `resource` | `display_name?`, `min`, `max`, `default?`, `regen_per_second?`, `bands[]` (`range`, `name`, `effects[]`, `actions[]`) | effect/ability ids |
@@ -55,7 +55,7 @@ ids won't be renamed or silently re-purposed in 1.x.
 - **unlock** (3): `celestial_blessing phantom_touch phoenix_contract`
 - **resource** (4): `blood load phantom_form temperature`
 - **ability** (79 files) — every `ability/*.json` ships a frozen `lifepath:<file>` id.
-- **diet** (3), **relation** (3), **item_weight** (1), **xp_source** (14), **level_curve** (loader present; no shipped files yet).
+- **diet** (3), **relation** (3), **item_weight** (1), **xp_source** (14), **level_curve** (1: `default` at `skill/curve/default.json`).
 
 ### Shipped tag ids (`data/lifepath/tags/`) — Stable (additive)
 
@@ -115,7 +115,8 @@ unparseable files rename to `<name>.toml.invalid` and defaults apply.
 |---|---|
 | `general.toml` | `debug_logging` |
 | `character.toml` | `flush_interval_ticks` |
-| `skills.toml` | `band_*` (7 tiers), `global_xp_multiplier`, per-skill `*_xp_multiplier`, `aptitude_{d..s}_{xp,decay}_multiplier`, `unmapped_sources_award_xp`, decay `enabled`/`grace_hours`/`maintenance_minutes` |
+| `skills.toml` | `band_*` (7 tiers), `global_xp_multiplier`, per-skill `*_xp_multiplier` (mining/farming/smithing/fishing/foraging/engineering), `aptitude_{d..s}_{xp,decay}_multiplier`, `unmapped_sources_award_xp` |
+| `decay.toml` | decay `enabled`, `grace_hours`, `maintenance_minutes`, `band_{1..5}_{upper,rate}` |
 | `abilities.toml` | `enabled`, `passive_interval_ticks`, `nearby_max_radius`, `cooldown_multiplier`, `persist_min_seconds` |
 | `resources.toml` | `tick_interval_ticks` |
 | `diminishing.toml` | `enabled`, `window_hours`, `tier_{1,2}_{count,multiplier}`, `tier_3_multiplier`, `signature_cap` |

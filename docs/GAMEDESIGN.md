@@ -5,6 +5,20 @@
 > Project type: Independent character progression mod  
 > Design direction: RimWorld-inspired progression, data-driven species, specialization presets, skill use and decay
 
+> **Accuracy note (M10-3):** this is the *design intent* document — sections
+> below describe targets, not guarantees. For what is actually shipped, see
+> `docs/API.md` (enumerated public surface), `docs/DATAPACK_API.md`
+> (author-side schemas), `docs/CONFIGURATION.md` (balance knobs), and
+> `docs/ADMIN_COMMANDS.md` (commands). As of 1.0: **15 species** (all of §4.1
+> plus `celestial`), **13 specializations**, **13 skills** (all §6.1
+> proposals *except* Alchemy — deferred pending a brewing-station attribution
+> primitive — and *except* Melee and Enchanting, which failed the §6.1
+> frequency/decision gates: Melee was subsumed by Athletics' all-combat feed,
+> Enchanting's activity is too rare). **Conditions** (Vampirism, Lycanthropy),
+> **attunements** (Air, Earth, Lightning), **encumbrance** (§17, via
+> `lifepath:load` resource bands), and **narrative unlocks** (§4.1 specials
+> gated by `unlock/` definitions) are all shipped as data-driven domains.
+
 ---
 
 ## 1. Project Direction
