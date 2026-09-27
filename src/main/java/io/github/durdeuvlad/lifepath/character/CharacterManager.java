@@ -172,6 +172,9 @@ public final class CharacterManager {
 		try {
 			ServerPlayNetworking.send(player,
 					new CharacterSyncPayload(snapshotForSync(data, System.currentTimeMillis())));
+			// M6-1: display strings ride the same funnel so identity text is
+			// fresh after join/respawn/dimension change/mutation.
+			ServerPlayNetworking.send(player, IdentitySummary.build(data));
 		} catch (Exception e) {
 			LifepathMod.LOGGER.error("failed to send character sync to {}", player.getUuid(), e);
 		}

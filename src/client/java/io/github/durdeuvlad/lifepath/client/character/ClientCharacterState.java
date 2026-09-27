@@ -18,6 +18,10 @@ import org.jetbrains.annotations.Nullable;
 @Environment(EnvType.CLIENT)
 public final class ClientCharacterState {
 	private static volatile PlayerCharacterData snapshot;
+	/** Server-resolved display strings (M6-1) — ids stay in the snapshot. */
+	private static volatile io.github.durdeuvlad.lifepath.network.s2c
+			.IdentitySummaryPayload identity = io.github.durdeuvlad.lifepath
+			.network.s2c.IdentitySummaryPayload.empty();
 	/** Resource → current band index per the last delta (-1 removed). Server defs aren't client-visible. */
 	private static final java.util.Map<net.minecraft.util.Identifier, Integer>
 			RESOURCE_BANDS = new java.util.concurrent.ConcurrentHashMap<>();
@@ -33,7 +37,21 @@ public final class ClientCharacterState {
 	/** Drops the snapshot (disconnect / leaving a server). */
 	public static void clear() {
 		snapshot = null;
+		identity = io.github.durdeuvlad.lifepath.network.s2c
+				.IdentitySummaryPayload.empty();
 		RESOURCE_BANDS.clear();
+	}
+
+	/** Applies the server's resolved display strings (M6-1). */
+	public static void applyIdentity(io.github.durdeuvlad.lifepath.network.s2c
+			.IdentitySummaryPayload payload) {
+		identity = payload;
+	}
+
+	/** Latest identity summary — never null (empty until first sync). */
+	public static io.github.durdeuvlad.lifepath.network.s2c
+			.IdentitySummaryPayload identity() {
+		return identity;
 	}
 
 	/**
