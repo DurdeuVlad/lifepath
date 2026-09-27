@@ -81,13 +81,28 @@ public final class CharacterManager {
 			ServerPlayerEntity player = handler.getPlayer();
 			saveCharacter(player);
 			// Evict only if THIS session still owns the entry — a stale/zombie
-			// session must not remove a newer session's cache.
-			CACHE.computeIfPresent(player.getUuid(), (uuid, entry) ->
-					entry.owner == player ? null : entry);
-			DIRTY.remove(player.getUuid());
+			// session must not remove a newer session's cache NOR its dirty
+			// flag (clearing it would let SERVER_STOPPING skip the flush and
+			// lose the live session's unflushed mutations).
+			CACHE.computeIfPresent(player.getUuid(), (uuid, entry) -> {
+				if (entry.owner != player) {
+					return entry;
+				}
+				DIRTY.remove(uuid);
+				return null;
+			});
 		});
-		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) ->
-				syncCharacter(newPlayer));
+		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			// Respawn builds a NEW entity for the same UUID — the cache entry
+			// must follow it or owner-gated save/evict would silently no-op
+			// (data still keyed to the dead entity → flushes skipped, cache
+			// leak on disconnect).
+			CACHE.computeIfPresent(newPlayer.getUuid(), (uuid, entry) -> {
+				entry.owner = newPlayer;
+				return entry;
+			});
+			syncCharacter(newPlayer);
+		});
 		ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) ->
 				syncCharacter(player));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
