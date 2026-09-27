@@ -77,7 +77,7 @@ reference and skipped by the content-ref scan.
 | `equipment_contains` | `item` (id or `#tag`), `slot`? |
 | `inside_block` | `block` (id or `#tag`, required) — the block state at the player's feet |
 | `attacker_entity` | `entity` (id or `#tag`) — matches `source.getAttacker()`; damage_taken only |
-| `damage_type` | `type` (id or `#tag` on the damage-type registry); damage_taken only |
+| `damage_type` | `id` (id or `#tag` on the damage-type registry); damage_taken only |
 | `damage_amount` | `op`, `value` — compares the pre-modifier amount; damage_taken only |
 
 ### Targets
@@ -99,8 +99,10 @@ reference and skipped by the content-ref scan.
 | `apply_effect` | `effect`, `duration` (ticks), `amplifier` |
 | `remove_effect` | `effect` (id or `#tag`) |
 | `modify_attribute` | `attribute`, `operation` (`add_value`\|`add_multiplied_base`\|`add_multiplied_total`), `value`, `duration_ticks`? |
-| `damage` | `amount`, `source`? (`magic`\|`starve`\|`fall`\|`fire`\|`wither`, else player-attack) |
+| `damage` | `amount`, `source`? (`magic`\|`starve`\|`fall`\|`fire`\|`wither`\|`drown`, else player-attack) |
 | `heal` | `amount` |
+| `ignite` | `duration_ticks`? (default 80) — sets burning; never shortens an existing burn |
+| `random_teleport` | `range`? (default 8, max 64), `attempts`? (default 16, max 64) — chorus-fruit blink to a random safe spot (never into walls, void, or liquid); no-op if every sample fails |
 | `grow_blocks` | `growth_rolls` |
 | `freeze_water` | `temporary` (default true) |
 | `highlight_entities` | `duration_ticks`, `visibility` (`self`\|`global`) |

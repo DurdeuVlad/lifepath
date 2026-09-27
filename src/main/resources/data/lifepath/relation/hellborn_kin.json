@@ -1,0 +1,7 @@
+{
+	"rules": [
+		{"entity": "minecraft:piglin", "disposition": "neutral"},
+		{"entity": "minecraft:piglin_brute", "disposition": "neutral"},
+		{"entity": "minecraft:zombified_piglin", "disposition": "neutral"}
+	]
+}

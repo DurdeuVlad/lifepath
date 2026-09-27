@@ -1,0 +1,5 @@
+{
+	"rules": [
+		{"entity": "#lifepath:animals", "disposition": "friendly"}
+	]
+}

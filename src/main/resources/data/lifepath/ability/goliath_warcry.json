@@ -1,0 +1,10 @@
+{
+	"display_name": "Warcry",
+	"trigger": {"type": "active"},
+	"target": {"type": "lifepath:entities_in_radius", "radius": 8, "living_only": true},
+	"actions": [
+		{"type": "lifepath:apply_effect", "effect": "minecraft:weakness", "duration": 100, "amplifier": 0},
+		{"type": "lifepath:apply_effect", "effect": "minecraft:slowness", "duration": 100, "amplifier": 0}
+	],
+	"cooldown": {"seconds": 180}
+}

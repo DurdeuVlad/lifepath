@@ -1,0 +1,10 @@
+{
+	"display_name": "Subterranean",
+	"trigger": {"type": "passive", "interval_ticks": 40},
+	"conditions": {"all": [{"type": "lifepath:inside_block", "block": "minecraft:cave_air"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect", "effect": "minecraft:haste", "duration": 100, "amplifier": 0},
+		{"type": "lifepath:apply_effect", "effect": "minecraft:night_vision", "duration": 260, "amplifier": 0}
+	]
+}

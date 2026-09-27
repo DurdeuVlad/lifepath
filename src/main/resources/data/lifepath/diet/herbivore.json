@@ -1,0 +1,23 @@
+{
+	"allowed": [
+		"minecraft:bread",
+		"minecraft:carrot",
+		"minecraft:golden_carrot",
+		"minecraft:potato",
+		"minecraft:baked_potato",
+		"minecraft:beetroot",
+		"minecraft:beetroot_soup",
+		"minecraft:apple",
+		"minecraft:golden_apple",
+		"minecraft:enchanted_golden_apple",
+		"minecraft:melon_slice",
+		"minecraft:sweet_berries",
+		"minecraft:glow_berries",
+		"minecraft:chorus_fruit",
+		"minecraft:dried_kelp",
+		"minecraft:mushroom_stew",
+		"minecraft:suspicious_stew",
+		"minecraft:pumpkin_pie",
+		"minecraft:cookie"
+	]
+}

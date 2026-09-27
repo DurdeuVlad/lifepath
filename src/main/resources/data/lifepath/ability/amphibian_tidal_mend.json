@@ -1,0 +1,11 @@
+{
+	"display_name": "Tidal Mend",
+	"trigger": {"type": "active"},
+	"conditions": {"all": [{"type": "lifepath:submerged"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:heal", "amount": 4.0},
+		{"type": "lifepath:spawn_particle", "particle": "minecraft:splash", "count": 24}
+	],
+	"cooldown": {"seconds": 180}
+}

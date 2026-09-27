@@ -125,8 +125,18 @@ public final class ActivityEvents {
 
 	public static ActivityEvent combat(ServerPlayerEntity player, Identifier entityTypeId,
 			ActivityEvent.Cause cause) {
-		return new ActivityEvent(player, ActivityTypes.COMBAT, entityTypeId, Set.of(),
-				cause, now(), Map.of());
+		return combat(player, entityTypeId, Set.of(), cause);
+	}
+
+	/**
+	 * Canonical kill event (M8-1) — sourceId = killed entity type id, tags =
+	 * the victim's entity-type tags ({@code minecraft:skeletons},
+	 * {@code lifepath:undead}, …) so xp_source data can weight by family.
+	 */
+	public static ActivityEvent combat(ServerPlayerEntity player, Identifier entityTypeId,
+			Set<Identifier> entityTags, ActivityEvent.Cause cause) {
+		return new ActivityEvent(player, ActivityTypes.COMBAT, entityTypeId,
+				Set.copyOf(entityTags), cause, now(), Map.of());
 	}
 
 	private static Set<Identifier> tags(@Nullable Identifier extra) {

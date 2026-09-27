@@ -66,6 +66,39 @@ class ActivityPipelineTest {
 		assertEquals(Identifier.of("minecraft", "piston"), c.sourceId());
 		assertTrue(c.tags().contains(Identifier.of("minecraft", "redstone")));
 		assertEquals("1", c.attributes().get("count"));
+
+		// Combat (M8-1 athletics feed): sourceId = killed entity type id,
+		// tags = victim entity-type tags for xp_source per_tag weighting.
+		ActivityEvent k = ActivityEvents.combat(null,
+				Identifier.of("minecraft", "zombie"),
+				Set.of(Identifier.of("minecraft", "undead")),
+				ActivityEvent.Cause.PLAYER);
+		assertEquals(ActivityTypes.COMBAT, k.type());
+		assertEquals(Identifier.of("minecraft", "zombie"), k.sourceId());
+		assertTrue(k.tags().contains(Identifier.of("minecraft", "undead")));
+		assertEquals(ActivityEvent.Cause.PLAYER, k.cause());
+	}
+
+	/** M8-1: the shipped athletics xp_source resolves tagged kills as specific. */
+	@Test
+	void athleticsSourceResolvesCombatKills() throws Exception {
+		var file = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(
+				java.nio.file.Path.of(
+						"src/main/resources/data/lifepath/xp_source/athletics.json")));
+		var def = io.github.durdeuvlad.lifepath.content.XpSourceDefinition.fromFile(
+				id("athletics"), io.github.durdeuvlad.lifepath.content.XpSourceDefinition
+						.XpSourceFile.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, file)
+						.getOrThrow(err -> new AssertionError("athletics xp_source: " + err)));
+		ActivityEvent zombie = ActivityEvents.combat(null,
+				Identifier.of("minecraft", "zombie"),
+				Set.of(Identifier.of("minecraft", "undead")),
+				ActivityEvent.Cause.PLAYER);
+		assertTrue(def.matches(zombie));
+		assertTrue(def.resolve(zombie.sourceId(), zombie.tags()).specific());
+		assertEquals(0.5, def.resolve(zombie.sourceId(), zombie.tags()).amount(), 1e-6);
+		// An untagged kill falls back to base_xp (still awards — combat is universal).
+		assertEquals(0.4, def.resolve(Identifier.of("minecraft", "slime"),
+				Set.of()).amount(), 1e-6);
 	}
 
 	@Test

@@ -1,0 +1,9 @@
+{
+	"display_name": "Amphibian Gills",
+	"trigger": {"type": "passive", "interval_ticks": 40},
+	"conditions": {"all": [{"type": "lifepath:submerged"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect", "effect": "minecraft:conduit_power", "duration": 100, "amplifier": 0}
+	]
+}

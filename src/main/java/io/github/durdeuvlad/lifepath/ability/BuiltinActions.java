@@ -164,9 +164,54 @@ final class BuiltinActions {
 						case "fall" -> world.getDamageSources().fall();
 						case "fire" -> world.getDamageSources().inFire();
 						case "wither" -> world.getDamageSources().wither();
+						case "drown" -> world.getDamageSources().drown();
 						default -> world.getDamageSources().generic();
 					};
 			le.damage(ds, amount);
+		});
+
+		// Sets the target burning — {@code duration_ticks} (default 80). Never
+		// shortens an existing burn; re-application only extends.
+		register("ignite", (target, ctx, params) -> {
+			Entity e = target.entity();
+			if (!(e instanceof LivingEntity)) {
+				return;
+			}
+			int ticks = Math.max(1, (int) num(params, "duration_ticks", 80));
+			e.setFireTicks(Math.max(e.getFireTicks(), ticks));
+		});
+
+		// Chorus-fruit-style blink (M8-1, Enderian): samples {@code attempts}
+		// random offsets within {@code range} blocks, picks the first spot with
+		// two non-colliding blocks for the body and a floor within 4 below —
+		// never into a wall, void, or lava. No-op when every sample fails.
+		register("random_teleport", (target, ctx, params) -> {
+			Entity e = target.entity();
+			if (e == null || !(e.getWorld() instanceof ServerWorld world)) {
+				return;
+			}
+			// Bounded so malformed data can't turn one cast into a chunk-load storm.
+			double range = Math.min(Math.max(num(params, "range", 8), 1), 64);
+			int attempts = Math.min(Math.max(1, (int) num(params, "attempts", 16)), 64);
+			var rand = world.getRandom();
+			for (int i = 0; i < attempts; i++) {
+				double tx = e.getX() + (rand.nextDouble() - 0.5) * 2 * range;
+				double ty = e.getY() + (rand.nextDouble() - 0.5) * 2
+						* Math.min(range, 6);
+				double tz = e.getZ() + (rand.nextDouble() - 0.5) * 2 * range;
+				BlockPos pos = BlockPos.ofFloored(tx, ty, tz);
+				if (!isSafeSpot(world, pos)) {
+					continue;
+				}
+				double fy = pos.getY();
+				if (e instanceof ServerPlayerEntity sp) {
+					sp.teleport(world, tx, fy, tz, sp.getYaw(), sp.getPitch());
+				} else {
+					e.teleport(world, tx, fy, tz,
+							java.util.Set.of(), e.getYaw(), e.getPitch());
+				}
+				return;
+			}
 		});
 
 		register("heal", (target, ctx, params) -> {
@@ -342,6 +387,25 @@ final class BuiltinActions {
 
 	private static void register(String name, AbilityVocabulary.ActionExecutor exec) {
 		AbilityVocabulary.registerAction(LifepathMod.id(name), exec);
+	}
+
+	/** Feet+head must be non-colliding, with a solid floor within 4 blocks below. */
+	private static boolean isSafeSpot(ServerWorld world, BlockPos pos) {
+		if (!world.getBlockState(pos).getCollisionShape(world, pos).isEmpty()
+				|| !world.getBlockState(pos.up()).getCollisionShape(world, pos.up()).isEmpty()) {
+			return false;
+		}
+		for (int d = 1; d <= 4; d++) {
+			BlockPos below = pos.down(d);
+			var state = world.getBlockState(below);
+			if (!state.getCollisionShape(world, below).isEmpty()) {
+				return true;
+			}
+			if (!state.getFluidState().isEmpty()) {
+				return false; // don't strand the caster in lava or mid-water
+			}
+		}
+		return false;
 	}
 
 	@Nullable

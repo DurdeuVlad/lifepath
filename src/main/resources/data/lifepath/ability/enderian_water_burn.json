@@ -1,0 +1,9 @@
+{
+	"display_name": "Hydrophobia",
+	"trigger": {"type": "passive", "interval_ticks": 20},
+	"conditions": {"all": [{"type": "lifepath:inside_block", "block": "minecraft:water"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:damage", "amount": 1.0, "source": "drown"}
+	]
+}

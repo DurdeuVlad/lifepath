@@ -1,0 +1,13 @@
+{
+	"display_name": "Anima",
+	"description": "Beasts know them as their own. Animals never hunt them, their presence steadies the heart and quickens the feet, and a touch mends the pack — but their hollow bones crack on falls, and flesh is no food to them.",
+	"visibility": "normal",
+	"selection": "open",
+	"diet_rules": "lifepath:herbivore",
+	"mob_dispositions": "lifepath:anima_kin",
+	"passive_abilities": [
+		"lifepath:anima_pack_heart",
+		"lifepath:anima_hollow_bones"
+	],
+	"active_abilities": ["lifepath:anima_beast_soothe"]
+}

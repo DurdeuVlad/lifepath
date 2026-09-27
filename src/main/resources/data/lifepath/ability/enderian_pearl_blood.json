@@ -1,0 +1,6 @@
+{
+	"display_name": "Pearl Blood",
+	"trigger": {"type": "damage_taken", "multiplier": 0.25},
+	"conditions": {"all": [{"type": "lifepath:damage_type", "id": "minecraft:ender_pearl"}]},
+	"target": {"type": "lifepath:self"}
+}

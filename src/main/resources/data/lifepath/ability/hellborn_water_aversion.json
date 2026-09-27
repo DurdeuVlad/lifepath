@@ -1,0 +1,10 @@
+{
+	"display_name": "Water Aversion",
+	"trigger": {"type": "passive", "interval_ticks": 40},
+	"conditions": {"all": [{"type": "lifepath:inside_block", "block": "minecraft:water"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect", "effect": "minecraft:weakness", "duration": 100, "amplifier": 0},
+		{"type": "lifepath:apply_effect", "effect": "minecraft:slowness", "duration": 100, "amplifier": 0}
+	]
+}

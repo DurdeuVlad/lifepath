@@ -139,16 +139,19 @@ class VerticalSliceTest {
 	@Test
 	void milestoneContentChecklist() throws Exception {
 		loadEverything();
-		for (String s : List.of("human", "sylvian", "iceborn", "undead"))
+		for (String s : List.of("human", "sylvian", "iceborn", "undead",
+				"enderian", "amphibian", "dragonborn", "automaton",
+				"hellborn", "anima", "dwarf", "goliath"))
 			assertTrue(LifepathContent.species().contains(LifepathMod.id(s)),
 					"missing species " + s);
 		for (String s : List.of("miner", "farmer", "blacksmith", "fisherman"))
 			assertTrue(LifepathContent.specializations().contains(LifepathMod.id(s)),
 					"missing specialization " + s);
-		for (String s : List.of("mining", "farming", "smithing", "fishing"))
+		for (String s : List.of("mining", "farming", "smithing", "fishing",
+				"foraging", "engineering", "athletics"))
 			assertTrue(LifepathContent.skills().contains(LifepathMod.id(s)),
 					"missing skill " + s);
-		assertEquals(4, LifepathContent.species().size());
+		assertEquals(12, LifepathContent.species().size());
 	}
 
 	@Test
@@ -194,9 +197,8 @@ class VerticalSliceTest {
 	@Test
 	void speciesAndSpecsComposeOrthogonally() throws Exception {
 		loadEverything();
-		for (Identifier speciesId : List.of(LifepathMod.id("human"),
-				LifepathMod.id("sylvian"), LifepathMod.id("iceborn"),
-				LifepathMod.id("undead"))) {
+		// Every registered species — new species get this check for free.
+		for (Identifier speciesId : LifepathContent.species().all().keySet()) {
 			SpeciesDefinition species = LifepathContent.species().get(speciesId);
 			Set<Identifier> innate = new HashSet<>();
 			innate.addAll(species.passiveAbilities());

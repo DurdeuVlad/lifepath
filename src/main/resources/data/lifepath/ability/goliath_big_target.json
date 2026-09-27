@@ -1,0 +1,6 @@
+{
+	"display_name": "Big Target",
+	"trigger": {"type": "damage_taken", "multiplier": 1.2},
+	"conditions": {"all": [{"type": "lifepath:damage_type", "id": "#minecraft:is_projectile"}]},
+	"target": {"type": "lifepath:self"}
+}

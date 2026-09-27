@@ -1,0 +1,12 @@
+{
+	"display_name": "Amphibian",
+	"description": "Children of the shallows. Underwater they breathe, see, and swim like natives — and can knit wounds with river-magic. In arid lands their skin dries to a crawling weakness.",
+	"visibility": "normal",
+	"selection": "open",
+	"passive_abilities": [
+		"lifepath:amphibian_gills",
+		"lifepath:amphibian_slick_swimmer",
+		"lifepath:amphibian_dry_skin"
+	],
+	"active_abilities": ["lifepath:amphibian_tidal_mend"]
+}

@@ -1,0 +1,13 @@
+{
+	"display_name": "Dwarf",
+	"description": "Compact and subterranean — Mining aptitude can't fall below B. Cave-dark speeds their hands and steadies their falls, and stoneform can still a killing blow — but water drags at them like a millstone.",
+	"visibility": "normal",
+	"selection": "open",
+	"min_aptitudes": {"lifepath:mining": "b"},
+	"passive_abilities": [
+		"lifepath:dwarf_subterranean",
+		"lifepath:dwarf_sturdy_frame",
+		"lifepath:dwarf_sink_stone"
+	],
+	"active_abilities": ["lifepath:dwarf_stoneform"]
+}

@@ -1,0 +1,6 @@
+{
+	"display_name": "Infernal Heat",
+	"trigger": {"type": "damage_taken", "multiplier": 0.5},
+	"conditions": {"all": [{"type": "lifepath:damage_type", "id": "#minecraft:is_fire"}]},
+	"target": {"type": "lifepath:self"}
+}
