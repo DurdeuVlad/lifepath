@@ -24,7 +24,7 @@ Cells that could not be exercised live in this environment are labelled
 
 | Criterion | Verdict | Evidence |
 |---|---|---|
-| No known progression duplication exploits | **PASS** | Diminishing-returns window (`diminishing.toml`, 4-tier taper), placed-block re-mine tracking, `player_caused_only` gating, `unmapped_sources_award_xp` whitelist switch. Two milestone bug-hunts (M7, M9) found and fixed the only discovered exploits; M9 hunt clean otherwise. |
+| No known progression duplication exploits | **PASS** | Diminishing-returns window (`diminishing.toml`, 4-tier taper), placed-block re-mine tracking, `player_caused_only` gating, `unmapped_sources_award_xp` whitelist switch. Two milestone bug-hunts (M7, M9) found and fixed the only discovered defects (a dead event-type reference, untranslated tags); no progression-duplication exploit is known open. |
 | No known save corruption | **PASS** | `CharacterPersistence` backup-on-decode-failure + defaults fallback (suite-verified); session-lock and flush semantics live-verified across 3 boots; `data_version` chain tested v0→v2 (`MIGRATIONS.md`). |
 | No client/server desync in core systems | **PARTIAL** | All character state is server-owned with S2C sync snapshots (`lifepath:character/sync`); M7-2 fixed the two real desync-class bugs (disconnect race, respawn rebind) with tests. No live two-client soak in this environment — deferred to M10.5-2 beta. |
 | No mandatory Origins/Apoli/KubeJS dep | **PASS** | Zero compile/runtime references to Origins, Origins Classes, Apoli, OriginJS, or KubeJS in `build.gradle`/`fabric.mod.json`/src. All validation ran with them absent (`docs/COMPAT.md`). |
