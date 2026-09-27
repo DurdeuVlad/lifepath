@@ -45,4 +45,10 @@ Minecraft 1.21.1 · Fabric Loader · Java 21 · Gradle
 
 ## License
 
-LGPL-3.0-only — see `LICENSE`. Selected by the maintainer under M11-2.
+Copyright (C) 2026 Vlad Durdeu — see `NOTICE`.
+
+**LGPL-3.0-only** — full text in `LICENSE`, plus the GPL-3.0 it extends in
+`LICENSE.GPL` (both ship inside the jar, per LGPL-3.0 §4(b)). Selected by
+the maintainer under M11-2: weak copyleft keeps the framework source-open
+while still permitting use in modpacks and alongside proprietary launch
+tooling.

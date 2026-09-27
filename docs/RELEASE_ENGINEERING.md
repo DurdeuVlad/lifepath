@@ -6,8 +6,10 @@
 ./gradlew clean build   # compile + test + assemble
 ```
 
-Output: `build/libs/lifepath-<version>.jar` (+ `-sources.jar`). Requires
-**JDK 21** (Temurin or equivalent) — Gradle wrapper is pinned
+Output: `build/libs/lifepath-<version>.jar` (+ `-sources.jar`). The jar
+root carries `LICENSE` (LGPL-3.0), `LICENSE.GPL` (the GPL-3.0 it extends —
+LGPL-3.0 §4(b) requires both), and `NOTICE` (copyright statement).
+Requires **JDK 21** (Temurin or equivalent) — Gradle wrapper is pinned
 (`gradle/wrapper/gradle-wrapper.properties`), no other tooling needed. The
 command is what CI runs and what produced `1.0.0-beta.1`.
 
@@ -33,13 +35,19 @@ point; copy the curated section into the release body.
 ## CI
 
 `.github/workflows/build.yml` — every push to `main` and every PR: Temurin 21,
-`./gradlew build` (compile + tests + jar), uploads the jar and test reports as
-artifacts. A red build means compile or test failure — treat as merge blocker.
+`gradle/actions/setup-gradle` (validates `gradle-wrapper.jar` checksums and
+manages the dependency cache), `./gradlew build` (compile + tests + jar),
+uploads the jar and test reports as artifacts. Token is scoped
+`contents: read`. A red build means compile or test failure — treat as
+merge blocker.
 
-`.github/workflows/release.yml` — pushing a `v*` tag builds clean, writes
-`sha256` checksums, and creates a **draft** GitHub Release with the jars +
-checksums + generated notes. Draft (not published) so the curated changelog
-section is attached before anyone sees it. Tagging:
+`.github/workflows/release.yml` — pushing a `v*` tag fails fast unless the
+tag matches `version=` in `gradle.properties` (`v1.0.0-beta.1` ↔
+`1.0.0-beta.1`), then builds clean, writes `sha256` checksums, and creates
+a **draft** GitHub Release with the jars + checksums + generated notes
+(`fail_on_unmatched_files` is on — a missing artifact fails the workflow
+instead of shipping an empty release). Draft (not published) so the
+curated changelog section is attached before anyone sees it. Tagging:
 
 ```bash
 git tag v1.0.0-beta.1 <commit> && git push origin v1.0.0-beta.1

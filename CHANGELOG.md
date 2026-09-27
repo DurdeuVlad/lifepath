@@ -51,10 +51,12 @@ server log section around the failure.
 ### Distribution path
 
 **GitHub Releases** for this beta — a draft release tagged `v1.0.0-beta.1`
-carrying `lifepath-1.0.0-beta.1.jar`
-(sha256 `b63fbb37de1fbdd474a9092da7c58cd7643eafa7332a0d7a105cd1a884167678`,
-produced by `./gradlew clean build` on this commit). CurseForge public
-listing is the M11 release milestone, not the beta path.
+carrying `lifepath-1.0.0-beta.1.jar` and a `checksums.txt` produced by the
+release workflow (those checksums are authoritative). Reference hash of
+the local verification build on this commit: sha256
+`b63fbb37de1fbdd474a9092da7c58cd7643eafa7332a0d7a105cd1a884167678` — the
+released jar may hash differently if the tag lands on a later commit.
+CurseForge public listing is the M11 release milestone, not the beta path.
 
 ### Pre-flight RC evaluation (M10-4 evidence)
 

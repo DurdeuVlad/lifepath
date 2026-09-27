@@ -59,7 +59,9 @@ processResources {
 }
 
 tasks.jar {
-	from rootProject.file("LICENSE")
+	// LGPL-3.0 §4(b): object code must ship with copies of both the LGPL
+	// and the GPL it extends; NOTICE carries the copyright statement.
+	from rootProject.files("LICENSE", "LICENSE.GPL", "NOTICE")
 }
 
 tasks.withType(JavaCompile).configureEach {

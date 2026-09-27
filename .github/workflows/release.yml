@@ -17,10 +17,20 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-          cache: gradle
+
+      - uses: gradle/actions/setup-gradle@v4
 
       - name: Grant wrapper
         run: chmod +x gradlew
+
+      - name: Verify tag matches project version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(grep -E '^version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::tag 'v$tag' does not match gradle.properties version '$version'"
+            exit 1
+          fi
 
       - name: Build
         run: ./gradlew clean build --console=plain
@@ -33,6 +43,7 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
+          fail_on_unmatched_files: true
           files: |
             build/libs/lifepath-*.jar
             build/checksums.txt
