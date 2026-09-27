@@ -1,10 +1,12 @@
 package io.github.durdeuvlad.lifepath.client.hud;
 
 import io.github.durdeuvlad.lifepath.client.character.ClientCharacterState;
+import io.github.durdeuvlad.lifepath.client.icon.ClientIcons;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.hud.HudModel;
 import io.github.durdeuvlad.lifepath.hud.HudModel.CooldownRow;
 import io.github.durdeuvlad.lifepath.hud.HudModel.ResourceRow;
+import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -22,6 +24,11 @@ import net.minecraft.text.Text;
  * <p>Accessibility: every row is labeled text (never color-only). Resource
  * rows show label + band name + numeric value beside the bar; cooldown rows
  * show ability name + seconds remaining; state rows are plain text.
+ *
+ * <p>M12-3: every row leads with a 10px badge icon resolved through
+ * {@link ClientIcons} (declared → placeholder → none). The gutter is
+ * reserved regardless so rows stay aligned when an icon is absent; all
+ * labels remain — icons augment, never replace.
  */
 @Environment(EnvType.CLIENT)
 public final class LifepathHud {
@@ -29,6 +36,7 @@ public final class LifepathHud {
 	private static final int BAR_W = 96;
 	private static final int BAR_H = 7;
 	private static final int ROW_STEP = 10;
+	private static final int ICON_W = 12;
 	private static final int COL_TEXT = 0xFFE0E0E0;
 	private static final int COL_BAR_BG = 0x80101010;
 	private static final int COL_BAR_FILL = 0xFF58B0D8;
@@ -82,46 +90,60 @@ public final class LifepathHud {
 			y += ROW_STEP;
 		}
 		for (CooldownRow row : view.cooldowns()) {
+			drawIcon(context, "ability", row.icon(), y);
 			context.drawTextWithShadow(client.textRenderer,
 					Text.translatable("hud.lifepath.cooldown", row.label(),
 							String.format("%.0f", row.secondsLeft())),
-					0, y, COL_TEXT);
+					ICON_W, y, COL_TEXT);
 			y += ROW_STEP;
 		}
-		for (String state : view.states()) {
-			context.drawTextWithShadow(client.textRenderer, state, 0, y,
-					COL_BAND);
+		for (IdentitySummaryPayload.Entry state : view.states()) {
+			drawIcon(context, "condition", state.icon(), y);
+			context.drawTextWithShadow(client.textRenderer, state.name(),
+					ICON_W, y, COL_BAND);
 			y += ROW_STEP;
 		}
 		context.getMatrices().pop();
 	}
 
+	private static void drawIcon(DrawContext context, String domain,
+			String iconRef, int y) {
+		// 9-arg form: 10x10 box sampling the full 16x16 sprite.
+		ClientIcons.resolve(domain, iconRef)
+				.ifPresent(tex -> context.drawTexture(tex, 0, y,
+						10, 10, 0, 0, 16, 16, 16, 16));
+	}
+
 	private static void drawResourceRow(DrawContext context,
 			MinecraftClient client, ResourceRow row, int y) {
-		// Layout: [bar][text "Label BandName value"] — text carries the
+		// Layout: [icon][bar][text "Label BandName value"] — text carries the
 		// information so color is never the only signal.
-		context.fill(0, y, BAR_W, y + BAR_H, COL_BAR_BG);
-		context.fill(0, y, Math.round(BAR_W * (float) row.fraction()), y + BAR_H,
+		drawIcon(context, "resource", row.icon(), y);
+		context.fill(ICON_W, y, ICON_W + BAR_W, y + BAR_H, COL_BAR_BG);
+		context.fill(ICON_W, y,
+				ICON_W + Math.round(BAR_W * (float) row.fraction()), y + BAR_H,
 				COL_BAR_FILL);
 		String band = row.bandName().isEmpty() ? ""
 				: " " + row.bandName();
 		String text = row.label() + band + " "
 				+ String.format("%.0f", row.value());
-		context.drawTextWithShadow(client.textRenderer, text, BAR_W + 4, y,
-				COL_TEXT);
+		context.drawTextWithShadow(client.textRenderer, text,
+				ICON_W + BAR_W + 4, y, COL_TEXT);
 	}
 
 	private static int contentWidth(HudModel.View view, MinecraftClient client) {
-		int w = BAR_W + 4;
+		int w = ICON_W + BAR_W + 4;
 		for (ResourceRow row : view.resources()) {
-			w = Math.max(w, BAR_W + 4 + client.textRenderer.getWidth(row.label()
-					+ " " + row.bandName() + " 000"));
+			w = Math.max(w, ICON_W + BAR_W + 4 + client.textRenderer
+					.getWidth(row.label() + " " + row.bandName() + " 000"));
 		}
 		for (CooldownRow row : view.cooldowns()) {
-			w = Math.max(w, client.textRenderer.getWidth(row.label() + " 000"));
+			w = Math.max(w, ICON_W + client.textRenderer
+					.getWidth(row.label() + " 000"));
 		}
-		for (String state : view.states()) {
-			w = Math.max(w, client.textRenderer.getWidth(state));
+		for (IdentitySummaryPayload.Entry state : view.states()) {
+			w = Math.max(w, ICON_W + client.textRenderer
+					.getWidth(state.name()));
 		}
 		return w;
 	}

@@ -37,7 +37,8 @@ class IdentitySummaryPayloadTest {
 						"Frost Nova", "lifepath:textures/gui/ability/frost.png")),
 				List.of(new IdentitySummaryPayload.ResourceDisplay(
 						"lifepath:temperature", "Temperature", 50, 1,
-						List.of("Cold", "Hot"))));
+						List.of("Cold", "Hot"),
+						"lifepath:textures/gui/resource/temp.png")));
 
 		RegistryByteBuf buf = new RegistryByteBuf(
 				Unpooled.buffer(), DynamicRegistryManager.EMPTY);
