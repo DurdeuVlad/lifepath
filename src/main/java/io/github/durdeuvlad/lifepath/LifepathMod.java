@@ -140,6 +140,10 @@ public class LifepathMod implements ModInitializer {
 						"Levels lost per real day inside band 5 (91–100).")
 				.build());
 		LifepathConfig.define(id("abilities"), ConfigSpec.builder()
+				.define("enabled", true,
+						"Master switch for the ability system: passive sweeps,"
+								+ " event dispatch, activation requests, and"
+								+ " damage_taken modifiers all no-op when off.")
 				.define("passive_interval_ticks", 20, v -> v >= 1 && v <= 1200,
 						"Engine tick interval for PASSIVE abilities (each ability's"
 								+ " own interval_ticks is additionally honored).")
@@ -177,6 +181,9 @@ public class LifepathMod implements ModInitializer {
 						"XP multiplier for counts between the two tiers.")
 				.define("tier_3_multiplier", 0.1, v -> v >= 0 && v <= 10,
 						"XP multiplier for counts above tier_2_count.")
+				.define("signature_cap", 4096, v -> v >= 64 && v <= 4096,
+						"Anti-exploit bound: max timestamps kept per action"
+								+ " signature. Capped at the persistence bound (4096).")
 				.build());
 		LifepathConfig.define(LifepathConfig.CLIENT, ConfigSpec.builder()
 				.define("hud_enabled", true,
@@ -197,6 +204,7 @@ public class LifepathMod implements ModInitializer {
 		CharacterCommands.init();
 		io.github.durdeuvlad.lifepath.command.SpecializationCommands.init();
 		io.github.durdeuvlad.lifepath.command.SpeciesCommands.init();
+		io.github.durdeuvlad.lifepath.command.DebugCommands.init();
 
 		RegistryBootstrap.register(id("character_attachments"), CharacterAttachments::init);
 		RegistryBootstrap.bootstrap();

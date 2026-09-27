@@ -8,6 +8,7 @@ import io.github.durdeuvlad.lifepath.content.SkillDefinition;
 import io.github.durdeuvlad.lifepath.event.ActivityEvent;
 import io.github.durdeuvlad.lifepath.event.SkillEvents;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -91,6 +92,11 @@ public final class SkillXpService {
 		if (MODIFIERS.putIfAbsent(id, modifier) != null) {
 			LifepathMod.LOGGER.warn("duplicate xp modifier id '{}' — keeping the first", id);
 		}
+	}
+
+	/** Ordered pipeline ids — the "modifiers in effect" list for {@code debug character}. */
+	public static List<Identifier> modifierIds() {
+		return List.copyOf(MODIFIERS.keySet());
 	}
 
 	/**
