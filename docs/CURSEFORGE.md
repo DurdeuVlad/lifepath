@@ -76,10 +76,17 @@ dormant — see the project repo for the exact compat state).</p>
 
 <h3>First minutes</h3>
 <ol>
-<li>Open the character screen (check the Controls menu for the Lifepath key).</li>
-<li>Pick a species — read the hover text, follow the fantasy you want.</li>
-<li>Pick a specialization — it's a head start, not a contract.</li>
-<li>Go play. Watch the skills screen fill in.</li>
+<li>Open the character screen (default <code>C</code>; the Controls menu
+lists both Lifepath keys).</li>
+<li>Pick a species with <code>/lifepath species choose</code> —
+tab-completion lists the species, and its description prints
+when you pick.</li>
+<li>Specializations are assigned by a server admin
+(<code>/lifepath specialization set</code>) — solo with cheats, set your
+own. It's a head start, not a contract.</li>
+<li>Go play. Watch the skills screen fill in; press the ability key
+(default <code>G</code>) to fire an active ability — click an ability row
+on the character screen to choose which.</li>
 </ol>
 
 <h3>Status</h3>

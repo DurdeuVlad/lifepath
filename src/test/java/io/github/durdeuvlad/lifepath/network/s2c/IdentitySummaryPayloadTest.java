@@ -33,11 +33,18 @@ class IdentitySummaryPayloadTest {
 								"lifepath:textures/gui/condition/chilled.png")),
 						"traits", List.of(
 								new Entry("lifepath:night_eyes", "Night Eyes", ""))),
+				// Two entries so iteration order is observable — the decode
+				// must preserve the sender's order (LinkedHashMap), since the
+				// character screen iterates the values directly.
 				Map.of("lifepath:frost_nova",
 						new IdentitySummaryPayload.AbilityEntry(
 								"lifepath:frost_nova", "Frost Nova",
 								"lifepath:textures/gui/ability/frost.png",
-								true)),
+								true),
+						"lifepath:zz_passive",
+						new IdentitySummaryPayload.AbilityEntry(
+								"lifepath:zz_passive", "Passive",
+								"", false)),
 				List.of(new IdentitySummaryPayload.ResourceDisplay(
 						"lifepath:temperature", "Temperature", 50, 1,
 						List.of("Cold", "Hot"),
@@ -52,6 +59,9 @@ class IdentitySummaryPayloadTest {
 		assertEquals(p.specFocus(), d.specFocus());
 		assertEquals(p.sections(), d.sections());
 		assertEquals(p.abilities(), d.abilities());
+		// Map equality ignores order — assert the wire order explicitly.
+		assertEquals(List.copyOf(p.abilities().keySet()),
+				List.copyOf(d.abilities().keySet()));
 		assertEquals(p.resourceDisplays(), d.resourceDisplays());
 	}
 

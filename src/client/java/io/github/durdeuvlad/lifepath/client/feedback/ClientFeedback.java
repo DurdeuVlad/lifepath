@@ -54,9 +54,12 @@ public final class ClientFeedback {
 			case "milestone" -> Text.translatable(key, arg(p, 0), arg(p, 1),
 					arg(p, 2).isEmpty() ? Text.empty()
 							: Text.translatable(arg(p, 2)));
+			// secondsLeft feeds the REASON's own "%ss" (e.g. "on cooldown
+			// (42s)") — the outer "%s — %s" has no slot for it; an unbound
+			// placeholder would render a literal "null".
 			case "ability_denied" -> Text.translatable(key, arg(p, 0),
-					Text.translatable("feedback.lifepath.reason." + arg(p, 1)),
-					arg(p, 2));
+					Text.translatable("feedback.lifepath.reason." + arg(p, 1),
+							arg(p, 2)));
 			default -> Text.translatable(key, args);
 		};
 	}

@@ -101,10 +101,19 @@ public final class AbilityEngine {
 					// The queued task can run after a disconnect — resolving a
 					// character for an offline entity would leak a cache entry.
 					if (ctx.server().getPlayerManager().getPlayer(player.getUuid()) == player) {
+						// Resolve AUTO up front so denial feedback names the
+						// real ability (and its real cooldown), not the sentinel.
+						// tryActivate resolves again internally — keeping the
+						// DISABLED-first validation order the single authority.
+						Identifier abilityId = resolveActivationTarget(
+								CharacterManager.getCharacter(player),
+								payload.abilityId());
 						Outcome outcome = tryActivate(player, payload.abilityId());
 						if (outcome != Outcome.EXECUTED) {
 							io.github.durdeuvlad.lifepath.feedback.FeedbackService
-									.abilityDenied(player, payload.abilityId(),
+									.abilityDenied(player,
+											abilityId != null ? abilityId
+													: payload.abilityId(),
 											outcome);
 						}
 					}
@@ -163,6 +172,19 @@ public final class AbilityEngine {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Resolves the {@link ActivateAbilityPayload#AUTO} sentinel to the player's
+	 * first owned ACTIVE ability; any other id passes through unchanged. Null
+	 * when AUTO was requested and the player owns no ACTIVE ability.
+	 */
+	@Nullable
+	public static Identifier resolveActivationTarget(PlayerCharacterData data,
+			Identifier abilityId) {
+		return abilityId.equals(ActivateAbilityPayload.AUTO)
+				? firstOwnedActive(data)
+				: abilityId;
 	}
 
 	/**
@@ -284,11 +306,9 @@ public final class AbilityEngine {
 		if (!abilitiesEnabled()) {
 			return Outcome.DISABLED;
 		}
-		if (abilityId.equals(ActivateAbilityPayload.AUTO)) {
-			abilityId = firstOwnedActive(data);
-			if (abilityId == null) {
-				return Outcome.NOT_OWNED;
-			}
+		abilityId = resolveActivationTarget(data, abilityId);
+		if (abilityId == null) {
+			return Outcome.NOT_OWNED;
 		}
 		if (!ownedAbilities(data).contains(abilityId)) {
 			return Outcome.NOT_OWNED;

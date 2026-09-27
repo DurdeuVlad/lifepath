@@ -118,7 +118,9 @@ public record IdentitySummaryPayload(IdentityCore identity,
 					PacketCodecs.map(java.util.HashMap::new, PacketCodecs.STRING,
 							Entry.CODEC.collect(PacketCodecs.toList())),
 							IdentitySummaryPayload::sections,
-					PacketCodecs.map(java.util.HashMap::new, PacketCodecs.STRING,
+					// LinkedHashMap so the server's owned-set order survives the
+					// wire — the character screen iterates these values directly.
+					PacketCodecs.map(java.util.LinkedHashMap::new, PacketCodecs.STRING,
 							AbilityEntry.CODEC), IdentitySummaryPayload::abilities,
 					ResourceDisplay.CODEC.collect(PacketCodecs.toList()),
 							IdentitySummaryPayload::resourceDisplays,

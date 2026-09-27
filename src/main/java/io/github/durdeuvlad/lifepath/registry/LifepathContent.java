@@ -261,6 +261,12 @@ public final class LifepathContent {
 	public static AbilityDefinition decodeAbility(Identifier id, AbilityDefinition.AbilityFile file) {
 		AbilityDefinition def = AbilityDefinition.fromFile(id, file);
 		java.util.Set<String> errors = new java.util.LinkedHashSet<>();
+		// Reserved: the C2S activation AUTO sentinel — an ability with this id
+		// would be shadowed (every request for it resolves to the auto-pick).
+		if (id.equals(io.github.durdeuvlad.lifepath.network.c2s
+				.ActivateAbilityPayload.AUTO)) {
+			errors.add("id is reserved for the activation AUTO sentinel");
+		}
 		for (Identifier t : io.github.durdeuvlad.lifepath.ability
 				.AbilityVocabulary.unknownNodeTypes(def)) {
 			errors.add("unknown spec node type " + t);

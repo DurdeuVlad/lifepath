@@ -48,6 +48,10 @@ public class CharacterScreen extends Screen {
 	/** Clickable active-ability rows, rebuilt every render pass. */
 	private final List<AbilityRow> abilityRows = new ArrayList<>();
 
+	/** The skills entry point — re-anchored under the panel each render so
+	 *  growing/shrinking content never leaves it stranded or overlapped. */
+	private net.minecraft.client.gui.widget.ButtonWidget skillsButton;
+
 	/** Hit rect for one clickable ability row (screen coordinates). */
 	private record AbilityRow(String id, int x, int y, int w, int h) {}
 
@@ -58,7 +62,7 @@ public class CharacterScreen extends Screen {
 	@Override
 	protected void init() {
 		// M6-2: Skills entry point — the identity hub links to the skills list.
-		addDrawableChild(net.minecraft.client.gui.widget.ButtonWidget.builder(
+		skillsButton = addDrawableChild(net.minecraft.client.gui.widget.ButtonWidget.builder(
 				Text.translatable("screen.lifepath.character.skills_button"),
 				b -> client.setScreen(new SkillsScreen()))
 				.dimensions(width / 2 - 60,
@@ -79,6 +83,9 @@ public class CharacterScreen extends Screen {
 		// height, so it must grow or the key hint lands on the last rows.
 		int panelH = panelHeight(id);
 		int top = panelTop(panelH);
+		if (skillsButton != null) {
+			skillsButton.setY(top + panelH + 6);
+		}
 		context.fill(left - 4, top - 4, left + panelW + 4, top + panelH + 4, PANEL_EDGE);
 		context.fill(left - 3, top - 3, left + panelW + 3, top + panelH + 3, PANEL);
 
@@ -168,8 +175,20 @@ public class CharacterScreen extends Screen {
 			}
 			y = section(context, left, y + 4,
 					Text.translatable("screen.lifepath.character.abilities"));
-			for (IdentitySummaryPayload.AbilityEntry e
-					: id.abilities().values()) {
+			// Actives lead — they're the clickable rows — then passives; both
+			// groups keep the server's owned-set order within themselves.
+			List<IdentitySummaryPayload.AbilityEntry> ordered = new ArrayList<>();
+			for (var e : id.abilities().values()) {
+				if (e.active()) {
+					ordered.add(e);
+				}
+			}
+			for (var e : id.abilities().values()) {
+				if (!e.active()) {
+					ordered.add(e);
+				}
+			}
+			for (IdentitySummaryPayload.AbilityEntry e : ordered) {
 				boolean sel = selected != null
 						&& e.id().equals(selected.toString());
 				final int rowY = y;
@@ -211,13 +230,15 @@ public class CharacterScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		for (AbilityRow row : abilityRows) {
-			if (mouseX >= row.x() && mouseX < row.x() + row.w()
-					&& mouseY >= row.y() && mouseY < row.y() + row.h()) {
-				Identifier picked = Identifier.tryParse(row.id());
-				if (picked != null) {
-					ClientAbilityState.select(picked);
-					return true;
+		if (button == 0) {
+			for (AbilityRow row : abilityRows) {
+				if (mouseX >= row.x() && mouseX < row.x() + row.w()
+						&& mouseY >= row.y() && mouseY < row.y() + row.h()) {
+					Identifier picked = Identifier.tryParse(row.id());
+					if (picked != null) {
+						ClientAbilityState.select(picked);
+						return true;
+					}
 				}
 			}
 		}
@@ -256,7 +277,11 @@ public class CharacterScreen extends Screen {
 				IdentitySummary.SECTION_TRAITS, List.of()));
 		if (!id.abilities().isEmpty()) {
 			h += 4 + 11 + 11 * id.abilities().size();
-			if (ClientAbilityState.selected() == null) {
+			// Mirrors the render condition exactly — including the keybind
+			// null-check — so the panel never carries dead space.
+			if (ClientAbilityState.selected() == null
+					&& io.github.durdeuvlad.lifepath.client.LifepathClient
+							.abilityKey != null) {
 				h += 13;                     // "click to bind" hint line
 			}
 		}

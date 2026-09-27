@@ -176,8 +176,12 @@ public final class FeedbackService {
 				.remainingMillis(io.github.durdeuvlad.lifepath.character
 								.CharacterManager.getCharacter(player),
 						abilityId, System.currentTimeMillis()) / 1000L;
-		send(player, "ability_denied", IdentitySummary.displayName(abilityId),
-				reason, String.valueOf(secs));
+		// The AUTO sentinel reaches here only when nothing ACTIVE was owned —
+		// show a plain label instead of leaking the wire id to the player.
+		String name = io.github.durdeuvlad.lifepath.network.c2s
+				.ActivateAbilityPayload.AUTO.equals(abilityId)
+				? "Ability" : IdentitySummary.displayName(abilityId);
+		send(player, "ability_denied", name, reason, String.valueOf(secs));
 	}
 
 	/**

@@ -53,12 +53,17 @@ is something you maintain, not a checkbox you tick once.
 
 ## First minutes
 
-1. Start a world and open the character screen (default key: check the
-   vanilla key-bind menu under "Lifepath").
-2. Pick a species — read the hover text, pick the one whose fantasy you
-   want.
-3. Pick a specialization — it's a head start, not a contract.
-4. Go play. Skills level from play; watch them grow on the skills screen.
+1. Start a world and open the character screen (default key `C` — rebind
+   under Controls → "Lifepath").
+2. Pick a species with `/lifepath species choose` — tab-completion lists
+   the species, and its description prints when you pick
+   (hover the species row on the character screen to re-read it).
+3. Specializations are assigned by a server admin
+   (`/lifepath specialization set`) — playing solo with cheats, set your
+   own. It's a head start, not a contract: you can still train anything.
+4. Go play. Skills level from play — watch them grow on the skills screen,
+   and press the ability key (default `G`) to fire an active ability;
+   click an ability row on the character screen to choose which.
 
 ## Compatibility
 
