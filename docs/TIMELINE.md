@@ -3,7 +3,11 @@
 > Project: Lifepath  
 > Target: Minecraft 1.21.1 / Fabric  
 > Document purpose: High-level implementation roadmap for human developers and AI coding agents  
-> Status: Initial execution plan  
+> Status: Living execution plan — M0–M9 and M10-1/M10-2 delivered; M10-3 (this
+> document's companion docs) through M11 remain. Exit-gate phrasing below
+> describes *targets*; shipped reality is enumerated in `docs/API.md`,
+> `docs/DATAPACK_API.md`, `docs/CONFIGURATION.md`, `docs/ADMIN_COMMANDS.md`,
+> and `docs/MIGRATIONS.md`.  
 > Relationship to design: This document operationalizes `GAMEDESIGN.md`
 
 ---
@@ -2633,6 +2637,13 @@ This matrix defines when game Skills should become production-ready.
 | Defence | M8 | Damage-response progression |
 | Athletics | M8 | Movement/physical progression |
 | Scholarship | M8 | Knowledge/research progression |
+
+**M8-3 delivery record** (accuracy pass): Woodcutting, Hunting, Engineering,
+Cooking, Archery, Defence, Athletics, Scholarship shipped; **Melee rejected**
+(subsumed by Athletics' all-combat feed), **Enchanting rejected** (activity
+too rare — fails the frequency gate), **Alchemy deferred** (no brewing-station
+attribution primitive). Foraging shipped in M8 alongside as an existing skill.
+Shipped skill inventory: `docs/API.md` §6.
 
 ---
 
