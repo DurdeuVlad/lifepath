@@ -127,16 +127,17 @@ encumbrance capacity (default `1.0`).
   "aptitudes": { "lifepath:mining": "b" },
   "xp_modifiers": { "lifepath:mining": 1.1 },
   "decay_modifiers": {},
-  "protected_floors": [],
-  "signature": "lifepath:miner_signature",
+  "protected_floors": {},
+  "signature": ["lifepath:miner_signature"],
   "capacity_multiplier": 1.0
 }
 ```
 
-Required: `display_name`; all others optional. `signature` is a single ability
-id granted while specialized. `starting_skills` maps skill id → starting level;
+Required: `display_name`; all others optional. `signature` is a list of
+ability ids granted while specialized. `starting_skills` maps skill id → starting level;
 `aptitudes` map skill id → grade `d`–`s` (drives the per-grade multipliers in
-`skills.toml`); `xp_modifiers`/`decay_modifiers` map skill id → multiplier.
+`skills.toml`); `xp_modifiers`/`decay_modifiers` map skill id → multiplier;
+`protected_floors` maps skill id → level floor decay can't cross.
 
 ## `ability/` — data-driven ability
 
