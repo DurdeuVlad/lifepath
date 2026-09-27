@@ -1,0 +1,14 @@
+{
+	"activity": "lifepath:mining",
+	"skill": "lifepath:foraging",
+	"player_caused_only": true,
+	"base_xp": 0.04,
+	"per_tag": {
+		"minecraft:logs": 0.15,
+		"minecraft:leaves": 0.02,
+		"minecraft:flowers": 0.1
+	},
+	"required_tags": [
+		"lifepath:forageable"
+	]
+}

@@ -171,6 +171,25 @@ public final class VanillaGameplayProducers {
 	}
 
 	/**
+	 * Crafting-table output, called by {@code mixin.CraftingResultSlotMixin}
+	 * when the player takes the result stack. The output item id + its tags are
+	 * the event surface — all weighting lives in xp_source data.
+	 */
+	public static void onCraftOutput(net.minecraft.entity.player.PlayerEntity player,
+			net.minecraft.item.ItemStack output) {
+		if (!(player instanceof ServerPlayerEntity serverPlayer) || output.isEmpty()) {
+			return;
+		}
+		Set<Identifier> itemTags = output.streamTags()
+				.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
+		Identifier itemId = net.minecraft.registry.Registries.ITEM.getId(output.getItem());
+		ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents.crafting(
+				serverPlayer, itemId, itemTags,
+				Map.of("count", Integer.toString(output.getCount())),
+				ActivityEvent.Cause.PLAYER));
+	}
+
+	/**
 	 * Fishing catch, called by {@code mixin.FishingBobberEntityMixin} for each
 	 * spawned loot stack. sourceId = caught item id → repetition signatures
 	 * distinguish junk spam; caught-item tags carry vanilla/classification
