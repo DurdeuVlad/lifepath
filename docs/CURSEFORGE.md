@@ -59,8 +59,12 @@ across deaths, works in singleplayer.</li>
 
 <h3>Install</h3>
 <ul>
-<li>Minecraft <strong>1.21.1</strong>, Fabric Loader <strong>0.16.10+</strong></li>
-<li>Fabric API <strong>0.116.0+</strong> in <code>mods</code></li>
+<li>Minecraft <strong>1.21.1</strong></li>
+<li><strong>NeoForge 21.1+</strong> — primary loader: grab
+<code>lifepath-&lt;ver&gt;-neoforge.jar</code></li>
+<li><strong>Fabric 0.16.10+</strong> — secondary support: grab
+<code>lifepath-&lt;ver&gt;-fabric.jar</code> plus Fabric API
+<strong>0.116.0+</strong> in <code>mods</code></li>
 <li>Lifepath in <code>mods</code> on <strong>client and server</strong> —
 the server owns character state</li>
 <li>Java 21</li>
@@ -100,8 +104,12 @@ shift. Report issues on the GitHub issue tracker linked from this page.</em></p>
 ## Notes for the uploader (do not paste)
 
 - Version/loader claims verified against `fabric.mod.json`
-  (`fabricloader >=0.16.10`, `minecraft ~1.21.1`, `fabric-api >=0.116.0`)
-  and `gradle.properties`.
+  (`fabricloader >=0.16.10`, `minecraft ~1.21.1`, `fabric-api >=0.116.0`),
+  `neoforge.mods.toml` (`neoforge [21.1,)`, `minecraft [1.21.1,1.22)`),
+  and `gradle.properties` — CI fails the release on skew.
+- Multi-loader: NeoForge jar is the headline artifact; Fabric jar is the
+  secondary listing. CurseForge loader tags deferred to the public-listing
+  milestone — set both NeoForge + Fabric tags on upload.
 - Content counts verified against `data/lifepath/`: 15 species,
   13 specializations, 13 skills, 79 abilities, 3 attunements,
   2 conditions, 4 resources.

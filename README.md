@@ -1,9 +1,9 @@
 # Lifepath
 
 **Build a character by playing, not by picking from a list.** Lifepath is a
-character-progression mod for Minecraft 1.21.1 (Fabric) where who you are,
-what you focus on, and what you actually practice all matter — and mastery
-is something you maintain, not a checkbox you tick once.
+character-progression mod for Minecraft 1.21.1 (NeoForge + Fabric) where who
+you are, what you focus on, and what you actually practice all matter — and
+mastery is something you maintain, not a checkbox you tick once.
 
 > **Status:** approaching 1.0 — feature-complete, in release-candidate
 > stabilization. Things may still shift before the first stable release.
@@ -45,11 +45,19 @@ is something you maintain, not a checkbox you tick once.
 
 ## Install
 
-1. Install **Fabric Loader** 0.16.10+ for **Minecraft 1.21.1**.
-2. Install **Fabric API** 0.116.0+ in your `mods` folder.
-3. Drop the Lifepath JAR into `mods` — on **both** the client and the
-   server (the server owns your character's progress).
-4. Java 21 required.
+Lifepath ships one jar per loader — **NeoForge is the primary loader**,
+Fabric is supported secondarily. Same version, same content, same features.
+
+| Loader | File | Requirements |
+|---|---|---|
+| **NeoForge** (primary) | `lifepath-<ver>-neoforge.jar` | NeoForge 21.1+ for Minecraft 1.21.1 |
+| **Fabric** (secondary) | `lifepath-<ver>-fabric.jar` | Fabric Loader 0.16.10+ **and** Fabric API 0.116.0+ |
+
+1. Install the loader for **Minecraft 1.21.1** (NeoForge 21.1+ or Fabric
+   0.16.10+; Fabric also needs Fabric API).
+2. Drop the matching Lifepath jar into `mods` — on **both** the client and
+   the server (the server owns your character's progress).
+3. Java 21 required.
 
 ## First minutes
 
@@ -96,7 +104,7 @@ only if a compatible partner mod is present (today it is dormant — see
 
 ## Tech
 
-Minecraft 1.21.1 · Fabric Loader · Java 21 · Gradle
+Minecraft 1.21.1 · NeoForge (primary) + Fabric (secondary) · Java 21 · Gradle
 
 ## License
 

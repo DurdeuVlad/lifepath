@@ -24,14 +24,34 @@ jobs:
       - name: Grant wrapper
         run: chmod +x gradlew
 
+      # `build` on the root aggregates all three modules: common (compile +
+      # test + verifyNoFabricImports — which also rejects net.neoforged),
+      # fabric (loom assemble/remap), neoforge (ModDevGradle assemble).
       - name: Build, test, assemble
         run: ./gradlew build --console=plain
 
-      - name: Upload mod jar
+      # M13-5: the mod metadata files carry the ${version} placeholder —
+      # parity is checked against the processed resources the build emits.
+      - name: Verify loader metadata version parity
+        run: |
+          ver=$(grep -E '^version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+          fab=$(grep -oE '"version": *"[^"]+"' fabric/build/resources/main/fabric.mod.json | cut -d'"' -f4)
+          nf=$(grep -oE '^[[:space:]]*version="[^"]+"' neoforge/build/resources/main/META-INF/neoforge.mods.toml | head -1 | grep -oE '"[^"]+"' | tr -d '"')
+          echo "gradle.properties=$ver fabric.mod.json=$fab neoforge.mods.toml=$nf"
+          if [ -z "$ver" ] || [ "$fab" != "$ver" ] || [ "$nf" != "$ver" ]; then
+            echo "::error::version skew between gradle.properties and mod metadata"
+            exit 1
+          fi
+
+      - name: Upload mod jars
         uses: actions/upload-artifact@v4
         with:
-          name: lifepath-jar
-          path: fabric/build/libs/lifepath-*.jar
+          name: lifepath-jars
+          path: |
+            fabric/build/libs/lifepath-*-fabric.jar
+            fabric/build/libs/lifepath-*-fabric-sources.jar
+            neoforge/build/libs/lifepath-*-neoforge.jar
+            neoforge/build/libs/lifepath-*-neoforge-sources.jar
           if-no-files-found: error
 
       - name: Upload test reports

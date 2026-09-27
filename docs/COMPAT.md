@@ -4,6 +4,20 @@ Lifepath is a progression layer over other mods' gameplay. External systems
 provide content; Lifepath provides XP/levels/aptitude/abilities on top. Nothing
 here replaces a foreign loop.
 
+## Loader support (M13)
+
+| Loader | Minecraft | Status | Artifact |
+|---|---|---|---|
+| **NeoForge** 21.1+ | 1.21.1 | **Primary** — full feature parity | `lifepath-<ver>-neoforge.jar` |
+| **Fabric** 0.16.10+ (+ Fabric API 0.116.0+) | 1.21.1 | Secondary — full feature parity | `lifepath-<ver>-fabric.jar` |
+
+One shared `common/` codebase (Mojang mappings, zero loader imports —
+CI-enforced) sits behind `platform/` ports; each loader module is a thin
+adapter. Save-format (`lifepath:character_data` NBT) and datapack content
+are identical on both. Mod-to-mod bridges plug in through the
+`lifepath:adapter` seam — a Fabric entrypoint on Fabric, a
+`ServiceLoader` service on NeoForge.
+
 ## Priority order applied (TIMELINE §10)
 
 | Level | Used for |
@@ -30,8 +44,10 @@ different version logs an error and is skipped, never crashes init.
 ## Overgeared adapter (`compat/overgeared/`)
 
 Overgeared ships **no Fabric build for 1.21.1** (1.20.1 only; 1.21.1 is
-Forge/NeoForge) and exposes no stable Fabric event API — so the shipped
-adapter is deliberately declarative:
+NeoForge) and exposes no stable event API — so the shipped adapter is
+deliberately declarative. On NeoForge the partner mod *can* load beside
+Lifepath (`overgeared-neoforge` 1.21.1 builds exist); live co-load
+validation is tracked in issue #138. On Fabric the adapter stays dormant:
 
 - Watches normalized `lifepath:crafting` events; when the result id is
   `overgeared:*` or carries `#lifepath:forged_outputs`, republishes it as
@@ -50,8 +66,8 @@ adapter is deliberately declarative:
 
 | Scenario | Result |
 |---|---|
-| Overgeared absent | `register()` logs one debug line, wires nothing; vanilla paths untouched (boot-verified) |
-| Overgeared present | dispatcher subscription active; crafting events with forged results translate to smithing XP |
+| Overgeared absent | `register()` logs one debug line, wires nothing; vanilla paths untouched (boot-verified on both loaders) |
+| Overgeared present (NeoForge) | dispatcher subscription active; crafting events with forged results translate to smithing XP — live co-load verification is #138 |
 | Item id changed/renamed | tag entries simply miss; `required:false` entries never fail tag load |
 | Recipe removed | fewer events fire; nothing errors |
 | Adapter API drift (bridge built vs different Lifepath) | entrypoint throws `LinkageError` → caught per-adapter, error logged, init continues |

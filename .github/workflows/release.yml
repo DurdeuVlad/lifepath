@@ -35,8 +35,24 @@ jobs:
       - name: Build
         run: ./gradlew clean build --console=plain
 
+      # M13-5: expanded mod metadata must agree with the released version —
+      # guards the placeholder substitution on both loaders.
+      - name: Verify loader metadata version parity
+        run: |
+          ver=$(grep -E '^version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+          fab=$(grep -oE '"version": *"[^"]+"' fabric/build/resources/main/fabric.mod.json | cut -d'"' -f4)
+          nf=$(grep -oE '^[[:space:]]*version="[^"]+"' neoforge/build/resources/main/META-INF/neoforge.mods.toml | head -1 | grep -oE '"[^"]+"' | tr -d '"')
+          echo "gradle.properties=$ver fabric.mod.json=$fab neoforge.mods.toml=$nf"
+          if [ "$fab" != "$ver" ] || [ "$nf" != "$ver" ]; then
+            echo "::error::version skew between mod metadata files"
+            exit 1
+          fi
+
       - name: Checksum
-        run: cd fabric/build/libs && sha256sum lifepath-*.jar > ../../../checksums.txt && cat ../../../checksums.txt
+        run: |
+          sha256sum fabric/build/libs/lifepath-*-fabric*.jar \
+                    neoforge/build/libs/lifepath-*-neoforge*.jar > checksums.txt
+          cat checksums.txt
 
       - name: Draft release
         uses: softprops/action-gh-release@v2
@@ -44,8 +60,20 @@ jobs:
           draft: true
           generate_release_notes: true
           fail_on_unmatched_files: true
+          body: |
+            **Lifepath ${{ github.ref_name }}** — multi-loader release. **NeoForge 1.21.1 is the primary loader**; Fabric 1.21.1 ships as secondary support.
+
+            | Loader | File | Requires |
+            |---|---|---|
+            | NeoForge 21.1+ (MC 1.21.1) | `lifepath-*-neoforge.jar` | NeoForge only |
+            | Fabric 0.16.10+ (MC 1.21.1) | `lifepath-*-fabric.jar` | Fabric API 0.116.0+ |
+
+            `checksums.txt` covers every jar.
           files: |
-            fabric/build/libs/lifepath-*.jar
+            neoforge/build/libs/lifepath-*-neoforge.jar
+            neoforge/build/libs/lifepath-*-neoforge-sources.jar
+            fabric/build/libs/lifepath-*-fabric.jar
+            fabric/build/libs/lifepath-*-fabric-sources.jar
             checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

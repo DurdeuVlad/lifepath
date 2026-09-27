@@ -79,6 +79,23 @@ base {
 	archivesName = archives_base_name
 }
 
+// M13-5 dual-loader artifacts: lifepath-<ver>-fabric.jar alongside the
+// neoforge module's lifepath-<ver>-neoforge.jar. The sources jar carries
+// common's sources too — that's the bulk of what ships.
+tasks.named('remapJar') {
+	// Loom names the remapped output eagerly at configuration time — the
+	// classifier alone doesn't reach it, so set the final file name.
+	archiveFileName = "${archives_base_name}-${project.version}-fabric.jar"
+}
+tasks.named('remapSourcesJar') {
+	archiveFileName = "${archives_base_name}-${project.version}-fabric-sources.jar"
+}
+tasks.named('sourcesJar') {
+	archiveClassifier = 'fabric-sources'
+	from(project(':common').sourceSets.main.allJava,
+			project(':common').sourceSets.client.allJava)
+}
+
 // configure the maven publication
 publishing {
 	publications {

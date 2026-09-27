@@ -6,7 +6,11 @@
 ./gradlew clean build   # compile + test + assemble
 ```
 
-Output: `build/libs/lifepath-<version>.jar` (+ `-sources.jar`). The jar
+Outputs (multi-loader, M13): `fabric/build/libs/lifepath-<version>-fabric.jar`
+and `neoforge/build/libs/lifepath-<version>-neoforge.jar`, each with a
+`-fabric-sources` / `-neoforge-sources` sources jar carrying the shared
+`common/` sources. **NeoForge is the primary loader**; Fabric is secondary.
+Every release attaches all four jars plus one `checksums.txt`. Each jar
 root carries `LICENSE` (LGPL-3.0), `LICENSE.GPL` (the GPL-3.0 it extends —
 LGPL-3.0 §4(b) requires both), and `NOTICE` (copyright statement).
 Requires **JDK 21** (Temurin or equivalent) — Gradle wrapper is pinned

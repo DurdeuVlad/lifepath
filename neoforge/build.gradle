@@ -88,6 +88,8 @@ tasks.withType(ProcessResources).configureEach {
 }
 
 java {
+	withSourcesJar()
+
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
 }
@@ -96,7 +98,14 @@ base {
 	archivesName = "${archives_base_name}"
 }
 
-// Artifact name contract (issue #136): lifepath-<ver>-neoforge.jar
+// Artifact name contract (issues #136/#137): lifepath-<ver>-neoforge.jar +
+// lifepath-<ver>-neoforge-sources.jar. The sources jar carries common's
+// sources too — that's the bulk of what ships.
 tasks.named('jar') {
 	archiveClassifier = 'neoforge'
+}
+tasks.named('sourcesJar') {
+	archiveClassifier = 'neoforge-sources'
+	from(project(':common').sourceSets.main.allJava,
+			project(':common').sourceSets.client.allJava)
 }
