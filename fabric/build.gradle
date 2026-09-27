@@ -1,0 +1,98 @@
+plugins {
+	id 'fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"lifepath" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+			sourceSet project(":common").sourceSets.main
+			sourceSet project(":common").sourceSets.client
+		}
+	}
+}
+
+sourceSets {
+	// The loom `mods` block groups entries for the loader, but the JVM
+	// classpath comes from the sourceSet runtime classpaths — common's
+	// named output dirs must be present there for dev class loading.
+	main {
+		runtimeClasspath += project(':common').sourceSets.main.output
+		runtimeClasspath += project(':common').sourceSets.client.output
+	}
+	client {
+		compileClasspath += project(':common').sourceSets.client.output
+		runtimeClasspath += project(':common').sourceSets.main.output
+		runtimeClasspath += project(':common').sourceSets.client.output
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Compile against common; dev runtime picks up its classes via the
+	// sourceSet runtimeClasspath wiring above (named output dirs). A plain
+	// `implementation` dep would put the remapped (intermediary) jar on the
+	// dev classpath and break class loading.
+	compileOnly project(':common')
+	// Bundle common inside the fabric jar (jar-in-jar) for production.
+	include project(':common')
+
+	// TOML config parsing (bundled into the mod jar; include is non-transitive,
+	// so core must be bundled explicitly alongside toml).
+	implementation "com.electronwill.night-config:toml:3.8.4"
+	implementation "com.electronwill.night-config:core:3.8.4"
+	include "com.electronwill.night-config:toml:3.8.4"
+	include "com.electronwill.night-config:core:3.8.4"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.jar {
+	// LGPL-3.0 §4(b): object code must ship with copies of both the LGPL
+	// and the GPL it extends; NOTICE carries the copyright statement.
+	from rootProject.files("LICENSE", "LICENSE.GPL", "NOTICE")
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+base {
+	archivesName = archives_base_name
+}
+
+// configure the maven publication
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for
+	// information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in
+		// the top level. The repositories here will be used for publishing your
+		// artifact, not for retrieving dependencies.
+	}
+}

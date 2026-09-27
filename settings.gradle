@@ -19,3 +19,8 @@ pluginManagement {
 
 // Should match your modid
 rootProject.name = 'lifepath'
+
+// M13-3: multi-loader layout — common holds loader-agnostic code (zero
+// net.fabric* imports, enforced by verifyNoFabricImports); fabric hosts the
+// Fabric adapter + entrypoints; neoforge arrives in M13-4.
+include 'common', 'fabric'

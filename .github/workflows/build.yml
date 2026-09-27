@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lifepath-jar
-          path: build/libs/lifepath-*.jar
+          path: fabric/build/libs/lifepath-*.jar
           if-no-files-found: error
 
       - name: Upload test reports
@@ -39,4 +39,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: build/reports/tests/test/**
+          path: common/build/reports/tests/test/**

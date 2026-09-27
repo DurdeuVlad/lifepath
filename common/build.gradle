@@ -1,0 +1,78 @@
+plugins {
+	id 'fabric-loom' version "${loom_version}"
+}
+
+// M13-3: common compiles against Minecraft (Mojmap) only — no loader deps.
+// It is not a mod itself (no fabric.mod.json, no mods block); loaders embed
+// it. splitEnvironmentSourceSets keeps client code client-only.
+loom {
+	splitEnvironmentSourceSets()
+}
+
+repositories {
+	// mixin annotation compile-only deps (loaders bundle the runtime)
+	maven { url = 'https://maven.llamalad7.net/' }
+	maven { url = 'https://maven.fabricmc.net/' }
+	mavenCentral()
+}
+
+sourceSets {
+	test {
+		compileClasspath += sourceSets.client.output
+		runtimeClasspath += sourceSets.client.output
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings loom.officialMojangMappings()
+
+	// Mixin annotations for common's mixin classes — loaders bundle the
+	// runtime (fabric-loader ships sponge-mixin + MixinExtras).
+	compileOnly "net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7"
+	compileOnly "io.github.llamalad7:mixinextras-common:0.4.1"
+	compileOnly "org.jetbrains:annotations:24.1.0"
+
+	// TOML config parsing — loaders bundle these into their own jars.
+	implementation "com.electronwill.night-config:toml:3.8.4"
+	implementation "com.electronwill.night-config:core:3.8.4"
+
+	testImplementation "org.junit.jupiter:junit-jupiter:5.10.2"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.jar {
+	// LGPL-3.0 §4(b): the nested jar ships inside the loader jar; carry the
+	// licenses so the bundle is self-describing at every level.
+	from rootProject.files("LICENSE", "LICENSE.GPL", "NOTICE")
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+base {
+	archivesName = 'lifepath-common'
+}
+
+// M13-3 acceptance gate: common must never import a loader API. Runs under
+// check (and therefore build and CI); keep it cheap — a line scan, not a
+// compile-time processor.
+def verifyNoFabricImports = tasks.register('verifyNoFabricImports') {
+	doLast {
+		def offenders = []
+		fileTree(dir: 'src', includes: ['**/*.java']).each { f ->
+			f.eachLine { line ->
+				if (line.contains('net.fabric')) {
+					offenders << "${f.path}: ${line.trim()}"
+				}
+			}
+		}
+		if (!offenders.isEmpty()) {
+			throw new GradleException(
+					'common/ must not reference net.fabric* APIs:\n' + offenders.join('\n'))
+		}
+	}
+}
+check.dependsOn verifyNoFabricImports

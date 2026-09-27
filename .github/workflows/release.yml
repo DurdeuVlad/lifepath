@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew clean build --console=plain
 
       - name: Checksum
-        run: cd build/libs && sha256sum lifepath-*.jar > ../checksums.txt && cat ../checksums.txt
+        run: cd fabric/build/libs && sha256sum lifepath-*.jar > ../../../checksums.txt && cat ../../../checksums.txt
 
       - name: Draft release
         uses: softprops/action-gh-release@v2
@@ -45,7 +45,7 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            build/libs/lifepath-*.jar
-            build/checksums.txt
+            fabric/build/libs/lifepath-*.jar
+            checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

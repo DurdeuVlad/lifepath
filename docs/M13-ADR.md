@@ -110,3 +110,26 @@ client). The complete API surface in use:
   must re-derive behavior, differences recorded on #136.
 - The shipped `v1.0.0-beta.1` Fabric artifact is unaffected; save format is
   loader-neutral NBT — worlds carry across loaders.
+
+## Implementation notes (M13-3, verified)
+
+- **Dev classpath:** loom's `mods` block groups entries for the *loader's* mod
+  discovery, but the JVM `-classpath` comes from the sourceSet runtime
+  classpaths. `fabric` therefore adds `project(':common')` main+client outputs
+  to `sourceSets.main.runtimeClasspath` — without it, mixin classes exist on
+  disk but `Launch.classLoader` cannot find them (`ClassNotFoundException` at
+  bootstrap). A plain `implementation project(':common')` dep is wrong: it
+  resolves the *remapped* (intermediary) jar onto the dev classpath and every
+  Mojmap reference fails. `compileOnly` + runtimeClasspath output dirs +
+  `include` (jar-in-jar for production) is the working combination.
+- **Mixin config location:** `lifepath.mixins.json` lives in `fabric`'s
+  resources beside `fabric.mod.json` — the mixin bootstrap resolves configs by
+  classpath lookup against the owning mod's roots; keeping the json in the
+  loader module keeps that resolution reliable. Mixin *classes* stay in common.
+  The loom annotation processor's refmap is unused at runtime in both
+  environments: dev runs named (Mojmap) classes and production ships remapped
+  (intermediary) bytecode.
+- **NeoForge note for M13-4:** the `neoforge` module will need the same
+  split — ModDevGradle's `additionalRuntimeClasspath`/jarJar for the common
+  output, mixin config in the neoforge resources, `neoforge.mods.toml`
+  declaring the entrypoint class.
