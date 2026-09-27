@@ -1,5 +1,29 @@
 {
 	"display_name": "Farming",
+	"description": "Planting, tending, and harvesting crops.",
+	"improve_hint": "Plant crops and harvest them when fully grown.",
 	"category": "gathering",
-	"max_level": 100
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.farming.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.farming.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.farming.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.farming.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.farming.milestone.95"
+		}
+	]
 }

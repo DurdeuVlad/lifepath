@@ -22,6 +22,9 @@ public final class ClientCharacterState {
 	private static volatile io.github.durdeuvlad.lifepath.network.s2c
 			.IdentitySummaryPayload identity = io.github.durdeuvlad.lifepath
 			.network.s2c.IdentitySummaryPayload.empty();
+	/** Server-resolved per-skill display cards (M6-2). */
+	private static volatile java.util.List<io.github.durdeuvlad.lifepath.network
+			.s2c.SkillsSummaryPayload.SkillCard> skills = java.util.List.of();
 	/** Resource → current band index per the last delta (-1 removed). Server defs aren't client-visible. */
 	private static final java.util.Map<net.minecraft.util.Identifier, Integer>
 			RESOURCE_BANDS = new java.util.concurrent.ConcurrentHashMap<>();
@@ -39,7 +42,20 @@ public final class ClientCharacterState {
 		snapshot = null;
 		identity = io.github.durdeuvlad.lifepath.network.s2c
 				.IdentitySummaryPayload.empty();
+		skills = java.util.List.of();
 		RESOURCE_BANDS.clear();
+	}
+
+	/** Applies the server's per-skill display cards (M6-2). */
+	public static void applySkills(io.github.durdeuvlad.lifepath.network.s2c
+			.SkillsSummaryPayload payload) {
+		skills = payload.skills();
+	}
+
+	/** Latest per-skill display cards — empty until first sync. */
+	public static java.util.List<io.github.durdeuvlad.lifepath.network.s2c
+			.SkillsSummaryPayload.SkillCard> skills() {
+		return skills;
 	}
 
 	/** Applies the server's resolved display strings (M6-1). */

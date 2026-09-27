@@ -34,7 +34,12 @@ public class CharacterScreen extends Screen {
 
 	@Override
 	protected void init() {
-		// No interactive widgets for M6-1 — Esc/keybind closes.
+		// M6-2: Skills entry point — the identity hub links to the skills list.
+		addDrawableChild(net.minecraft.client.gui.widget.ButtonWidget.builder(
+				Text.translatable("screen.lifepath.character.skills_button"),
+				b -> client.setScreen(new SkillsScreen()))
+				.dimensions(width / 2 - 60, height / 2 + 88, 120, 18)
+				.build());
 	}
 
 	@Override
