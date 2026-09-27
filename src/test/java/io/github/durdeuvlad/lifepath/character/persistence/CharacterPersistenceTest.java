@@ -19,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -119,6 +121,70 @@ class CharacterPersistenceTest {
 			assertTrue(sanitized.unlocks()
 					.contains(Identifier.of("lifepath", "u1")),
 					"a held unlock id must survive relog while its content exists");
+		} finally {
+			CharacterPersistence.setContentIndex(ContentIndex.PERMISSIVE);
+		}
+	}
+
+	/**
+	 * M10-2 end-to-end fixture: a hand-built {@code data_version: 1} blob —
+	 * conditions stored as a bare id <i>list</i> (the pre-v2 shape) — runs the
+	 * real {@code migrate -> decode -> sanitize} path and yields valid v2 data.
+	 */
+	@Test
+	void v1FixtureMigratesThroughTheRealPath() {
+		NbtCompound v1 = new NbtCompound();
+		v1.putInt("data_version", 1);
+		v1.putString("species_id", "lifepath:human");
+		NbtList oldConditions = new NbtList();
+		oldConditions.add(NbtString.of("lifepath:vampirism"));
+		oldConditions.add(NbtString.of("lifepath:lycanthropy"));
+		v1.put("conditions", oldConditions);
+		NbtList unlocks = new NbtList();
+		unlocks.add(NbtString.of("lifepath:phantom"));
+		v1.put("unlocks", unlocks);
+		v1.put("skills", new NbtCompound());
+		v1.put("cooldowns", new NbtCompound());
+		v1.put("resources", new NbtCompound());
+
+		PlayerCharacterData data = CharacterPersistence.deserialize(v1);
+
+		assertEquals(LifepathMod.DATA_VERSION, data.dataVersion(),
+				"migrated blob must stamp the current data version");
+		assertEquals(Identifier.of("lifepath", "human"), data.speciesId());
+		assertTrue(data.conditionState(Identifier.of("lifepath", "vampirism")) != null,
+				"v1 bare condition ids must become v2 condition state entries");
+		assertEquals(0, data.conditionState(
+				Identifier.of("lifepath", "vampirism")).stage(),
+				"migrated conditions land at stage 0");
+		assertTrue(data.unlocks().contains(Identifier.of("lifepath", "phantom")),
+				"unlocks were already a bare id list in v1 and survive untouched");
+	}
+
+	/**
+	 * M10-2: removed/renamed content degrades to the documented fallback —
+	 * unknown ids drop on load; the save stays valid.
+	 */
+	@Test
+	void removedContentIdDropsWithoutCorrupting() {
+		NbtCompound v2 = CharacterPersistence.serialize(sampleData());
+		// Simulate a datapack that deleted a species while a save references
+		// it — every other domain still resolves.
+		CharacterPersistence.setContentIndex(new ContentIndex() {
+			@Override
+			public boolean exists(String domain, Identifier id) {
+				return !"species".equals(domain);
+			}
+		});
+		try {
+			PlayerCharacterData sanitized = CharacterPersistence.deserialize(v2);
+			assertNull(sanitized.speciesId(),
+					"removed species id -> null, not crash or dangling ref");
+			// The rest of the blob is untouched — drop is surgical.
+			assertTrue(sanitized.skills()
+					.containsKey(Identifier.of("lifepath", "test_skill")),
+					"unrelated known content survives the same load");
+			assertEquals(LifepathMod.DATA_VERSION, sanitized.dataVersion());
 		} finally {
 			CharacterPersistence.setContentIndex(ContentIndex.PERMISSIVE);
 		}

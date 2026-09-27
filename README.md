@@ -13,6 +13,7 @@ Species defines what a character *is*. Specialization defines what they *chose t
 | [docs/GAMEDESIGN.md](docs/GAMEDESIGN.md) | Foundational design: character model, species, specializations, skills, aptitudes, decay, ability engine, UX |
 | [docs/TIMELINE.md](docs/TIMELINE.md) | Milestone plan M0–M11, architecture contracts, execution rules, agent contract |
 | [docs/API.md](docs/API.md) | 1.0 API freeze: the enumerated public surface (data domains, ids, commands, config keys, wire ids, extension points, saved-data schema) |
+| [docs/MIGRATIONS.md](docs/MIGRATIONS.md) | Save-compatibility rules: the dataVersion chain, removed-id fallbacks, how to add the next migration |
 | [docs/RELEASE_ISSUES.md](docs/RELEASE_ISSUES.md) | Public-release & branding issue backlog (LP-REL-001…010) |
 
 ## Core contracts
