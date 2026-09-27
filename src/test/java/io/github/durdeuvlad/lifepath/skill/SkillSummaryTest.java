@@ -14,7 +14,6 @@ import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

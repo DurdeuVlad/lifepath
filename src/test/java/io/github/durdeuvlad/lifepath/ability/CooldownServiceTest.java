@@ -13,7 +13,7 @@ import io.github.durdeuvlad.lifepath.config.ConfigSpec;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +30,8 @@ class CooldownServiceTest {
 	Path configDir;
 
 	private PlayerCharacterData data;
-	private static final Identifier ABILITIES = LifepathMod.id("abilities");
-	private static final Identifier AB = LifepathMod.id("flash_freeze");
+	private static final ResourceLocation ABILITIES = LifepathMod.id("abilities");
+	private static final ResourceLocation AB = LifepathMod.id("flash_freeze");
 
 	@BeforeEach
 	void setUp() {
@@ -92,7 +92,7 @@ class CooldownServiceTest {
 	@Test
 	void clearRemovesOneCooldownButNeverScheduleMarkers() {
 		data.setCooldown(AB, 50_000L);
-		Identifier marker = CooldownService.scheduleKey(AB);
+		ResourceLocation marker = CooldownService.scheduleKey(AB);
 		data.setCooldown(marker, 50_000L);
 
 		assertFalse(CooldownService.clear(data, marker),
@@ -106,7 +106,7 @@ class CooldownServiceTest {
 	void clearAllDropsOnlyRealCooldowns() {
 		data.setCooldown(AB, 50_000L);
 		data.setCooldown(LifepathMod.id("other"), 60_000L);
-		Identifier marker = CooldownService.scheduleKey(AB);
+		ResourceLocation marker = CooldownService.scheduleKey(AB);
 		data.setCooldown(marker, 50_000L);
 
 		assertEquals(2, CooldownService.clearAll(data));
@@ -135,7 +135,7 @@ class CooldownServiceTest {
 		long now = 100_000L;
 		data.setCooldown(AB, now + 3_000L);              // 3s left — below 5s threshold
 		data.setCooldown(LifepathMod.id("long_cd"), now + 60_000L); // survives
-		Identifier marker = CooldownService.scheduleKey(AB);
+		ResourceLocation marker = CooldownService.scheduleKey(AB);
 		data.setCooldown(marker, now + 1_000L);          // bookkeeping — exempt
 
 		CharacterPersistence.sanitize(data, now);

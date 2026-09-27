@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -16,18 +16,18 @@ import org.jetbrains.annotations.Nullable;
  * this class is deliberately free of content-domain knowledge.
  */
 public final class ContentRegistry<T> {
-	private final Identifier id;
-	private final Map<Identifier, T> entries = new LinkedHashMap<>();
+	private final ResourceLocation id;
+	private final Map<ResourceLocation, T> entries = new LinkedHashMap<>();
 
-	public ContentRegistry(Identifier id) {
+	public ContentRegistry(ResourceLocation id) {
 		this.id = id;
 	}
 
-	public Identifier id() {
+	public ResourceLocation id() {
 		return id;
 	}
 
-	public T register(Identifier entryId, T value) {
+	public T register(ResourceLocation entryId, T value) {
 		if (entries.containsKey(entryId)) {
 			throw new IllegalArgumentException("duplicate entry '" + entryId + "' in registry " + id);
 		}
@@ -36,11 +36,11 @@ public final class ContentRegistry<T> {
 	}
 
 	@Nullable
-	public T get(Identifier entryId) {
+	public T get(ResourceLocation entryId) {
 		return entries.get(entryId);
 	}
 
-	public boolean contains(Identifier entryId) {
+	public boolean contains(ResourceLocation entryId) {
 		return entries.containsKey(entryId);
 	}
 
@@ -49,11 +49,11 @@ public final class ContentRegistry<T> {
 	 * registries get cleared and repopulated on datapack reload, and readers
 	 * must not observe a half-rebuilt map or hit a ConcurrentModificationException.
 	 */
-	public Map<Identifier, T> all() {
+	public Map<ResourceLocation, T> all() {
 		return Collections.unmodifiableMap(new LinkedHashMap<>(entries));
 	}
 
-	public Set<Identifier> ids() {
+	public Set<ResourceLocation> ids() {
 		return Collections.unmodifiableSet(new java.util.LinkedHashSet<>(entries.keySet()));
 	}
 

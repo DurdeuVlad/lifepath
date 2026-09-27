@@ -5,15 +5,15 @@ import io.github.durdeuvlad.lifepath.character.persistence.CharacterPersistence;
 import java.nio.file.Path;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Entity-attachment plumbing for {@link PlayerCharacterData}.
  *
- * <p>Storage: a {@code copyOnDeath} attachment of raw {@link NbtCompound} —
+ * <p>Storage: a {@code copyOnDeath} attachment of raw {@link CompoundTag} —
  * persists through death/respawn (the documented "nothing resets on death"
  * rule), logout/login, restarts and dimension changes. Raw NBT (not a typed
  * attachment) so {@link CharacterPersistence} controls decode order —
@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
  * failures, disk spam, or a broken join.
  */
 public final class CharacterAttachments {
-	private static AttachmentType<NbtCompound> characterData;
+	private static AttachmentType<CompoundTag> characterData;
 
 	private CharacterAttachments() {
 	}
@@ -38,10 +38,10 @@ public final class CharacterAttachments {
 		if (characterData != null) {
 			return;
 		}
-		characterData = AttachmentRegistry.<NbtCompound>builder()
-				.persistent(NbtCompound.CODEC)
+		characterData = AttachmentRegistry.<CompoundTag>builder()
+				.persistent(CompoundTag.CODEC)
 				.copyOnDeath()
-				.initializer(NbtCompound::new)
+				.initializer(CompoundTag::new)
 				.buildAndRegister(LifepathMod.id("character_data"));
 	}
 
@@ -50,8 +50,8 @@ public final class CharacterAttachments {
 	 * player gets valid defaults; a corrupt blob becomes backup + repaired
 	 * defaults. Never throws for data reasons.
 	 */
-	public static PlayerCharacterData get(ServerPlayerEntity player) {
-		NbtCompound raw = player.getAttached(characterData);
+	public static PlayerCharacterData get(ServerPlayer player) {
+		CompoundTag raw = player.getAttached(characterData);
 		if (raw == null || raw.isEmpty()) {
 			return PlayerCharacterData.createDefault();
 		}
@@ -62,9 +62,9 @@ public final class CharacterAttachments {
 			}
 			return data;
 		} catch (Exception e) {
-			Path backup = CharacterPersistence.writeBackup(raw, player.getUuid(), backupDir(player));
+			Path backup = CharacterPersistence.writeBackup(raw, player.getUUID(), backupDir(player));
 			LifepathMod.LOGGER.error("corrupt character data for {} (backup: {}); repairing with defaults",
-					player.getUuid(), backup, e);
+					player.getUUID(), backup, e);
 			PlayerCharacterData defaults = PlayerCharacterData.createDefault();
 			set(player, defaults);
 			return defaults;
@@ -72,20 +72,20 @@ public final class CharacterAttachments {
 	}
 
 	/** Serializes and stores the player's character data. */
-	public static void set(ServerPlayerEntity player, PlayerCharacterData data) {
+	public static void set(ServerPlayer player, PlayerCharacterData data) {
 		player.setAttached(characterData, CharacterPersistence.serialize(data));
 	}
 
-	private static int versionOf(NbtCompound raw) {
+	private static int versionOf(CompoundTag raw) {
 		return raw.contains("data_version") ? raw.getInt("data_version") : 0;
 	}
 
 	@Nullable
-	private static Path backupDir(ServerPlayerEntity player) {
-		var server = player.getEntityWorld().getServer();
+	private static Path backupDir(ServerPlayer player) {
+		var server = player.getCommandSenderWorld().getServer();
 		if (server == null) {
 			return null;
 		}
-		return server.getSavePath(WorldSavePath.ROOT).resolve("lifepath");
+		return server.getWorldPath(LevelResource.ROOT).resolve("lifepath");
 	}
 }

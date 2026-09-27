@@ -2,8 +2,8 @@ package io.github.durdeuvlad.lifepath.producer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /**
  * In-memory record of recently player-placed block positions, per world
@@ -23,42 +23,42 @@ public final class PlacedBlockTracker {
 	/** Positions retained per world before oldest-eviction. */
 	static final int CAPACITY_PER_WORLD = 4096;
 
-	private record WorldKey(net.minecraft.registry.RegistryKey<World> dim) {
+	private record WorldKey(net.minecraft.resources.ResourceKey<Level> dim) {
 	}
 
 	private static final Map<WorldKey, Map<BlockPos, Boolean>> TRACKED = new LinkedHashMap<>();
 
 	/** Records {@code pos} in {@code world} as player-placed. */
-	public static void record(World world, BlockPos pos) {
-		record(world.getRegistryKey(), pos);
+	public static void record(Level world, BlockPos pos) {
+		record(world.dimension(), pos);
 	}
 
 	/**
 	 * Consumes the record: returns true (and clears it) the first time a
 	 * recorded position is queried — one placement defeats one break.
 	 */
-	public static boolean consume(World world, BlockPos pos) {
-		return consume(world.getRegistryKey(), pos);
+	public static boolean consume(Level world, BlockPos pos) {
+		return consume(world.dimension(), pos);
 	}
 
-	public static boolean contains(World world, BlockPos pos) {
-		return contains(world.getRegistryKey(), pos);
+	public static boolean contains(Level world, BlockPos pos) {
+		return contains(world.dimension(), pos);
 	}
 
 	// RegistryKey-keyed seam: identical semantics, testable without a World.
-	static synchronized void record(net.minecraft.registry.RegistryKey<World> key, BlockPos pos) {
-		tracked(key).put(pos.toImmutable(), Boolean.TRUE);
+	static synchronized void record(net.minecraft.resources.ResourceKey<Level> key, BlockPos pos) {
+		tracked(key).put(pos.immutable(), Boolean.TRUE);
 	}
 
-	static synchronized boolean consume(net.minecraft.registry.RegistryKey<World> key, BlockPos pos) {
+	static synchronized boolean consume(net.minecraft.resources.ResourceKey<Level> key, BlockPos pos) {
 		return tracked(key).remove(pos) != null;
 	}
 
-	static synchronized boolean contains(net.minecraft.registry.RegistryKey<World> key, BlockPos pos) {
+	static synchronized boolean contains(net.minecraft.resources.ResourceKey<Level> key, BlockPos pos) {
 		return tracked(key).containsKey(pos);
 	}
 
-	private static Map<BlockPos, Boolean> tracked(net.minecraft.registry.RegistryKey<World> key) {
+	private static Map<BlockPos, Boolean> tracked(net.minecraft.resources.ResourceKey<Level> key) {
 		return TRACKED.computeIfAbsent(new WorldKey(key),
 				k -> new LinkedHashMap<>(16, 0.75f, true) {
 					@Override

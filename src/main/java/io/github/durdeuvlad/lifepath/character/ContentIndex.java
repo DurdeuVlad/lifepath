@@ -1,6 +1,6 @@
 package io.github.durdeuvlad.lifepath.character;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Existence view over content registries, used when sanitizing loaded character
@@ -17,5 +17,5 @@ import net.minecraft.util.Identifier;
 public interface ContentIndex {
 	ContentIndex PERMISSIVE = (domain, id) -> true;
 
-	boolean exists(String domain, Identifier id);
+	boolean exists(String domain, ResourceLocation id);
 }

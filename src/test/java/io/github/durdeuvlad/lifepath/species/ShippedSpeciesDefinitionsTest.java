@@ -17,7 +17,7 @@ import io.github.durdeuvlad.lifepath.specialization.SpecializationService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 class ShippedSpeciesDefinitionsTest {
 	private static final Path SPECIES_DIR =
 			Path.of("src/main/resources/data/lifepath/species");
-	private static final Identifier HUMAN = LifepathMod.id("human");
+	private static final ResourceLocation HUMAN = LifepathMod.id("human");
 
 	private PlayerCharacterData data;
 
@@ -105,7 +105,7 @@ class ShippedSpeciesDefinitionsTest {
 		assertTrue(data.resources().isEmpty(), "no species resources materialize");
 
 		// Specialization still applies — human is not a special case.
-		Identifier miner = LifepathMod.id("miner");
+		ResourceLocation miner = LifepathMod.id("miner");
 		var specFile = SpecializationDefinition.SpecializationDefinitionFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString(Files.readString(
 						Path.of("src/main/resources/data/lifepath/specialization/miner.json"))))

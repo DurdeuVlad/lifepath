@@ -8,9 +8,9 @@ import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 class CharacterSyncPayloadTest {
@@ -21,8 +21,8 @@ class CharacterSyncPayloadTest {
 
 		// The payload encodes pure NBT — the registry manager is never consulted,
 		// so EMPTY is sufficient (full Minecraft bootstrap is not needed).
-		RegistryByteBuf buf = new RegistryByteBuf(
-				Unpooled.buffer(), DynamicRegistryManager.EMPTY);
+		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
+				Unpooled.buffer(), RegistryAccess.EMPTY);
 		CharacterSyncPayload.PACKET_CODEC.encode(buf, new CharacterSyncPayload(data));
 		CharacterSyncPayload decoded = CharacterSyncPayload.PACKET_CODEC.decode(buf);
 
@@ -31,16 +31,16 @@ class CharacterSyncPayloadTest {
 
 	@Test
 	void payloadIdUsesSyncNamespace() {
-		assertEquals(Identifier.of("lifepath", "sync/character"), CharacterSyncPayload.ID.id());
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "sync/character"), CharacterSyncPayload.ID.id());
 	}
 
 	private static PlayerCharacterData sampleData() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setSpeciesId(Identifier.of("lifepath", "test_species"));
-		data.setSkillProgress(Identifier.of("lifepath", "s"),
+		data.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_species"));
+		data.setSkillProgress(ResourceLocation.fromNamespaceAndPath("lifepath", "s"),
 				new SkillProgress(1.0, 2, 3, 1, Aptitude.B, 9L));
-		data.addId(PlayerCharacterData.ListKind.CONDITIONS, Identifier.of("lifepath", "c1"));
-		data.setCooldown(Identifier.of("lifepath", "ab"), 5000L);
+		data.addId(PlayerCharacterData.ListKind.CONDITIONS, ResourceLocation.fromNamespaceAndPath("lifepath", "c1"));
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "ab"), 5000L);
 		return data;
 	}
 }

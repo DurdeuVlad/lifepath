@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import io.github.durdeuvlad.lifepath.skill.Aptitude;
+import net.minecraft.resources.ResourceLocation;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition.Category;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition.Selection;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition.Visibility;
-import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.Test;
 
 class DefinitionCodecTest {
@@ -44,8 +44,8 @@ class DefinitionCodecTest {
 
 		assertEquals(Visibility.HIDDEN, file.visibility());
 		assertEquals(Selection.UNLOCKED, file.selection());
-		assertEquals(Aptitude.A, file.minAptitudes().get(Identifier.of("lifepath", "foraging")));
-		assertEquals(Identifier.of("lifepath", "photosynthetic"), file.dietRules().orElseThrow());
+		assertEquals(Aptitude.A, file.minAptitudes().get(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging")));
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "photosynthetic"), file.dietRules().orElseThrow());
 	}
 
 	@Test
@@ -63,12 +63,12 @@ class DefinitionCodecTest {
 						}
 						""")).result().orElseThrow();
 
-		assertEquals(3, file.startingSkills().get(Identifier.of("lifepath", "foraging")));
-		assertEquals(Aptitude.B, file.aptitudes().get(Identifier.of("lifepath", "foraging")));
-		assertEquals(1.25, file.xpModifiers().get(Identifier.of("lifepath", "foraging")));
-		assertEquals(0.5, file.decayModifiers().get(Identifier.of("lifepath", "foraging")));
-		assertEquals(5, file.protectedFloors().get(Identifier.of("lifepath", "foraging")));
-		assertEquals(Identifier.of("lifepath", "keen_eye"), file.signatureRefs().get(0));
+		assertEquals(3, file.startingSkills().get(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging")));
+		assertEquals(Aptitude.B, file.aptitudes().get(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging")));
+		assertEquals(1.25, file.xpModifiers().get(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging")));
+		assertEquals(0.5, file.decayModifiers().get(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging")));
+		assertEquals(5, file.protectedFloors().get(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging")));
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "keen_eye"), file.signatureRefs().get(0));
 	}
 
 	@Test
@@ -89,7 +89,7 @@ class DefinitionCodecTest {
 		assertEquals(1, file.milestones().size());
 		assertEquals(10, file.milestones().get(0).level());
 		assertEquals("lifepath.skill.trained_eye", file.milestones().get(0).descriptionKey());
-		assertEquals(Identifier.of("lifepath", "e1"), file.milestones().get(0).effectRefs().get(0));
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "e1"), file.milestones().get(0).effectRefs().get(0));
 		assertTrue(file.levelCurve().isEmpty());
 		assertTrue(file.xpSources().isEmpty());
 	}

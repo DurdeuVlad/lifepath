@@ -10,20 +10,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.block.CropBlock;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 
 /**
  * Vanilla gameplay → normalized events (M2-4). This is the boundary where raw
@@ -55,13 +55,13 @@ public final class VanillaGameplayProducers {
 	private VanillaGameplayProducers() {
 	}
 
-	private static final TagKey<net.minecraft.block.Block> HARVESTABLE =
-			TagKey.of(RegistryKeys.BLOCK, LifepathMod.id("harvestable"));
-	private static final TagKey<net.minecraft.block.Block> CLICK_HARVEST =
-			TagKey.of(RegistryKeys.BLOCK, LifepathMod.id("click_harvest"));
-	private static final Identifier TAG_PLANTED = LifepathMod.id("planted");
-	private static final Identifier TAG_HARVESTED = LifepathMod.id("harvested");
-	private static final Identifier TAG_MATURE = LifepathMod.id("mature");
+	private static final TagKey<net.minecraft.world.level.block.Block> HARVESTABLE =
+			TagKey.create(Registries.BLOCK, LifepathMod.id("harvestable"));
+	private static final TagKey<net.minecraft.world.level.block.Block> CLICK_HARVEST =
+			TagKey.create(Registries.BLOCK, LifepathMod.id("click_harvest"));
+	private static final ResourceLocation TAG_PLANTED = LifepathMod.id("planted");
+	private static final ResourceLocation TAG_HARVESTED = LifepathMod.id("harvested");
+	private static final ResourceLocation TAG_MATURE = LifepathMod.id("mature");
 	private static boolean initialized;
 
 	public static void init() {
@@ -75,21 +75,21 @@ public final class VanillaGameplayProducers {
 		// block-break (a wolf/golem kill is not the player's exertion).
 		net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY
 				.register((world, entity, killedEntity) -> {
-					if (!(entity instanceof ServerPlayerEntity killer)) {
+					if (!(entity instanceof ServerPlayer killer)) {
 						return;
 					}
-					Identifier typeId = net.minecraft.registry.Registries.ENTITY_TYPE
-							.getId(killedEntity.getType());
-					Set<Identifier> entityTags = killedEntity.getType().getRegistryEntry()
-							.streamTags().map(TagKey::id)
+					ResourceLocation typeId = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+							.getKey(killedEntity.getType());
+					Set<ResourceLocation> entityTags = killedEntity.getType().builtInRegistryHolder()
+							.tags().map(TagKey::location)
 							.collect(Collectors.toCollection(HashSet::new));
 					ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents
 							.combat(killer, typeId, entityTags, ActivityEvent.Cause.PLAYER));
 					// Archery: the same kill also counts as ranged-combat
 					// activity when the killing blow was a projectile.
-					var killSource = killedEntity.getRecentDamageSource();
-					if (killSource != null && killSource.isIn(
-							net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)) {
+					var killSource = killedEntity.getLastDamageSource();
+					if (killSource != null && killSource.is(
+							net.minecraft.tags.DamageTypeTags.IS_PROJECTILE)) {
 						ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event
 								.ActivityEvents.archery(killer, typeId, entityTags,
 										ActivityEvent.Cause.PLAYER));
@@ -99,22 +99,22 @@ public final class VanillaGameplayProducers {
 		// the attacker is the cause. Environment/self damage can't train it.
 		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DAMAGE
 				.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
-					if (!(entity instanceof ServerPlayerEntity victim)) {
+					if (!(entity instanceof ServerPlayer victim)) {
 						return;
 					}
 					// M9-2: damage-source attunement rules run even without a
 					// living attacker (lightning strike, drowning, etc.).
 					io.github.durdeuvlad.lifepath.attunement.AttunementService
-							.onDamaged(victim, source, victim.getWorld().getRandom(),
+							.onDamaged(victim, source, victim.level().getRandom(),
 									System.currentTimeMillis());
-					if (!(source.getAttacker() instanceof LivingEntity attacker)
+					if (!(source.getEntity() instanceof LivingEntity attacker)
 							|| attacker == entity) {
 						return;
 					}
-					Identifier attackerId = net.minecraft.registry.Registries.ENTITY_TYPE
-							.getId(attacker.getType());
-					Set<Identifier> attackerTags = attacker.getType().getRegistryEntry()
-							.streamTags().map(TagKey::id)
+					ResourceLocation attackerId = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+							.getKey(attacker.getType());
+					Set<ResourceLocation> attackerTags = attacker.getType().builtInRegistryHolder()
+							.tags().map(TagKey::location)
 							.collect(Collectors.toCollection(HashSet::new));
 					ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents
 							.defence(victim, attackerId, attackerTags,
@@ -122,53 +122,53 @@ public final class VanillaGameplayProducers {
 					// M9-1: attack-type condition acquisition rides the same
 					// hostile-hit seam (vampirism bite, lycanthropy scratch).
 					io.github.durdeuvlad.lifepath.condition.ConditionService
-							.onDamagedBy(victim, attacker, victim.getWorld().getRandom(),
+							.onDamagedBy(victim, attacker, victim.level().getRandom(),
 									System.currentTimeMillis());
 				});
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-			if (world.isClient() || !(player instanceof ServerPlayerEntity serverPlayer)) {
-				return ActionResult.PASS;
+			if (world.isClientSide() || !(player instanceof ServerPlayer serverPlayer)) {
+				return InteractionResult.PASS;
 			}
 			BlockState state = world.getBlockState(hitResult.getBlockPos());
 			// Right-click harvest only for click-harvestables at maturity —
 			// CropBlock farming awards on break; PASS always (never consume).
-			if (state.isIn(CLICK_HARVEST) && isMature(state)) {
+			if (state.is(CLICK_HARVEST) && isMature(state)) {
 				publishHarvest(serverPlayer, state);
 			}
-			return ActionResult.PASS;
+			return InteractionResult.PASS;
 		});
 		// M9-2: attunement ritual items — right-clicking an acquisition item
 		// (e.g. phantom membrane for Air) evaluates type:item rules. PASS
 		// always; consumption is handled by the service on success.
 		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT
 				.register((player, world, hand) -> {
-					if (world.isClient()
-							|| !(player instanceof ServerPlayerEntity serverPlayer)) {
-						return net.minecraft.util.TypedActionResult.pass(
-								player.getStackInHand(hand));
+					if (world.isClientSide()
+							|| !(player instanceof ServerPlayer serverPlayer)) {
+						return net.minecraft.world.InteractionResultHolder.pass(
+								player.getItemInHand(hand));
 					}
 					io.github.durdeuvlad.lifepath.attunement.AttunementService
-							.onUseItem(serverPlayer, serverPlayer.getStackInHand(hand),
+							.onUseItem(serverPlayer, serverPlayer.getItemInHand(hand),
 									System.currentTimeMillis());
 					// M9-4: item-source unlock grants ride the same seam.
 					io.github.durdeuvlad.lifepath.unlock.UnlockService
-							.onUseItem(serverPlayer, serverPlayer.getStackInHand(hand),
+							.onUseItem(serverPlayer, serverPlayer.getItemInHand(hand),
 									System.currentTimeMillis());
-					return net.minecraft.util.TypedActionResult.pass(
-							serverPlayer.getStackInHand(hand));
+					return net.minecraft.world.InteractionResultHolder.pass(
+							serverPlayer.getItemInHand(hand));
 				});
 	}
 
-	private static void onBlockBroken(net.minecraft.world.World world,
-			net.minecraft.entity.player.PlayerEntity player, BlockPos pos,
-			BlockState state, net.minecraft.block.entity.BlockEntity blockEntity) {
-		if (!(player instanceof ServerPlayerEntity serverPlayer)) {
+	private static void onBlockBroken(net.minecraft.world.level.Level world,
+			net.minecraft.world.entity.player.Player player, BlockPos pos,
+			BlockState state, net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
+		if (!(player instanceof ServerPlayer serverPlayer)) {
 			return;
 		}
 		boolean wasPlayerPlaced = PlacedBlockTracker.consume(world, pos);
-		Identifier blockId = net.minecraft.registry.Registries.BLOCK.getId(state.getBlock());
-		Set<Identifier> blockTags = state.streamTags()
-				.map(TagKey::id).collect(Collectors.toUnmodifiableSet());
+		ResourceLocation blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock());
+		Set<ResourceLocation> blockTags = state.getTags()
+				.map(TagKey::location).collect(Collectors.toUnmodifiableSet());
 
 		// Mining: only non-player-placed blocks yield events — a block the
 		// player placed earlier this session is the re-mine exploit pattern.
@@ -186,14 +186,14 @@ public final class VanillaGameplayProducers {
 	}
 
 	/** Called by {@code mixin.BlockItemMixin} after a successful block placement. */
-	public static void onBlockPlaced(ServerPlayerEntity player, ServerWorld world,
+	public static void onBlockPlaced(ServerPlayer player, ServerLevel world,
 			BlockPos pos, BlockState placedState) {
 		PlacedBlockTracker.record(world, pos);
 		if (isFarmable(placedState)) {
-			Set<Identifier> tags = placedState.streamTags()
-					.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
+			Set<ResourceLocation> tags = placedState.getTags()
+					.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
 			tags.add(TAG_PLANTED);
-			Identifier blockId = net.minecraft.registry.Registries.BLOCK.getId(placedState.getBlock());
+			ResourceLocation blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(placedState.getBlock());
 			ActivityDispatcher.publish(new ActivityEvent(player, ActivityTypes.FARMING,
 					blockId, Set.copyOf(tags), ActivityEvent.Cause.PLAYER,
 					System.currentTimeMillis(), Map.of("mature", "false")));
@@ -201,7 +201,7 @@ public final class VanillaGameplayProducers {
 	}
 
 	static boolean isFarmable(BlockState state) {
-		return state.isIn(BlockTags.CROPS) || state.isIn(HARVESTABLE) || state.isIn(CLICK_HARVEST);
+		return state.is(BlockTags.CROPS) || state.is(HARVESTABLE) || state.is(CLICK_HARVEST);
 	}
 
 	/**
@@ -211,17 +211,17 @@ public final class VanillaGameplayProducers {
 	 */
 	static boolean isMature(BlockState state) {
 		if (state.getBlock() instanceof CropBlock crop) {
-			return crop.isMature(state);
+			return crop.isMaxAge(state);
 		}
 		for (Property<?> p : state.getProperties()) {
 			if ("berries".equals(p.getName()) && p instanceof BooleanProperty bp) {
-				return state.get(bp);
+				return state.getValue(bp);
 			}
 		}
 		for (Property<?> p : state.getProperties()) {
-			if ("age".equals(p.getName()) && p instanceof IntProperty ip) {
-				int max = ip.getValues().stream().mapToInt(Integer::intValue).max().orElse(0);
-				return state.get(ip) >= max;
+			if ("age".equals(p.getName()) && p instanceof IntegerProperty ip) {
+				int max = ip.getPossibleValues().stream().mapToInt(Integer::intValue).max().orElse(0);
+				return state.getValue(ip) >= max;
 			}
 		}
 		return false;
@@ -233,14 +233,14 @@ public final class VanillaGameplayProducers {
 	 * event sourceId → repetition signatures distinguish identical-recipe
 	 * spam for M3-4. All weighting lives in xp_source data.
 	 */
-	public static void onForgeOutput(net.minecraft.entity.player.PlayerEntity player,
-			net.minecraft.item.ItemStack output, Identifier workstationId) {
-		if (!(player instanceof ServerPlayerEntity serverPlayer) || output.isEmpty()) {
+	public static void onForgeOutput(net.minecraft.world.entity.player.Player player,
+			net.minecraft.world.item.ItemStack output, ResourceLocation workstationId) {
+		if (!(player instanceof ServerPlayer serverPlayer) || output.isEmpty()) {
 			return;
 		}
-		Set<Identifier> itemTags = output.streamTags()
-				.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
-		Identifier itemId = net.minecraft.registry.Registries.ITEM.getId(output.getItem());
+		Set<ResourceLocation> itemTags = output.getTags()
+				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
+		ResourceLocation itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.getItem());
 		ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents.smithing(
 				serverPlayer, itemId, itemTags, workstationId,
 				Map.of("count", Integer.toString(output.getCount()))));
@@ -251,14 +251,14 @@ public final class VanillaGameplayProducers {
 	 * when the player takes the result stack. The output item id + its tags are
 	 * the event surface — all weighting lives in xp_source data.
 	 */
-	public static void onCraftOutput(net.minecraft.entity.player.PlayerEntity player,
-			net.minecraft.item.ItemStack output) {
-		if (!(player instanceof ServerPlayerEntity serverPlayer) || output.isEmpty()) {
+	public static void onCraftOutput(net.minecraft.world.entity.player.Player player,
+			net.minecraft.world.item.ItemStack output) {
+		if (!(player instanceof ServerPlayer serverPlayer) || output.isEmpty()) {
 			return;
 		}
-		Set<Identifier> itemTags = output.streamTags()
-				.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
-		Identifier itemId = net.minecraft.registry.Registries.ITEM.getId(output.getItem());
+		Set<ResourceLocation> itemTags = output.getTags()
+				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
+		ResourceLocation itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.getItem());
 		ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents.crafting(
 				serverPlayer, itemId, itemTags,
 				Map.of("count", Integer.toString(output.getCount())),
@@ -272,35 +272,35 @@ public final class VanillaGameplayProducers {
 	 * tags ({@code minecraft:fishes}, {@code lifepath:fishing_treasure},
 	 * {@code lifepath:fishing_junk}) for data-side weighting.
 	 */
-	public static void onFishCaught(net.minecraft.entity.player.PlayerEntity player,
-			net.minecraft.item.ItemStack caught) {
-		if (!(player instanceof ServerPlayerEntity serverPlayer) || caught.isEmpty()) {
+	public static void onFishCaught(net.minecraft.world.entity.player.Player player,
+			net.minecraft.world.item.ItemStack caught) {
+		if (!(player instanceof ServerPlayer serverPlayer) || caught.isEmpty()) {
 			return;
 		}
-		Set<Identifier> itemTags = caught.streamTags()
-				.map(TagKey::id).collect(Collectors.toCollection(HashSet::new));
+		Set<ResourceLocation> itemTags = caught.getTags()
+				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
 		// Enchanted catches are treasure-pool items even when their item type
 		// is also junk-listed (the enchanted fishing_rod overlaps both pools;
 		// item tags are component-blind). Treasure must precede junk in the
 		// xp_source per_tag order.
-		if (caught.hasEnchantments()) {
+		if (caught.isEnchanted()) {
 			itemTags.add(LifepathMod.id("fishing_treasure"));
 		}
-		Identifier itemId = net.minecraft.registry.Registries.ITEM.getId(caught.getItem());
+		ResourceLocation itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(caught.getItem());
 		ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents.fishing(
 				serverPlayer, itemId, itemTags,
 				Map.of("count", Integer.toString(caught.getCount()))));
 	}
 
-	private static void publishHarvest(ServerPlayerEntity player, BlockState state) {
+	private static void publishHarvest(ServerPlayer player, BlockState state) {
 		publishHarvest(player, state,
-				net.minecraft.registry.Registries.BLOCK.getId(state.getBlock()),
-				state.streamTags().map(TagKey::id).collect(Collectors.toUnmodifiableSet()));
+				net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()),
+				state.getTags().map(TagKey::location).collect(Collectors.toUnmodifiableSet()));
 	}
 
-	private static void publishHarvest(ServerPlayerEntity player, BlockState state,
-			Identifier blockId, Set<Identifier> blockTags) {
-		Set<Identifier> tags = new HashSet<>(blockTags);
+	private static void publishHarvest(ServerPlayer player, BlockState state,
+			ResourceLocation blockId, Set<ResourceLocation> blockTags) {
+		Set<ResourceLocation> tags = new HashSet<>(blockTags);
 		tags.add(TAG_HARVESTED);
 		tags.add(TAG_MATURE);
 		ActivityDispatcher.publish(new ActivityEvent(player, ActivityTypes.FARMING,

@@ -10,13 +10,13 @@ import io.github.durdeuvlad.lifepath.event.SkillEvents;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * The authoritative XP service (TIMELINE §5, M2-2). <b>Server-side only</b>:
- * every API takes a {@link ServerPlayerEntity} or the model — no C2S "award
+ * every API takes a {@link ServerPlayer} or the model — no C2S "award
  * me XP" packet exists anywhere in the mod, so clients physically cannot
  * trigger it.
  *
@@ -51,9 +51,9 @@ public final class SkillXpService {
 			double xpBefore, double xpAfter, boolean applied) {
 	}
 
-	private static final Map<Identifier, XpModifier> MODIFIERS = new LinkedHashMap<>();
-	private static final Identifier GLOBAL_MULTIPLIER = LifepathMod.id("global_multiplier");
-	private static final Identifier SKILLS_CONFIG = LifepathMod.id("skills");
+	private static final Map<ResourceLocation, XpModifier> MODIFIERS = new LinkedHashMap<>();
+	private static final ResourceLocation GLOBAL_MULTIPLIER = LifepathMod.id("global_multiplier");
+	private static final ResourceLocation SKILLS_CONFIG = LifepathMod.id("skills");
 	private static boolean initialized;
 
 	/** Registers the built-in config-multiplier modifier. Idempotent. */
@@ -88,14 +88,14 @@ public final class SkillXpService {
 	}
 
 	/** Appends {@code modifier} to the pipeline; later registrations run later. */
-	public static void registerModifier(Identifier id, XpModifier modifier) {
+	public static void registerModifier(ResourceLocation id, XpModifier modifier) {
 		if (MODIFIERS.putIfAbsent(id, modifier) != null) {
 			LifepathMod.LOGGER.warn("duplicate xp modifier id '{}' — keeping the first", id);
 		}
 	}
 
 	/** Ordered pipeline ids — the "modifiers in effect" list for {@code debug character}. */
-	public static List<Identifier> modifierIds() {
+	public static List<ResourceLocation> modifierIds() {
 		return List.copyOf(MODIFIERS.keySet());
 	}
 
@@ -103,7 +103,7 @@ public final class SkillXpService {
 	 * Awards XP to {@code player}. Returns the {@link XpResult}; {@code applied}
 	 * is false when validation rejected the award (no mutation happened).
 	 */
-	public static XpResult awardXp(ServerPlayerEntity player, Identifier skillId,
+	public static XpResult awardXp(ServerPlayer player, ResourceLocation skillId,
 			double amount, ActivityEvent source) {
 		// Validate BEFORE touching the cache — a rejected award must not
 		// lazy-load (and leak) a character entry.
@@ -128,19 +128,19 @@ public final class SkillXpService {
 	 * that operate on a character model directly. Mutates {@code data};
 	 * callers mark dirty/sync when a player is attached.
 	 */
-	public static XpResult awardXp(PlayerCharacterData data, Identifier skillId,
+	public static XpResult awardXp(PlayerCharacterData data, ResourceLocation skillId,
 			double amount, ActivityEvent source) {
 		return awardXpCore(data, skillId, amount, source, null);
 	}
 
 	/** Data-only award path used by {@link #awardXp} and unit tests (no player). */
-	static XpResult awardXpCore(PlayerCharacterData data, Identifier skillId,
+	static XpResult awardXpCore(PlayerCharacterData data, ResourceLocation skillId,
 			double amount, ActivityEvent source) {
 		return awardXpCore(data, skillId, amount, source, null);
 	}
 
-	private static XpResult awardXpCore(PlayerCharacterData data, Identifier skillId,
-			double amount, ActivityEvent source, @Nullable ServerPlayerEntity player) {
+	private static XpResult awardXpCore(PlayerCharacterData data, ResourceLocation skillId,
+			double amount, ActivityEvent source, @Nullable ServerPlayer player) {
 		SkillDefinition def = SkillService.definition(skillId).orElse(null);
 		SkillProgress existing = SkillService.progress(data, skillId);
 		if (def == null || !Double.isFinite(amount) || amount <= 0) {
@@ -171,7 +171,7 @@ public final class SkillXpService {
 		XpModifier.XpContext ctx = new XpModifier.XpContext(player, skillId, current,
 				source, data.speciesId(), data.specializationId(), data);
 		double modified = amount;
-		for (Map.Entry<Identifier, XpModifier> entry : MODIFIERS.entrySet()) {
+		for (Map.Entry<ResourceLocation, XpModifier> entry : MODIFIERS.entrySet()) {
 			try {
 				double out = entry.getValue().apply(ctx, modified);
 				if (Double.isNaN(out)) {
@@ -201,7 +201,7 @@ public final class SkillXpService {
 	}
 
 	/** Admin/setter path: absolute XP, clamped, level recomputed. Fires LEVEL_UP on increase. */
-	public static XpResult setXp(ServerPlayerEntity player, Identifier skillId,
+	public static XpResult setXp(ServerPlayer player, ResourceLocation skillId,
 			double xp, ActivityEvent source) {
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
 		XpResult result = setXpCore(data, skillId, xp);
@@ -216,7 +216,7 @@ public final class SkillXpService {
 	}
 
 	/** Data-only {@link #setXp} core — no dirty marking, sync, or event fire. */
-	static XpResult setXpCore(PlayerCharacterData data, Identifier skillId, double xp) {
+	static XpResult setXpCore(PlayerCharacterData data, ResourceLocation skillId, double xp) {
 		SkillDefinition def = SkillService.definition(skillId).orElse(null);
 		if (def == null || !Double.isFinite(xp) || xp < 0) {
 			return new XpResult(0, 0, 0, 0, 0, false);
@@ -237,7 +237,7 @@ public final class SkillXpService {
 	}
 
 	/** Admin/setter path: absolute level (clamped); XP snaps to the level's threshold. */
-	public static XpResult setLevel(ServerPlayerEntity player, Identifier skillId,
+	public static XpResult setLevel(ServerPlayer player, ResourceLocation skillId,
 			int level, ActivityEvent source) {
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
 		XpResult result = setLevelCore(data, skillId, level);
@@ -252,7 +252,7 @@ public final class SkillXpService {
 	}
 
 	/** Data-only {@link #setLevel} core — no dirty marking, sync, or event fire. */
-	static XpResult setLevelCore(PlayerCharacterData data, Identifier skillId, int level) {
+	static XpResult setLevelCore(PlayerCharacterData data, ResourceLocation skillId, int level) {
 		SkillDefinition def = SkillService.definition(skillId).orElse(null);
 		if (def == null || level < 0) {
 			return new XpResult(0, 0, 0, 0, 0, false);
@@ -262,13 +262,13 @@ public final class SkillXpService {
 		return setXpCore(data, skillId, xp);
 	}
 
-	public static int getLevel(PlayerCharacterData data, Identifier skillId) {
+	public static int getLevel(PlayerCharacterData data, ResourceLocation skillId) {
 		SkillProgress p = SkillService.progress(data, skillId);
 		return p == null ? 0 : p.level();
 	}
 
 	@Nullable
-	public static SkillProgress getProgress(PlayerCharacterData data, Identifier skillId) {
+	public static SkillProgress getProgress(PlayerCharacterData data, ResourceLocation skillId) {
 		return SkillService.progress(data, skillId);
 	}
 

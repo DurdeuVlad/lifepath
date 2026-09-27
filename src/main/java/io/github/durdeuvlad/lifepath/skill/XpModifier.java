@@ -1,8 +1,8 @@
 package io.github.durdeuvlad.lifepath.skill;
 
 import io.github.durdeuvlad.lifepath.event.ActivityEvent;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -30,9 +30,9 @@ public interface XpModifier {
 	 * convention EXCEPT for sanctioned bookkeeping writes (the diminishing-
 	 * returns signature ledger records itself through it).
 	 */
-	record XpContext(@Nullable ServerPlayerEntity player, Identifier skillId,
+	record XpContext(@Nullable ServerPlayer player, ResourceLocation skillId,
 			SkillProgress progress, ActivityEvent source,
-			@Nullable Identifier speciesId, @Nullable Identifier specializationId,
+			@Nullable ResourceLocation speciesId, @Nullable ResourceLocation specializationId,
 			@Nullable io.github.durdeuvlad.lifepath.character.PlayerCharacterData data) {
 	}
 }

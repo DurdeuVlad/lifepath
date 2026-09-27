@@ -1,7 +1,7 @@
 package io.github.durdeuvlad.lifepath.character.migration;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * The concrete Lifepath migration chain. Even at {@code DATA_VERSION = 1} the
@@ -23,7 +23,7 @@ public final class CharacterMigrations {
 				}
 
 				@Override
-				public void migrate(NbtCompound data) {
+				public void migrate(CompoundTag data) {
 					// v0 blobs predate versioning; v1 introduced the current
 					// field layout, which the codec fills with defaults anyway.
 					// This step exists to prove the chain executes end-to-end.
@@ -41,20 +41,20 @@ public final class CharacterMigrations {
 				}
 
 				@Override
-				public void migrate(NbtCompound data) {
+				public void migrate(CompoundTag data) {
 					// v1 stored `conditions` as a list of bare id strings
 					// (dead field — nothing ever granted them, but upgrade
 					// anyway). v2 stores a compound {id: {stage,…}}.
-					if (!(data.get("conditions") instanceof net.minecraft.nbt.NbtList old)
+					if (!(data.get("conditions") instanceof net.minecraft.nbt.ListTag old)
 							|| old.isEmpty()) {
-						data.put("conditions", new net.minecraft.nbt.NbtCompound());
+						data.put("conditions", new net.minecraft.nbt.CompoundTag());
 						return;
 					}
-					var map = new net.minecraft.nbt.NbtCompound();
+					var map = new net.minecraft.nbt.CompoundTag();
 					for (int i = 0; i < old.size(); i++) {
 						String id = old.getString(i);
 						if (!id.isEmpty()) {
-							map.put(id, new net.minecraft.nbt.NbtCompound());
+							map.put(id, new net.minecraft.nbt.CompoundTag());
 						}
 					}
 					data.put("conditions", map);
@@ -66,7 +66,7 @@ public final class CharacterMigrations {
 	}
 
 	/** Upgrades {@code data} (mutated in place) to {@link LifepathMod#DATA_VERSION}. */
-	public static NbtCompound migrate(NbtCompound data) {
+	public static CompoundTag migrate(CompoundTag data) {
 		return CHAIN.migrate(data);
 	}
 }

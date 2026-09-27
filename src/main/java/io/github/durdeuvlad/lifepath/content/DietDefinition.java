@@ -3,7 +3,7 @@ package io.github.durdeuvlad.lifepath.content;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * A data-defined diet rule (M5-4, GAMEDESIGN §15): which items a character may
@@ -13,9 +13,9 @@ import net.minecraft.util.Identifier;
  * still eaten — food side-effects unchanged. Content lives in
  * {@code data/<ns>/diet/<name>.json}.
  */
-public record DietDefinition(Identifier id, List<IdTagRef> allowed) {
+public record DietDefinition(ResourceLocation id, List<IdTagRef> allowed) {
 
-	public static DietDefinition fromFile(Identifier id, DietFile file) {
+	public static DietDefinition fromFile(ResourceLocation id, DietFile file) {
 		if (file.allowed().isEmpty()) {
 			throw new IllegalArgumentException(
 					"diet " + id + " must declare at least one allowed item/tag");

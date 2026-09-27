@@ -9,7 +9,7 @@ import io.github.durdeuvlad.lifepath.specialization.SpecializationService;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -34,7 +34,7 @@ import org.jetbrains.annotations.Nullable;
  * {@code lastDecayCheckpoint} to {@code now} so elapsed time is charged once.
  */
 public final class SkillDecayService {
-	public static final Identifier DECAY_CONFIG = LifepathMod.id("decay");
+	public static final ResourceLocation DECAY_CONFIG = LifepathMod.id("decay");
 	private static final long DAY_MS = 86_400_000L;
 	private static final long HOUR_MS = 3_600_000L;
 
@@ -53,7 +53,7 @@ public final class SkillDecayService {
 			}
 			ticksSinceMaintenance = 0;
 			long now = System.currentTimeMillis();
-			for (var player : server.getPlayerManager().getPlayerList()) {
+			for (var player : server.getPlayerList().getPlayers()) {
 				int changed = io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
 						"decay.maintenance_batch", () -> io.github.durdeuvlad.lifepath.feedback
 								.FeedbackService.applyDecayWithFeedback(player, now));
@@ -76,7 +76,7 @@ public final class SkillDecayService {
 	 * Returns the (possibly unchanged) record. Missing definitions degrade
 	 * gracefully — the record is checkpointed and returned untouched.
 	 */
-	public static SkillProgress applyLazy(PlayerCharacterData data, Identifier skillId, long now) {
+	public static SkillProgress applyLazy(PlayerCharacterData data, ResourceLocation skillId, long now) {
 		SkillProgress cur = data.skill(skillId);
 		SkillDefinition def = SkillService.definition(skillId).orElse(null);
 		if (cur == null) {
@@ -124,7 +124,7 @@ public final class SkillDecayService {
 		// otherwise accumulate in the model/NBT forever.
 		data.pruneActionSignatures(now - DiminishingReturns.windowMs());
 		int changed = 0;
-		for (Identifier id : new ArrayList<>(data.skills().keySet())) {
+		for (ResourceLocation id : new ArrayList<>(data.skills().keySet())) {
 			SkillProgress before = data.skill(id);
 			SkillProgress after = applyLazy(data, id, now);
 			if (after != null

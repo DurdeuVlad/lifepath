@@ -7,7 +7,7 @@ import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
  * COPIES — records stay immutable.
  */
 public final class SkillService {
-	private static final Set<Identifier> WARNED = ConcurrentHashMap.newKeySet();
+	private static final Set<ResourceLocation> WARNED = ConcurrentHashMap.newKeySet();
 	private static final int WARNED_CAP = 256;
 	private static final int DEFAULT_MAX_LEVEL = 100;
 
@@ -33,7 +33,7 @@ public final class SkillService {
 	}
 
 	/** Looks up a definition; {@code empty} + WARN-once for unknown/missing ids. */
-	public static Optional<SkillDefinition> definition(@Nullable Identifier skillId) {
+	public static Optional<SkillDefinition> definition(@Nullable ResourceLocation skillId) {
 		if (skillId == null) {
 			return Optional.empty();
 		}
@@ -56,7 +56,7 @@ public final class SkillService {
 	}
 
 	/** The definition's max level, or the 100 default when no definition exists. */
-	public static int maxLevel(@Nullable Identifier skillId) {
+	public static int maxLevel(@Nullable ResourceLocation skillId) {
 		return definition(skillId).map(SkillDefinition::maxLevel).orElse(DEFAULT_MAX_LEVEL);
 	}
 
@@ -82,7 +82,7 @@ public final class SkillService {
 	}
 
 	/** {@link #clamped} against the skill's own definition (or the 100 default). */
-	public static SkillProgress clamped(Identifier skillId, SkillProgress progress) {
+	public static SkillProgress clamped(ResourceLocation skillId, SkillProgress progress) {
 		return clamped(progress, maxLevel(skillId));
 	}
 
@@ -109,7 +109,7 @@ public final class SkillService {
 	 * inspection paths (UI, listings, decay scans) that must not create entries.
 	 */
 	@Nullable
-	public static SkillProgress progress(PlayerCharacterData data, Identifier skillId) {
+	public static SkillProgress progress(PlayerCharacterData data, ResourceLocation skillId) {
 		SkillProgress existing = data.skill(skillId);
 		return existing == null ? null : clamped(skillId, existing);
 	}
@@ -125,7 +125,7 @@ public final class SkillService {
 	 * untouched skill permanently persists (and syncs) a new map entry.
 	 */
 	@Nullable
-	public static SkillProgress ensureProgress(PlayerCharacterData data, Identifier skillId) {
+	public static SkillProgress ensureProgress(PlayerCharacterData data, ResourceLocation skillId) {
 		if (definition(skillId).isEmpty()) {
 			return null;
 		}
@@ -147,8 +147,8 @@ public final class SkillService {
 	 * grade raised to the species floor — {@code max(speciesMin, current)}.
 	 * A null/unknown species means no floor. Pure lookup; writes nothing.
 	 */
-	public static Aptitude effectiveAptitude(@Nullable Identifier speciesId,
-			Identifier skillId, SkillProgress progress) {
+	public static Aptitude effectiveAptitude(@Nullable ResourceLocation speciesId,
+			ResourceLocation skillId, SkillProgress progress) {
 		Aptitude grade = progress.aptitude();
 		if (speciesId != null) {
 			var def = LifepathContent.species().get(speciesId);

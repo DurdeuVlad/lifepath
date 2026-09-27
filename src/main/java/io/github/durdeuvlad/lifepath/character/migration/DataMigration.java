@@ -1,6 +1,6 @@
 package io.github.durdeuvlad.lifepath.character.migration;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * One step in the character-data migration chain: upgrades a serialized
@@ -13,5 +13,5 @@ public interface DataMigration {
 
 	int toVersion();
 
-	void migrate(NbtCompound data);
+	void migrate(CompoundTag data);
 }

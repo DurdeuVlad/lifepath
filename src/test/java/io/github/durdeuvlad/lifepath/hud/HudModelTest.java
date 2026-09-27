@@ -9,7 +9,7 @@ import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload
 		.ResourceDisplay;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test;
  * renderer only draws what {@link HudModel} returns.
  */
 class HudModelTest {
-	private static final Identifier TEMP = Identifier.of("lifepath:temperature");
-	private static final Identifier ABIL = Identifier.of("lifepath:frost_nova");
+	private static final ResourceLocation TEMP = ResourceLocation.parse("lifepath:temperature");
+	private static final ResourceLocation ABIL = ResourceLocation.parse("lifepath:frost_nova");
 
 	private static IdentitySummaryPayload identity(List<ResourceDisplay> res,
 			Map<String, IdentitySummaryPayload.AbilityEntry> abilities) {
@@ -113,7 +113,7 @@ class HudModelTest {
 	void cooldownsShowRemainingSortedAscending() {
 		PlayerCharacterData data = new PlayerCharacterData();
 		data.setCooldown(ABIL, 5_000L);
-		data.setCooldown(Identifier.of("lifepath:verdant_bloom"), 9_000L);
+		data.setCooldown(ResourceLocation.parse("lifepath:verdant_bloom"), 9_000L);
 		IdentitySummaryPayload id = identity(List.of(), Map.of(
 				"lifepath:frost_nova", new IdentitySummaryPayload.AbilityEntry(
 						"lifepath:frost_nova", "Frost Nova",

@@ -12,13 +12,13 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class AptitudeTableTest {
-	private static final Identifier SKILLS = LifepathMod.id("skills");
-	private static final Identifier MINING = Identifier.of("lifepath", "mining");
+	private static final ResourceLocation SKILLS = LifepathMod.id("skills");
+	private static final ResourceLocation MINING = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
 
 	@AfterEach
 	void tearDown() {
@@ -57,8 +57,8 @@ class AptitudeTableTest {
 
 	@Test
 	void speciesFloorRaisesEffectiveGrade() {
-		LifepathContent.species().register(Identifier.of("lifepath", "dwarf"),
-				new SpeciesDefinition(Identifier.of("lifepath", "dwarf"), "Dwarf",
+		LifepathContent.species().register(ResourceLocation.fromNamespaceAndPath("lifepath", "dwarf"),
+				new SpeciesDefinition(ResourceLocation.fromNamespaceAndPath("lifepath", "dwarf"), "Dwarf",
 						SpeciesDefinition.Visibility.NORMAL, SpeciesDefinition.Selection.OPEN,
 						List.of(), List.of(), Map.of(MINING, Aptitude.B),
 						List.of(), Optional.empty(), Optional.empty()));
@@ -68,17 +68,17 @@ class AptitudeTableTest {
 
 		// Dwarf mining floor B: D→B raised, A stays (max rule, never lowers).
 		assertEquals(Aptitude.B, SkillService.effectiveAptitude(
-				Identifier.of("lifepath", "dwarf"), MINING, dGrade));
+				ResourceLocation.fromNamespaceAndPath("lifepath", "dwarf"), MINING, dGrade));
 		assertEquals(Aptitude.A, SkillService.effectiveAptitude(
-				Identifier.of("lifepath", "dwarf"), MINING, aGrade));
+				ResourceLocation.fromNamespaceAndPath("lifepath", "dwarf"), MINING, aGrade));
 		// No floor for other skills.
 		assertEquals(Aptitude.D, SkillService.effectiveAptitude(
-				Identifier.of("lifepath", "dwarf"), Identifier.of("lifepath", "fishing"), dGrade));
+				ResourceLocation.fromNamespaceAndPath("lifepath", "dwarf"), ResourceLocation.fromNamespaceAndPath("lifepath", "fishing"), dGrade));
 		// No species → recorded grade.
 		assertEquals(Aptitude.C, SkillService.effectiveAptitude(
 				null, MINING, new SkillProgress(0, 0, 0, 0, Aptitude.C, 0L)));
 		// Unknown species → no floor (graceful).
 		assertEquals(Aptitude.D, SkillService.effectiveAptitude(
-				Identifier.of("lifepath", "nonexistent"), MINING, dGrade));
+				ResourceLocation.fromNamespaceAndPath("lifepath", "nonexistent"), MINING, dGrade));
 	}
 }

@@ -1,6 +1,6 @@
 package io.github.durdeuvlad.lifepath.command;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -10,8 +10,8 @@ import io.github.durdeuvlad.lifepath.reload.ReloadManager;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 
 /**
  * The {@code /lifepath} command tree and its registration framework.
@@ -21,14 +21,14 @@ import net.minecraft.text.Text;
  * attaches the whole tree under the {@code lifepath} root through Fabric's
  * {@code CommandRegistrationCallback}. Admin subcommands must declare
  * {@code requires(src -> src.hasPermissionLevel(2))} themselves. Handlers only
- * use {@link ServerCommandSource} APIs — never {@code getPlayer()} — so every
+ * use {@link CommandSourceStack} APIs — never {@code getPlayer()} — so every
  * command also works from the dedicated-server console.
  */
 public final class LifepathCommands {
 	/** Brigadier admin permission level required by privileged subcommands. */
 	public static final int ADMIN_PERMISSION = 2;
 
-	private static final List<LiteralArgumentBuilder<ServerCommandSource>> SUBCOMMANDS = new ArrayList<>();
+	private static final List<LiteralArgumentBuilder<CommandSourceStack>> SUBCOMMANDS = new ArrayList<>();
 	private static boolean initialized;
 
 	private LifepathCommands() {
@@ -40,9 +40,9 @@ public final class LifepathCommands {
 	 * @throws IllegalArgumentException if another subcommand already claims the same
 	 *         literal name (brigadier would silently merge them)
 	 */
-	public static void register(LiteralArgumentBuilder<ServerCommandSource> subcommand) {
+	public static void register(LiteralArgumentBuilder<CommandSourceStack> subcommand) {
 		String name = subcommand.getLiteral();
-		for (LiteralArgumentBuilder<ServerCommandSource> existing : SUBCOMMANDS) {
+		for (LiteralArgumentBuilder<CommandSourceStack> existing : SUBCOMMANDS) {
 			if (existing.getLiteral().equals(name)) {
 				throw new IllegalArgumentException("duplicate /lifepath subcommand literal: " + name);
 			}
@@ -59,47 +59,47 @@ public final class LifepathCommands {
 
 		register(literal("version").executes(ctx -> version(ctx.getSource())));
 		register(literal("reload")
-				.requires(src -> src.hasPermissionLevel(ADMIN_PERMISSION))
+				.requires(src -> src.hasPermission(ADMIN_PERMISSION))
 				.executes(ctx -> reload(ctx.getSource())));
 
 		CommandRegistrationCallback.EVENT.register(
 				(dispatcher, registryAccess, environment) -> registerRoot(dispatcher));
 	}
 
-	private static void registerRoot(CommandDispatcher<ServerCommandSource> dispatcher) {
+	private static void registerRoot(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(buildRoot());
 	}
 
-	private static int version(ServerCommandSource source) {
-		source.sendFeedback(() -> Text.literal(
+	private static int version(CommandSourceStack source) {
+		source.sendSuccess(() -> Component.literal(
 				"Lifepath " + LifepathMod.modVersion() + " (data version " + LifepathMod.DATA_VERSION + ")"),
 				false);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int reload(ServerCommandSource source) {
+	private static int reload(CommandSourceStack source) {
 		List<ReloadManager.ReloadResult> results =
 				ReloadManager.reloadAll(source.getServer().getResourceManager());
 		int failures = 0;
 		for (ReloadManager.ReloadResult result : results) {
 			if (result.success()) {
-				source.sendFeedback(() -> Text.literal("reloaded " + result.id()), false);
+				source.sendSuccess(() -> Component.literal("reloaded " + result.id()), false);
 			} else {
 				failures++;
-				source.sendError(Text.literal("FAILED " + result.id() + ": " + result.error()));
+				source.sendFailure(Component.literal("FAILED " + result.id() + ": " + result.error()));
 			}
 		}
 		int failureCount = failures;
-		source.sendFeedback(() -> Text.literal(
+		source.sendSuccess(() -> Component.literal(
 				"Lifepath reload finished: " + results.size() + " reloadables, " + failureCount + " failed"),
 				true);
 		// M7-5: the content_validation reloader ran last — surface its grouped
 		// report to the command source, not just the log.
 		var report = io.github.durdeuvlad.lifepath.registry.LifepathContent
 				.lastValidationReport();
-		source.sendFeedback(() -> Text.literal(report.summaryLine()), true);
+		source.sendSuccess(() -> Component.literal(report.summaryLine()), true);
 		for (String line : report.detailLines()) {
-			source.sendFeedback(() -> Text.literal(line), false);
+			source.sendSuccess(() -> Component.literal(line), false);
 		}
 		return failureCount == 0 && !report.hasErrors() ? Command.SINGLE_SUCCESS : 0;
 	}
@@ -111,10 +111,10 @@ public final class LifepathCommands {
 	}
 
 	/** Builds the root tree; bare {@code /lifepath} defaults to version output. */
-	static LiteralArgumentBuilder<ServerCommandSource> buildRoot() {
-		LiteralArgumentBuilder<ServerCommandSource> root = literal("lifepath")
+	static LiteralArgumentBuilder<CommandSourceStack> buildRoot() {
+		LiteralArgumentBuilder<CommandSourceStack> root = literal("lifepath")
 				.executes(ctx -> version(ctx.getSource()));
-		for (LiteralArgumentBuilder<ServerCommandSource> subcommand : new ArrayList<>(SUBCOMMANDS)) {
+		for (LiteralArgumentBuilder<CommandSourceStack> subcommand : new ArrayList<>(SUBCOMMANDS)) {
 			root.then(subcommand);
 		}
 		return root;

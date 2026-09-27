@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
  * takes {@code now} explicitly so offline-elapsed behavior is deterministic.
  */
 class SkillDecayServiceTest {
-	private static final Identifier SKILL = Identifier.of("lifepath", "decaytest");
-	private static final Identifier CURVE = Identifier.of("lifepath", "decay_curve");
+	private static final ResourceLocation SKILL = ResourceLocation.fromNamespaceAndPath("lifepath", "decaytest");
+	private static final ResourceLocation CURVE = ResourceLocation.fromNamespaceAndPath("lifepath", "decay_curve");
 	private static final long DAY = 86_400_000L;
 	private static final long GRACE = 48L * 3_600_000L;
 	private static final long T0 = 1_700_000_000_000L;
@@ -148,7 +148,7 @@ class SkillDecayServiceTest {
 		// D grade decays ×1.25; a spec with 60% resistance on this skill halves it.
 		io.github.durdeuvlad.lifepath.content.SpecializationDefinition spec =
 				new io.github.durdeuvlad.lifepath.content.SpecializationDefinition(
-						Identifier.of("lifepath", "s"), "S", Map.of(), Map.of(), Map.of(),
+						ResourceLocation.fromNamespaceAndPath("lifepath", "s"), "S", Map.of(), Map.of(), Map.of(),
 						Map.of(SKILL, 0.6), Map.of(), List.of());
 		LifepathContent.specializations().register(spec.id(), spec);
 		data.setSpecializationId(spec.id());
@@ -165,7 +165,7 @@ class SkillDecayServiceTest {
 		// Untracked skill → null, no throw.
 		assertEquals(null, SkillDecayService.applyLazy(data, SKILL, T0));
 		// Skill with no definition: checkpointed untouched.
-		Identifier ghost = Identifier.of("lifepath", "ghost");
+		ResourceLocation ghost = ResourceLocation.fromNamespaceAndPath("lifepath", "ghost");
 		data.setSkillProgress(ghost, atLevel(50, T0));
 		SkillProgress p = SkillDecayService.applyLazy(data, ghost, T0 + GRACE + 30 * DAY);
 		assertEquals(50, p.level());

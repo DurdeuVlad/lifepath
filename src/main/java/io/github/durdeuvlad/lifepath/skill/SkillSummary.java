@@ -10,7 +10,7 @@ import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -37,13 +37,13 @@ public final class SkillSummary {
 		return new SkillsSummaryPayload(cards);
 	}
 
-	private static SkillCard card(Identifier id, SkillDefinition def,
+	private static SkillCard card(ResourceLocation id, SkillDefinition def,
 			PlayerCharacterData data) {
 		SkillProgress prog = data.skill(id);
 		int level = prog != null ? prog.level() : 0;
 		int floor = prog != null ? prog.protectedFloor() : 0;
 
-		Identifier curveId = def.levelCurve().orElse(LevelCurves.DEFAULT_ID);
+		ResourceLocation curveId = def.levelCurve().orElse(LevelCurves.DEFAULT_ID);
 		double floorXp = LevelCurves.xpForLevel(curveId, level);
 		double nextXp = level >= def.maxLevel()
 				? floorXp : LevelCurves.xpForLevel(curveId, level + 1);
@@ -61,7 +61,7 @@ public final class SkillSummary {
 		List<IdentitySummaryPayload.Entry> bonuses = new ArrayList<>();
 		for (SkillDefinition.Milestone m : def.milestones()) {
 			if (m.level() <= level) {
-				for (Identifier ref : m.effectRefs()) {
+				for (ResourceLocation ref : m.effectRefs()) {
 					bonuses.add(IdentitySummary.entry(ref));
 				}
 			} else if (nextLevel == 0 || m.level() < nextLevel) {
@@ -73,13 +73,13 @@ public final class SkillSummary {
 		return new SkillCard(id.toString(),
 				new SkillCard.Display(def.displayName(), def.description(),
 						RankBands.bandFor(level).key(), apt.name(), def.improveHint(),
-						def.icon().map(Identifier::toString).orElse("")),
+						def.icon().map(ResourceLocation::toString).orElse("")),
 				new SkillCard.Progress(level, xpIn, xpNeed, floor, graceEnd),
 				new SkillCard.Details(nextLevel, nextText, List.copyOf(bonuses)));
 	}
 
 	/** Species minAptitudes floor, else the neutral default grade. */
-	private static Aptitude speciesFloor(@Nullable Identifier speciesId, Identifier skillId) {
+	private static Aptitude speciesFloor(@Nullable ResourceLocation speciesId, ResourceLocation skillId) {
 		if (speciesId != null) {
 			var def = LifepathContent.species().get(speciesId);
 			Aptitude floor = def == null ? null : def.minAptitudes().get(skillId);

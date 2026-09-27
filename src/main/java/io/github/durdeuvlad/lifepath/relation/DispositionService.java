@@ -4,9 +4,9 @@ import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.RelationDefinition;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -44,8 +44,8 @@ public final class DispositionService {
 		if (def == null) {
 			return false;
 		}
-		Identifier typeId = Registries.ENTITY_TYPE.getId(mobType);
-		var entry = Registries.ENTITY_TYPE.getEntry(mobType);
+		ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(mobType);
+		var entry = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(mobType);
 		var disposition = def.dispositionFor(typeId, entry);
 		return disposition != null && disposition.suppressesTargeting();
 	}

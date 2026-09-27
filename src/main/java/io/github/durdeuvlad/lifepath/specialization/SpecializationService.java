@@ -9,7 +9,7 @@ import io.github.durdeuvlad.lifepath.skill.LevelCurves;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.github.durdeuvlad.lifepath.skill.SkillService;
 import java.util.Map;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -36,7 +36,7 @@ public final class SpecializationService {
 	public enum ApplyResult { APPLIED, UNKNOWN_SPEC }
 
 	/** Applies the specialization onto {@code data}. Never lowers levels. */
-	public static ApplyResult apply(PlayerCharacterData data, Identifier specId) {
+	public static ApplyResult apply(PlayerCharacterData data, ResourceLocation specId) {
 		SpecializationDefinition def = LifepathContent.specializations().get(specId);
 		if (def == null) {
 			return ApplyResult.UNKNOWN_SPEC;
@@ -44,7 +44,7 @@ public final class SpecializationService {
 		data.setSpecializationId(specId);
 
 		long now = System.currentTimeMillis();
-		for (Map.Entry<Identifier, Integer> e : def.startingSkills().entrySet()) {
+		for (Map.Entry<ResourceLocation, Integer> e : def.startingSkills().entrySet()) {
 			SkillProgress cur = SkillService.ensureProgress(data, e.getKey());
 			if (cur == null) {
 				continue;
@@ -68,7 +68,7 @@ public final class SpecializationService {
 		}
 		// Aptitude overrides are raise-only like levels — spec switches never
 		// downgrade a recorded grade.
-		for (Map.Entry<Identifier, Aptitude> e : def.aptitudes().entrySet()) {
+		for (Map.Entry<ResourceLocation, Aptitude> e : def.aptitudes().entrySet()) {
 			SkillProgress cur = SkillService.ensureProgress(data, e.getKey());
 			if (cur != null && e.getValue().ordinal() > cur.aptitude().ordinal()) {
 				data.setSkillProgress(e.getKey(), new SkillProgress(cur.xp(), cur.level(),
@@ -78,7 +78,7 @@ public final class SpecializationService {
 		}
 		// Protected floors are stored verbatim (raise-only): a floor above the
 		// granted level is a valid decay floor — it simply cannot be undercut.
-		for (Map.Entry<Identifier, Integer> e : def.protectedFloors().entrySet()) {
+		for (Map.Entry<ResourceLocation, Integer> e : def.protectedFloors().entrySet()) {
 			SkillProgress cur = SkillService.ensureProgress(data, e.getKey());
 			if (cur != null && e.getValue() > cur.protectedFloor()) {
 				data.setSkillProgress(e.getKey(), new SkillProgress(cur.xp(), cur.level(),
@@ -93,7 +93,7 @@ public final class SpecializationService {
 	 * XP multiplier contributed by the character's specialization
 	 * ({@code xp_modifiers[skillId]}), or 1.0 when unset/absent/unknown.
 	 */
-	public static double xpModifierFor(@Nullable Identifier specId, Identifier skillId) {
+	public static double xpModifierFor(@Nullable ResourceLocation specId, ResourceLocation skillId) {
 		if (specId == null) {
 			return 1.0;
 		}
@@ -109,7 +109,7 @@ public final class SpecializationService {
 	 * ({@code decay_modifiers[skillId]}, e.g. 0.30 = 30% less decay).
 	 * Consumed by M3-3; exposed now per the issue spec.
 	 */
-	public static double decayResistanceFor(@Nullable Identifier specId, Identifier skillId) {
+	public static double decayResistanceFor(@Nullable ResourceLocation specId, ResourceLocation skillId) {
 		if (specId == null) {
 			return 0.0;
 		}

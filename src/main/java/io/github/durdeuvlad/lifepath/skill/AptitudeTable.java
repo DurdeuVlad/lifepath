@@ -3,7 +3,7 @@ package io.github.durdeuvlad.lifepath.skill;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import java.util.Locale;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Config-backed grade → multiplier lookup (M3-1). Every balance number lives
@@ -18,7 +18,7 @@ public final class AptitudeTable {
 	private AptitudeTable() {
 	}
 
-	private static final Identifier SKILLS_CONFIG = LifepathMod.id("skills");
+	private static final ResourceLocation SKILLS_CONFIG = LifepathMod.id("skills");
 
 	/** XP multiplier for {@code grade} (config key {@code aptitude_<g>_xp_multiplier}). */
 	public static double xpMultiplier(Aptitude grade) {

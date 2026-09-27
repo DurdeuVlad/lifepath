@@ -26,7 +26,7 @@ public final class ClientCharacterState {
 	private static volatile java.util.List<io.github.durdeuvlad.lifepath.network
 			.s2c.SkillsSummaryPayload.SkillCard> skills = java.util.List.of();
 	/** Resource → current band index per the last delta (-1 removed). Server defs aren't client-visible. */
-	private static final java.util.Map<net.minecraft.util.Identifier, Integer>
+	private static final java.util.Map<net.minecraft.resources.ResourceLocation, Integer>
 			RESOURCE_BANDS = new java.util.concurrent.ConcurrentHashMap<>();
 
 	private ClientCharacterState() {
@@ -75,7 +75,7 @@ public final class ClientCharacterState {
 	 * read-model snapshot + records the band index for M6 feedback.
 	 * No-op before the first snapshot.
 	 */
-	public static void applyResource(net.minecraft.util.Identifier resourceId,
+	public static void applyResource(net.minecraft.resources.ResourceLocation resourceId,
 			double current, double min, double max, int bandIndex) {
 		PlayerCharacterData s = snapshot;
 		if (s == null) {
@@ -91,12 +91,12 @@ public final class ClientCharacterState {
 	}
 
 	/** The band index a resource currently sits in (−1 = none), per the last delta. */
-	public static int resourceBand(net.minecraft.util.Identifier resourceId) {
+	public static int resourceBand(net.minecraft.resources.ResourceLocation resourceId) {
 		return RESOURCE_BANDS.getOrDefault(resourceId, -1);
 	}
 
 	/** All known resource band indices (M6-3 HUD) — read-only view. */
-	public static java.util.Map<net.minecraft.util.Identifier, Integer> resourceBands() {
+	public static java.util.Map<net.minecraft.resources.ResourceLocation, Integer> resourceBands() {
 		return java.util.Collections.unmodifiableMap(RESOURCE_BANDS);
 	}
 
@@ -105,7 +105,7 @@ public final class ClientCharacterState {
 	 * the read-model snapshot so HUD state stays fresh between full syncs.
 	 * {@code expiryEpochMs <= 0} clears the entry. No-op before first snapshot.
 	 */
-	public static void applyCooldown(net.minecraft.util.Identifier abilityId,
+	public static void applyCooldown(net.minecraft.resources.ResourceLocation abilityId,
 			long expiryEpochMs) {
 		PlayerCharacterData s = snapshot;
 		if (s == null) {

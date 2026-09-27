@@ -17,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,8 +32,8 @@ class ShippedAbilityDefinitionsTest {
 			Path.of("src/test/resources/data/lifepath_test/ability");
 	private static final Path RESOURCE_DIR =
 			Path.of("src/test/resources/data/lifepath_test/resource");
-	private static final Identifier FOCUS =
-			Identifier.of("lifepath_test", "test_focus");
+	private static final ResourceLocation FOCUS =
+			ResourceLocation.fromNamespaceAndPath("lifepath_test", "test_focus");
 
 	private PlayerCharacterData data;
 
@@ -59,7 +59,7 @@ class ShippedAbilityDefinitionsTest {
 		var parsed = AbilityDefinition.AbilityFile.CODEC.parse(JsonOps.INSTANCE,
 				JsonParser.parseString(Files.readString(file))).result()
 				.orElseThrow(() -> new AssertionError(file + " failed to parse"));
-		Identifier id = Identifier.of("lifepath_test",
+		ResourceLocation id = ResourceLocation.fromNamespaceAndPath("lifepath_test",
 				file.getFileName().toString().replace(".json", ""));
 		// The production decode path — validates vocabulary types + refs.
 		return LifepathContent.decodeAbility(id, parsed);
@@ -86,7 +86,7 @@ class ShippedAbilityDefinitionsTest {
 		for (String name : List.of("test_passive_condition", "test_active_cooldown",
 				"test_aoe_target", "test_resource_conditioned", "test_state_change")) {
 			assertTrue(LifepathContent.abilities()
-							.contains(Identifier.of("lifepath_test", name)),
+							.contains(ResourceLocation.fromNamespaceAndPath("lifepath_test", name)),
 					"missing shipped synthetic ability " + name);
 		}
 	}
@@ -94,12 +94,12 @@ class ShippedAbilityDefinitionsTest {
 	@Test
 	void syntheticSetExecutesThroughEnginePaths() throws Exception {
 		registerTestSet();
-		Identifier passive = Identifier.of("lifepath_test", "test_passive_condition");
-		Identifier active = Identifier.of("lifepath_test", "test_active_cooldown");
-		Identifier aoe = Identifier.of("lifepath_test", "test_aoe_target");
-		Identifier gated = Identifier.of("lifepath_test", "test_resource_conditioned");
-		Identifier stateful = Identifier.of("lifepath_test", "test_state_change");
-		for (Identifier id : List.of(passive, active, aoe, gated, stateful)) {
+		ResourceLocation passive = ResourceLocation.fromNamespaceAndPath("lifepath_test", "test_passive_condition");
+		ResourceLocation active = ResourceLocation.fromNamespaceAndPath("lifepath_test", "test_active_cooldown");
+		ResourceLocation aoe = ResourceLocation.fromNamespaceAndPath("lifepath_test", "test_aoe_target");
+		ResourceLocation gated = ResourceLocation.fromNamespaceAndPath("lifepath_test", "test_resource_conditioned");
+		ResourceLocation stateful = ResourceLocation.fromNamespaceAndPath("lifepath_test", "test_state_change");
+		for (ResourceLocation id : List.of(passive, active, aoe, gated, stateful)) {
 			data.addId(PlayerCharacterData.ListKind.UNLOCKS, id);
 		}
 
@@ -133,7 +133,7 @@ class ShippedAbilityDefinitionsTest {
 
 		// State-changing event ability: a mining event mutates focus via data.
 		ResourceService.setTo(data, null, FOCUS, 40.0, 0L);
-		AbilityEngine.handleEvent(data, null, Identifier.of("lifepath", "mining"), 0L);
+		AbilityEngine.handleEvent(data, null, ResourceLocation.fromNamespaceAndPath("lifepath", "mining"), 0L);
 		assertEquals(45.0, ResourceService.current(data, FOCUS));
 	}
 
@@ -166,7 +166,7 @@ class ShippedAbilityDefinitionsTest {
 						 "target": {"type": "lifepath:self"},
 						 "actions": [{"type": "lifepath:debug_log"}]}
 						""")).result().orElseThrow();
-		Identifier off = LifepathMod.id("off");
+		ResourceLocation off = LifepathMod.id("off");
 		LifepathContent.abilities().register(off,
 				LifepathContent.decodeAbility(off, file));
 		data.addId(PlayerCharacterData.ListKind.UNLOCKS, off);

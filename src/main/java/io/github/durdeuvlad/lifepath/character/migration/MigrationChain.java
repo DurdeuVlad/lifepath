@@ -4,10 +4,10 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 /**
- * Ordered chain of {@link DataMigration}s. {@link #migrate(NbtCompound)} reads
+ * Ordered chain of {@link DataMigration}s. {@link #migrate(CompoundTag)} reads
  * the blob's {@code data_version} and applies every step needed to reach
  * {@link #targetVersion()}. A missing {@code data_version} is treated as 0
  * (pre-versioning data). Data written by a NEWER mod version is left untouched
@@ -34,7 +34,7 @@ public final class MigrationChain {
 		return targetVersion;
 	}
 
-	public NbtCompound migrate(NbtCompound data) {
+	public CompoundTag migrate(CompoundTag data) {
 		int version = data.contains("data_version") ? data.getInt("data_version") : 0;
 		if (version > targetVersion) {
 			LifepathMod.LOGGER.warn("character data version {} is newer than mod's {}; loading as-is",

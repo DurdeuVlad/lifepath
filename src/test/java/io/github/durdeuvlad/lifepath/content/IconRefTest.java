@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,29 +23,29 @@ class IconRefTest {
 
 	@Test
 	void barePathResolvesUnderGuiRoot() {
-		Identifier id = Identifier.of("lifepath", "human");
-		assertEquals(Identifier.of("lifepath", "textures/gui/species/human.png"),
+		ResourceLocation id = ResourceLocation.fromNamespaceAndPath("lifepath", "human");
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "textures/gui/species/human.png"),
 				IconRef.resolve("species", id, "species/human"));
 	}
 
 	@Test
 	void barePathKeepsExistingPngSuffix() {
-		Identifier id = Identifier.of("lifepath", "mining");
-		assertEquals(Identifier.of("lifepath", "textures/gui/skill/mining.png"),
+		ResourceLocation id = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "textures/gui/skill/mining.png"),
 				IconRef.resolve("skill", id, "skill/mining.png"));
 	}
 
 	@Test
 	void explicitIdentifierIsLiteral() {
-		Identifier id = Identifier.of("lifepath", "human");
+		ResourceLocation id = ResourceLocation.fromNamespaceAndPath("lifepath", "human");
 		// Explicit ns:path is an escape hatch — no gui-root rewriting.
-		assertEquals(Identifier.of("othermod", "icons/human.png"),
+		assertEquals(ResourceLocation.fromNamespaceAndPath("othermod", "icons/human.png"),
 				IconRef.resolve("species", id, "othermod:icons/human.png"));
 	}
 
 	@Test
 	void malformedValueWarnsAndReturnsNull() {
-		Identifier id = Identifier.of("lifepath", "human");
+		ResourceLocation id = ResourceLocation.fromNamespaceAndPath("lifepath", "human");
 		assertNull(IconRef.resolve("species", id, "not an identifier!!"));
 		assertNull(IconRef.resolve("species", id, ""));
 		var warnings = IconRef.drainWarnings();

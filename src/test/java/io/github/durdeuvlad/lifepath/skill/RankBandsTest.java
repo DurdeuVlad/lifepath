@@ -6,11 +6,11 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.config.ConfigSpec;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.skill.RankBands.RankBand;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 class RankBandsTest {
-	private static final Identifier SKILLS = LifepathMod.id("skills");
+	private static final ResourceLocation SKILLS = LifepathMod.id("skills");
 
 	private static void defineBands(int... values) throws Exception {
 		ConfigSpec.Builder b = ConfigSpec.builder();

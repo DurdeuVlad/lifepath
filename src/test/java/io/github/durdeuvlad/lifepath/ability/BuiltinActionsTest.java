@@ -10,8 +10,8 @@ import io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.EvalContext;
 import io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.TargetContext;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +59,7 @@ class BuiltinActionsTest {
 
 	@Test
 	void modifyResourceSupportsDeltaAndSetTo() {
-		Identifier mana = LifepathMod.id("mana");
+		ResourceLocation mana = LifepathMod.id("mana");
 		data.setResource(mana, new PlayerCharacterData.ResourceState(30, 0, 100));
 		action("modify_resource").run(dataTarget, ctx,
 				params("{\"resource\": \"lifepath:mana\", \"delta\": 25}"));
@@ -80,7 +80,7 @@ class BuiltinActionsTest {
 
 	@Test
 	void modifyResourceHitsTheTargetNotTheCaster() {
-		Identifier mana = LifepathMod.id("mana");
+		ResourceLocation mana = LifepathMod.id("mana");
 		PlayerCharacterData other = PlayerCharacterData.createDefault();
 		data.setResource(mana, new PlayerCharacterData.ResourceState(50, 0, 100));
 		other.setResource(mana, new PlayerCharacterData.ResourceState(50, 0, 100));
@@ -95,7 +95,7 @@ class BuiltinActionsTest {
 		// Non-player / block targets carry no character model (per-target
 		// semantics) — resource/XP actions must no-op, not NPE or multiply
 		// against the caster's model.
-		TargetContext blockTarget = new TargetContext(null, BlockPos.ORIGIN, null);
+		TargetContext blockTarget = new TargetContext(null, BlockPos.ZERO, null);
 		action("modify_resource").run(blockTarget, ctx,
 				params("{\"resource\": \"lifepath:mana\", \"delta\": 25}"));
 		action("resource_delta").run(blockTarget, ctx,
@@ -135,7 +135,7 @@ class BuiltinActionsTest {
 					"""));
 		}
 		// pos present but no live player → still no-op (needs ctx.self world).
-		TargetContext posOnly = new TargetContext(null, BlockPos.ORIGIN, data);
+		TargetContext posOnly = new TargetContext(null, BlockPos.ZERO, data);
 		for (String name : new String[] {"grow_blocks", "freeze_water",
 				"play_sound", "spawn_particle"}) {
 			action(name).run(posOnly, ctx, params(
@@ -164,7 +164,7 @@ class BuiltinActionsTest {
 						              "temporary": true}],
 						 "cooldown": {"seconds": 30}}
 						""")).result().orElseThrow();
-		Identifier id = LifepathMod.id("flash_freeze");
+		ResourceLocation id = LifepathMod.id("flash_freeze");
 		LifepathContent.abilities().clear();
 		LifepathContent.abilities().register(id,
 				io.github.durdeuvlad.lifepath.content.AbilityDefinition.fromFile(id, file));

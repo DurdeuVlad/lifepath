@@ -15,7 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Single authoritative access point for {@link PlayerCharacterData} on the
@@ -64,10 +64,10 @@ public final class CharacterManager {
 	 * disconnect from evicting or overwriting the new session's live state.
 	 */
 	private static final class CachedCharacter {
-		private ServerPlayerEntity owner;
+		private ServerPlayer owner;
 		private final PlayerCharacterData data;
 
-		private CachedCharacter(ServerPlayerEntity owner, PlayerCharacterData data) {
+		private CachedCharacter(ServerPlayer owner, PlayerCharacterData data) {
 			this.owner = owner;
 			this.data = data;
 		}
@@ -78,13 +78,13 @@ public final class CharacterManager {
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
 				initializeCharacter(handler.getPlayer()));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			ServerPlayerEntity player = handler.getPlayer();
+			ServerPlayer player = handler.getPlayer();
 			saveCharacter(player);
 			// Evict only if THIS session still owns the entry — a stale/zombie
 			// session must not remove a newer session's cache NOR its dirty
 			// flag (clearing it would let SERVER_STOPPING skip the flush and
 			// lose the live session's unflushed mutations).
-			CACHE.computeIfPresent(player.getUuid(), (uuid, entry) -> {
+			CACHE.computeIfPresent(player.getUUID(), (uuid, entry) -> {
 				if (entry.owner != player) {
 					return entry;
 				}
@@ -97,7 +97,7 @@ public final class CharacterManager {
 			// must follow it or owner-gated save/evict would silently no-op
 			// (data still keyed to the dead entity → flushes skipped, cache
 			// leak on disconnect).
-			CACHE.computeIfPresent(newPlayer.getUuid(), (uuid, entry) -> {
+			CACHE.computeIfPresent(newPlayer.getUUID(), (uuid, entry) -> {
 				entry.owner = newPlayer;
 				return entry;
 			});
@@ -125,8 +125,8 @@ public final class CharacterManager {
 	 * it may hold unflushed mutations that are fresher than what was just read
 	 * from disk — and ownership transfers to the new entity.
 	 */
-	public static void initializeCharacter(ServerPlayerEntity player) {
-		CACHE.compute(player.getUuid(), (uuid, entry) -> {
+	public static void initializeCharacter(ServerPlayer player) {
+		CACHE.compute(player.getUUID(), (uuid, entry) -> {
 			if (entry == null) {
 				return new CachedCharacter(player, CharacterAttachments.get(player));
 			}
@@ -150,21 +150,21 @@ public final class CharacterManager {
 	 * only for players currently connected (an offline entity would leak a
 	 * cache entry with no eviction path).
 	 */
-	public static PlayerCharacterData getCharacter(ServerPlayerEntity player) {
-		return CACHE.computeIfAbsent(player.getUuid(),
+	public static PlayerCharacterData getCharacter(ServerPlayer player) {
+		return CACHE.computeIfAbsent(player.getUUID(),
 				uuid -> new CachedCharacter(player, CharacterAttachments.get(player))).data;
 	}
 
 	/** Flags the player's cached data as modified; persisted at the next flush point. */
-	public static void markDirty(ServerPlayerEntity player) {
-		DIRTY.add(player.getUuid());
+	public static void markDirty(ServerPlayer player) {
+		DIRTY.add(player.getUUID());
 	}
 
 	/**
 	 * Convenience for mutation call sites: marks dirty and re-syncs the client
 	 * in one call (synced fields changed ⇒ client must see them).
 	 */
-	public static void changed(ServerPlayerEntity player) {
+	public static void changed(ServerPlayer player) {
 		markDirty(player);
 		syncCharacter(player);
 	}
@@ -174,16 +174,16 @@ public final class CharacterManager {
 	 * player no longer owns the cache entry (e.g. a zombie session flushing
 	 * after a duplicate login already transferred ownership).
 	 */
-	public static void saveCharacter(ServerPlayerEntity player) {
-		CachedCharacter entry = CACHE.get(player.getUuid());
+	public static void saveCharacter(ServerPlayer player) {
+		CachedCharacter entry = CACHE.get(player.getUUID());
 		if (entry != null && entry.owner == player) {
 			CharacterAttachments.set(player, entry.data);
-			DIRTY.remove(player.getUuid());
+			DIRTY.remove(player.getUUID());
 		}
 	}
 
 	/** Sends a full bounded snapshot of the player's synced state to their client. */
-	public static void syncCharacter(ServerPlayerEntity player) {
+	public static void syncCharacter(ServerPlayer player) {
 		PlayerCharacterData data = getCharacter(player);
 		try {
 			PlayerCharacterData snapshot =
@@ -194,7 +194,7 @@ public final class CharacterManager {
 					"sync.payload_bytes",
 					PlayerCharacterData.CODEC.encodeStart(
 							net.minecraft.nbt.NbtOps.INSTANCE, snapshot)
-							.result().map(net.minecraft.nbt.NbtElement::getSizeInBytes)
+							.result().map(net.minecraft.nbt.Tag::sizeInBytes)
 							.orElse(0));
 			io.github.durdeuvlad.lifepath.perf.PerfCounters.time("sync.character",
 					() -> ServerPlayNetworking.send(player,
@@ -214,7 +214,7 @@ public final class CharacterManager {
 			io.github.durdeuvlad.lifepath.feedback.FeedbackService
 					.onSync(player, data);
 		} catch (Exception e) {
-			LifepathMod.LOGGER.error("failed to send character sync to {}", player.getUuid(), e);
+			LifepathMod.LOGGER.error("failed to send character sync to {}", player.getUUID(), e);
 		}
 	}
 
@@ -238,8 +238,8 @@ public final class CharacterManager {
 	}
 
 	private static void flushDirty(MinecraftServer server) {
-		for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-			if (DIRTY.contains(player.getUuid())) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (DIRTY.contains(player.getUUID())) {
 				saveCharacter(player);
 			}
 		}

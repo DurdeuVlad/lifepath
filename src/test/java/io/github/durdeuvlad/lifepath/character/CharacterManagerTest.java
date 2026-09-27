@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 class CharacterManagerTest {
@@ -14,8 +14,8 @@ class CharacterManagerTest {
 	@Test
 	void snapshotForSyncPrunesExpiredCooldowns() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		Identifier active = Identifier.of("lifepath", "active");
-		Identifier expired = Identifier.of("lifepath", "expired");
+		ResourceLocation active = ResourceLocation.fromNamespaceAndPath("lifepath", "active");
+		ResourceLocation expired = ResourceLocation.fromNamespaceAndPath("lifepath", "expired");
 		data.setCooldown(active, 2000L);
 		data.setCooldown(expired, 500L);
 
@@ -30,14 +30,14 @@ class CharacterManagerTest {
 	@Test
 	void snapshotForSyncDoesNotShareMutableState() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setSkillProgress(Identifier.of("lifepath", "s"),
+		data.setSkillProgress(ResourceLocation.fromNamespaceAndPath("lifepath", "s"),
 				new SkillProgress(5.0, 1, 1, 0, Aptitude.C, 0L));
 
 		PlayerCharacterData snapshot = CharacterManager.snapshotForSync(data, 0L);
-		snapshot.setSpeciesId(Identifier.of("lifepath", "other"));
+		snapshot.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "other"));
 
 		org.junit.jupiter.api.Assertions.assertNull(data.speciesId());
-		assertEquals(Identifier.of("lifepath", "other"), snapshot.speciesId());
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "other"), snapshot.speciesId());
 		assertEquals(data.skills(), snapshot.skills());
 	}
 
@@ -46,14 +46,14 @@ class CharacterManagerTest {
 		// M7-2: a snapshot taken mid-tick must not observe mutations applied
 		// to the live model afterwards (the deep-copy guarantee).
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setCooldown(Identifier.of("lifepath", "a"), 5000L);
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "a"), 5000L);
 
 		PlayerCharacterData snapshot = CharacterManager.snapshotForSync(data, 0L);
-		data.setCooldown(Identifier.of("lifepath", "b"), 5000L);
-		data.setSpeciesId(Identifier.of("lifepath", "iceborn"));
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "b"), 5000L);
+		data.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "iceborn"));
 
 		assertFalse(snapshot.cooldowns().containsKey(
-				Identifier.of("lifepath", "b")));
+				ResourceLocation.fromNamespaceAndPath("lifepath", "b")));
 		org.junit.jupiter.api.Assertions.assertNull(snapshot.speciesId());
 	}
 
@@ -61,14 +61,14 @@ class CharacterManagerTest {
 	void snapshotForSyncStripsScheduleKeysAndLedger() {
 		// M7-2: server bookkeeping never reaches the wire.
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setCooldown(Identifier.of("lifepath", "schedule/mining"), 5000L);
-		data.setCooldown(Identifier.of("lifepath", "real_cd"), 5000L);
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "schedule/mining"), 5000L);
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "real_cd"), 5000L);
 		data.setActionTimestamps("sig/mining",
 				new java.util.ArrayList<>(java.util.List.of(1L)));
 
 		PlayerCharacterData snapshot = CharacterManager.snapshotForSync(data, 0L);
 		assertTrue(snapshot.cooldowns().containsKey(
-				Identifier.of("lifepath", "real_cd")));
+				ResourceLocation.fromNamespaceAndPath("lifepath", "real_cd")));
 		assertFalse(snapshot.cooldowns().keySet().stream().anyMatch(
 				io.github.durdeuvlad.lifepath.ability.CooldownService::isScheduleKey));
 		assertTrue(snapshot.actionSignatures().isEmpty());

@@ -4,7 +4,7 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Maps skill level to a named rank band (GAMEDESIGN §8). Default bands:
@@ -37,7 +37,7 @@ public final class RankBands {
 	}
 
 	private static final int[] DEFAULT_THRESHOLDS = {0, 1, 20, 40, 60, 80, 95};
-	private static final Identifier SKILLS_CONFIG = LifepathMod.id("skills");
+	private static final ResourceLocation SKILLS_CONFIG = LifepathMod.id("skills");
 	private static final String[] KEYS = {
 			"band_untrained", "band_novice", "band_apprentice", "band_skilled",
 			"band_expert", "band_master", "band_legendary"};

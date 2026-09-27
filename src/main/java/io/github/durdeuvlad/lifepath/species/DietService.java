@@ -5,16 +5,16 @@ import io.github.durdeuvlad.lifepath.content.DietDefinition;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.List;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Generic diet gate (M5-4): a species' optional {@code diet_rules} def decides
  * whether an item yields nutrition. Consulted once inside {@code
- * PlayerEntity.eatFood} at the {@code HungerManager.eat} call — a denied item
+ * Player.eat} at the {@code FoodData.eat} call — a denied item
  * is still eaten (animation, stack consumption, food side-effects) but adds
  * zero hunger/saturation. No rules → everything nourishes.
  */
@@ -45,7 +45,7 @@ public final class DietService {
 			@Nullable PlayerCharacterData data) {
 		java.util.List<DietDefinition> conditionDiets = new java.util.ArrayList<>();
 		if (data != null) {
-			for (Identifier condId : data.conditions()) {
+			for (ResourceLocation condId : data.conditions()) {
 				var cond = LifepathContent.conditions().get(condId);
 				if (cond != null && cond.dietRules().isPresent()) {
 					var diet = LifepathContent.diets().get(cond.dietRules().get());
@@ -68,11 +68,11 @@ public final class DietService {
 		if (diets.isEmpty() || stack.isEmpty()) {
 			return true;
 		}
-		Identifier itemId = Registries.ITEM.getId(stack.getItem());
-		var entry = Registries.ITEM.getEntry(stack.getItem());
+		ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		var entry = BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem());
 		for (DietDefinition def : diets) {
 			for (var allowed : def.allowed()) {
-				if (allowed.matches(itemId, entry, RegistryKeys.ITEM)) {
+				if (allowed.matches(itemId, entry, Registries.ITEM)) {
 					return true;
 				}
 			}

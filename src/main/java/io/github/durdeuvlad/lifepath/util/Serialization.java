@@ -4,9 +4,9 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import java.util.Optional;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 
 /**
  * Codec convenience helpers shared by persistence (M1) and network code.
@@ -34,7 +34,7 @@ public final class Serialization {
 				.getFirst();
 	}
 
-	public static <T> NbtElement toNbt(Codec<T> codec, T value) {
+	public static <T> Tag toNbt(Codec<T> codec, T value) {
 		return codec.encodeStart(NbtOps.INSTANCE, value)
 				.resultOrPartial(error -> {
 					throw new IllegalArgumentException("nbt encode failed: " + error);
@@ -42,7 +42,7 @@ public final class Serialization {
 				.orElseThrow(() -> new IllegalArgumentException("nbt encode failed: empty result"));
 	}
 
-	public static <T> T fromNbt(Codec<T> codec, NbtElement nbt) {
+	public static <T> T fromNbt(Codec<T> codec, Tag nbt) {
 		return codec.decode(NbtOps.INSTANCE, nbt)
 				.resultOrPartial(error -> {
 					throw new IllegalArgumentException("nbt decode failed: " + error);
@@ -52,7 +52,7 @@ public final class Serialization {
 	}
 
 	/** Encodes {@code value} and stores it under {@code key} in {@code compound}. */
-	public static <T> void putNbt(NbtCompound compound, String key, Codec<T> codec, T value) {
+	public static <T> void putNbt(CompoundTag compound, String key, Codec<T> codec, T value) {
 		compound.put(key, toNbt(codec, value));
 	}
 
@@ -62,7 +62,7 @@ public final class Serialization {
 	 * @throws IllegalArgumentException if the key exists but fails to decode —
 	 *         callers loading potentially-corrupt saves should catch this.
 	 */
-	public static <T> Optional<T> getNbt(NbtCompound compound, String key, Codec<T> codec) {
+	public static <T> Optional<T> getNbt(CompoundTag compound, String key, Codec<T> codec) {
 		if (!compound.contains(key)) {
 			return Optional.empty();
 		}

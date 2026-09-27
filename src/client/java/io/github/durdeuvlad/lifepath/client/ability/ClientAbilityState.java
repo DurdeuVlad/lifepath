@@ -1,7 +1,7 @@
 package io.github.durdeuvlad.lifepath.client.ability;
 
 import io.github.durdeuvlad.lifepath.client.character.ClientCharacterState;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -13,17 +13,17 @@ import org.jetbrains.annotations.Nullable;
  * re-validates.
  */
 public final class ClientAbilityState {
-	private static Identifier selected;
+	private static ResourceLocation selected;
 
 	private ClientAbilityState() {}
 
 	@Nullable
-	public static Identifier selected() {
+	public static ResourceLocation selected() {
 		return selected;
 	}
 
 	/** Called by the character screen ability list; cleared on disconnect. */
-	public static void select(@Nullable Identifier abilityId) {
+	public static void select(@Nullable ResourceLocation abilityId) {
 		selected = abilityId;
 	}
 
@@ -35,10 +35,10 @@ public final class ClientAbilityState {
 	public static boolean requestActivation() {
 		// send() throws IllegalStateException when the client isn't in a game —
 		// a keypress during disconnect/unload must degrade to a no-op.
-		if (net.minecraft.client.MinecraftClient.getInstance().getNetworkHandler() == null) {
+		if (net.minecraft.client.Minecraft.getInstance().getConnection() == null) {
 			return false;
 		}
-		Identifier abilityId = selected != null
+		ResourceLocation abilityId = selected != null
 				? selected
 				: io.github.durdeuvlad.lifepath.network.c2s
 						.ActivateAbilityPayload.AUTO;
@@ -58,7 +58,7 @@ public final class ClientAbilityState {
 	 * read-model (M4-4) — advisory for HUD display only; the server owns the
 	 * truth. Returns 0 when no snapshot or the cooldown is inactive.
 	 */
-	public static long remainingMillis(Identifier abilityId, long nowEpochMs) {
+	public static long remainingMillis(ResourceLocation abilityId, long nowEpochMs) {
 		var snapshot = ClientCharacterState.snapshot();
 		if (snapshot == null) {
 			return 0L;

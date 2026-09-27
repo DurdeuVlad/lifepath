@@ -57,38 +57,38 @@ class ReloadManagerTest {
 		ReloadManager.register(LifepathMod.id("plain"), () -> ran.add("plain"));
 
 		List<ReloadManager.ReloadResult> results =
-				ReloadManager.reloadAll(new net.minecraft.resource.ResourceManager() {
+				ReloadManager.reloadAll(new net.minecraft.server.packs.resources.ResourceManager() {
 					@Override
-					public java.util.Set<String> getAllNamespaces() {
+					public java.util.Set<String> getNamespaces() {
 						return java.util.Set.of();
 					}
 
 					@Override
-					public java.util.Optional<net.minecraft.resource.Resource> getResource(
-							net.minecraft.util.Identifier identifier) {
+					public java.util.Optional<net.minecraft.server.packs.resources.Resource> getResource(
+							net.minecraft.resources.ResourceLocation identifier) {
 						return java.util.Optional.empty();
 					}
 
 					@Override
-					public java.util.Map<net.minecraft.util.Identifier, net.minecraft.resource.Resource>
-							findResources(String directory, java.util.function.Predicate<net.minecraft.util.Identifier> filter) {
+					public java.util.Map<net.minecraft.resources.ResourceLocation, net.minecraft.server.packs.resources.Resource>
+							listResources(String directory, java.util.function.Predicate<net.minecraft.resources.ResourceLocation> filter) {
 						return java.util.Map.of();
 					}
 
 					@Override
-					public java.util.List<net.minecraft.resource.Resource> getAllResources(
-							net.minecraft.util.Identifier identifier) {
+					public java.util.List<net.minecraft.server.packs.resources.Resource> getResourceStack(
+							net.minecraft.resources.ResourceLocation identifier) {
 						return java.util.List.of();
 					}
 
 					@Override
-					public java.util.Map<net.minecraft.util.Identifier, java.util.List<net.minecraft.resource.Resource>>
-							findAllResources(String directory, java.util.function.Predicate<net.minecraft.util.Identifier> filter) {
+					public java.util.Map<net.minecraft.resources.ResourceLocation, java.util.List<net.minecraft.server.packs.resources.Resource>>
+							listResourceStacks(String directory, java.util.function.Predicate<net.minecraft.resources.ResourceLocation> filter) {
 						return java.util.Map.of();
 					}
 
 					@Override
-					public java.util.stream.Stream<net.minecraft.resource.ResourcePack> streamResourcePacks() {
+					public java.util.stream.Stream<net.minecraft.server.packs.PackResources> listPacks() {
 						return java.util.stream.Stream.empty();
 					}
 				});

@@ -4,8 +4,8 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -36,23 +36,23 @@ public final class ActivityEvents {
 	private ActivityEvents() {
 	}
 
-	public static ActivityEvent mining(ServerPlayerEntity player, Identifier blockId,
-			@Nullable Identifier oreTier) {
+	public static ActivityEvent mining(ServerPlayer player, ResourceLocation blockId,
+			@Nullable ResourceLocation oreTier) {
 		return mining(player, blockId, oreTier, ActivityEvent.Cause.PLAYER);
 	}
 
-	public static ActivityEvent mining(ServerPlayerEntity player, Identifier blockId,
-			@Nullable Identifier oreTier, ActivityEvent.Cause cause) {
+	public static ActivityEvent mining(ServerPlayer player, ResourceLocation blockId,
+			@Nullable ResourceLocation oreTier, ActivityEvent.Cause cause) {
 		return new ActivityEvent(player, ActivityTypes.MINING, blockId,
 				tags(oreTier), cause, now(),
 				oreTier == null ? Map.of() : Map.of("tier", oreTier.toString()));
 	}
 
-	public static ActivityEvent farming(ServerPlayerEntity player, Identifier cropId, boolean mature) {
+	public static ActivityEvent farming(ServerPlayer player, ResourceLocation cropId, boolean mature) {
 		return farming(player, cropId, mature, ActivityEvent.Cause.PLAYER);
 	}
 
-	public static ActivityEvent farming(ServerPlayerEntity player, Identifier cropId,
+	public static ActivityEvent farming(ServerPlayer player, ResourceLocation cropId,
 			boolean mature, ActivityEvent.Cause cause) {
 		return new ActivityEvent(player, ActivityTypes.FARMING, cropId,
 				Set.of(LifepathMod.id(mature ? "mature" : "immature")),
@@ -66,17 +66,17 @@ public final class ActivityEvents {
 	 * xp_source files can gate on the workstation family). Extra descriptive
 	 * attributes merge over the {@code workstation} attr.
 	 */
-	public static ActivityEvent smithing(ServerPlayerEntity player, Identifier outputId,
-			Set<Identifier> outputItemTags, Identifier workstationId,
+	public static ActivityEvent smithing(ServerPlayer player, ResourceLocation outputId,
+			Set<ResourceLocation> outputItemTags, ResourceLocation workstationId,
 			Map<String, String> extraAttrs) {
 		return smithing(player, outputId, outputItemTags, workstationId,
 				extraAttrs, ActivityEvent.Cause.PLAYER);
 	}
 
-	public static ActivityEvent smithing(ServerPlayerEntity player, Identifier outputId,
-			Set<Identifier> outputItemTags, Identifier workstationId,
+	public static ActivityEvent smithing(ServerPlayer player, ResourceLocation outputId,
+			Set<ResourceLocation> outputItemTags, ResourceLocation workstationId,
 			Map<String, String> extraAttrs, ActivityEvent.Cause cause) {
-		Set<Identifier> tags = new java.util.HashSet<>(outputItemTags);
+		Set<ResourceLocation> tags = new java.util.HashSet<>(outputItemTags);
 		tags.add(workstationId);
 		tags.add(LifepathMod.id("smithing_workstations"));
 		Map<String, String> attrs = new LinkedHashMap<>(extraAttrs);
@@ -91,39 +91,39 @@ public final class ActivityEvents {
 	 * {@code lifepath:fishing_treasure}, not a string attr). Extras merge into
 	 * attributes.
 	 */
-	public static ActivityEvent fishing(ServerPlayerEntity player, Identifier lootId,
-			Set<Identifier> lootTags, Map<String, String> extraAttrs) {
+	public static ActivityEvent fishing(ServerPlayer player, ResourceLocation lootId,
+			Set<ResourceLocation> lootTags, Map<String, String> extraAttrs) {
 		return fishing(player, lootId, lootTags, extraAttrs, ActivityEvent.Cause.PLAYER);
 	}
 
-	public static ActivityEvent fishing(ServerPlayerEntity player, Identifier lootId,
-			Set<Identifier> lootTags, Map<String, String> extraAttrs,
+	public static ActivityEvent fishing(ServerPlayer player, ResourceLocation lootId,
+			Set<ResourceLocation> lootTags, Map<String, String> extraAttrs,
 			ActivityEvent.Cause cause) {
 		return new ActivityEvent(player, ActivityTypes.FISHING, lootId,
 				Set.copyOf(lootTags), cause, now(), Map.copyOf(extraAttrs));
 	}
 
-	public static ActivityEvent crafting(ServerPlayerEntity player, Identifier recipeOrOutputId) {
+	public static ActivityEvent crafting(ServerPlayer player, ResourceLocation recipeOrOutputId) {
 		return crafting(player, recipeOrOutputId, ActivityEvent.Cause.PLAYER);
 	}
 
-	public static ActivityEvent crafting(ServerPlayerEntity player, Identifier recipeOrOutputId,
+	public static ActivityEvent crafting(ServerPlayer player, ResourceLocation recipeOrOutputId,
 			ActivityEvent.Cause cause) {
 		return crafting(player, recipeOrOutputId, Set.of(), Map.of(), cause);
 	}
 
-	public static ActivityEvent crafting(ServerPlayerEntity player, Identifier recipeOrOutputId,
-			Set<Identifier> outputTags, Map<String, String> extraAttrs,
+	public static ActivityEvent crafting(ServerPlayer player, ResourceLocation recipeOrOutputId,
+			Set<ResourceLocation> outputTags, Map<String, String> extraAttrs,
 			ActivityEvent.Cause cause) {
 		return new ActivityEvent(player, ActivityTypes.CRAFTING, recipeOrOutputId,
 				Set.copyOf(outputTags), cause, now(), Map.copyOf(extraAttrs));
 	}
 
-	public static ActivityEvent combat(ServerPlayerEntity player, Identifier entityTypeId) {
+	public static ActivityEvent combat(ServerPlayer player, ResourceLocation entityTypeId) {
 		return combat(player, entityTypeId, ActivityEvent.Cause.PLAYER);
 	}
 
-	public static ActivityEvent combat(ServerPlayerEntity player, Identifier entityTypeId,
+	public static ActivityEvent combat(ServerPlayer player, ResourceLocation entityTypeId,
 			ActivityEvent.Cause cause) {
 		return combat(player, entityTypeId, Set.of(), cause);
 	}
@@ -133,8 +133,8 @@ public final class ActivityEvents {
 	 * the victim's entity-type tags ({@code minecraft:skeletons},
 	 * {@code lifepath:undead}, …) so xp_source data can weight by family.
 	 */
-	public static ActivityEvent combat(ServerPlayerEntity player, Identifier entityTypeId,
-			Set<Identifier> entityTags, ActivityEvent.Cause cause) {
+	public static ActivityEvent combat(ServerPlayer player, ResourceLocation entityTypeId,
+			Set<ResourceLocation> entityTags, ActivityEvent.Cause cause) {
 		return new ActivityEvent(player, ActivityTypes.COMBAT, entityTypeId,
 				Set.copyOf(entityTags), cause, now(), Map.of());
 	}
@@ -143,8 +143,8 @@ public final class ActivityEvents {
 	 * Projectile kill (M8-3) — emitted in addition to {@link #combat} when the
 	 * killing blow's damage source is a projectile. Same payload shape.
 	 */
-	public static ActivityEvent archery(ServerPlayerEntity player, Identifier entityTypeId,
-			Set<Identifier> entityTags, ActivityEvent.Cause cause) {
+	public static ActivityEvent archery(ServerPlayer player, ResourceLocation entityTypeId,
+			Set<ResourceLocation> entityTags, ActivityEvent.Cause cause) {
 		return new ActivityEvent(player, ActivityTypes.ARCHERY, entityTypeId,
 				Set.copyOf(entityTags), cause, now(), Map.of());
 	}
@@ -154,13 +154,13 @@ public final class ActivityEvents {
 	 * entity type; the event's player is the victim. Cause is
 	 * {@code NON_PLAYER} — the damage was mob-caused, not player action.
 	 */
-	public static ActivityEvent defence(ServerPlayerEntity victim, Identifier attackerTypeId,
-			Set<Identifier> attackerTags, ActivityEvent.Cause cause) {
+	public static ActivityEvent defence(ServerPlayer victim, ResourceLocation attackerTypeId,
+			Set<ResourceLocation> attackerTags, ActivityEvent.Cause cause) {
 		return new ActivityEvent(victim, ActivityTypes.DEFENCE, attackerTypeId,
 				Set.copyOf(attackerTags), cause, now(), Map.of());
 	}
 
-	private static Set<Identifier> tags(@Nullable Identifier extra) {
+	private static Set<ResourceLocation> tags(@Nullable ResourceLocation extra) {
 		return extra == null ? Set.of() : Set.of(extra);
 	}
 

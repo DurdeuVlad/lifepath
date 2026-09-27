@@ -3,7 +3,7 @@ package io.github.durdeuvlad.lifepath.content;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Data-defined XP→level curve (TIMELINE §5, M2-2). A curve is a TABLE, not a
@@ -21,14 +21,14 @@ import net.minecraft.util.Identifier;
  * a skill's own {@code max_level} caps it further. XP above the last threshold
  * stays at the last level.
  */
-public record LevelCurveDefinition(Identifier id, List<Double> thresholds) {
+public record LevelCurveDefinition(ResourceLocation id, List<Double> thresholds) {
 
-	public static LevelCurveDefinition fromFile(Identifier id, LevelCurveFile file) {
+	public static LevelCurveDefinition fromFile(ResourceLocation id, LevelCurveFile file) {
 		validate(id, file.thresholds());
 		return new LevelCurveDefinition(id, List.copyOf(file.thresholds()));
 	}
 
-	private static void validate(Identifier id, List<Double> t) {
+	private static void validate(ResourceLocation id, List<Double> t) {
 		if (t.size() < 2 || t.get(0) != 0.0) {
 			throw new IllegalArgumentException(id
 					+ ": thresholds must have at least 2 entries with thresholds[0]==0"

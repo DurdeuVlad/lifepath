@@ -8,7 +8,7 @@ import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.feedback.FeedbackService.SyncDiff;
 import io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test;
  * condition changes become messages; first sync is a silent baseline.
  */
 class FeedbackServiceTest {
-	private static final Identifier ICE = Identifier.of("lifepath:iceborn");
-	private static final Identifier HUMAN = Identifier.of("lifepath:human");
-	private static final Identifier MINER = Identifier.of("lifepath:miner");
-	private static final Identifier CHILL = Identifier.of("lifepath:chilled");
+	private static final ResourceLocation ICE = ResourceLocation.parse("lifepath:iceborn");
+	private static final ResourceLocation HUMAN = ResourceLocation.parse("lifepath:human");
+	private static final ResourceLocation MINER = ResourceLocation.parse("lifepath:miner");
+	private static final ResourceLocation CHILL = ResourceLocation.parse("lifepath:chilled");
 
 	private static FeedbackService.Prev prev(PlayerCharacterData d) {
 		// Prev is private — construct through the public diff seam's shape.

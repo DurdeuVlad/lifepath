@@ -1,6 +1,6 @@
 package io.github.durdeuvlad.lifepath.command;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,7 +10,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -48,18 +48,18 @@ class LifepathCommandsTest {
 		LifepathCommands.register(literal("alpha"));
 		LifepathCommands.register(literal("beta"));
 
-		CommandNode<ServerCommandSource> root = dispatchRoot();
+		CommandNode<CommandSourceStack> root = dispatchRoot();
 		assertTrue(root.getChild("alpha") != null);
 		assertTrue(root.getChild("beta") != null);
 	}
 
-	private CommandNode<ServerCommandSource> dispatchRoot() {
-		CommandDispatcher<ServerCommandSource> dispatcher = new CommandDispatcher<>();
+	private CommandNode<CommandSourceStack> dispatchRoot() {
+		CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
 		return dispatcher.register(LifepathCommands.buildRoot());
 	}
 
-	private CommandNode<ServerCommandSource> childNamed(String name) {
-		CommandNode<ServerCommandSource> node = dispatchRoot().getChild(name);
+	private CommandNode<CommandSourceStack> childNamed(String name) {
+		CommandNode<CommandSourceStack> node = dispatchRoot().getChild(name);
 		assertNotNull(node, "missing subcommand: " + name);
 		return node;
 	}

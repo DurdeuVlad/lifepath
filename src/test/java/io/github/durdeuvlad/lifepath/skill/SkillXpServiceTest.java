@@ -18,21 +18,21 @@ import io.github.durdeuvlad.lifepath.specialization.SpecializationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
  * Covers the data-only core ({@code awardXpCore}) — the player-facing wrapper
- * needs a live {@code ServerPlayerEntity} and is exercised in-game. What MUST
+ * needs a live {@code ServerPlayer} and is exercised in-game. What MUST
  * be proven here: validation, modifier order/semantics, level recompute,
  * invariants, and the "no client award path" shape (the API takes server types).
  */
 class SkillXpServiceTest {
-	private static final Identifier SKILL = Identifier.of("lifepath", "mining");
-	private static final Identifier CURVE = Identifier.of("lifepath", "test_curve");
+	private static final ResourceLocation SKILL = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
+	private static final ResourceLocation CURVE = ResourceLocation.fromNamespaceAndPath("lifepath", "test_curve");
 	private static final ActivityEvent SRC = ActivityEvent.of(
-			Identifier.of("lifepath", "test"), Identifier.of("minecraft", "stone"));
+			ResourceLocation.fromNamespaceAndPath("lifepath", "test"), ResourceLocation.fromNamespaceAndPath("minecraft", "stone"));
 
 	@BeforeEach
 	void setUp() {
@@ -83,7 +83,7 @@ class SkillXpServiceTest {
 		// protected floor with it).
 		registerSkill(100);
 		registerCurve(100);
-		Identifier specId = Identifier.of("lifepath", "test_spec");
+		ResourceLocation specId = ResourceLocation.fromNamespaceAndPath("lifepath", "test_spec");
 		LifepathContent.specializations().register(specId,
 				new SpecializationDefinition(specId, "Spec", Map.of(SKILL, 10),
 						Map.of(), Map.of(), Map.of(), Map.of(SKILL, 30), List.of()));
@@ -132,7 +132,7 @@ class SkillXpServiceTest {
 		assertFalse(SkillXpService.awardXpCore(data, SKILL, 0, SRC).applied());
 		assertFalse(SkillXpService.awardXpCore(data, SKILL, -5, SRC).applied());
 		assertFalse(SkillXpService.awardXpCore(data, SKILL, Double.NaN, SRC).applied());
-		assertFalse(SkillXpService.awardXpCore(data, Identifier.of("lifepath", "nope"), 10, SRC).applied());
+		assertFalse(SkillXpService.awardXpCore(data, ResourceLocation.fromNamespaceAndPath("lifepath", "nope"), 10, SRC).applied());
 		assertEquals(0, data.skills().size()); // rejected awards create no progress
 	}
 
@@ -141,11 +141,11 @@ class SkillXpServiceTest {
 		registerSkill(100);
 		registerCurve(100);
 		List<String> order = new ArrayList<>();
-		SkillXpService.registerModifier(Identifier.of("test", "first"), (ctx, amt) -> {
+		SkillXpService.registerModifier(ResourceLocation.fromNamespaceAndPath("test", "first"), (ctx, amt) -> {
 			order.add("first");
 			return amt * 2;
 		});
-		SkillXpService.registerModifier(Identifier.of("test", "second"), (ctx, amt) -> {
+		SkillXpService.registerModifier(ResourceLocation.fromNamespaceAndPath("test", "second"), (ctx, amt) -> {
 			order.add("second");
 			return amt + 5;
 		});
@@ -159,7 +159,7 @@ class SkillXpServiceTest {
 	void modifierCanSuppressAwardButStillCountsAsUse() {
 		registerSkill(100);
 		registerCurve(100);
-		SkillXpService.registerModifier(Identifier.of("test", "zero"), (ctx, amt) -> 0);
+		SkillXpService.registerModifier(ResourceLocation.fromNamespaceAndPath("test", "zero"), (ctx, amt) -> 0);
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 		var r = SkillXpService.awardXpCore(data, SKILL, 50.0, SRC);
 		assertTrue(r.applied()); // validation passed; practice still happened
@@ -206,7 +206,7 @@ class SkillXpServiceTest {
 	void throwingModifierIsIsolated() {
 		registerSkill(100);
 		registerCurve(100);
-		SkillXpService.registerModifier(Identifier.of("test", "boom"), (ctx, amt) -> {
+		SkillXpService.registerModifier(ResourceLocation.fromNamespaceAndPath("test", "boom"), (ctx, amt) -> {
 			throw new RuntimeException("broken modifier");
 		});
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
@@ -275,7 +275,7 @@ class SkillXpServiceTest {
 		SkillXpService.init();
 		registerSkill(100);
 		registerCurve(100); // level1 at 10xp cumulative
-		Identifier dwarf = Identifier.of("lifepath", "dwarf");
+		ResourceLocation dwarf = ResourceLocation.fromNamespaceAndPath("lifepath", "dwarf");
 		LifepathContent.species().register(dwarf,
 				new SpeciesDefinition(dwarf, "Dwarf",
 						SpeciesDefinition.Visibility.NORMAL, SpeciesDefinition.Selection.OPEN,

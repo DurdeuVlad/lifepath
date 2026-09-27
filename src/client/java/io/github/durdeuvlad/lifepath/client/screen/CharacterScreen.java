@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * M6-1 character screen — the identity hub ("what am I?"). Pure read model:
@@ -50,22 +50,22 @@ public class CharacterScreen extends Screen {
 
 	/** The skills entry point — re-anchored under the panel each render so
 	 *  growing/shrinking content never leaves it stranded or overlapped. */
-	private net.minecraft.client.gui.widget.ButtonWidget skillsButton;
+	private net.minecraft.client.gui.components.Button skillsButton;
 
 	/** Hit rect for one clickable ability row (screen coordinates). */
 	private record AbilityRow(String id, int x, int y, int w, int h) {}
 
 	public CharacterScreen() {
-		super(Text.translatable("screen.lifepath.character.title"));
+		super(Component.translatable("screen.lifepath.character.title"));
 	}
 
 	@Override
 	protected void init() {
 		// M6-2: Skills entry point — the identity hub links to the skills list.
-		skillsButton = addDrawableChild(net.minecraft.client.gui.widget.ButtonWidget.builder(
-				Text.translatable("screen.lifepath.character.skills_button"),
-				b -> client.setScreen(new SkillsScreen()))
-				.dimensions(width / 2 - 60,
+		skillsButton = addRenderableWidget(net.minecraft.client.gui.components.Button.builder(
+				Component.translatable("screen.lifepath.character.skills_button"),
+				b -> minecraft.setScreen(new SkillsScreen()))
+				.bounds(width / 2 - 60,
 						panelTop() + panelHeight(
 								ClientCharacterState.identity()) + 6,
 						120, 18)
@@ -73,7 +73,7 @@ public class CharacterScreen extends Screen {
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		renderBackground(context, mouseX, mouseY, delta);
 		int left = width / 2 - 110;
 		int panelW = PANEL_W;
@@ -89,24 +89,24 @@ public class CharacterScreen extends Screen {
 		context.fill(left - 4, top - 4, left + panelW + 4, top + panelH + 4, PANEL_EDGE);
 		context.fill(left - 3, top - 3, left + panelW + 3, top + panelH + 3, PANEL);
 
-		context.drawCenteredTextWithShadow(textRenderer,
-				Text.translatable("screen.lifepath.character.title"),
+		context.drawCenteredString(font,
+				Component.translatable("screen.lifepath.character.title"),
 				width / 2, top + 4, ACCENT);
 
 		int y = top + 22;
 
 		// --- Species (the identity hero line) ---
 		y = section(context, left, y,
-				Text.translatable("screen.lifepath.character.species"));
+				Component.translatable("screen.lifepath.character.species"));
 		if (core.speciesName().isEmpty()) {
 			y = line(context, left, y,
-					Text.translatable("screen.lifepath.character.no_species"), DIM);
+					Component.translatable("screen.lifepath.character.no_species"), DIM);
 		} else {
 			int rowTop = y;
 			ClientIcons.resolve("species", core.speciesIcon())
-					.ifPresent(tex -> context.drawTexture(tex, left + 6, rowTop - 1,
+					.ifPresent(tex -> context.blit(tex, left + 6, rowTop - 1,
 							0, 0, 16, 16, 16, 16));
-			context.drawTextWithShadow(textRenderer, Text.literal(core.speciesName()),
+			context.drawString(font, Component.literal(core.speciesName()),
 					left + 26, rowTop + 4, TEXT);
 			y = rowTop + 18;
 			// M12-2: the description is displaced from the default view —
@@ -114,38 +114,38 @@ public class CharacterScreen extends Screen {
 			if (!core.speciesDescription().isEmpty() && mouseX >= left
 					&& mouseX <= left + panelW && mouseY >= rowTop - 2
 					&& mouseY <= rowTop + 16) {
-				context.drawOrderedTooltip(textRenderer,
-						textRenderer.wrapLines(
-								Text.literal(core.speciesDescription()), panelW - 8),
+				context.renderTooltip(font,
+						font.split(
+								Component.literal(core.speciesDescription()), panelW - 8),
 						mouseX, mouseY);
 			}
 		}
 
 		// --- Specialization + starting focus ---
 		y = section(context, left, y + 4,
-				Text.translatable("screen.lifepath.character.specialization"));
+				Component.translatable("screen.lifepath.character.specialization"));
 		if (core.specName().isEmpty()) {
 			y = line(context, left, y,
-					Text.translatable("screen.lifepath.character.no_specialization"), DIM);
+					Component.translatable("screen.lifepath.character.no_specialization"), DIM);
 		} else {
 			final int specRowY = y;
 			ClientIcons.resolve("specialization", core.specIcon())
-					.ifPresent(tex -> context.drawTexture(tex, left + 6,
+					.ifPresent(tex -> context.blit(tex, left + 6,
 							specRowY - 1, 0, 0, 16, 16, 16, 16));
-			context.drawTextWithShadow(textRenderer, Text.literal(core.specName()),
+			context.drawString(font, Component.literal(core.specName()),
 					left + 26, y + 4, TEXT);
 			y += 18;
 			if (!id.specFocus().isEmpty()) {
 				String focusNames = String.join(", ", id.specFocus().stream()
 						.map(IdentitySummaryPayload.Entry::name).toList());
-				y = line(context, left, y, Text.translatable(
+				y = line(context, left, y, Component.translatable(
 						"screen.lifepath.character.focus", focusNames), DIM);
 			}
 		}
 		// M6-4 mandated line — a spec choice must never read as a lockout.
-		for (var wrapped : textRenderer.wrapLines(Text.translatable(
+		for (var wrapped : font.split(Component.translatable(
 				"screen.lifepath.character.spec_note"), panelW - 8)) {
-			context.drawTextWithShadow(textRenderer, wrapped, left + 6, y, DIM);
+			context.drawString(font, wrapped, left + 6, y, DIM);
 			y += 10;
 		}
 
@@ -167,14 +167,14 @@ public class CharacterScreen extends Screen {
 			// stale pick so the key falls back to AUTO rather than failing
 			// silently. Guarded on non-empty: the pre-sync empty payload must
 			// never wipe a live selection.
-			Identifier selected = ClientAbilityState.selected();
+			ResourceLocation selected = ClientAbilityState.selected();
 			if (selected != null
 					&& !id.abilities().containsKey(selected.toString())) {
 				ClientAbilityState.clear();
 				selected = null;
 			}
 			y = section(context, left, y + 4,
-					Text.translatable("screen.lifepath.character.abilities"));
+					Component.translatable("screen.lifepath.character.abilities"));
 			// Actives lead — they're the clickable rows — then passives; both
 			// groups keep the server's owned-set order within themselves.
 			List<IdentitySummaryPayload.AbilityEntry> ordered = new ArrayList<>();
@@ -193,14 +193,14 @@ public class CharacterScreen extends Screen {
 						&& e.id().equals(selected.toString());
 				final int rowY = y;
 				ClientIcons.resolve("ability", e.icon())
-						.ifPresent(tex -> context.drawTexture(tex, left + 6,
+						.ifPresent(tex -> context.blit(tex, left + 6,
 								rowY, 10, 10, 0, 0, 16, 16, 16, 16));
-				Text label = e.active()
-						? Text.literal((sel ? "> " : "") + e.name())
-						: Text.translatable(
+				Component label = e.active()
+						? Component.literal((sel ? "> " : "") + e.name())
+						: Component.translatable(
 								"screen.lifepath.character.ability_passive",
 								e.name());
-				context.drawTextWithShadow(textRenderer, label, left + 19,
+				context.drawString(font, label, left + 19,
 						y + 1, sel ? ACCENT : (e.active() ? TEXT : DIM));
 				if (e.active()) {
 					abilityRows.add(new AbilityRow(e.id(), left, y, panelW, 11));
@@ -210,20 +210,20 @@ public class CharacterScreen extends Screen {
 			if (selected == null
 					&& io.github.durdeuvlad.lifepath.client.LifepathClient
 							.abilityKey != null) {
-				y = line(context, left, y + 2, Text.translatable(
+				y = line(context, left, y + 2, Component.translatable(
 						"screen.lifepath.character.abilities_hint",
 						io.github.durdeuvlad.lifepath.client.LifepathClient
-								.abilityKey.getBoundKeyLocalizedText()), DIM);
+								.abilityKey.getTranslatedKeyMessage()), DIM);
 			}
 		}
 
 		// M6-4: visible keybind hints — the ability key is never discoverable
 		// otherwise. Shows the ACTUAL bound key, not a hardcoded letter.
 		if (io.github.durdeuvlad.lifepath.client.LifepathClient.abilityKey != null) {
-			context.drawCenteredTextWithShadow(textRenderer,
-					Text.translatable("screen.lifepath.character.key_hint",
+			context.drawCenteredString(font,
+					Component.translatable("screen.lifepath.character.key_hint",
 							io.github.durdeuvlad.lifepath.client.LifepathClient
-									.abilityKey.getBoundKeyLocalizedText()),
+									.abilityKey.getTranslatedKeyMessage()),
 					width / 2, top + panelH - 14, DIM);
 		}
 	}
@@ -234,7 +234,7 @@ public class CharacterScreen extends Screen {
 			for (AbilityRow row : abilityRows) {
 				if (mouseX >= row.x() && mouseX < row.x() + row.w()
 						&& mouseY >= row.y() && mouseY < row.y() + row.h()) {
-					Identifier picked = Identifier.tryParse(row.id());
+					ResourceLocation picked = ResourceLocation.tryParse(row.id());
 					if (picked != null) {
 						ClientAbilityState.select(picked);
 						return true;
@@ -267,7 +267,7 @@ public class CharacterScreen extends Screen {
 		if (!core.specName().isEmpty() && !id.specFocus().isEmpty()) {
 			h += 11;
 		}
-		h += 10 * textRenderer.wrapLines(Text.translatable(
+		h += 10 * font.split(Component.translatable(
 				"screen.lifepath.character.spec_note"), PANEL_W - 8).size();
 		h += listHeight(id.sections().getOrDefault(
 				IdentitySummary.SECTION_CONDITIONS, List.of()));
@@ -292,31 +292,31 @@ public class CharacterScreen extends Screen {
 		return 4 + 11 + 11 * Math.max(1, entries.size());
 	}
 
-	private int section(DrawContext context, int x, int y, Text label) {
-		context.drawTextWithShadow(textRenderer, label, x, y, ACCENT);
+	private int section(GuiGraphics context, int x, int y, Component label) {
+		context.drawString(font, label, x, y, ACCENT);
 		return y + 11;
 	}
 
-	private int line(DrawContext context, int x, int y, Text text, int color) {
-		context.drawTextWithShadow(textRenderer, text, x + 6, y, color);
+	private int line(GuiGraphics context, int x, int y, Component text, int color) {
+		context.drawString(font, text, x + 6, y, color);
 		return y + 11;
 	}
 
-	private int listSection(DrawContext context, int x, int y, String key,
+	private int listSection(GuiGraphics context, int x, int y, String key,
 			String domain, List<IdentitySummaryPayload.Entry> entries) {
-		y = section(context, x, y, Text.translatable(key));
+		y = section(context, x, y, Component.translatable(key));
 		if (entries.isEmpty()) {
 			return line(context, x, y,
-					Text.translatable("screen.lifepath.character.none"), DIM);
+					Component.translatable("screen.lifepath.character.none"), DIM);
 		}
 		for (IdentitySummaryPayload.Entry e : entries) {
 			final int rowY = y;
 			// 9-arg overload: draw box 10x10 sampling the whole 16x16 sprite
 			// (the 8-arg form would crop, not scale).
 			ClientIcons.resolve(domain, e.icon())
-					.ifPresent(tex -> context.drawTexture(tex, x + 6, rowY,
+					.ifPresent(tex -> context.blit(tex, x + 6, rowY,
 							10, 10, 0, 0, 16, 16, 16, 16));
-			context.drawTextWithShadow(textRenderer, Text.literal(e.name()),
+			context.drawString(font, Component.literal(e.name()),
 					x + 19, y + 1, TEXT);
 			y += 11;
 		}

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test;
  * {@code null}, which the service treats as "no dirty-mark needed").
  */
 class ConditionServiceTest {
-	private static final Identifier COND = LifepathMod.id("test_curse");
-	private static final Identifier RES = LifepathMod.id("test_blood");
+	private static final ResourceLocation COND = LifepathMod.id("test_curse");
+	private static final ResourceLocation RES = LifepathMod.id("test_blood");
 
 	private PlayerCharacterData data;
 
@@ -56,7 +56,7 @@ class ConditionServiceTest {
 		LifepathContent.resources().clear();
 	}
 
-	private static ActivityEvent event(Identifier type) {
+	private static ActivityEvent event(ResourceLocation type) {
 		return new ActivityEvent(null, type, LifepathMod.id("src"),
 				Set.of(), ActivityEvent.Cause.PLAYER, 0L, Map.of());
 	}
@@ -118,7 +118,7 @@ class ConditionServiceTest {
 
 	@Test
 	void tickAdvancesOnElapsedSeconds() {
-		Identifier timed = LifepathMod.id("timed_curse");
+		ResourceLocation timed = LifepathMod.id("timed_curse");
 		LifepathContent.conditions().register(timed, new ConditionDefinition(
 				timed, "Timed", Optional.empty(), List.of(), Optional.empty(),
 				List.of(),

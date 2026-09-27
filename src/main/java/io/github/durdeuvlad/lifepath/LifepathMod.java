@@ -18,7 +18,7 @@ import io.github.durdeuvlad.lifepath.skill.SkillXpService;
 import io.github.durdeuvlad.lifepath.skill.XpSourceRouter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,8 +265,8 @@ public class LifepathMod implements ModInitializer {
 		io.github.durdeuvlad.lifepath.compat.ExternalAdapterRegistry.init();
 	}
 
-	public static Identifier id(String path) {
-		return Identifier.of(MOD_ID, path);
+	public static ResourceLocation id(String path) {
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
 	}
 
 	public static String modVersion() {

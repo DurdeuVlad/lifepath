@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Resolves a player's identity state into display strings for
@@ -37,7 +37,7 @@ public final class IdentitySummary {
 					? species.displayName() : data.speciesId().getPath();
 			if (species != null) {
 				speciesDesc = species.description().orElse("");
-				speciesIcon = species.icon().map(Identifier::toString).orElse("");
+				speciesIcon = species.icon().map(ResourceLocation::toString).orElse("");
 			}
 		}
 
@@ -50,7 +50,7 @@ public final class IdentitySummary {
 			specName = spec != null
 					? spec.displayName() : data.specializationId().getPath();
 			if (spec != null) {
-				specIcon = spec.icon().map(Identifier::toString).orElse("");
+				specIcon = spec.icon().map(ResourceLocation::toString).orElse("");
 				focus = spec.startingSkills().keySet().stream()
 						.map(IdentitySummary::entry).toList();
 			}
@@ -66,7 +66,7 @@ public final class IdentitySummary {
 		// screen offer click-to-bind only on rows the key can fire.
 		Map<String, IdentitySummaryPayload.AbilityEntry> abilities =
 				new LinkedHashMap<>();
-		for (Identifier id : io.github.durdeuvlad.lifepath.ability.AbilityEngine
+		for (ResourceLocation id : io.github.durdeuvlad.lifepath.ability.AbilityEngine
 				.ownedAbilities(data)) {
 			var def = LifepathContent.abilities().get(id);
 			boolean active = def != null && def.trigger().kind()
@@ -77,12 +77,12 @@ public final class IdentitySummary {
 		}
 		List<IdentitySummaryPayload.ResourceDisplay> resourceDisplays =
 				new ArrayList<>();
-		java.util.Set<Identifier> resourceIds = new java.util.LinkedHashSet<>(
+		java.util.Set<ResourceLocation> resourceIds = new java.util.LinkedHashSet<>(
 				data.resources().keySet());
 		if (species != null) {
 			resourceIds.addAll(species.resources());
 		}
-		for (Identifier rid : resourceIds) {
+		for (ResourceLocation rid : resourceIds) {
 			var rdef = LifepathContent.resources().get(rid);
 			if (rdef == null) {
 				continue;
@@ -101,7 +101,7 @@ public final class IdentitySummary {
 			resourceDisplays.add(new IdentitySummaryPayload.ResourceDisplay(
 					rid.toString(), rdef.displayName(), rdef.defaultValue(),
 					restBand, bandNames,
-					rdef.icon().map(Identifier::toString).orElse("")));
+					rdef.icon().map(ResourceLocation::toString).orElse("")));
 		}
 
 		return new IdentitySummaryPayload(
@@ -114,7 +114,7 @@ public final class IdentitySummary {
 	 * Display name for any content id: ability → {@code displayName}, skill →
 	 * {@code displayName}, else the id path. Never throws on unknown content.
 	 */
-	public static String displayName(Identifier id) {
+	public static String displayName(ResourceLocation id) {
 		var ability = LifepathContent.abilities().get(id);
 		if (ability != null) {
 			return ability.displayName();
@@ -145,42 +145,42 @@ public final class IdentitySummary {
 	 * name and its icon can never disagree about which def they came from.
 	 * Empty when the def declares none or the id resolves to nothing.
 	 */
-	public static String iconRef(Identifier id) {
+	public static String iconRef(ResourceLocation id) {
 		var ability = LifepathContent.abilities().get(id);
 		if (ability != null) {
-			return ability.icon().map(Identifier::toString).orElse("");
+			return ability.icon().map(ResourceLocation::toString).orElse("");
 		}
 		var skill = LifepathContent.skills().get(id);
 		if (skill != null) {
-			return skill.icon().map(Identifier::toString).orElse("");
+			return skill.icon().map(ResourceLocation::toString).orElse("");
 		}
 		var condition = LifepathContent.conditions().get(id);
 		if (condition != null) {
-			return condition.icon().map(Identifier::toString).orElse("");
+			return condition.icon().map(ResourceLocation::toString).orElse("");
 		}
 		var attunement = LifepathContent.attunements().get(id);
 		if (attunement != null) {
-			return attunement.icon().map(Identifier::toString).orElse("");
+			return attunement.icon().map(ResourceLocation::toString).orElse("");
 		}
 		// Same terminal as displayName(): specialization/resource icons ride
 		// their own payload fields (IdentityCore, ResourceDisplay), never
 		// through entry() — stopping here keeps the name/icon chains equal.
 		var species = LifepathContent.species().get(id);
 		if (species != null) {
-			return species.icon().map(Identifier::toString).orElse("");
+			return species.icon().map(ResourceLocation::toString).orElse("");
 		}
 		return "";
 	}
 
 	/** One displayable reference: id + resolved name + icon ref ("" none). */
-	public static IdentitySummaryPayload.Entry entry(Identifier id) {
+	public static IdentitySummaryPayload.Entry entry(ResourceLocation id) {
 		return new IdentitySummaryPayload.Entry(id.toString(), displayName(id),
 				iconRef(id));
 	}
 
-	private static List<IdentitySummaryPayload.Entry> entriesOf(List<Identifier> ids) {
+	private static List<IdentitySummaryPayload.Entry> entriesOf(List<ResourceLocation> ids) {
 		List<IdentitySummaryPayload.Entry> entries = new ArrayList<>(ids.size());
-		for (Identifier id : ids) {
+		for (ResourceLocation id : ids) {
 			entries.add(entry(id));
 		}
 		return entries;

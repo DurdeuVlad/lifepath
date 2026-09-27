@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class VerticalSliceTest {
 	 * Dangling refs the slice is allowed to have. Empty since #96 — the spec
 	 * signature abilities shipped; any NEW dangling reference fails the test.
 	 */
-	private static final Set<Identifier> KNOWN_DANGLING_SIGNATURES = Set.of();
+	private static final Set<ResourceLocation> KNOWN_DANGLING_SIGNATURES = Set.of();
 
 	private PlayerCharacterData data;
 
@@ -195,12 +195,12 @@ class VerticalSliceTest {
 	@Test
 	void everyCrossReferenceResolvesOrIsTracked() throws Exception {
 		loadEverything();
-		Set<Identifier> dangling = new HashSet<>();
+		Set<ResourceLocation> dangling = new HashSet<>();
 		for (SpeciesDefinition sp : LifepathContent.species().all().values()) {
-			for (Identifier a : Stream.concat(
+			for (ResourceLocation a : Stream.concat(
 					sp.passiveAbilities().stream(), sp.activeAbilities().stream()).toList())
 				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
-			for (Identifier r : sp.resources())
+			for (ResourceLocation r : sp.resources())
 				if (!LifepathContent.resources().contains(r)) dangling.add(r);
 			sp.dietRules().ifPresent(d -> {
 				if (!LifepathContent.diets().contains(d)) dangling.add(d);
@@ -213,9 +213,9 @@ class VerticalSliceTest {
 			});
 		}
 		for (SpecializationDefinition spec : LifepathContent.specializations().all().values()) {
-			for (Identifier a : spec.signatureRefs())
+			for (ResourceLocation a : spec.signatureRefs())
 				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
-			Set<Identifier> skillRefs = new HashSet<>();
+			Set<ResourceLocation> skillRefs = new HashSet<>();
 			skillRefs.addAll(spec.startingSkills().keySet());
 			skillRefs.addAll(spec.aptitudes().keySet());
 			skillRefs.addAll(spec.xpModifiers().keySet());
@@ -229,12 +229,12 @@ class VerticalSliceTest {
 			if (!LifepathContent.skills().contains(xs.skill())) dangling.add(xs.skill());
 		// M9-1: condition → ability/resource/diet refs resolve too.
 		for (var cond : LifepathContent.conditions().all().values()) {
-			for (Identifier a : cond.abilities())
+			for (ResourceLocation a : cond.abilities())
 				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
 			for (var stage : cond.stages())
-				for (Identifier a : stage.abilities())
+				for (ResourceLocation a : stage.abilities())
 					if (!LifepathContent.abilities().contains(a)) dangling.add(a);
-			for (Identifier r : cond.resources())
+			for (ResourceLocation r : cond.resources())
 				if (!LifepathContent.resources().contains(r)) dangling.add(r);
 			cond.dietRules().ifPresent(d -> {
 				if (!LifepathContent.diets().contains(d)) dangling.add(d);
@@ -242,11 +242,11 @@ class VerticalSliceTest {
 		}
 		// M9-2: attunement → ability refs resolve too.
 		for (var att : LifepathContent.attunements().all().values())
-			for (Identifier a : att.abilities())
+			for (ResourceLocation a : att.abilities())
 				if (!LifepathContent.abilities().contains(a)) dangling.add(a);
 		// M9-4: unlock → gated-content refs resolve (today: species ids).
 		for (var unlock : LifepathContent.unlocks().all().values())
-			for (Identifier content : unlock.unlocks())
+			for (ResourceLocation content : unlock.unlocks())
 				if (!LifepathContent.species().contains(content)) dangling.add(content);
 
 		assertEquals(KNOWN_DANGLING_SIGNATURES, dangling,
@@ -270,7 +270,7 @@ class VerticalSliceTest {
 					s + " must gate on a held unlock");
 		}
 		// Every special species is reachable through a data-declared unlock.
-		Set<Identifier> gated = new HashSet<>();
+		Set<ResourceLocation> gated = new HashSet<>();
 		for (var u : LifepathContent.unlocks().all().values())
 			gated.addAll(u.unlocks());
 		for (String s : List.of("phoenix", "phantom", "celestial"))
@@ -302,18 +302,18 @@ class VerticalSliceTest {
 	void speciesAndSpecsComposeOrthogonally() throws Exception {
 		loadEverything();
 		// Every registered species — new species get this check for free.
-		for (Identifier speciesId : LifepathContent.species().all().keySet()) {
+		for (ResourceLocation speciesId : LifepathContent.species().all().keySet()) {
 			SpeciesDefinition species = LifepathContent.species().get(speciesId);
-			Set<Identifier> innate = new HashSet<>();
+			Set<ResourceLocation> innate = new HashSet<>();
 			innate.addAll(species.passiveAbilities());
 			innate.addAll(species.activeAbilities());
 			// Every registered specialization — new presets get this check for free.
-			for (Identifier specId : LifepathContent.specializations().all().keySet()) {
+			for (ResourceLocation specId : LifepathContent.specializations().all().keySet()) {
 				PlayerCharacterData d = PlayerCharacterData.createDefault();
 				d.setSpeciesId(speciesId);
 				assertEquals(SpecializationService.ApplyResult.APPLIED,
 						SpecializationService.apply(d, specId));
-				Set<Identifier> owned = AbilityEngine.ownedAbilities(d);
+				Set<ResourceLocation> owned = AbilityEngine.ownedAbilities(d);
 				assertTrue(owned.containsAll(innate),
 						speciesId + " lost innate abilities under " + specId);
 				// Species and specialization are orthogonal axes: every pair

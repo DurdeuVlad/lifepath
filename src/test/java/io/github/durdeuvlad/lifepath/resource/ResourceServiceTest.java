@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Test;
  * null); status-effect application is entity-path, verified in-game.
  */
 class ResourceServiceTest {
-	private static final Identifier TEMP = LifepathMod.id("temperature");
-	private static final Identifier CAPTURE = LifepathMod.id("test_capture");
+	private static final ResourceLocation TEMP = LifepathMod.id("temperature");
+	private static final ResourceLocation CAPTURE = LifepathMod.id("test_capture");
 
 	private PlayerCharacterData data;
 	private final List<ActivityEvent> events = new ArrayList<>();
@@ -75,7 +75,7 @@ class ResourceServiceTest {
 		LifepathContent.resources().register(TEMP, def);
 	}
 
-	private long bandEvents(Identifier type) {
+	private long bandEvents(ResourceLocation type) {
 		return events.stream().filter(e -> e.type().equals(type)).count();
 	}
 
@@ -176,7 +176,7 @@ class ResourceServiceTest {
 	void speciesDeclaredResourcesTickEvenUnmaterialized() {
 		register(parse("{\"min\": 0, \"max\": 100, \"default\": 50,"
 				+ " \"regen_per_second\": 2.0}"));
-		Identifier speciesId = LifepathMod.id("frost");
+		ResourceLocation speciesId = LifepathMod.id("frost");
 		LifepathContent.species().clear();
 		LifepathContent.species().register(speciesId, new SpeciesDefinition(speciesId,
 				"Frost", SpeciesDefinition.Visibility.NORMAL,
@@ -303,7 +303,7 @@ class ResourceServiceTest {
 						 "actions": [{"type": "lifepath:test_capture"}],
 						 "cost": {"resource": "lifepath:temperature", "amount": 30}}
 						""")).result().orElseThrow();
-		Identifier abilityId = LifepathMod.id("spender");
+		ResourceLocation abilityId = LifepathMod.id("spender");
 		LifepathContent.abilities().clear();
 		LifepathContent.abilities().register(abilityId,
 				AbilityDefinition.fromFile(abilityId, file));

@@ -1,9 +1,9 @@
 package io.github.durdeuvlad.lifepath.mixin;
 
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.AdvancementProgress;
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,21 +17,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * advancement id. Fires once per completion — {@code grantCriterion} only
  * returns true on actual progress, and {@code isDone} flips exactly once.
  */
-@Mixin(PlayerAdvancementTracker.class)
+@Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementTrackerMixin {
 	@Shadow
 	@Final
-	private ServerPlayerEntity owner;
+	private ServerPlayer player;
 
 	@Shadow
-	public abstract AdvancementProgress getProgress(AdvancementEntry advancement);
+	public abstract AdvancementProgress getOrStartProgress(AdvancementHolder advancement);
 
-	@Inject(method = "grantCriterion", at = @At("RETURN"))
-	private void lifepath$unlockOnAdvancement(AdvancementEntry advancement,
+	@Inject(method = "award(Lnet/minecraft/advancements/AdvancementHolder;Ljava/lang/String;)Z", at = @At("RETURN"))
+	private void lifepath$unlockOnAdvancement(AdvancementHolder advancement,
 			String criterionName, CallbackInfoReturnable<Boolean> cir) {
-		if (Boolean.TRUE.equals(cir.getReturnValue()) && getProgress(advancement).isDone()) {
+		if (Boolean.TRUE.equals(cir.getReturnValue()) && getOrStartProgress(advancement).isDone()) {
 			io.github.durdeuvlad.lifepath.unlock.UnlockService
-					.onAdvancement(owner, advancement.id(), System.currentTimeMillis());
+					.onAdvancement(player, advancement.id(), System.currentTimeMillis());
 		}
 	}
 }

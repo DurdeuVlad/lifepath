@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Data definition of an acquired condition (M9-1) — a stateful layer grafted
@@ -34,21 +34,21 @@ import net.minecraft.util.Identifier;
  * </ul>
  */
 public record ConditionDefinition(
-		Identifier id,
+		ResourceLocation id,
 		String displayName,
 		Optional<String> description,
-		List<Identifier> abilities,
-		Optional<Identifier> dietRules,
-		List<Identifier> resources,
+		List<ResourceLocation> abilities,
+		Optional<ResourceLocation> dietRules,
+		List<ResourceLocation> resources,
 		List<Stage> stages,
 		List<AcquisitionRule> acquisition,
 		List<CureRule> cures,
-		Optional<Identifier> icon) {
+		Optional<ResourceLocation> icon) {
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
-	public ConditionDefinition(Identifier id, String displayName,
-			Optional<String> description, List<Identifier> abilities,
-			Optional<Identifier> dietRules, List<Identifier> resources,
+	public ConditionDefinition(ResourceLocation id, String displayName,
+			Optional<String> description, List<ResourceLocation> abilities,
+			Optional<ResourceLocation> dietRules, List<ResourceLocation> resources,
 			List<Stage> stages, List<AcquisitionRule> acquisition,
 			List<CureRule> cures) {
 		this(id, displayName, description, abilities, dietRules, resources,
@@ -64,8 +64,8 @@ public record ConditionDefinition(
 	}
 
 	/** All ability ids grafted at the given stage index (base + cumulative). */
-	public List<Identifier> abilitiesAt(int stageIndex) {
-		java.util.ArrayList<Identifier> out = new java.util.ArrayList<>(abilities);
+	public List<ResourceLocation> abilitiesAt(int stageIndex) {
+		java.util.ArrayList<ResourceLocation> out = new java.util.ArrayList<>(abilities);
 		for (int i = 0; i <= stageIndex && i < stages.size(); i++) {
 			out.addAll(stages.get(i).abilities());
 		}
@@ -81,8 +81,8 @@ public record ConditionDefinition(
 	 * {@code advanceCount} matching events (or {@code advanceAfterSeconds}
 	 * elapsed) moves to the next stage.
 	 */
-	public record Stage(String id, List<Identifier> abilities,
-			List<Identifier> advanceEvents, int advanceCount,
+	public record Stage(String id, List<ResourceLocation> abilities,
+			List<ResourceLocation> advanceEvents, int advanceCount,
 			Optional<Long> advanceAfterSeconds) {
 
 		public Stage {
@@ -92,8 +92,8 @@ public record ConditionDefinition(
 
 		public static final Codec<Stage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("id").forGetter(Stage::id),
-				Identifier.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(Stage::abilities),
-				Identifier.CODEC.listOf().optionalFieldOf("advance_events", List.of()).forGetter(Stage::advanceEvents),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(Stage::abilities),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("advance_events", List.of()).forGetter(Stage::advanceEvents),
 				Codec.intRange(1, 100000).optionalFieldOf("advance_count", 1).forGetter(Stage::advanceCount),
 				Codec.LONG.optionalFieldOf("advance_after_seconds").forGetter(Stage::advanceAfterSeconds)
 		).apply(instance, Stage::new));
@@ -105,26 +105,26 @@ public record ConditionDefinition(
 	 * {@code item} (eating/using {@code item}), {@code admin} (command only).
 	 */
 	public record AcquisitionRule(String type, Optional<String> entity,
-			Optional<Identifier> item, double chance) {
+			Optional<ResourceLocation> item, double chance) {
 
 		public static final Codec<AcquisitionRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(AcquisitionRule::type),
 				Codec.STRING.optionalFieldOf("entity").forGetter(AcquisitionRule::entity),
-				Identifier.CODEC.optionalFieldOf("item").forGetter(AcquisitionRule::item),
+				ResourceLocation.CODEC.optionalFieldOf("item").forGetter(AcquisitionRule::item),
 				Codec.doubleRange(0.0, 1.0).optionalFieldOf("chance", 1.0).forGetter(AcquisitionRule::chance)
 		).apply(instance, AcquisitionRule::new));
 	}
 
 	/** How the condition is removed. {@code type}: {@code item} | {@code admin}. */
-	public record CureRule(String type, Optional<Identifier> item) {
+	public record CureRule(String type, Optional<ResourceLocation> item) {
 
 		public static final Codec<CureRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(CureRule::type),
-				Identifier.CODEC.optionalFieldOf("item").forGetter(CureRule::item)
+				ResourceLocation.CODEC.optionalFieldOf("item").forGetter(CureRule::item)
 		).apply(instance, CureRule::new));
 	}
 
-	public static ConditionDefinition fromFile(Identifier id, ConditionFile file) {
+	public static ConditionDefinition fromFile(ResourceLocation id, ConditionFile file) {
 		return new ConditionDefinition(id, file.displayName(), file.description(),
 				file.abilities(), file.dietRules(), file.resources(), file.stages(),
 				file.acquisition(), file.cures(),
@@ -135,9 +135,9 @@ public record ConditionDefinition(
 	public record ConditionFile(
 			String displayName,
 			Optional<String> description,
-			List<Identifier> abilities,
-			Optional<Identifier> dietRules,
-			List<Identifier> resources,
+			List<ResourceLocation> abilities,
+			Optional<ResourceLocation> dietRules,
+			List<ResourceLocation> resources,
 			List<Stage> stages,
 			List<AcquisitionRule> acquisition,
 			List<CureRule> cures,
@@ -146,9 +146,9 @@ public record ConditionDefinition(
 		public static final Codec<ConditionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(ConditionFile::displayName),
 				Codec.STRING.optionalFieldOf("description").forGetter(ConditionFile::description),
-				Identifier.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(ConditionFile::abilities),
-				Identifier.CODEC.optionalFieldOf("diet_rules").forGetter(ConditionFile::dietRules),
-				Identifier.CODEC.listOf().optionalFieldOf("resources", List.of()).forGetter(ConditionFile::resources),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(ConditionFile::abilities),
+				ResourceLocation.CODEC.optionalFieldOf("diet_rules").forGetter(ConditionFile::dietRules),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("resources", List.of()).forGetter(ConditionFile::resources),
 				Stage.CODEC.listOf().optionalFieldOf("stages", List.of()).forGetter(ConditionFile::stages),
 				AcquisitionRule.CODEC.listOf().optionalFieldOf("acquisition", List.of()).forGetter(ConditionFile::acquisition),
 				CureRule.CODEC.listOf().optionalFieldOf("cures", List.of()).forGetter(ConditionFile::cures),

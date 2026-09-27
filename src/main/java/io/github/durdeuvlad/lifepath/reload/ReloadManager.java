@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * One reload lifecycle entrypoint for all engine/data systems. Systems register
- * via {@link #register(Identifier, Runnable)}; {@link #reloadAll()} runs every
+ * via {@link #register(ResourceLocation, Runnable)}; {@link #reloadAll()} runs every
  * registered reloader in registration order. A failing reloader is logged as
  * ERROR and skipped — reload never aborts over one broken system.
  *
@@ -24,9 +24,9 @@ import org.jetbrains.annotations.Nullable;
  * so {@code /reload} and {@code /lifepath reload} (M0-3) share one path.
  */
 public final class ReloadManager {
-	private static final Identifier LISTENER_ID = LifepathMod.id("engine_reload");
-	private static final Map<Identifier, Runnable> RELOADERS = new LinkedHashMap<>();
-	private static final Map<Identifier, Consumer<ResourceManager>>
+	private static final ResourceLocation LISTENER_ID = LifepathMod.id("engine_reload");
+	private static final Map<ResourceLocation, Runnable> RELOADERS = new LinkedHashMap<>();
+	private static final Map<ResourceLocation, Consumer<ResourceManager>>
 			DATA_RELOADERS = new LinkedHashMap<>();
 	private static boolean initialized;
 
@@ -34,7 +34,7 @@ public final class ReloadManager {
 	}
 
 	/** Registers a named reloader. Registration order is the run order. */
-	public static void register(Identifier id, Runnable reloader) {
+	public static void register(ResourceLocation id, Runnable reloader) {
 		if (RELOADERS.put(id, reloader) != null || DATA_RELOADERS.containsKey(id)) {
 			throw new IllegalArgumentException("duplicate reloader: " + id);
 		}
@@ -47,7 +47,7 @@ public final class ReloadManager {
 	 * resource manager (e.g. tests), data reloaders are reported as skipped
 	 * rather than failed.
 	 */
-	public static void registerData(Identifier id,
+	public static void registerData(ResourceLocation id,
 			Consumer<ResourceManager> reloader) {
 		if (DATA_RELOADERS.put(id, reloader) != null || RELOADERS.containsKey(id)) {
 			throw new IllegalArgumentException("duplicate reloader: " + id);
@@ -59,15 +59,15 @@ public final class ReloadManager {
 		if (initialized) {
 			return;
 		}
-		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(
+		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
 				new SimpleSynchronousResourceReloadListener() {
 					@Override
-					public Identifier getFabricId() {
+					public ResourceLocation getFabricId() {
 						return LISTENER_ID;
 					}
 
 					@Override
-					public void reload(ResourceManager manager) {
+					public void onResourceManagerReload(ResourceManager manager) {
 						reloadAll(manager);
 					}
 				});
@@ -75,7 +75,7 @@ public final class ReloadManager {
 	}
 
 	/** Outcome of one registered reloader for reporting (e.g. {@code /lifepath reload}). */
-	public record ReloadResult(Identifier id, boolean success, @Nullable String error) {
+	public record ReloadResult(ResourceLocation id, boolean success, @Nullable String error) {
 	}
 
 	/** {@link #reloadAll(ResourceManager)} without a resource manager: data reloaders report skipped. */
@@ -92,7 +92,7 @@ public final class ReloadManager {
 	 */
 	public static List<ReloadResult> reloadAll(@Nullable ResourceManager manager) {
 		List<ReloadResult> results = new ArrayList<>();
-		for (Map.Entry<Identifier, Runnable> reloader : RELOADERS.entrySet()) {
+		for (Map.Entry<ResourceLocation, Runnable> reloader : RELOADERS.entrySet()) {
 			try {
 				reloader.getValue().run();
 				LifepathMod.LOGGER.info("reloaded {}", reloader.getKey());
@@ -103,7 +103,7 @@ public final class ReloadManager {
 				results.add(new ReloadResult(reloader.getKey(), false, detail));
 			}
 		}
-		for (Map.Entry<Identifier, Consumer<ResourceManager>> reloader : DATA_RELOADERS.entrySet()) {
+		for (Map.Entry<ResourceLocation, Consumer<ResourceManager>> reloader : DATA_RELOADERS.entrySet()) {
 			if (manager == null) {
 				results.add(new ReloadResult(reloader.getKey(), true, "skipped: no resource manager"));
 				continue;

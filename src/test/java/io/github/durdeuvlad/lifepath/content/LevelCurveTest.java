@@ -11,11 +11,11 @@ import io.github.durdeuvlad.lifepath.skill.LevelCurves;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 class LevelCurveTest {
-	private static final Identifier ID = Identifier.of("lifepath", "test_curve");
+	private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("lifepath", "test_curve");
 
 	private static LevelCurveDefinition curve(double... thresholds) {
 		List<Double> t = java.util.Arrays.stream(thresholds).boxed().toList();
@@ -66,7 +66,7 @@ class LevelCurveTest {
 		var parsed = LevelCurveDefinition.LevelCurveFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString(Files.readString(file)))
 				.result().orElseThrow(() -> new AssertionError("default.json failed to parse"));
-		LevelCurveDefinition def = LevelCurveDefinition.fromFile(Identifier.of("lifepath", "default"), parsed);
+		LevelCurveDefinition def = LevelCurveDefinition.fromFile(ResourceLocation.fromNamespaceAndPath("lifepath", "default"), parsed);
 		assertTrue(def.maxAttainableLevel() >= 100, "default curve must reach level 100");
 		assertEquals(0, def.levelFor(0));
 		assertTrue(def.levelFor(1e12) >= 100);
@@ -76,7 +76,7 @@ class LevelCurveTest {
 	void missingCurveFallsBackGracefully() {
 		LifepathContent.levelCurves().clear();
 		// No curve registered — lookup warns once and falls back, never throws.
-		int lvl = LevelCurves.levelFor(Identifier.of("lifepath", "gone"), 1e9);
+		int lvl = LevelCurves.levelFor(ResourceLocation.fromNamespaceAndPath("lifepath", "gone"), 1e9);
 		assertTrue(lvl > 0); // fallback curve still produces levels
 	}
 }

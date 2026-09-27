@@ -1,13 +1,13 @@
 package io.github.durdeuvlad.lifepath.mixin;
 
 import io.github.durdeuvlad.lifepath.producer.VanillaGameplayProducers;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,16 +21,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin {
 
-	@Inject(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;",
+	@Inject(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;",
 			at = @At("RETURN"))
-	private void lifepath$onPlaced(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> cir) {
-		ActionResult result = cir.getReturnValue();
-		PlayerEntity player = context.getPlayer();
-		if (result.isAccepted() && player instanceof ServerPlayerEntity serverPlayer
-				&& context.getWorld() instanceof ServerWorld world) {
-			BlockState placed = context.getWorld().getBlockState(context.getBlockPos());
+	private void lifepath$onPlaced(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
+		InteractionResult result = cir.getReturnValue();
+		Player player = context.getPlayer();
+		if (result.consumesAction() && player instanceof ServerPlayer serverPlayer
+				&& context.getLevel() instanceof ServerLevel world) {
+			BlockState placed = context.getLevel().getBlockState(context.getClickedPos());
 			VanillaGameplayProducers.onBlockPlaced(serverPlayer, world,
-					context.getBlockPos(), placed);
+					context.getClickedPos(), placed);
 		}
 	}
 }

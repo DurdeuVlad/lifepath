@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 
 class SerializationTest {
@@ -33,7 +33,7 @@ class SerializationTest {
 	@Test
 	void putAndGetNbtRoundTrip() {
 		Sample sample = new Sample("dummy", 7, true);
-		NbtCompound compound = new NbtCompound();
+		CompoundTag compound = new CompoundTag();
 		Serialization.putNbt(compound, "data", Sample.CODEC, sample);
 		assertEquals(sample, Serialization.getNbt(compound, "data", Sample.CODEC).orElseThrow());
 		assertTrue(Serialization.getNbt(compound, "missing", Sample.CODEC).isEmpty());

@@ -14,7 +14,7 @@ import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Test;
  * condition/action vocabularies land in M4-2/M4-3.
  */
 class AbilityEngineTest {
-	private static final Identifier SPECIES = LifepathMod.id("test_species");
-	private static final Identifier ABILITY = LifepathMod.id("test_ability");
-	private static final Identifier EVENT_TYPE = LifepathMod.id("mine_block");
+	private static final ResourceLocation SPECIES = LifepathMod.id("test_species");
+	private static final ResourceLocation ABILITY = LifepathMod.id("test_ability");
+	private static final ResourceLocation EVENT_TYPE = LifepathMod.id("mine_block");
 
 	private AtomicInteger fired;
 
@@ -58,7 +58,7 @@ class AbilityEngineTest {
 				AbilityDefinition.fromFile(ABILITY, file));
 	}
 
-	private static void speciesWith(List<Identifier> passive, List<Identifier> active) {
+	private static void speciesWith(List<ResourceLocation> passive, List<ResourceLocation> active) {
 		LifepathContent.species().register(SPECIES, new SpeciesDefinition(
 				SPECIES, "Test", SpeciesDefinition.Visibility.NORMAL,
 				SpeciesDefinition.Selection.OPEN, passive, active,
@@ -142,7 +142,7 @@ class AbilityEngineTest {
 		// Owned order puts the species passive first — AUTO must skip it and
 		// land on the active (WRONG_TRIGGER would prove it didn't).
 		registerAbility(PASSIVE_JSON);
-		Identifier active = LifepathMod.id("auto_pick");
+		ResourceLocation active = LifepathMod.id("auto_pick");
 		AbilityDefinition.AbilityFile file = AbilityDefinition.AbilityFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString("""
 						{"display_name": "Active", "trigger": {"type": "active"},
@@ -254,7 +254,7 @@ class AbilityEngineTest {
 
 	@Test
 	void costGateSpendsOnSuccessAndBlocksWhenShort() {
-		Identifier stamina = LifepathMod.id("stamina");
+		ResourceLocation stamina = LifepathMod.id("stamina");
 		registerAbility("""
 				{"display_name": "Costly", "trigger": {"type": "active"},
 				 "cost": {"resource": "lifepath:stamina", "amount": 5.0},
@@ -334,7 +334,7 @@ class AbilityEngineTest {
 	 */
 	@Test
 	void hypotheticalSpeciesMechanicIsPureData() {
-		Identifier surge = LifepathMod.id("adrenaline_surge");
+		ResourceLocation surge = LifepathMod.id("adrenaline_surge");
 		AbilityDefinition.AbilityFile file = AbilityDefinition.AbilityFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString("""
 						{"display_name": "Adrenaline Surge",
@@ -347,7 +347,7 @@ class AbilityEngineTest {
 		LifepathContent.abilities().register(surge, AbilityDefinition.fromFile(surge, file));
 		speciesWith(List.of(surge), List.of());
 		PlayerCharacterData data = characterOfSpecies();
-		Identifier stamina = LifepathMod.id("stamina");
+		ResourceLocation stamina = LifepathMod.id("stamina");
 		data.setResource(stamina, new PlayerCharacterData.ResourceState(50.0, 0, 100));
 
 		AbilityEngine.handleEvent(data, null, LifepathMod.id("sprint_start"), 1_000L);
@@ -389,7 +389,7 @@ class AbilityEngineTest {
 
 	@Test
 	void resourceInteractionsClampAndAccumulate() {
-		Identifier stamina = LifepathMod.id("stamina");
+		ResourceLocation stamina = LifepathMod.id("stamina");
 		registerAbility("""
 				{"display_name": "Regen", "trigger": {"type": "passive", "interval_ticks": 20},
 				 "target": {"type": "lifepath:self"},
@@ -506,7 +506,7 @@ class AbilityEngineTest {
 
 	@Test
 	void malformedAbilityFileSkipsWithoutCorruptingRegistry() {
-		java.util.Map<Identifier, com.google.gson.JsonElement> files = new java.util.LinkedHashMap<>();
+		java.util.Map<ResourceLocation, com.google.gson.JsonElement> files = new java.util.LinkedHashMap<>();
 		files.put(LifepathMod.id("good"), JsonParser.parseString("""
 				{"display_name": "Good", "trigger": {"type": "passive"},
 				 "target": {"type": "lifepath:self"}, "actions": []}

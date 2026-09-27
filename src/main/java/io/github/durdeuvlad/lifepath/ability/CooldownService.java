@@ -8,8 +8,8 @@ import io.github.durdeuvlad.lifepath.network.s2c.CooldownUpdatePayload;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -51,7 +51,7 @@ public final class CooldownService {
 	 * ability cooldown key — namespace-checked so a foreign content id like
 	 * {@code othermod:schedule/x} is never mistaken for engine bookkeeping.
 	 */
-	public static boolean isScheduleKey(Identifier id) {
+	public static boolean isScheduleKey(ResourceLocation id) {
 		return LifepathMod.MOD_ID.equals(id.getNamespace())
 				&& id.getPath().startsWith(SCHEDULE_PREFIX);
 	}
@@ -61,13 +61,13 @@ public final class CooldownService {
 	// ------------------------------------------------------------------
 
 	/** True when {@code abilityId}'s cooldown has not yet expired at {@code nowMs}. */
-	public static boolean isOnCooldown(PlayerCharacterData data, Identifier abilityId, long nowMs) {
+	public static boolean isOnCooldown(PlayerCharacterData data, ResourceLocation abilityId, long nowMs) {
 		Long expiry = data.cooldowns().get(abilityId);
 		return expiry != null && expiry > nowMs;
 	}
 
 	/** Milliseconds remaining on {@code abilityId}'s cooldown at {@code nowMs}; 0 when free. */
-	public static long remainingMillis(PlayerCharacterData data, Identifier abilityId, long nowMs) {
+	public static long remainingMillis(PlayerCharacterData data, ResourceLocation abilityId, long nowMs) {
 		Long expiry = data.cooldowns().get(abilityId);
 		return expiry == null ? 0L : Math.max(0L, expiry - nowMs);
 	}
@@ -81,7 +81,7 @@ public final class CooldownService {
 	 * @return the expiry timestamp (epoch ms), or {@code -1} when no cooldown
 	 *         was set.
 	 */
-	public static long trigger(PlayerCharacterData data, Identifier abilityId,
+	public static long trigger(PlayerCharacterData data, ResourceLocation abilityId,
 			double cooldownSeconds, long nowMs) {
 		double multiplier = ((Number) LifepathConfig.getOrDefault(
 				LifepathMod.id("abilities"), "cooldown_multiplier", 1.0)).doubleValue();
@@ -105,7 +105,7 @@ public final class CooldownService {
 	 * triggered"). Full-snapshot sync stays the caller's contract — the engine
 	 * already {@code changed()}es on execution.
 	 */
-	public static long trigger(ServerPlayerEntity player, Identifier abilityId,
+	public static long trigger(ServerPlayer player, ResourceLocation abilityId,
 			double cooldownSeconds, long nowMs) {
 		long expiry = trigger(CharacterManager.getCharacter(player), abilityId,
 				cooldownSeconds, nowMs);
@@ -122,7 +122,7 @@ public final class CooldownService {
 	 *
 	 * @return true when a cooldown entry existed.
 	 */
-	public static boolean clear(PlayerCharacterData data, Identifier abilityId) {
+	public static boolean clear(PlayerCharacterData data, ResourceLocation abilityId) {
 		if (isScheduleKey(abilityId)) {
 			return false;
 		}
@@ -133,8 +133,8 @@ public final class CooldownService {
 
 	/** Removes every ability cooldown (schedule markers preserved). Returns the count. */
 	public static int clearAll(PlayerCharacterData data) {
-		List<Identifier> real = new ArrayList<>();
-		for (Identifier id : data.cooldowns().keySet()) {
+		List<ResourceLocation> real = new ArrayList<>();
+		for (ResourceLocation id : data.cooldowns().keySet()) {
 			if (!isScheduleKey(id)) {
 				real.add(id);
 			}
@@ -144,7 +144,7 @@ public final class CooldownService {
 	}
 
 	/** Debug-command API (M7-4): clears one cooldown and re-syncs the client. */
-	public static boolean clear(ServerPlayerEntity player, Identifier abilityId) {
+	public static boolean clear(ServerPlayer player, ResourceLocation abilityId) {
 		boolean cleared = clear(CharacterManager.getCharacter(player), abilityId);
 		if (cleared) {
 			ServerPlayNetworking.send(player, new CooldownUpdatePayload(abilityId, 0L));
@@ -154,10 +154,10 @@ public final class CooldownService {
 	}
 
 	/** Debug-command API (M7-4): clears all cooldowns; returns the count removed. */
-	public static int clearAll(ServerPlayerEntity player) {
+	public static int clearAll(ServerPlayer player) {
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
-		List<Identifier> cleared = new ArrayList<>();
-		for (Identifier id : data.cooldowns().keySet()) {
+		List<ResourceLocation> cleared = new ArrayList<>();
+		for (ResourceLocation id : data.cooldowns().keySet()) {
 			if (!isScheduleKey(id)) {
 				cleared.add(id);
 			}
@@ -183,19 +183,19 @@ public final class CooldownService {
 	 * distinct (unlike a {@code :}→{@code _} rewrite, which collides e.g.
 	 * {@code a:b_c} with {@code a_b:c}).
 	 */
-	public static Identifier scheduleKey(Identifier abilityId) {
-		return Identifier.of("lifepath",
+	public static ResourceLocation scheduleKey(ResourceLocation abilityId) {
+		return ResourceLocation.fromNamespaceAndPath("lifepath",
 				SCHEDULE_PREFIX + abilityId.getNamespace() + "/" + abilityId.getPath());
 	}
 
 	/** The next-due timestamp (epoch ms) for a passive ability, or null if unscheduled. */
 	@Nullable
-	public static Long nextDueAt(PlayerCharacterData data, Identifier abilityId) {
+	public static Long nextDueAt(PlayerCharacterData data, ResourceLocation abilityId) {
 		return data.cooldowns().get(scheduleKey(abilityId));
 	}
 
 	/** Records the next-due timestamp for a passive ability's eval. */
-	public static void markNextDue(PlayerCharacterData data, Identifier abilityId, long dueAtMs) {
+	public static void markNextDue(PlayerCharacterData data, ResourceLocation abilityId, long dueAtMs) {
 		data.setCooldown(scheduleKey(abilityId), dueAtMs);
 	}
 }

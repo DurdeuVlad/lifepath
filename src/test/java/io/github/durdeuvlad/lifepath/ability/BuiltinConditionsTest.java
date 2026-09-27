@@ -11,7 +11,7 @@ import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.AbilityDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -70,7 +70,7 @@ class BuiltinConditionsTest {
 
 	@Test
 	void skillLevelComparesAgainstProgress() {
-		Identifier skill = LifepathMod.id("mining");
+		ResourceLocation skill = LifepathMod.id("mining");
 		data.setSkillProgress(skill, new SkillProgress(0, 12, 12, 0, null, 0));
 		assertTrue(cond("skill_level").test(ctx,
 				params("{\"skill\": \"lifepath:mining\", \"op\": \"gte\", \"level\": 10}")));
@@ -134,7 +134,7 @@ class BuiltinConditionsTest {
 		// M4-2 contract: an unknown condition type is a load error naming the
 		// ability — never a silent fail-closed. Exercises the production
 		// decoder through registerAll (the real datapack-load path).
-		var files = new java.util.LinkedHashMap<Identifier, com.google.gson.JsonElement>();
+		var files = new java.util.LinkedHashMap<ResourceLocation, com.google.gson.JsonElement>();
 		files.put(LifepathMod.id("bad"), JsonParser.parseString("""
 				{"display_name": "Bad", "trigger": {"type": "active"},
 				 "conditions": {"all": [{"type": "lifepath:not_a_condition"}]},
@@ -205,7 +205,7 @@ class BuiltinConditionsTest {
 	void allAnyCompositionEndToEnd() {
 		// Engine-level proof the data shape composes: every `all` must pass AND
 		// (when present) at least one `any` must pass.
-		Identifier skill = LifepathMod.id("mining");
+		ResourceLocation skill = LifepathMod.id("mining");
 		data.setSkillProgress(skill, new SkillProgress(0, 20, 20, 0, null, 0));
 		data.setResource(LifepathMod.id("mana"),
 				new PlayerCharacterData.ResourceState(1.0, 0, 100));

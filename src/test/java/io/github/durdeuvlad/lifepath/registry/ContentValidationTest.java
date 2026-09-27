@@ -15,7 +15,7 @@ import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,8 +36,8 @@ class ContentValidationTest {
 		LifepathContent.validateAll();
 	}
 
-	private static Identifier id(String path) {
-		return Identifier.of("lifepath", path);
+	private static ResourceLocation id(String path) {
+		return ResourceLocation.fromNamespaceAndPath("lifepath", path);
 	}
 
 	@Test
@@ -62,7 +62,7 @@ class ContentValidationTest {
 	@Test
 	void duplicatePassiveRefIsReported() {
 		LifepathContent.abilities().register(id("a"), ability(id("a")));
-		Identifier dup = id("a");
+		ResourceLocation dup = id("a");
 		LifepathContent.species().register(id("s"),
 				new SpeciesDefinition(id("s"), "S", SpeciesDefinition.Visibility.NORMAL,
 						SpeciesDefinition.Selection.OPEN, List.of(dup, dup),
@@ -137,7 +137,7 @@ class ContentValidationTest {
 		assertEquals("content validation clean — no issues", report.summaryLine());
 	}
 
-	private static AbilityDefinition ability(Identifier id) {
+	private static AbilityDefinition ability(ResourceLocation id) {
 		return new AbilityDefinition(id, "A", true,
 				new AbilityDefinition.Trigger(AbilityDefinition.Kind.PASSIVE, 20,
 						List.of(), 1.0),
@@ -146,7 +146,7 @@ class ContentValidationTest {
 				List.of(), Optional.empty(), Optional.empty(), List.of());
 	}
 
-	private static ResourceDefinition resourceWithAction(Identifier id, Identifier target) {
+	private static ResourceDefinition resourceWithAction(ResourceLocation id, ResourceLocation target) {
 		JsonObject params = new JsonObject();
 		params.addProperty("resource", target.toString());
 		params.addProperty("amount", 1.0);

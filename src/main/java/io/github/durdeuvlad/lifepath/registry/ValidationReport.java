@@ -3,7 +3,7 @@ package io.github.durdeuvlad.lifepath.registry;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * M7-5: the grouped result of a full content-validation pass. Every detected
@@ -15,7 +15,7 @@ import net.minecraft.util.Identifier;
  */
 public record ValidationReport(List<Issue> issues) {
 
-	public record Issue(Severity severity, String domain, Identifier file,
+	public record Issue(Severity severity, String domain, ResourceLocation file,
 			String field, String message) {
 	}
 

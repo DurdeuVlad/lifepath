@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Locale;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
  * wins — so narrow exceptions can precede broad tags.
  * Content lives in {@code data/<ns>/relation/<name>.json}.
  */
-public record RelationDefinition(Identifier id, List<Rule> rules) {
+public record RelationDefinition(ResourceLocation id, List<Rule> rules) {
 
 	/** Mob stance toward the character. */
 	public enum Disposition {
@@ -46,13 +46,13 @@ public record RelationDefinition(Identifier id, List<Rule> rules) {
 						.forGetter(Rule::disposition))
 				.apply(i, Rule::new));
 
-		public boolean matches(Identifier typeId,
-				@Nullable RegistryEntry<EntityType<?>> entry) {
-			return entity.matches(typeId, entry, RegistryKeys.ENTITY_TYPE);
+		public boolean matches(ResourceLocation typeId,
+				@Nullable Holder<EntityType<?>> entry) {
+			return entity.matches(typeId, entry, Registries.ENTITY_TYPE);
 		}
 	}
 
-	public static RelationDefinition fromFile(Identifier id, RelationFile file) {
+	public static RelationDefinition fromFile(ResourceLocation id, RelationFile file) {
 		if (file.rules().isEmpty()) {
 			throw new IllegalArgumentException(
 					"relation " + id + " must declare at least one rule");
@@ -62,8 +62,8 @@ public record RelationDefinition(Identifier id, List<Rule> rules) {
 
 	/** First matching rule's disposition, or null when none apply. */
 	@Nullable
-	public Disposition dispositionFor(Identifier typeId,
-			@Nullable RegistryEntry<EntityType<?>> entry) {
+	public Disposition dispositionFor(ResourceLocation typeId,
+			@Nullable Holder<EntityType<?>> entry) {
 		for (Rule rule : rules) {
 			if (rule.matches(typeId, entry)) {
 				return rule.disposition();

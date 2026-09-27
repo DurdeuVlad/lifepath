@@ -2,7 +2,7 @@ package io.github.durdeuvlad.lifepath.content;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -35,7 +35,7 @@ public final class IconRef {
 	 * {@code ValidationReport.Issue} without importing the registry layer —
 	 * {@code LifepathContent.validateAll} drains and re-wraps them.
 	 */
-	public record Warning(String domain, Identifier file, String field, String message) {
+	public record Warning(String domain, ResourceLocation file, String field, String message) {
 	}
 
 	// Domain loaders can run on parallel reload threads — synchronize;
@@ -47,20 +47,20 @@ public final class IconRef {
 	}
 
 	/**
-	 * Decodes one {@code icon} string into the texture {@link Identifier} it
+	 * Decodes one {@code icon} string into the texture {@link ResourceLocation} it
 	 * points at. Explicit {@code ns:path} values are literal; bare paths are
 	 * shorthand for {@code lifepath:textures/gui/<path>.png}. Malformed input
 	 * warns and returns {@code null} — callers store {@code Optional.empty()}.
 	 */
 	@Nullable
-	public static Identifier resolve(String domain, Identifier file, String raw) {
+	public static ResourceLocation resolve(String domain, ResourceLocation file, String raw) {
 		if (raw.isBlank()) {
 			warn(domain, file, "malformed icon '" + raw + "' — icon ignored");
 			return null;
 		}
-		Identifier base = raw.indexOf(':') >= 0
-				? Identifier.tryParse(raw)
-				: Identifier.tryParse("lifepath:" + raw);
+		ResourceLocation base = raw.indexOf(':') >= 0
+				? ResourceLocation.tryParse(raw)
+				: ResourceLocation.tryParse("lifepath:" + raw);
 		if (base == null || base.getPath().isBlank()) {
 			warn(domain, file, "malformed icon '" + raw + "' — icon ignored");
 			return null;
@@ -72,7 +72,7 @@ public final class IconRef {
 		if (!path.endsWith(".png")) {
 			path = path + ".png";
 		}
-		return Identifier.of(base.getNamespace(), GUI_ROOT + path);
+		return ResourceLocation.fromNamespaceAndPath(base.getNamespace(), GUI_ROOT + path);
 	}
 
 	/**
@@ -88,7 +88,7 @@ public final class IconRef {
 		}
 	}
 
-	private static void warn(String domain, Identifier file, String message) {
+	private static void warn(String domain, ResourceLocation file, String message) {
 		PENDING.add(new Warning(domain, file, "icon", message));
 	}
 }

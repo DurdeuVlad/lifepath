@@ -2,8 +2,8 @@ package io.github.durdeuvlad.lifepath.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Skill-domain lifecycle events, Fabric-style. Server-side only — listeners
@@ -28,7 +28,7 @@ public final class SkillEvents {
 
 	@FunctionalInterface
 	public interface LevelUp {
-		void onLevelUp(ServerPlayerEntity player, Identifier skillId,
+		void onLevelUp(ServerPlayer player, ResourceLocation skillId,
 				int oldLevel, int newLevel, ActivityEvent source);
 	}
 }

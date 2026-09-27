@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Data definition of an unlock grant (M9-4, GAMEDESIGN §4.1/§16): when any
@@ -24,10 +24,10 @@ import net.minecraft.util.Identifier;
  * </ul>
  */
 public record UnlockDefinition(
-		Identifier id,
+		ResourceLocation id,
 		String displayName,
 		Optional<String> description,
-		List<Identifier> unlocks,
+		List<ResourceLocation> unlocks,
 		List<SourceRule> sources) {
 
 	public UnlockDefinition {
@@ -42,24 +42,24 @@ public record UnlockDefinition(
 	 * type) + {@code tag} (must be in the event's tag set) + {@code chance}
 	 * for {@code event}; {@code advancement} for {@code advancement}.
 	 */
-	public record SourceRule(String type, Optional<Identifier> item,
-			Optional<Identifier> event, Optional<Identifier> subject,
-			Optional<Identifier> tag, Optional<Identifier> advancement,
+	public record SourceRule(String type, Optional<ResourceLocation> item,
+			Optional<ResourceLocation> event, Optional<ResourceLocation> subject,
+			Optional<ResourceLocation> tag, Optional<ResourceLocation> advancement,
 			double chance, boolean consume) {
 
 		public static final Codec<SourceRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(SourceRule::type),
-				Identifier.CODEC.optionalFieldOf("item").forGetter(SourceRule::item),
-				Identifier.CODEC.optionalFieldOf("event").forGetter(SourceRule::event),
-				Identifier.CODEC.optionalFieldOf("subject").forGetter(SourceRule::subject),
-				Identifier.CODEC.optionalFieldOf("tag").forGetter(SourceRule::tag),
-				Identifier.CODEC.optionalFieldOf("advancement").forGetter(SourceRule::advancement),
+				ResourceLocation.CODEC.optionalFieldOf("item").forGetter(SourceRule::item),
+				ResourceLocation.CODEC.optionalFieldOf("event").forGetter(SourceRule::event),
+				ResourceLocation.CODEC.optionalFieldOf("subject").forGetter(SourceRule::subject),
+				ResourceLocation.CODEC.optionalFieldOf("tag").forGetter(SourceRule::tag),
+				ResourceLocation.CODEC.optionalFieldOf("advancement").forGetter(SourceRule::advancement),
 				Codec.doubleRange(0.0, 1.0).optionalFieldOf("chance", 1.0).forGetter(SourceRule::chance),
 				Codec.BOOL.optionalFieldOf("consume", true).forGetter(SourceRule::consume)
 		).apply(instance, SourceRule::new));
 	}
 
-	public static UnlockDefinition fromFile(Identifier id, UnlockFile file) {
+	public static UnlockDefinition fromFile(ResourceLocation id, UnlockFile file) {
 		return new UnlockDefinition(id, file.displayName(), file.description(),
 				file.unlocks(), file.sources());
 	}
@@ -68,13 +68,13 @@ public record UnlockDefinition(
 	public record UnlockFile(
 			String displayName,
 			Optional<String> description,
-			List<Identifier> unlocks,
+			List<ResourceLocation> unlocks,
 			List<SourceRule> sources) {
 
 		public static final Codec<UnlockFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(UnlockFile::displayName),
 				Codec.STRING.optionalFieldOf("description").forGetter(UnlockFile::description),
-				Identifier.CODEC.listOf().optionalFieldOf("unlocks", List.of()).forGetter(UnlockFile::unlocks),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("unlocks", List.of()).forGetter(UnlockFile::unlocks),
 				SourceRule.CODEC.listOf().optionalFieldOf("sources", List.of()).forGetter(UnlockFile::sources)
 		).apply(instance, UnlockFile::new));
 	}

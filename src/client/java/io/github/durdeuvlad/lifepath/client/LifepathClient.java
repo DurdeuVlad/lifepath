@@ -1,5 +1,6 @@
 package io.github.durdeuvlad.lifepath.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.client.character.ClientCharacterState;
 import io.github.durdeuvlad.lifepath.client.network.ClientLifepathNetworking;
@@ -10,17 +11,16 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.client.KeyMapping;
 import io.github.durdeuvlad.lifepath.client.ability.ClientAbilityState;
 import io.github.durdeuvlad.lifepath.client.ability.ClientHighlights;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
 public class LifepathClient implements ClientModInitializer {
 	/** Bound keys — read by screens for visible-hint footers (M6-4). */
-	public static KeyBinding abilityKey;
-	public static KeyBinding characterKey;
+	public static KeyMapping abilityKey;
+	public static KeyMapping characterKey;
 
 	@Override
 	public void onInitializeClient() {
@@ -81,36 +81,36 @@ public class LifepathClient implements ClientModInitializer {
 		// resource reload (F3+T / pack change) so a texture that just arrived
 		// is picked up and warn-once can re-fire for genuinely missing ones.
 		net.fabricmc.fabric.api.resource.ResourceManagerHelper
-				.get(net.minecraft.resource.ResourceType.CLIENT_RESOURCES)
+				.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)
 				.registerReloadListener(new net.fabricmc.fabric.api.resource
 						.SimpleSynchronousResourceReloadListener() {
 					@Override
-					public net.minecraft.util.Identifier getFabricId() {
+					public net.minecraft.resources.ResourceLocation getFabricId() {
 						return LifepathMod.id("icon_cache");
 					}
 
 					@Override
-					public void reload(net.minecraft.resource.ResourceManager manager) {
+					public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager manager) {
 						io.github.durdeuvlad.lifepath.client.icon.ClientIcons.invalidate();
 					}
 				});
 
 		// M4-1: rebindable ability key (default G) — sends a C2S activation
 		// request for the client-selected ability; the server validates all.
-		abilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-				"key.lifepath.ability", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G,
+		abilityKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+				"key.lifepath.ability", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G,
 				"key.categories.lifepath"));
 		// M6-1: character screen key (default C) — opens the read-only
 		// identity hub; the screen renders synced state, never mutates it.
-		characterKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-				"key.lifepath.character", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_C,
+		characterKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+				"key.lifepath.character", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C,
 				"key.categories.lifepath"));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			while (abilityKey.wasPressed()) {
+			while (abilityKey.consumeClick()) {
 				ClientAbilityState.requestActivation();
 			}
-			while (characterKey.wasPressed()) {
-				if (client.currentScreen == null) {
+			while (characterKey.consumeClick()) {
+				if (client.screen == null) {
 					client.setScreen(
 							new io.github.durdeuvlad.lifepath.client.screen
 									.CharacterScreen());

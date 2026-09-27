@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Loads and validates the TOML balance/config files under {@code config/lifepath/}.
  *
  * <p>Mechanism: NightConfig {@code TomlParser}/{@code TomlWriter} (a small, dependency-free
  * TOML implementation bundled into the mod jar). One {@link ConfigSpec} is
- * registered per file via {@link #define(Identifier, ConfigSpec)}; the file name
+ * registered per file via {@link #define(ResourceLocation, ConfigSpec)}; the file name
  * is the identifier path plus {@code .toml}.
  *
  * <p>Behaviour contract:
@@ -45,19 +45,19 @@ import net.minecraft.util.Identifier;
  */
 public final class LifepathConfig {
 	/** The always-present base config file ({@code config/lifepath/general.toml}). */
-	public static final Identifier GENERAL = LifepathMod.id("general");
+	public static final ResourceLocation GENERAL = LifepathMod.id("general");
 	/** Client-side presentation options (HUD etc.) — generated client.toml. */
-	public static final Identifier CLIENT = LifepathMod.id("client");
+	public static final ResourceLocation CLIENT = LifepathMod.id("client");
 
-	private static final Map<Identifier, ConfigSpec> SPECS = new LinkedHashMap<>();
-	private static volatile Map<Identifier, Map<String, Object>> VALUES = Map.of();
+	private static final Map<ResourceLocation, ConfigSpec> SPECS = new LinkedHashMap<>();
+	private static volatile Map<ResourceLocation, Map<String, Object>> VALUES = Map.of();
 	private static Path configDir;
 
 	private LifepathConfig() {
 	}
 
 	/** Registers the spec for {@code config/lifepath/<id.path()>.toml}. Call during mod init. */
-	public static void define(Identifier fileId, ConfigSpec spec) {
+	public static void define(ResourceLocation fileId, ConfigSpec spec) {
 		if (SPECS.put(fileId, spec) != null) {
 			throw new IllegalArgumentException("duplicate config file spec: " + fileId);
 		}
@@ -71,8 +71,8 @@ public final class LifepathConfig {
 	/** Loads all defined files from {@code dir}. Exposed for tests and the reload lifecycle. */
 	public static synchronized void loadAll(Path dir) {
 		configDir = dir;
-		Map<Identifier, Map<String, Object>> snapshot = new HashMap<>();
-		for (Map.Entry<Identifier, ConfigSpec> file : SPECS.entrySet()) {
+		Map<ResourceLocation, Map<String, Object>> snapshot = new HashMap<>();
+		for (Map.Entry<ResourceLocation, ConfigSpec> file : SPECS.entrySet()) {
 			try {
 				snapshot.put(file.getKey(), Map.copyOf(loadFile(dir, file.getKey(), file.getValue())));
 			} catch (Exception e) {
@@ -89,7 +89,7 @@ public final class LifepathConfig {
 		loadAll(configDir != null ? configDir : defaultDir());
 	}
 
-	public static boolean isLoaded(Identifier fileId) {
+	public static boolean isLoaded(ResourceLocation fileId) {
 		return VALUES.containsKey(fileId);
 	}
 
@@ -100,7 +100,7 @@ public final class LifepathConfig {
 	 * @throws IllegalArgumentException if the key is not in the file's spec
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T get(Identifier fileId, String key) {
+	public static <T> T get(ResourceLocation fileId, String key) {
 		Map<String, Object> file = VALUES.get(fileId);
 		if (file == null) {
 			throw new IllegalStateException("config file not loaded: " + fileId);
@@ -117,7 +117,7 @@ public final class LifepathConfig {
 	 * missing key must degrade gracefully rather than crash the caller.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getOrDefault(Identifier fileId, String key, T fallback) {
+	public static <T> T getOrDefault(ResourceLocation fileId, String key, T fallback) {
 		Map<String, Object> file = VALUES.get(fileId);
 		if (file == null || !file.containsKey(key)) {
 			return fallback;
@@ -129,23 +129,23 @@ public final class LifepathConfig {
 				? (T) value : fallback;
 	}
 
-	public static boolean getBoolean(Identifier fileId, String key) {
+	public static boolean getBoolean(ResourceLocation fileId, String key) {
 		return get(fileId, key);
 	}
 
-	public static int getInt(Identifier fileId, String key) {
+	public static int getInt(ResourceLocation fileId, String key) {
 		return ((Number) get(fileId, key)).intValue();
 	}
 
-	public static double getDouble(Identifier fileId, String key) {
+	public static double getDouble(ResourceLocation fileId, String key) {
 		return ((Number) get(fileId, key)).doubleValue();
 	}
 
-	public static String getString(Identifier fileId, String key) {
+	public static String getString(ResourceLocation fileId, String key) {
 		return get(fileId, key);
 	}
 
-	private static Map<String, Object> loadFile(Path dir, Identifier fileId, ConfigSpec spec) {
+	private static Map<String, Object> loadFile(Path dir, ResourceLocation fileId, ConfigSpec spec) {
 		Path path = dir.resolve(fileId.getPath() + ".toml");
 		try {
 			Files.createDirectories(path.getParent());

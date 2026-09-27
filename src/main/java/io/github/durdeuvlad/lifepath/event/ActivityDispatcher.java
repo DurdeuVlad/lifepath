@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * The activity bus (M2-3): producers {@link #publish} normalized events,
@@ -26,16 +26,16 @@ public final class ActivityDispatcher {
 		void onActivity(ActivityEvent event);
 	}
 
-	private static final Map<Identifier, List<Listener>> BY_TYPE = new ConcurrentHashMap<>();
+	private static final Map<ResourceLocation, List<Listener>> BY_TYPE = new ConcurrentHashMap<>();
 	private static final List<Listener> ANY = new CopyOnWriteArrayList<>();
 
 	/** Subscribes to one activity type (e.g. {@code lifepath:mining}). */
-	public static void register(Identifier type, Listener listener) {
+	public static void register(ResourceLocation type, Listener listener) {
 		BY_TYPE.computeIfAbsent(type, k -> new CopyOnWriteArrayList<>()).add(listener);
 	}
 
 	/** Unsubscribes a type listener (test/teardown symmetry with {@link #register}). */
-	public static void unregister(Identifier type, Listener listener) {
+	public static void unregister(ResourceLocation type, Listener listener) {
 		List<Listener> list = BY_TYPE.get(type);
 		if (list != null) {
 			list.remove(listener);

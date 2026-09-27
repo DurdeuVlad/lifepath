@@ -8,10 +8,10 @@ import io.github.durdeuvlad.lifepath.skill.SkillXpService;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -35,15 +35,15 @@ public final class AbilityVocabulary {
 	 * the evaluating ability (for namespacing e.g. attribute modifiers); null
 	 * only in bare test contexts.
 	 */
-	public record EvalContext(@Nullable ServerPlayerEntity self,
-			PlayerCharacterData data, long now, @Nullable Identifier abilityId,
+	public record EvalContext(@Nullable ServerPlayer self,
+			PlayerCharacterData data, long now, @Nullable ResourceLocation abilityId,
 			@Nullable DamageInfo damage) {
-		public EvalContext(ServerPlayerEntity self, PlayerCharacterData data, long now) {
+		public EvalContext(ServerPlayer self, PlayerCharacterData data, long now) {
 			this(self, data, now, null, null);
 		}
 
-		public EvalContext(ServerPlayerEntity self, PlayerCharacterData data, long now,
-				@Nullable Identifier abilityId) {
+		public EvalContext(ServerPlayer self, PlayerCharacterData data, long now,
+				@Nullable ResourceLocation abilityId) {
 			this(self, data, now, abilityId, null);
 		}
 	}
@@ -56,7 +56,7 @@ public final class AbilityVocabulary {
 	 * Null on every non-damage eval path — damage conditions fail closed.
 	 */
 	public record DamageInfo(@Nullable Entity attacker,
-			@Nullable net.minecraft.entity.damage.DamageSource source, float amount) {
+			@Nullable net.minecraft.world.damagesource.DamageSource source, float amount) {
 	}
 
 	/**
@@ -72,7 +72,7 @@ public final class AbilityVocabulary {
 	public record TargetContext(@Nullable Entity entity,
 			@Nullable BlockPos pos, @Nullable PlayerCharacterData data) {
 		public TargetContext(@Nullable Entity entity, @Nullable PlayerCharacterData data) {
-			this(entity, entity == null ? null : entity.getBlockPos(), data);
+			this(entity, entity == null ? null : entity.blockPosition(), data);
 		}
 	}
 
@@ -114,34 +114,34 @@ public final class AbilityVocabulary {
 		List<TargetContext> resolve(EvalContext ctx, JsonObject params);
 	}
 
-	private static final Map<Identifier, ConditionEvaluator> CONDITIONS = new ConcurrentHashMap<>();
-	private static final Map<Identifier, ActionExecutor> ACTIONS = new ConcurrentHashMap<>();
-	private static final Map<Identifier, TargetResolver> TARGETS = new ConcurrentHashMap<>();
+	private static final Map<ResourceLocation, ConditionEvaluator> CONDITIONS = new ConcurrentHashMap<>();
+	private static final Map<ResourceLocation, ActionExecutor> ACTIONS = new ConcurrentHashMap<>();
+	private static final Map<ResourceLocation, TargetResolver> TARGETS = new ConcurrentHashMap<>();
 
-	public static void registerCondition(Identifier id, ConditionEvaluator eval) {
+	public static void registerCondition(ResourceLocation id, ConditionEvaluator eval) {
 		CONDITIONS.putIfAbsent(id, eval);
 	}
 
-	public static void registerAction(Identifier id, ActionExecutor exec) {
+	public static void registerAction(ResourceLocation id, ActionExecutor exec) {
 		ACTIONS.putIfAbsent(id, exec);
 	}
 
-	public static void registerTarget(Identifier id, TargetResolver resolver) {
+	public static void registerTarget(ResourceLocation id, TargetResolver resolver) {
 		TARGETS.putIfAbsent(id, resolver);
 	}
 
 	@Nullable
-	public static ConditionEvaluator condition(Identifier id) {
+	public static ConditionEvaluator condition(ResourceLocation id) {
 		return CONDITIONS.get(id);
 	}
 
 	@Nullable
-	public static ActionExecutor action(Identifier id) {
+	public static ActionExecutor action(ResourceLocation id) {
 		return ACTIONS.get(id);
 	}
 
 	@Nullable
-	public static TargetResolver target(Identifier id) {
+	public static TargetResolver target(ResourceLocation id) {
 		return TARGETS.get(id);
 	}
 
@@ -161,7 +161,7 @@ public final class AbilityVocabulary {
 
 		registerCondition(LifepathMod.id("always"), (ctx, params) -> true);
 		registerCondition(LifepathMod.id("has_resource"), (ctx, params) -> {
-			Identifier res = id(params, "resource");
+			ResourceLocation res = id(params, "resource");
 			if (res == null) {
 				return false;
 			}
@@ -181,7 +181,7 @@ public final class AbilityVocabulary {
 		BuiltinActions.init();
 
 		registerAction(LifepathMod.id("grant_xp"), (target, ctx, params) -> {
-			Identifier skill = id(params, "skill");
+			ResourceLocation skill = id(params, "skill");
 			double amount = num(params, "amount", 0.0);
 			if (skill == null || amount <= 0 || target.data() == null) {
 				return;
@@ -190,7 +190,7 @@ public final class AbilityVocabulary {
 					ActivityEvent.of(LifepathMod.id("ability"), skill));
 		});
 		registerAction(LifepathMod.id("resource_delta"), (target, ctx, params) -> {
-			Identifier res = id(params, "resource");
+			ResourceLocation res = id(params, "resource");
 			double delta = num(params, "amount", 0.0);
 			if (res == null || delta == 0.0 || target.data() == null) {
 				return;
@@ -199,7 +199,7 @@ public final class AbilityVocabulary {
 			// transitions, delta sync — never a raw map write.
 			io.github.durdeuvlad.lifepath.resource.ResourceService.modify(
 					target.data(),
-					target.entity() instanceof ServerPlayerEntity sp ? sp : null,
+					target.entity() instanceof ServerPlayer sp ? sp : null,
 					res, delta, ctx.now());
 		});
 		BuiltinConditions.init(); // M4-2 primitive vocabulary
@@ -212,10 +212,10 @@ public final class AbilityVocabulary {
 	}
 
 	@Nullable
-	static Identifier id(JsonObject params, String key) {
+	static ResourceLocation id(JsonObject params, String key) {
 		var el = params.get(key);
 		return el != null && el.isJsonPrimitive() && el.getAsJsonPrimitive().isString()
-				? Identifier.tryParse(el.getAsString()) : null;
+				? ResourceLocation.tryParse(el.getAsString()) : null;
 	}
 
 	static double num(JsonObject params, String key, double def) {
@@ -231,12 +231,12 @@ public final class AbilityVocabulary {
 	 * fail-closing forever. Returns the list of unknown types; empty when the
 	 * vocabulary isn't initialized (data-path tests that never ran {@link #init}).
 	 */
-	public static java.util.List<Identifier> unknownNodeTypes(
+	public static java.util.List<ResourceLocation> unknownNodeTypes(
 			io.github.durdeuvlad.lifepath.content.AbilityDefinition def) {
 		if (!initialized) {
 			return java.util.List.of();
 		}
-		java.util.List<Identifier> unknown = new java.util.ArrayList<>();
+		java.util.List<ResourceLocation> unknown = new java.util.ArrayList<>();
 		for (var node : def.conditions().all()) {
 			if (condition(node.type()) == null) {
 				unknown.add(node.type());

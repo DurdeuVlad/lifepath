@@ -6,9 +6,8 @@ import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -54,7 +53,7 @@ class PerfSyncBenchmarkTest {
 			PlayerCharacterData snap = CharacterManager.snapshotForSync(d, now);
 			bytes = PlayerCharacterData.CODEC
 					.encodeStart(NbtOps.INSTANCE, snap).result()
-					.map(NbtElement::getSizeInBytes).orElse(0);
+					.map(Tag::sizeInBytes).orElse(0);
 		}
 		double usPerSync = (System.nanoTime() - t0) / 1000.0 / 500.0;
 		System.out.printf("[PERF] sync_snapshot: %.1f us/snapshot+encode, payload=%d bytes%n",

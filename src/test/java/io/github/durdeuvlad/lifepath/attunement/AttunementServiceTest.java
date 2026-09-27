@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  * PlayerCharacterData} with {@code player = null} (no dirty-mark needed).
  */
 class AttunementServiceTest {
-	private static final Identifier ATT = LifepathMod.id("test_affinity");
+	private static final ResourceLocation ATT = LifepathMod.id("test_affinity");
 
 	private PlayerCharacterData data;
 
@@ -44,7 +44,7 @@ class AttunementServiceTest {
 		LifepathContent.attunements().clear();
 	}
 
-	private static ActivityEvent event(Identifier type) {
+	private static ActivityEvent event(ResourceLocation type) {
 		return new ActivityEvent(null, type, LifepathMod.id("src"),
 				Set.of(), ActivityEvent.Cause.PLAYER, 0L, Map.of());
 	}

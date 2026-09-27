@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,8 +52,8 @@ class EncumbranceServiceTest {
 
 	@Test
 	void speciesAndSpecMultipliersCompose() {
-		Identifier spId = LifepathMod.id("pack_mule");
-		Identifier specId = LifepathMod.id("hauler");
+		ResourceLocation spId = LifepathMod.id("pack_mule");
+		ResourceLocation specId = LifepathMod.id("hauler");
 		LifepathContent.species().register(spId, new SpeciesDefinition(
 				spId, "Mule", Optional.empty(), SpeciesDefinition.Visibility.NORMAL,
 				SpeciesDefinition.Selection.OPEN, List.of(), List.of(), Map.of(),

@@ -5,18 +5,18 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import java.util.function.Predicate;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -44,31 +44,31 @@ public final class BuiltinConditions {
 		initialized = true;
 
 		register("biome_tag", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			String idOrTag = str(params, "tag");
 			if (p == null || idOrTag == null) {
 				return false;
 			}
-			var biome = p.getWorld().getBiome(p.getBlockPos());
+			var biome = p.level().getBiome(p.blockPosition());
 			if (idOrTag.startsWith("#")) {
-				Identifier tag = Identifier.tryParse(idOrTag.substring(1));
-				return tag != null && biome.isIn(TagKey.of(RegistryKeys.BIOME, tag));
+				ResourceLocation tag = ResourceLocation.tryParse(idOrTag.substring(1));
+				return tag != null && biome.is(TagKey.create(Registries.BIOME, tag));
 			}
-			Identifier id = Identifier.tryParse(idOrTag);
+			ResourceLocation id = ResourceLocation.tryParse(idOrTag);
 			// Bare ids match either an exact biome or a tag by that name.
-			return id != null && (biome.matchesId(id)
-					|| biome.isIn(TagKey.of(RegistryKeys.BIOME, id)));
+			return id != null && (biome.is(id)
+					|| biome.is(TagKey.create(Registries.BIOME, id)));
 		});
 		register("dimension", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
-			Identifier dim = id(params, "id");
+			ServerPlayer p = ctx.self();
+			ResourceLocation dim = id(params, "id");
 			return p != null && dim != null
-					&& p.getWorld().getRegistryKey().getValue().equals(dim);
+					&& p.level().dimension().location().equals(dim);
 		});
 		register("block_nearby", (ctx, params) ->
 				io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
 						"scan.block_nearby", () -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			String idOrTag = str(params, "block");
 			if (p == null || idOrTag == null) {
 				return false;
@@ -78,14 +78,14 @@ public final class BuiltinConditions {
 			if (match == null) {
 				return false;
 			}
-			World world = p.getWorld();
-			BlockPos center = p.getBlockPos();
+			Level world = p.level();
+			BlockPos center = p.blockPosition();
 			// iterateOutwards = cubic shells nearest-first (early exit finds the
 			// closest match); isChunkLoaded guards against synchronous chunk
 			// loads on the server tick at scan fringes.
-			for (BlockPos pos : BlockPos.iterateOutwards(center, radius, radius, radius)) {
-				if (pos.isWithinDistance(center, radius + 0.5)
-						&& world.isChunkLoaded(pos)
+			for (BlockPos pos : BlockPos.withinManhattan(center, radius, radius, radius)) {
+				if (pos.closerThan(center, radius + 0.5)
+						&& world.hasChunkAt(pos)
 						&& match.test(world.getBlockState(pos))) {
 					return true;
 				}
@@ -95,7 +95,7 @@ public final class BuiltinConditions {
 		register("entity_nearby", (ctx, params) ->
 				io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
 						"scan.entity_nearby", () -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			String idOrTag = str(params, "entity");
 			if (p == null || idOrTag == null) {
 				return false;
@@ -107,39 +107,39 @@ public final class BuiltinConditions {
 				return false;
 			}
 			double r2 = radius * radius;
-			return !p.getWorld().getOtherEntities(p, p.getBoundingBox().expand(radius),
+			return !p.level().getEntities(p, p.getBoundingBox().inflate(radius),
 					e -> !e.isSpectator()
 							&& (!livingOnly || e instanceof LivingEntity)
-							&& e.squaredDistanceTo(p) <= r2
+							&& e.distanceToSqr(p) <= r2
 							&& type.test(e)).isEmpty();
 		}));
 		// Time-of-day thresholds, not World.isDay()/isNight() — the latter read
 		// ambient darkness and lie during thunderstorms (night at noon) or in
 		// fixed-time dimensions (never either).
 		register("daylight", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			if (p == null) {
 				return false;
 			}
-			long t = Math.floorMod(p.getWorld().getTimeOfDay(), 24000L);
+			long t = Math.floorMod(p.level().getDayTime(), 24000L);
 			return t < 12300 || t >= 23700;
 		});
 		register("night", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			if (p == null) {
 				return false;
 			}
-			long t = Math.floorMod(p.getWorld().getTimeOfDay(), 24000L);
+			long t = Math.floorMod(p.level().getDayTime(), 24000L);
 			return t >= 12300 && t < 23700;
 		});
 		register("health_threshold", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			String op = str(params, "op");
 			return p != null && op != null && hasNumber(params, "value")
 					&& compare(op, p.getHealth(), num(params, "value", 0));
 		});
 		register("inventory_contains", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			String idOrTag = str(params, "item");
 			if (p == null || idOrTag == null) {
 				return false;
@@ -153,8 +153,8 @@ public final class BuiltinConditions {
 				return false; // "contains ≤0 items" is vacuous — invalid input fails closed
 			}
 			int found = 0;
-			for (int i = 0; i < p.getInventory().size() && found < needed; i++) {
-				ItemStack stack = p.getInventory().getStack(i);
+			for (int i = 0; i < p.getInventory().getContainerSize() && found < needed; i++) {
+				ItemStack stack = p.getInventory().getItem(i);
 				if (!stack.isEmpty() && match.test(stack)) {
 					found += stack.getCount();
 				}
@@ -162,7 +162,7 @@ public final class BuiltinConditions {
 			return found >= needed;
 		});
 		register("equipment_contains", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			String idOrTag = str(params, "item");
 			if (p == null || idOrTag == null) {
 				return false;
@@ -174,25 +174,25 @@ public final class BuiltinConditions {
 			String slot = str(params, "slot");
 			if (slot != null) {
 				EquipmentSlot s = equipmentSlot(slot);
-				return s != null && match.test(p.getEquippedStack(s));
+				return s != null && match.test(p.getItemBySlot(s));
 			}
 			for (EquipmentSlot s : EquipmentSlot.values()) {
-				if (match.test(p.getEquippedStack(s))) {
+				if (match.test(p.getItemBySlot(s))) {
 					return true;
 				}
 			}
 			return false;
 		});
 		register("submerged", (ctx, params) ->
-				ctx.self() != null && ctx.self().isSubmergedInWater());
+				ctx.self() != null && ctx.self().isUnderWater());
 		register("on_fire", (ctx, params) -> ctx.self() != null && ctx.self().isOnFire());
 		register("weather", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			String wanted = str(params, "state");
 			if (p == null || wanted == null) {
 				return false;
 			}
-			World world = p.getWorld();
+			Level world = p.level();
 			return switch (wanted) {
 				case "thunder" -> world.isThundering();
 				case "rain" -> world.isRaining() && !world.isThundering();
@@ -202,7 +202,7 @@ public final class BuiltinConditions {
 		});
 		// Data-path primitives — no live entity required.
 		register("skill_level", (ctx, params) -> {
-			Identifier skill = id(params, "skill");
+			ResourceLocation skill = id(params, "skill");
 			String op = str(params, "op");
 			if (skill == null || op == null) {
 				return false;
@@ -213,7 +213,7 @@ public final class BuiltinConditions {
 							num(params, "level", 0));
 		});
 		register("resource_threshold", (ctx, params) -> {
-			Identifier res = id(params, "resource");
+			ResourceLocation res = id(params, "resource");
 			String op = str(params, "op");
 			if (res == null || op == null || !hasNumber(params, "value")) {
 				return false;
@@ -228,12 +228,12 @@ public final class BuiltinConditions {
 		});
 		// M9-1 condition primitives — gate abilities on held condition state.
 		register("has_condition", (ctx, params) -> {
-			Identifier cond = id(params, "condition");
+			ResourceLocation cond = id(params, "condition");
 			return cond != null && ctx.data() != null
 					&& ctx.data().conditions().contains(cond);
 		});
 		register("condition_stage", (ctx, params) -> {
-			Identifier cond = id(params, "condition");
+			ResourceLocation cond = id(params, "condition");
 			if (cond == null || ctx.data() == null) {
 				return false;
 			}
@@ -243,7 +243,7 @@ public final class BuiltinConditions {
 		});
 		// M5-2 primitives: block occupancy + incoming-damage context.
 		register("inside_block", (ctx, params) -> {
-			ServerPlayerEntity p = ctx.self();
+			ServerPlayer p = ctx.self();
 			String idOrTag = str(params, "block");
 			if (p == null || idOrTag == null) {
 				return false;
@@ -251,7 +251,7 @@ public final class BuiltinConditions {
 			Predicate<BlockState> match = blockMatcher(idOrTag);
 			// The block the feet occupy — "standing in vegetation/water/…".
 			return match != null && match.test(
-					p.getWorld().getBlockState(p.getBlockPos()));
+					p.level().getBlockState(p.blockPosition()));
 		});
 		register("attacker_entity", (ctx, params) -> {
 			var damage = ctx.damage();
@@ -271,13 +271,13 @@ public final class BuiltinConditions {
 				return false;
 			}
 			if (idOrTag.startsWith("#")) {
-				Identifier tag = Identifier.tryParse(idOrTag.substring(1));
+				ResourceLocation tag = ResourceLocation.tryParse(idOrTag.substring(1));
 				return tag != null && damage.source()
-						.isIn(TagKey.of(RegistryKeys.DAMAGE_TYPE, tag));
+						.is(TagKey.create(Registries.DAMAGE_TYPE, tag));
 			}
-			Identifier type = Identifier.tryParse(idOrTag);
-			return type != null && damage.source().getTypeRegistryEntry()
-					.matchesId(type);
+			ResourceLocation type = ResourceLocation.tryParse(idOrTag);
+			return type != null && damage.source().typeHolder()
+					.is(type);
 		});
 		register("damage_amount", (ctx, params) -> {
 			var damage = ctx.damage();
@@ -308,40 +308,40 @@ public final class BuiltinConditions {
 	@Nullable
 	static Predicate<BlockState> blockMatcher(String idOrTag) {
 		if (idOrTag.startsWith("#")) {
-			Identifier tag = Identifier.tryParse(idOrTag.substring(1));
+			ResourceLocation tag = ResourceLocation.tryParse(idOrTag.substring(1));
 			return tag == null ? null
-					: state -> state.isIn(TagKey.of(RegistryKeys.BLOCK, tag));
+					: state -> state.is(TagKey.create(Registries.BLOCK, tag));
 		}
-		Identifier id = Identifier.tryParse(idOrTag);
-		var block = id == null ? null : Registries.BLOCK.getOrEmpty(id).orElse(null);
-		return block == null ? null : state -> state.isOf(block);
+		ResourceLocation id = ResourceLocation.tryParse(idOrTag);
+		var block = id == null ? null : BuiltInRegistries.BLOCK.getOptional(id).orElse(null);
+		return block == null ? null : state -> state.is(block);
 	}
 
 	@Nullable
 	static Predicate<ItemStack> itemMatcher(String idOrTag) {
 		if (idOrTag.startsWith("#")) {
-			Identifier tag = Identifier.tryParse(idOrTag.substring(1));
+			ResourceLocation tag = ResourceLocation.tryParse(idOrTag.substring(1));
 			return tag == null ? null
-					: stack -> stack.isIn(TagKey.of(RegistryKeys.ITEM, tag));
+					: stack -> stack.is(TagKey.create(Registries.ITEM, tag));
 		}
-		Identifier id = Identifier.tryParse(idOrTag);
-		var item = id == null ? null : Registries.ITEM.getOrEmpty(id).orElse(null);
-		return item == null ? null : stack -> stack.isOf(item);
+		ResourceLocation id = ResourceLocation.tryParse(idOrTag);
+		var item = id == null ? null : BuiltInRegistries.ITEM.getOptional(id).orElse(null);
+		return item == null ? null : stack -> stack.is(item);
 	}
 
 	@Nullable
 	static Predicate<Entity> entityMatcher(String idOrTag) {
 		if (idOrTag.startsWith("#")) {
-			Identifier tag = Identifier.tryParse(idOrTag.substring(1));
+			ResourceLocation tag = ResourceLocation.tryParse(idOrTag.substring(1));
 			if (tag == null) {
 				return null;
 			}
-			TagKey<net.minecraft.entity.EntityType<?>> key =
-					TagKey.of(RegistryKeys.ENTITY_TYPE, tag);
-			return e -> Registries.ENTITY_TYPE.getEntry(e.getType()).isIn(key);
+			TagKey<net.minecraft.world.entity.EntityType<?>> key =
+					TagKey.create(Registries.ENTITY_TYPE, tag);
+			return e -> BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(e.getType()).is(key);
 		}
-		Identifier id = Identifier.tryParse(idOrTag);
-		var type = id == null ? null : Registries.ENTITY_TYPE.getOrEmpty(id).orElse(null);
+		ResourceLocation id = ResourceLocation.tryParse(idOrTag);
+		var type = id == null ? null : BuiltInRegistries.ENTITY_TYPE.getOptional(id).orElse(null);
 		return type == null ? null : e -> e.getType() == type;
 	}
 
@@ -376,7 +376,7 @@ public final class BuiltinConditions {
 	}
 
 	@Nullable
-	static Identifier id(JsonObject params, String key) {
+	static ResourceLocation id(JsonObject params, String key) {
 		return AbilityVocabulary.id(params, key);
 	}
 

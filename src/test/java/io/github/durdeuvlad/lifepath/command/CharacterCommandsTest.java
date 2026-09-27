@@ -12,9 +12,9 @@ import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.ResourceState;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import java.util.List;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,15 +31,15 @@ class CharacterCommandsTest {
 		LifepathCommands.init();
 		CharacterCommands.init();
 
-		CommandNode<ServerCommandSource> character = root().getChild("character");
+		CommandNode<CommandSourceStack> character = root().getChild("character");
 		assertNotNull(character, "missing /lifepath character");
 		assertNotNull(character.getCommand(), "bare /lifepath character should print usage");
 		assertNotNull(character.getChild("inspect"));
-		CommandNode<ServerCommandSource> resetNode = character.getChild("reset");
+		CommandNode<CommandSourceStack> resetNode = character.getChild("reset");
 		assertNotNull(resetNode);
 		// reset -> <player arg> -> "confirm" literal; the arg node itself must
 		// carry the refuseReset executor or `reset <player>` would fail unexplained.
-		CommandNode<ServerCommandSource> playerArg = resetNode.getChild("player");
+		CommandNode<CommandSourceStack> playerArg = resetNode.getChild("player");
 		assertNotNull(playerArg);
 		assertNotNull(playerArg.getCommand(), "reset without confirm must refuse explicitly");
 		assertNotNull(playerArg.getChild("confirm"), "reset must require literal confirm");
@@ -59,17 +59,17 @@ class CharacterCommandsTest {
 	@Test
 	void describePrintsEveryPersistedField() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setSpeciesId(Identifier.of("lifepath", "test_species"));
-		data.setSpecializationId(Identifier.of("lifepath", "test_spec"));
-		data.setSkillProgress(Identifier.of("lifepath", "s"),
+		data.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_species"));
+		data.setSpecializationId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_spec"));
+		data.setSkillProgress(ResourceLocation.fromNamespaceAndPath("lifepath", "s"),
 				new SkillProgress(12.5, 3, 4, 2, Aptitude.A, 1_700_000_000_000L));
-		data.addId(PlayerCharacterData.ListKind.TRAITS, Identifier.of("lifepath", "t1"));
-		data.addId(PlayerCharacterData.ListKind.UNLOCKS, Identifier.of("lifepath", "u1"));
-		data.setResource(Identifier.of("lifepath", "mana"), new ResourceState(5.0, 0.0, 10.0));
-		data.setCooldown(Identifier.of("lifepath", "ab"), 1500L);
+		data.addId(PlayerCharacterData.ListKind.TRAITS, ResourceLocation.fromNamespaceAndPath("lifepath", "t1"));
+		data.addId(PlayerCharacterData.ListKind.UNLOCKS, ResourceLocation.fromNamespaceAndPath("lifepath", "u1"));
+		data.setResource(ResourceLocation.fromNamespaceAndPath("lifepath", "mana"), new ResourceState(5.0, 0.0, 10.0));
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "ab"), 1500L);
 
-		List<Text> lines = CharacterCommands.describe(data, 1000L);
-		String all = lines.stream().map(Text::getString).reduce("", (a, b) -> a + "\n" + b);
+		List<Component> lines = CharacterCommands.describe(data, 1000L);
+		String all = lines.stream().map(Component::getString).reduce("", (a, b) -> a + "\n" + b);
 
 		assertTrue(all.contains("lifepath:test_species"));
 		assertTrue(all.contains("lifepath:test_spec"));
@@ -88,10 +88,10 @@ class CharacterCommandsTest {
 	@Test
 	void describeShowsExpiredCooldownsAsExpired() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setCooldown(Identifier.of("lifepath", "ab"), 500L);
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "ab"), 500L);
 
 		String all = CharacterCommands.describe(data, 1000L).stream()
-				.map(Text::getString).reduce("", (a, b) -> a + "\n" + b);
+				.map(Component::getString).reduce("", (a, b) -> a + "\n" + b);
 
 		assertTrue(all.contains("expired 500ms ago"));
 	}
@@ -99,8 +99,8 @@ class CharacterCommandsTest {
 	@Test
 	void modelResetRestoresDefaults() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setSpeciesId(Identifier.of("lifepath", "x"));
-		data.setSkillProgress(Identifier.of("lifepath", "s"),
+		data.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "x"));
+		data.setSkillProgress(ResourceLocation.fromNamespaceAndPath("lifepath", "s"),
 				new SkillProgress(9.0, 2, 2, 1, Aptitude.S, 5L));
 		data.setDataVersion(0);
 
@@ -109,7 +109,7 @@ class CharacterCommandsTest {
 		assertEquals(PlayerCharacterData.createDefault(), data);
 	}
 
-	private CommandNode<ServerCommandSource> root() {
-		return new CommandDispatcher<ServerCommandSource>().register(LifepathCommands.buildRoot());
+	private CommandNode<CommandSourceStack> root() {
+		return new CommandDispatcher<CommandSourceStack>().register(LifepathCommands.buildRoot());
 	}
 }

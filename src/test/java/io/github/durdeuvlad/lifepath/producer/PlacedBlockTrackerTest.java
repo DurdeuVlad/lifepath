@@ -3,19 +3,19 @@ package io.github.durdeuvlad.lifepath.producer;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class PlacedBlockTrackerTest {
-	private static final RegistryKey<World> OVERWORLD =
-			RegistryKey.of(RegistryKeys.WORLD, Identifier.of("minecraft", "overworld"));
-	private static final RegistryKey<World> NETHER =
-			RegistryKey.of(RegistryKeys.WORLD, Identifier.of("minecraft", "the_nether"));
+	private static final ResourceKey<Level> OVERWORLD =
+			ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath("minecraft", "overworld"));
+	private static final ResourceKey<Level> NETHER =
+			ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath("minecraft", "the_nether"));
 
 	@BeforeEach
 	void setUp() {
@@ -54,7 +54,7 @@ class PlacedBlockTrackerTest {
 
 	@Test
 	void mutablePosDoesNotCorruptRecord() {
-		BlockPos.Mutable mutable = new BlockPos.Mutable(2, 3, 4);
+		BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos(2, 3, 4);
 		PlacedBlockTracker.record(OVERWORLD, mutable);
 		mutable.set(99, 99, 99); // mutate AFTER record
 		assertTrue(PlacedBlockTracker.contains(OVERWORLD, new BlockPos(2, 3, 4)));

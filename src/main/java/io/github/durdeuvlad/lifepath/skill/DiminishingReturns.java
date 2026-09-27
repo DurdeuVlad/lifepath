@@ -5,7 +5,7 @@ import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Diminishing returns / anti-exploit v1 (GAMEDESIGN §11.1): repeated identical
@@ -22,8 +22,8 @@ import net.minecraft.util.Identifier;
  * pruned to the window on every record, bounding memory to the cap below.
  */
 public final class DiminishingReturns {
-	public static final Identifier CONFIG = LifepathMod.id("diminishing");
-	public static final Identifier MODIFIER_ID = LifepathMod.id("diminishing_returns");
+	public static final ResourceLocation CONFIG = LifepathMod.id("diminishing");
+	public static final ResourceLocation MODIFIER_ID = LifepathMod.id("diminishing_returns");
 	/**
 	 * In-code fallback for {@code signature_cap}; the persistence bound in
 	 * {@link PlayerCharacterData} also caps decoded lists at this size, so the

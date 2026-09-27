@@ -16,8 +16,8 @@ import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -64,7 +64,7 @@ public final class AbilityEngine {
 						return;
 					}
 					long now = System.currentTimeMillis();
-					for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+					for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 						io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
 								"ability.passive_sweep", () -> {
 									var data = CharacterManager.getCharacter(player);
@@ -78,7 +78,7 @@ public final class AbilityEngine {
 				});
 		// EVENT: one bus listener; per-event filtering keeps the domain data-driven.
 		ActivityDispatcher.registerAny(event -> {
-			ServerPlayerEntity player = event.player();
+			ServerPlayer player = event.player();
 			if (player == null) {
 				return;
 			}
@@ -97,15 +97,15 @@ public final class AbilityEngine {
 		// ACTIVE: server re-validates the request end-to-end.
 		LifepathNetworking.onC2S(ActivateAbilityPayload.ID, (payload, ctx) ->
 				ctx.server().execute(() -> {
-					ServerPlayerEntity player = ctx.player();
+					ServerPlayer player = ctx.player();
 					// The queued task can run after a disconnect — resolving a
 					// character for an offline entity would leak a cache entry.
-					if (ctx.server().getPlayerManager().getPlayer(player.getUuid()) == player) {
+					if (ctx.server().getPlayerList().getPlayer(player.getUUID()) == player) {
 						// Resolve AUTO up front so denial feedback names the
 						// real ability (and its real cooldown), not the sentinel.
 						// tryActivate resolves again internally — keeping the
 						// DISABLED-first validation order the single authority.
-						Identifier abilityId = resolveActivationTarget(
+						ResourceLocation abilityId = resolveActivationTarget(
 								CharacterManager.getCharacter(player),
 								payload.abilityId());
 						Outcome outcome = tryActivate(player, payload.abilityId());
@@ -125,8 +125,8 @@ public final class AbilityEngine {
 	 * specialization signature refs + any trait/condition/attunement/unlock id
 	 * that resolves to an ability definition. Missing defs contribute nothing.
 	 */
-	public static Set<Identifier> ownedAbilities(PlayerCharacterData data) {
-		Set<Identifier> owned = new LinkedHashSet<>();
+	public static Set<ResourceLocation> ownedAbilities(PlayerCharacterData data) {
+		Set<ResourceLocation> owned = new LinkedHashSet<>();
 		if (data.speciesId() != null) {
 			SpeciesDefinition species = LifepathContent.species().get(data.speciesId());
 			if (species != null) {
@@ -141,7 +141,7 @@ public final class AbilityEngine {
 				owned.addAll(spec.signatureRefs());
 			}
 		}
-		for (Identifier id : data.traits()) {
+		for (ResourceLocation id : data.traits()) {
 			owned.add(id);
 		}
 		// M9-1: conditions resolve through the service — base + cumulative
@@ -152,7 +152,7 @@ public final class AbilityEngine {
 		// attunement ids are not ability ids either.
 		owned.addAll(io.github.durdeuvlad.lifepath.attunement.AttunementService
 				.activeAbilities(data));
-		for (Identifier id : data.unlocks()) {
+		for (ResourceLocation id : data.unlocks()) {
 			owned.add(id);
 		}
 		return owned;
@@ -164,8 +164,8 @@ public final class AbilityEngine {
 	 * trait/condition/attunement/unlock ids. Null when the player owns none.
 	 */
 	@Nullable
-	private static Identifier firstOwnedActive(PlayerCharacterData data) {
-		for (Identifier id : ownedAbilities(data)) {
+	private static ResourceLocation firstOwnedActive(PlayerCharacterData data) {
+		for (ResourceLocation id : ownedAbilities(data)) {
 			AbilityDefinition def = LifepathContent.abilities().get(id);
 			if (def != null && def.trigger().kind() == AbilityDefinition.Kind.ACTIVE) {
 				return id;
@@ -180,8 +180,8 @@ public final class AbilityEngine {
 	 * when AUTO was requested and the player owns no ACTIVE ability.
 	 */
 	@Nullable
-	public static Identifier resolveActivationTarget(PlayerCharacterData data,
-			Identifier abilityId) {
+	public static ResourceLocation resolveActivationTarget(PlayerCharacterData data,
+			ResourceLocation abilityId) {
 		return abilityId.equals(ActivateAbilityPayload.AUTO)
 				? firstOwnedActive(data)
 				: abilityId;
@@ -193,8 +193,8 @@ public final class AbilityEngine {
 	 * no ability-specific fields on the model).
 	 */
 	static void runPassiveSweep(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity player, long now) {
-		for (Identifier id : ownedAbilities(data)) {
+			@Nullable ServerPlayer player, long now) {
+		for (ResourceLocation id : ownedAbilities(data)) {
 			AbilityDefinition def = LifepathContent.abilities().get(id);
 			if (def == null || def.trigger().kind() != AbilityDefinition.Kind.PASSIVE) {
 				continue;
@@ -224,11 +224,11 @@ public final class AbilityEngine {
 	 * types are plain identifiers, never Java branches.
 	 */
 	static void handleEvent(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity player, Identifier eventType, long now) {
+			@Nullable ServerPlayer player, ResourceLocation eventType, long now) {
 		if (!abilitiesEnabled()) {
 			return;
 		}
-		for (Identifier id : ownedAbilities(data)) {
+		for (ResourceLocation id : ownedAbilities(data)) {
 			AbilityDefinition def = LifepathContent.abilities().get(id);
 			if (def != null && def.trigger().kind() == AbilityDefinition.Kind.EVENT
 					&& def.trigger().events().contains(eventType)
@@ -247,27 +247,27 @@ public final class AbilityEngine {
 	 * base amount via {@code EvalContext.damage()}. No actions run here — a
 	 * mid-damage action could recurse; load-time validation warns about them.
 	 */
-	public static float modifyIncomingDamage(net.minecraft.entity.Entity entity,
-			net.minecraft.entity.damage.DamageSource source, float amount) {
-		if (!(entity instanceof ServerPlayerEntity player)
-				|| player.getWorld().isClient()) {
+	public static float modifyIncomingDamage(net.minecraft.world.entity.Entity entity,
+			net.minecraft.world.damagesource.DamageSource source, float amount) {
+		if (!(entity instanceof ServerPlayer player)
+				|| player.level().isClientSide()) {
 			return amount;
 		}
 		return modifyIncomingDamage(CharacterManager.getCharacter(player), player,
-				new AbilityVocabulary.DamageInfo(source.getAttacker(), source, amount),
+				new AbilityVocabulary.DamageInfo(source.getEntity(), source, amount),
 				amount);
 	}
 
 	/** Data-path core (tests): multiplies {@code amount} per passing owned def. */
 	static float modifyIncomingDamage(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity player, AbilityVocabulary.DamageInfo info,
+			@Nullable ServerPlayer player, AbilityVocabulary.DamageInfo info,
 			float amount) {
 		if (!abilitiesEnabled()) {
 			return amount;
 		}
 		float modified = amount;
 		long now = System.currentTimeMillis();
-		for (Identifier id : ownedAbilities(data)) {
+		for (ResourceLocation id : ownedAbilities(data)) {
 			AbilityDefinition def = LifepathContent.abilities().get(id);
 			if (def == null || !def.enabled()
 					|| def.trigger().kind() != AbilityDefinition.Kind.DAMAGE_TAKEN
@@ -288,7 +288,7 @@ public final class AbilityEngine {
 	}
 
 	/** Server-side activation for a C2S request — full validation, never trusts. */
-	public static Outcome tryActivate(ServerPlayerEntity player, Identifier abilityId) {
+	public static Outcome tryActivate(ServerPlayer player, ResourceLocation abilityId) {
 		Outcome outcome = tryActivate(CharacterManager.getCharacter(player), player,
 				abilityId, System.currentTimeMillis());
 		if (outcome == Outcome.EXECUTED) {
@@ -302,7 +302,7 @@ public final class AbilityEngine {
 	 * trigger kind, cooldown, conditions, cost — then execute.
 	 */
 	public static Outcome tryActivate(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity self, Identifier abilityId, long now) {
+			@Nullable ServerPlayer self, ResourceLocation abilityId, long now) {
 		if (!abilitiesEnabled()) {
 			return Outcome.DISABLED;
 		}
@@ -335,7 +335,7 @@ public final class AbilityEngine {
 	 *        other trigger kinds pass 0 (interactions are a passive concept).
 	 */
 	public static Outcome evaluate(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity self, AbilityDefinition def, long now,
+			@Nullable ServerPlayer self, AbilityDefinition def, long now,
 			double interactionSeconds) {
 		if (!def.enabled()) {
 			return debug(def, Outcome.DISABLED);
@@ -388,7 +388,7 @@ public final class AbilityEngine {
 			// mark+sync theirs too; the caster's own changed() happens in the
 			// caller. Non-player/block targets carry no model.
 			if (t.data() != null && t.data() != data
-					&& t.entity() instanceof ServerPlayerEntity sp) {
+					&& t.entity() instanceof ServerPlayer sp) {
 				io.github.durdeuvlad.lifepath.character.CharacterManager.changed(sp);
 			}
 		}
@@ -414,7 +414,7 @@ public final class AbilityEngine {
 
 	/** Passive-only by contract: scales {@code per_second} by elapsed real time. */
 	private static void applyResourceInteractions(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity self, AbilityDefinition def,
+			@Nullable ServerPlayer self, AbilityDefinition def,
 			double seconds, long now) {
 		if (def.resourceInteractions().isEmpty() || seconds <= 0.0) {
 			return;
@@ -464,7 +464,7 @@ public final class AbilityEngine {
 	}
 
 	/** Kept for existing call sites/tests — the key format lives in {@link CooldownService}. */
-	static Identifier scheduleKey(Identifier abilityId) {
+	static ResourceLocation scheduleKey(ResourceLocation abilityId) {
 		return CooldownService.scheduleKey(abilityId);
 	}
 

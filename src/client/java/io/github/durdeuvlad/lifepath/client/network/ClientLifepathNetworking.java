@@ -3,7 +3,7 @@ package io.github.durdeuvlad.lifepath.client.network;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * Client-side counterpart of {@code LifepathNetworking}: registers receivers for
@@ -24,8 +24,8 @@ public final class ClientLifepathNetworking {
 	 * @throws IllegalStateException if a receiver is already registered for the
 	 *         type (duplicate registration is a bug — the first would silently win)
 	 */
-	public static <T extends CustomPayload> void onS2C(
-			CustomPayload.Id<T> id, ClientPlayNetworking.PlayPayloadHandler<T> handler) {
+	public static <T extends CustomPacketPayload> void onS2C(
+			CustomPacketPayload.Type<T> id, ClientPlayNetworking.PlayPayloadHandler<T> handler) {
 		if (!ClientPlayNetworking.registerGlobalReceiver(id, handler)) {
 			throw new IllegalStateException("duplicate S2C receiver for payload " + id.id());
 		}

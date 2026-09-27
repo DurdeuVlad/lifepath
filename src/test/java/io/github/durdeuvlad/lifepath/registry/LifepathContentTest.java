@@ -11,7 +11,7 @@ import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,67 +28,67 @@ class LifepathContentTest {
 
 	@Test
 	void registerAllLoadsGoodEntriesAndSkipsMalformed() {
-		Map<Identifier, com.google.gson.JsonElement> files = new LinkedHashMap<>();
-		files.put(Identifier.of("lifepath", "a"), JsonParser.parseString("{\"display_name\": \"A\"}"));
-		files.put(Identifier.of("lifepath", "bad"), JsonParser.parseString("{\"nope\": true}"));
-		files.put(Identifier.of("lifepath", "bad_enum"),
+		Map<ResourceLocation, com.google.gson.JsonElement> files = new LinkedHashMap<>();
+		files.put(ResourceLocation.fromNamespaceAndPath("lifepath", "a"), JsonParser.parseString("{\"display_name\": \"A\"}"));
+		files.put(ResourceLocation.fromNamespaceAndPath("lifepath", "bad"), JsonParser.parseString("{\"nope\": true}"));
+		files.put(ResourceLocation.fromNamespaceAndPath("lifepath", "bad_enum"),
 				JsonParser.parseString("{\"display_name\": \"X\", \"visibility\": \"bogus\"}"));
-		files.put(Identifier.of("lifepath", "b"), JsonParser.parseString("{\"display_name\": \"B\"}"));
+		files.put(ResourceLocation.fromNamespaceAndPath("lifepath", "b"), JsonParser.parseString("{\"display_name\": \"B\"}"));
 
 		int loaded = LifepathContent.registerAll("species", files,
 				SpeciesDefinition.SpeciesDefinitionFile.CODEC, SpeciesDefinition::fromFile,
 				LifepathContent.species());
 
 		assertEquals(2, loaded);
-		assertTrue(LifepathContent.species().contains(Identifier.of("lifepath", "a")));
-		assertTrue(LifepathContent.species().contains(Identifier.of("lifepath", "b")));
-		assertFalse(LifepathContent.species().contains(Identifier.of("lifepath", "bad")));
-		assertFalse(LifepathContent.species().contains(Identifier.of("lifepath", "bad_enum")));
+		assertTrue(LifepathContent.species().contains(ResourceLocation.fromNamespaceAndPath("lifepath", "a")));
+		assertTrue(LifepathContent.species().contains(ResourceLocation.fromNamespaceAndPath("lifepath", "b")));
+		assertFalse(LifepathContent.species().contains(ResourceLocation.fromNamespaceAndPath("lifepath", "bad")));
+		assertFalse(LifepathContent.species().contains(ResourceLocation.fromNamespaceAndPath("lifepath", "bad_enum")));
 	}
 
 	@Test
 	void entryIdMapsFilePathToContentId() {
-		assertEquals(Identifier.of("lifepath", "human"),
-				LifepathContent.entryId(Identifier.of("lifepath", "species/human.json"), "species"));
-		assertEquals(Identifier.of("mypack", "deep/dir"),
-				LifepathContent.entryId(Identifier.of("mypack", "skill/deep/dir.json"), "skill"));
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "human"),
+				LifepathContent.entryId(ResourceLocation.fromNamespaceAndPath("lifepath", "species/human.json"), "species"));
+		assertEquals(ResourceLocation.fromNamespaceAndPath("mypack", "deep/dir"),
+				LifepathContent.entryId(ResourceLocation.fromNamespaceAndPath("mypack", "skill/deep/dir.json"), "skill"));
 	}
 
 	@Test
 	void existsAnswersRegisteredDomainsAndPermitsUnregistered() {
-		LifepathContent.skills().register(Identifier.of("lifepath", "foraging"),
-				new SkillDefinition(Identifier.of("lifepath", "foraging"), "Foraging",
+		LifepathContent.skills().register(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging"),
+				new SkillDefinition(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging"), "Foraging",
 						SkillDefinition.Category.GATHERING, 100,
 						java.util.Optional.empty(), List.of(),
 						List.of(), java.util.Optional.empty()));
 
-		assertTrue(LifepathContent.exists("skill", Identifier.of("lifepath", "foraging")));
-		assertFalse(LifepathContent.exists("skill", Identifier.of("lifepath", "gone")));
-		assertFalse(LifepathContent.exists("species", Identifier.of("lifepath", "gone")));
+		assertTrue(LifepathContent.exists("skill", ResourceLocation.fromNamespaceAndPath("lifepath", "foraging")));
+		assertFalse(LifepathContent.exists("skill", ResourceLocation.fromNamespaceAndPath("lifepath", "gone")));
+		assertFalse(LifepathContent.exists("species", ResourceLocation.fromNamespaceAndPath("lifepath", "gone")));
 		// Domains without a registry yet answer permissively (their milestone hasn't landed);
 		// ability landed in M4-1 and now answers strictly.
-		assertFalse(LifepathContent.exists("ability", Identifier.of("lifepath", "anything")));
-		assertTrue(LifepathContent.exists("trait", Identifier.of("lifepath", "anything")));
+		assertFalse(LifepathContent.exists("ability", ResourceLocation.fromNamespaceAndPath("lifepath", "anything")));
+		assertTrue(LifepathContent.exists("trait", ResourceLocation.fromNamespaceAndPath("lifepath", "anything")));
 	}
 
 	@Test
 	void validationRecordsOnlyTrulyUnresolvedRefs() {
-		Identifier skillId = Identifier.of("lifepath", "foraging");
-		Identifier missingSkill = Identifier.of("lifepath", "missing_skill");
+		ResourceLocation skillId = ResourceLocation.fromNamespaceAndPath("lifepath", "foraging");
+		ResourceLocation missingSkill = ResourceLocation.fromNamespaceAndPath("lifepath", "missing_skill");
 		LifepathContent.skills().register(skillId,
 				new SkillDefinition(skillId, "Foraging", SkillDefinition.Category.GATHERING, 100,
 						java.util.Optional.empty(), List.of(),
 						List.of(), java.util.Optional.empty()));
-		Identifier minAptSkill = Identifier.of("lifepath", "min_apt_skill");
-		LifepathContent.species().register(Identifier.of("lifepath", "human"),
-				new SpeciesDefinition(Identifier.of("lifepath", "human"), "Human",
+		ResourceLocation minAptSkill = ResourceLocation.fromNamespaceAndPath("lifepath", "min_apt_skill");
+		LifepathContent.species().register(ResourceLocation.fromNamespaceAndPath("lifepath", "human"),
+				new SpeciesDefinition(ResourceLocation.fromNamespaceAndPath("lifepath", "human"), "Human",
 						SpeciesDefinition.Visibility.NORMAL, SpeciesDefinition.Selection.OPEN,
-						List.of(Identifier.of("lifepath", "fae_grace")), List.of(),
+						List.of(ResourceLocation.fromNamespaceAndPath("lifepath", "fae_grace")), List.of(),
 						Map.of(minAptSkill, io.github.durdeuvlad.lifepath.skill.Aptitude.B),
-						List.of(Identifier.of("lifepath", "mana")),
+						List.of(ResourceLocation.fromNamespaceAndPath("lifepath", "mana")),
 						java.util.Optional.empty(), java.util.Optional.empty()));
-		LifepathContent.specializations().register(Identifier.of("lifepath", "wanderer"),
-				new SpecializationDefinition(Identifier.of("lifepath", "wanderer"), "Wanderer",
+		LifepathContent.specializations().register(ResourceLocation.fromNamespaceAndPath("lifepath", "wanderer"),
+				new SpecializationDefinition(ResourceLocation.fromNamespaceAndPath("lifepath", "wanderer"), "Wanderer",
 						Map.of(skillId, 2, missingSkill, 1), Map.of(), Map.of(), Map.of(), Map.of(),
 						List.of()));
 
@@ -111,10 +111,10 @@ class LifepathContentTest {
 	// malformed values (warns into the validation report; file still loads).
 	@Test
 	void iconFieldLoadsNormalizedAndOptional() {
-		Map<Identifier, com.google.gson.JsonElement> files = new LinkedHashMap<>();
-		files.put(Identifier.of("lifepath", "mining"), JsonParser.parseString(
+		Map<ResourceLocation, com.google.gson.JsonElement> files = new LinkedHashMap<>();
+		files.put(ResourceLocation.fromNamespaceAndPath("lifepath", "mining"), JsonParser.parseString(
 				"{\"display_name\": \"Mining\", \"category\": \"gathering\", \"icon\": \"skill/mining\"}"));
-		files.put(Identifier.of("lifepath", "foraging"), JsonParser.parseString(
+		files.put(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging"), JsonParser.parseString(
 				"{\"display_name\": \"Foraging\", \"category\": \"gathering\"}"));
 
 		LifepathContent.registerAll("skill", files,
@@ -122,16 +122,16 @@ class LifepathContentTest {
 				LifepathContent.skills());
 
 		assertEquals(java.util.Optional.of(
-						Identifier.of("lifepath", "textures/gui/skill/mining.png")),
-				LifepathContent.skills().get(Identifier.of("lifepath", "mining")).icon());
-		assertTrue(LifepathContent.skills().get(Identifier.of("lifepath", "foraging"))
+						ResourceLocation.fromNamespaceAndPath("lifepath", "textures/gui/skill/mining.png")),
+				LifepathContent.skills().get(ResourceLocation.fromNamespaceAndPath("lifepath", "mining")).icon());
+		assertTrue(LifepathContent.skills().get(ResourceLocation.fromNamespaceAndPath("lifepath", "foraging"))
 				.icon().isEmpty());
 	}
 
 	@Test
 	void malformedIconWarnsButFileLoads() {
-		Map<Identifier, com.google.gson.JsonElement> files = new LinkedHashMap<>();
-		files.put(Identifier.of("lifepath", "mining"), JsonParser.parseString(
+		Map<ResourceLocation, com.google.gson.JsonElement> files = new LinkedHashMap<>();
+		files.put(ResourceLocation.fromNamespaceAndPath("lifepath", "mining"), JsonParser.parseString(
 				"{\"display_name\": \"Mining\", \"category\": \"gathering\", \"icon\": \"bad icon!!\"}"));
 
 		int loaded = LifepathContent.registerAll("skill", files,
@@ -139,13 +139,13 @@ class LifepathContentTest {
 				LifepathContent.skills());
 
 		assertEquals(1, loaded);
-		assertTrue(LifepathContent.skills().get(Identifier.of("lifepath", "mining"))
+		assertTrue(LifepathContent.skills().get(ResourceLocation.fromNamespaceAndPath("lifepath", "mining"))
 				.icon().isEmpty());
 
 		var report = LifepathContent.validateAll();
 		assertTrue(report.issues().stream().anyMatch(i ->
 				i.severity() == io.github.durdeuvlad.lifepath.registry.ValidationReport.Severity.WARN
 						&& i.field().equals("icon")
-						&& i.file().equals(Identifier.of("lifepath", "mining"))));
+						&& i.file().equals(ResourceLocation.fromNamespaceAndPath("lifepath", "mining"))));
 	}
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -22,7 +22,7 @@ public final class LevelCurves {
 	}
 
 	/** Curve used when a definition references nothing (or nothing resolves). */
-	public static final Identifier DEFAULT_ID = LifepathMod.id("default");
+	public static final ResourceLocation DEFAULT_ID = LifepathMod.id("default");
 
 	/**
 	 * Last-resort table if even {@code lifepath:default} fails to load.
@@ -33,17 +33,17 @@ public final class LevelCurves {
 	private static final LevelCurveDefinition FALLBACK = new LevelCurveDefinition(
 			DEFAULT_ID, List.of(0.0, 40.0, 120.0, 300.0, 600.0, 1000.0));
 
-	private static final Set<Identifier> WARNED = ConcurrentHashMap.newKeySet();
+	private static final Set<ResourceLocation> WARNED = ConcurrentHashMap.newKeySet();
 	private static final int WARNED_CAP = 256;
 
 	/** The curve a skill resolves to (its {@code level_curve} ref, else default, else fallback). */
 	public static LevelCurveDefinition forSkill(SkillDefinition skill) {
-		Identifier ref = skill.levelCurve().orElse(DEFAULT_ID);
+		ResourceLocation ref = skill.levelCurve().orElse(DEFAULT_ID);
 		return curve(ref).orElse(FALLBACK);
 	}
 
 	/** Looks up a curve by id; {@code empty} + WARN-once for unknown/missing ids. */
-	public static Optional<LevelCurveDefinition> curve(@Nullable Identifier id) {
+	public static Optional<LevelCurveDefinition> curve(@Nullable ResourceLocation id) {
 		if (id == null) {
 			return Optional.empty();
 		}
@@ -65,7 +65,7 @@ public final class LevelCurves {
 	}
 
 	/** Level for {@code xp} on the given curve (missing curve → fallback). Never negative. */
-	public static int levelFor(@Nullable Identifier curveId, double xp) {
+	public static int levelFor(@Nullable ResourceLocation curveId, double xp) {
 		return curve(curveId).orElse(FALLBACK).levelFor(xp);
 	}
 
@@ -75,7 +75,7 @@ public final class LevelCurves {
 	}
 
 	/** Total XP needed to reach {@code level} on the given curve (missing → fallback). */
-	public static double xpForLevel(@Nullable Identifier curveId, int level) {
+	public static double xpForLevel(@Nullable ResourceLocation curveId, int level) {
 		return curve(curveId).orElse(FALLBACK).xpForLevel(level);
 	}
 

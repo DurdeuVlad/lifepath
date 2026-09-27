@@ -11,7 +11,7 @@ import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * One data-driven ability (M4-1, GAMEDESIGN §12): a pure composition of
@@ -23,7 +23,7 @@ import net.minecraft.util.Identifier;
  * vocabularies can declare arbitrary fields without schema churn here.
  */
 public record AbilityDefinition(
-		Identifier id,
+		ResourceLocation id,
 		String displayName,
 		boolean enabled,
 		Trigger trigger,
@@ -33,10 +33,10 @@ public record AbilityDefinition(
 		Optional<Cost> cost,
 		Optional<Cooldown> cooldown,
 		List<ResourceInteraction> resourceInteractions,
-		Optional<Identifier> icon) {
+		Optional<ResourceLocation> icon) {
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
-	public AbilityDefinition(Identifier id, String displayName, boolean enabled,
+	public AbilityDefinition(ResourceLocation id, String displayName, boolean enabled,
 			Trigger trigger, ConditionSet conditions, SpecNode target,
 			List<SpecNode> actions, Optional<Cost> cost,
 			Optional<Cooldown> cooldown, List<ResourceInteraction> resourceInteractions) {
@@ -44,7 +44,7 @@ public record AbilityDefinition(
 				cost, cooldown, resourceInteractions, Optional.empty());
 	}
 
-	public static AbilityDefinition fromFile(Identifier id, AbilityFile file) {
+	public static AbilityDefinition fromFile(ResourceLocation id, AbilityFile file) {
 		return new AbilityDefinition(id, file.displayName(), file.enabled(),
 				file.trigger(), file.conditions(), file.target(), file.actions(),
 				file.cost(), file.cooldown(), file.resourceInteractions(),
@@ -74,13 +74,13 @@ public record AbilityDefinition(
 				k -> k.name().toLowerCase(Locale.ROOT));
 	}
 
-	public record Trigger(Kind kind, int intervalTicks, List<Identifier> events,
+	public record Trigger(Kind kind, int intervalTicks, List<ResourceLocation> events,
 			double multiplier) {
 		public static final Codec<Trigger> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Kind.CODEC.fieldOf("type").forGetter(Trigger::kind),
 				Codec.intRange(1, Integer.MAX_VALUE)
 						.optionalFieldOf("interval_ticks", 20).forGetter(Trigger::intervalTicks),
-				Identifier.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(Trigger::events),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(Trigger::events),
 				Codec.doubleRange(0.0, 100.0)
 						.optionalFieldOf("multiplier", 1.0).forGetter(Trigger::multiplier)
 		).apply(i, Trigger::new));
@@ -101,7 +101,7 @@ public record AbilityDefinition(
 	 * preserved verbatim so condition/action/target evaluators read their own
 	 * parameters — the engine never interprets content.
 	 */
-	public record SpecNode(Identifier type, JsonObject raw) {
+	public record SpecNode(ResourceLocation type, JsonObject raw) {
 		public static final Codec<SpecNode> CODEC = Codec.PASSTHROUGH.flatXmap(
 				dyn -> {
 					JsonElement el = dyn.convert(JsonOps.INSTANCE).getValue();
@@ -114,7 +114,7 @@ public record AbilityDefinition(
 							|| !typeEl.getAsJsonPrimitive().isString()) {
 						return DataResult.error(() -> "spec node needs a string 'type' field");
 					}
-					Identifier id = Identifier.tryParse(typeEl.getAsString());
+					ResourceLocation id = ResourceLocation.tryParse(typeEl.getAsString());
 					if (id == null) {
 						return DataResult.error(() -> "bad spec node type " + typeEl);
 					}
@@ -137,9 +137,9 @@ public record AbilityDefinition(
 					: DataResult.error(() -> "value must be finite"));
 
 	/** Resource gate: {@code current >= amount} required, then spent. */
-	public record Cost(Identifier resource, double amount) {
+	public record Cost(ResourceLocation resource, double amount) {
 		public static final Codec<Cost> CODEC = RecordCodecBuilder.create(i -> i.group(
-				Identifier.CODEC.fieldOf("resource").forGetter(Cost::resource),
+				ResourceLocation.CODEC.fieldOf("resource").forGetter(Cost::resource),
 				POSITIVE_DOUBLE.fieldOf("amount").forGetter(Cost::amount)
 		).apply(i, Cost::new));
 	}
@@ -152,9 +152,9 @@ public record AbilityDefinition(
 	}
 
 	/** Passive resource drain/regen seam (applied per passive evaluation). */
-	public record ResourceInteraction(Identifier resource, double perSecond) {
+	public record ResourceInteraction(ResourceLocation resource, double perSecond) {
 		public static final Codec<ResourceInteraction> CODEC = RecordCodecBuilder.create(i -> i.group(
-				Identifier.CODEC.fieldOf("resource").forGetter(ResourceInteraction::resource),
+				ResourceLocation.CODEC.fieldOf("resource").forGetter(ResourceInteraction::resource),
 				FINITE_DOUBLE.fieldOf("per_second").forGetter(ResourceInteraction::perSecond)
 		).apply(i, ResourceInteraction::new));
 	}

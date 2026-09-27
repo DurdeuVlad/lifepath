@@ -17,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,7 @@ class DamageTakenTest {
 	private AbilityDefinition ability(String id, String json) {
 		var file = AbilityDefinition.AbilityFile.CODEC.parse(JsonOps.INSTANCE,
 				JsonParser.parseString(json)).result().orElseThrow();
-		Identifier iid = LifepathMod.id(id);
+		ResourceLocation iid = LifepathMod.id(id);
 		return LifepathContent.decodeAbility(iid, file);
 	}
 
@@ -74,7 +74,7 @@ class DamageTakenTest {
 						                         "op": ">=", "value": 10}]},
 						 "target": {"type": "lifepath:self"}}
 						""")));
-		for (Identifier id : List.of(LifepathMod.id("fragile"), LifepathMod.id("heavy"))) {
+		for (ResourceLocation id : List.of(LifepathMod.id("fragile"), LifepathMod.id("heavy"))) {
 			data.addId(PlayerCharacterData.ListKind.UNLOCKS, id);
 		}
 		// Both pass at amount 10 → multiplicative 1.5 × 2.0 = 3.0.
@@ -128,7 +128,7 @@ class DamageTakenTest {
 				var parsed = AbilityDefinition.AbilityFile.CODEC.parse(JsonOps.INSTANCE,
 						JsonParser.parseString(Files.readString(f))).result()
 						.orElseThrow(() -> new AssertionError(f + " failed to parse"));
-				Identifier id = Identifier.of("lifepath",
+				ResourceLocation id = ResourceLocation.fromNamespaceAndPath("lifepath",
 						f.getFileName().toString().replace(".json", ""));
 				var def = LifepathContent.decodeAbility(id, parsed);
 				assertTrue(AbilityVocabulary.unknownNodeTypes(def).isEmpty(),

@@ -1,7 +1,7 @@
 package io.github.durdeuvlad.lifepath.command;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import io.github.durdeuvlad.lifepath.LifepathMod;
@@ -10,12 +10,12 @@ import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.specialization.SpecializationService;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Admin {@code /lifepath specialization} tree (M3-2). The player-facing
@@ -42,41 +42,41 @@ public final class SpecializationCommands {
 		}
 		initialized = true;
 		LifepathCommands.register(literal("specialization")
-				.requires(src -> src.hasPermissionLevel(LifepathCommands.ADMIN_PERMISSION))
+				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 				.executes(ctx -> usage(ctx.getSource()))
 				.then(literal("get")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> get(ctx.getSource(),
-										EntityArgumentType.getPlayer(ctx, "player")))))
+										EntityArgument.getPlayer(ctx, "player")))))
 				.then(literal("set")
-						.then(argument("player", EntityArgumentType.player())
-								.then(argument("id", IdentifierArgumentType.identifier())
+						.then(argument("player", EntityArgument.player())
+								.then(argument("id", ResourceLocationArgument.id())
 										.suggests((ctx, builder) -> {
 											LifepathContent.specializations().all().keySet()
 													.forEach(id -> builder.suggest(id.toString()));
 											return builder.buildFuture();
 										})
 										.executes(ctx -> set(ctx.getSource(),
-												EntityArgumentType.getPlayer(ctx, "player"),
-												IdentifierArgumentType.getIdentifier(ctx, "id")))))));
+												EntityArgument.getPlayer(ctx, "player"),
+												ResourceLocationArgument.getId(ctx, "id")))))));
 	}
 
-	private static int usage(ServerCommandSource source) {
-		source.sendFeedback(() -> Text.literal(
+	private static int usage(CommandSourceStack source) {
+		source.sendSuccess(() -> Component.literal(
 				"usage: /lifepath specialization get <player> | set <player> <id>"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int get(ServerCommandSource source, ServerPlayerEntity target) {
+	private static int get(CommandSourceStack source, ServerPlayer target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
-		Identifier specId = data.specializationId();
+		ResourceLocation specId = data.specializationId();
 		if (specId == null) {
-			source.sendFeedback(() -> Text.literal(
+			source.sendSuccess(() -> Component.literal(
 					target.getName().getString() + " has no specialization"), false);
 			return Command.SINGLE_SUCCESS;
 		}
 		SpecializationDefinition def = LifepathContent.specializations().get(specId);
-		source.sendFeedback(() -> Text.literal(target.getName().getString()
+		source.sendSuccess(() -> Component.literal(target.getName().getString()
 				+ " specialization: " + specId
 				+ (def == null ? " (definition missing — effects inactive)"
 						: " \"" + def.displayName() + "\""
@@ -86,22 +86,22 @@ public final class SpecializationCommands {
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int set(ServerCommandSource source, ServerPlayerEntity target, Identifier specId) {
+	private static int set(CommandSourceStack source, ServerPlayer target, ResourceLocation specId) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		SpecializationService.ApplyResult result = SpecializationService.apply(data, specId);
 		if (result == SpecializationService.ApplyResult.UNKNOWN_SPEC) {
-			source.sendError(Text.literal("unknown specialization: " + specId));
+			source.sendFailure(Component.literal("unknown specialization: " + specId));
 			return 0;
 		}
 		CharacterManager.markDirty(target);
 		CharacterManager.saveCharacter(target);
 		CharacterManager.syncCharacter(target);
 		LifepathMod.LOGGER.info("admin action: {} set {} ({}) specialization to {}",
-				source.getName(), target.getName().getString(), target.getUuid(), specId);
+				source.getTextName(), target.getName().getString(), target.getUUID(), specId);
 		// The recipient's notice (name + non-lockout line) rides the M6-4
 		// spec_assigned feedback emitted by the sync diff above — no
 		// duplicate literal here.
-		source.sendFeedback(() -> Text.literal("set " + target.getName().getString()
+		source.sendSuccess(() -> Component.literal("set " + target.getName().getString()
 				+ " specialization to " + specId), true);
 		return Command.SINGLE_SUCCESS;
 	}

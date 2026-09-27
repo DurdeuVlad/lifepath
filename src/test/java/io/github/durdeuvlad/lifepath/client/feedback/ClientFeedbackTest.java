@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload;
 import java.util.List;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -19,30 +19,30 @@ class ClientFeedbackTest {
 
 	@Test
 	void cooldownDenialFeedsSecondsToTheReason() {
-		Text msg = ClientFeedback.messageFor(new FeedbackPayload(
+		Component msg = ClientFeedback.messageFor(new FeedbackPayload(
 				"ability_denied", List.of("Frost Nova", "cooldown", "42")));
-		TranslatableTextContent outer =
-				(TranslatableTextContent) msg.getContent();
+		TranslatableContents outer =
+				(TranslatableContents) msg.getContents();
 		assertEquals("feedback.lifepath.ability_denied", outer.getKey());
 		assertEquals(2, outer.getArgs().length);
 		assertEquals("Frost Nova", outer.getArgs()[0]);
-		TranslatableTextContent reason =
-				(TranslatableTextContent) ((Text) outer.getArgs()[1])
-						.getContent();
+		TranslatableContents reason =
+				(TranslatableContents) ((Component) outer.getArgs()[1])
+						.getContents();
 		assertEquals("feedback.lifepath.reason.cooldown", reason.getKey());
 		// The placeholder resolves to the sent seconds — "42", not "null".
-		assertEquals("42", reason.getArg(0).getString());
+		assertEquals("42", reason.getArgument(0).getString());
 	}
 
 	@Test
 	void nonCooldownReasonStillTranslates() {
-		Text msg = ClientFeedback.messageFor(new FeedbackPayload(
+		Component msg = ClientFeedback.messageFor(new FeedbackPayload(
 				"ability_denied", List.of("Frost Nova", "unavailable", "0")));
-		TranslatableTextContent outer =
-				(TranslatableTextContent) msg.getContent();
-		TranslatableTextContent reason =
-				(TranslatableTextContent) ((Text) outer.getArgs()[1])
-						.getContent();
+		TranslatableContents outer =
+				(TranslatableContents) msg.getContents();
+		TranslatableContents reason =
+				(TranslatableContents) ((Component) outer.getArgs()[1])
+						.getContents();
 		assertEquals("feedback.lifepath.reason.unavailable", reason.getKey());
 	}
 }

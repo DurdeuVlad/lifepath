@@ -3,10 +3,10 @@ package io.github.durdeuvlad.lifepath.network.s2c;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import java.util.List;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * S2C "highlight these entities" (M4-3). Sent ONLY to the players who should
@@ -16,18 +16,18 @@ import net.minecraft.network.packet.CustomPayload;
  * particle outline until {@code durationTicks} elapses.
  */
 public record HighlightEntitiesPayload(List<Integer> entityIds, int durationTicks)
-		implements CustomPayload {
-	public static final CustomPayload.Id<HighlightEntitiesPayload> ID =
+		implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<HighlightEntitiesPayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("ability/highlight"));
-	public static final PacketCodec<RegistryByteBuf, HighlightEntitiesPayload> PACKET_CODEC =
-			PacketCodec.tuple(
-					PacketCodecs.INTEGER.collect(PacketCodecs.toList()),
+	public static final StreamCodec<RegistryFriendlyByteBuf, HighlightEntitiesPayload> PACKET_CODEC =
+			StreamCodec.composite(
+					ByteBufCodecs.INT.apply(ByteBufCodecs.list()),
 					HighlightEntitiesPayload::entityIds,
-					PacketCodecs.INTEGER, HighlightEntitiesPayload::durationTicks,
+					ByteBufCodecs.INT, HighlightEntitiesPayload::durationTicks,
 					HighlightEntitiesPayload::new);
 
 	@Override
-	public CustomPayload.Id<HighlightEntitiesPayload> getId() {
+	public CustomPacketPayload.Type<HighlightEntitiesPayload> type() {
 		return ID;
 	}
 }

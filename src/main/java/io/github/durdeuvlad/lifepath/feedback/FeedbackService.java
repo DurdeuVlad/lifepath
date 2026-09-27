@@ -17,8 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -35,8 +35,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class FeedbackService {
 	/** What we last sent each player — the diff baseline for {@link #onSync}. */
-	record Prev(Identifier speciesId, Identifier specId,
-			Set<Identifier> conditions) {
+	record Prev(ResourceLocation speciesId, ResourceLocation specId,
+			Set<ResourceLocation> conditions) {
 		static Prev of(PlayerCharacterData d) {
 			return new Prev(d.speciesId(), d.specializationId(),
 					new HashSet<>(d.conditions()));
@@ -44,9 +44,9 @@ public final class FeedbackService {
 	}
 
 	/** What changed between two syncs; null fields/empty lists = no change. */
-	public record SyncDiff(@Nullable Identifier speciesAssigned,
-			@Nullable Identifier specAssigned, List<Identifier> conditionsGained,
-			List<Identifier> conditionsLost) {
+	public record SyncDiff(@Nullable ResourceLocation speciesAssigned,
+			@Nullable ResourceLocation specAssigned, List<ResourceLocation> conditionsGained,
+			List<ResourceLocation> conditionsLost) {
 		public boolean isEmpty() {
 			return speciesAssigned == null && specAssigned == null
 					&& conditionsGained.isEmpty() && conditionsLost.isEmpty();
@@ -67,25 +67,25 @@ public final class FeedbackService {
 		initialized = true;
 		SkillEvents.LEVEL_UP.register(FeedbackService::onLevelUp);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
-				PREVIOUS.remove(handler.player.getUuid()));
+				PREVIOUS.remove(handler.player.getUUID()));
 	}
 
 	/** Pure diff — baseline vs current data. Baseline {@code null} means
 	 * first sync (join): current state becomes the baseline with no messages. */
 	public static SyncDiff diff(@Nullable Prev prev, PlayerCharacterData data) {
-		List<Identifier> gained = new ArrayList<>();
-		List<Identifier> lost = new ArrayList<>();
-		Identifier species = null, spec = null;
+		List<ResourceLocation> gained = new ArrayList<>();
+		List<ResourceLocation> lost = new ArrayList<>();
+		ResourceLocation species = null, spec = null;
 		if (prev == null) {
 			return new SyncDiff(null, null, gained, lost);
 		}
-		Set<Identifier> now = new HashSet<>(data.conditions());
-		for (Identifier c : now) {
+		Set<ResourceLocation> now = new HashSet<>(data.conditions());
+		for (ResourceLocation c : now) {
 			if (!prev.conditions().contains(c)) {
 				gained.add(c);
 			}
 		}
-		for (Identifier c : prev.conditions()) {
+		for (ResourceLocation c : prev.conditions()) {
 			if (!now.contains(c)) {
 				lost.add(c);
 			}
@@ -104,11 +104,11 @@ public final class FeedbackService {
 	 * Called from the character-sync funnel AFTER the payload sends. Emits
 	 * the diff messages, then stores the new baseline.
 	 */
-	public static void onSync(ServerPlayerEntity player, PlayerCharacterData data) {
+	public static void onSync(ServerPlayer player, PlayerCharacterData data) {
 		if (player == null || data == null) {
 			return;
 		}
-		SyncDiff d = diff(PREVIOUS.get(player.getUuid()), data);
+		SyncDiff d = diff(PREVIOUS.get(player.getUUID()), data);
 		if (!d.isEmpty()) {
 			if (d.speciesAssigned() != null) {
 				var def = LifepathContent.species().get(d.speciesAssigned());
@@ -123,18 +123,18 @@ public final class FeedbackService {
 						def != null ? def.displayName()
 								: d.specAssigned().getPath());
 			}
-			for (Identifier c : d.conditionsGained()) {
+			for (ResourceLocation c : d.conditionsGained()) {
 				send(player, "condition_gained", IdentitySummary.displayName(c));
 			}
-			for (Identifier c : d.conditionsLost()) {
+			for (ResourceLocation c : d.conditionsLost()) {
 				send(player, "condition_lost", IdentitySummary.displayName(c));
 			}
 		}
-		PREVIOUS.put(player.getUuid(), Prev.of(data));
+		PREVIOUS.put(player.getUUID(), Prev.of(data));
 	}
 
 	/** LEVEL_UP listener — level message + any milestones crossed. */
-	private static void onLevelUp(ServerPlayerEntity player, Identifier skillId,
+	private static void onLevelUp(ServerPlayer player, ResourceLocation skillId,
 			int oldLevel, int newLevel,
 			io.github.durdeuvlad.lifepath.event.ActivityEvent source) {
 		String skillName = IdentitySummary.displayName(skillId);
@@ -151,7 +151,7 @@ public final class FeedbackService {
 	}
 
 	/** "Significant decay" — a skill that lost whole levels. */
-	public static void decayed(ServerPlayerEntity player, Identifier skillId,
+	public static void decayed(ServerPlayer player, ResourceLocation skillId,
 			int levelsLost) {
 		if (levelsLost > 0) {
 			send(player, "decay", IdentitySummary.displayName(skillId),
@@ -163,8 +163,8 @@ public final class FeedbackService {
 	 * Ability-activation denial with a human reason (M6-4 "denied with
 	 * reason, phrased helpfully").
 	 */
-	public static void abilityDenied(ServerPlayerEntity player,
-			Identifier abilityId, AbilityEngine.Outcome outcome) {
+	public static void abilityDenied(ServerPlayer player,
+			ResourceLocation abilityId, AbilityEngine.Outcome outcome) {
 		String reason = switch (outcome) {
 			case ON_COOLDOWN -> "cooldown";
 			case CONDITIONS_FAILED -> "conditions";
@@ -189,11 +189,11 @@ public final class FeedbackService {
 	 * each skill that lost whole levels — "significant decay". Returns the
 	 * changed-count so callers keep their dirty/sync semantics.
 	 */
-	public static int applyDecayWithFeedback(ServerPlayerEntity player, long now) {
+	public static int applyDecayWithFeedback(ServerPlayer player, long now) {
 		var data = io.github.durdeuvlad.lifepath.character.CharacterManager
 				.getCharacter(player);
-		Map<Identifier, Integer> before = new java.util.HashMap<>();
-		for (Map.Entry<Identifier, ?> e : data.skills().entrySet()) {
+		Map<ResourceLocation, Integer> before = new java.util.HashMap<>();
+		for (Map.Entry<ResourceLocation, ?> e : data.skills().entrySet()) {
 			before.put(e.getKey(),
 					((io.github.durdeuvlad.lifepath.skill.SkillProgress)
 							e.getValue()).level());
@@ -201,7 +201,7 @@ public final class FeedbackService {
 		int changed = io.github.durdeuvlad.lifepath.skill.SkillDecayService
 				.applyLazyAll(data, now);
 		if (changed > 0) {
-			for (Map.Entry<Identifier, Integer> e : before.entrySet()) {
+			for (Map.Entry<ResourceLocation, Integer> e : before.entrySet()) {
 				var after = data.skill(e.getKey());
 				if (after != null && after.level() < e.getValue()) {
 					decayed(player, e.getKey(), e.getValue() - after.level());
@@ -212,7 +212,7 @@ public final class FeedbackService {
 	}
 
 	/** Sends one feedback packet; no-ops for null/offline players. */
-	public static void send(@Nullable ServerPlayerEntity player, String kind,
+	public static void send(@Nullable ServerPlayer player, String kind,
 			String... args) {
 		if (player == null) {
 			return;
@@ -222,7 +222,7 @@ public final class FeedbackService {
 					new FeedbackPayload(kind, List.of(args)));
 		} catch (Exception e) {
 			LifepathMod.LOGGER.error("failed to send feedback {} to {}", kind,
-					player.getUuid(), e);
+					player.getUUID(), e);
 		}
 	}
 

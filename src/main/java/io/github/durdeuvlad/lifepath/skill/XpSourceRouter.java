@@ -8,8 +8,8 @@ import io.github.durdeuvlad.lifepath.event.ActivityEvent;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -28,12 +28,12 @@ public final class XpSourceRouter {
 	}
 
 	/** One planned award: which skill, how much base XP. */
-	public record Award(Identifier skillId, Identifier sourceDefId, double amount) {
+	public record Award(ResourceLocation skillId, ResourceLocation sourceDefId, double amount) {
 	}
 
 	/** The award sink — production wires SkillXpService; tests can substitute. */
 	public interface AwardSink {
-		void award(@Nullable ServerPlayerEntity player, Identifier skillId,
+		void award(@Nullable ServerPlayer player, ResourceLocation skillId,
 				double amount, ActivityEvent source);
 	}
 

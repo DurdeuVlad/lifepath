@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * M6-4 client feedback sink. Server-triggered {@link FeedbackPayload}s are
@@ -22,45 +22,45 @@ import net.minecraft.util.Identifier;
 @Environment(EnvType.CLIENT)
 public final class ClientFeedback {
 	/** Cooldowns we have seen, for ready-transition detection. */
-	private static final Map<Identifier, Long> SEEN_COOLDOWNS = new HashMap<>();
+	private static final Map<ResourceLocation, Long> SEEN_COOLDOWNS = new HashMap<>();
 
 	private ClientFeedback() {
 	}
 
 	/** Handles one server feedback packet on the client thread. */
 	public static void handle(FeedbackPayload payload) {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		if (client.player == null) {
 			return;
 		}
-		Text message = messageFor(payload);
+		Component message = messageFor(payload);
 		boolean actionbar = switch (payload.kind()) {
 			case "ability_denied", "ability_ready" -> true;
 			default -> false;
 		};
 		if (actionbar) {
-			client.player.sendMessage(message, true);
+			client.player.displayClientMessage(message, true);
 		} else {
-			client.player.sendMessage(message, false);
+			client.player.displayClientMessage(message, false);
 		}
 	}
 
 	/** Builds the localized message for a payload kind + args. */
-	static Text messageFor(FeedbackPayload p) {
+	static Component messageFor(FeedbackPayload p) {
 		String key = "feedback.lifepath." + p.kind();
 		Object[] args = p.args().toArray();
 		// Kinds whose last arg is a lang key get it translated client-side.
 		return switch (p.kind()) {
-			case "milestone" -> Text.translatable(key, arg(p, 0), arg(p, 1),
-					arg(p, 2).isEmpty() ? Text.empty()
-							: Text.translatable(arg(p, 2)));
+			case "milestone" -> Component.translatable(key, arg(p, 0), arg(p, 1),
+					arg(p, 2).isEmpty() ? Component.empty()
+							: Component.translatable(arg(p, 2)));
 			// secondsLeft feeds the REASON's own "%ss" (e.g. "on cooldown
 			// (42s)") — the outer "%s — %s" has no slot for it; an unbound
 			// placeholder would render a literal "null".
-			case "ability_denied" -> Text.translatable(key, arg(p, 0),
-					Text.translatable("feedback.lifepath.reason." + arg(p, 1),
+			case "ability_denied" -> Component.translatable(key, arg(p, 0),
+					Component.translatable("feedback.lifepath.reason." + arg(p, 1),
 							arg(p, 2)));
-			default -> Text.translatable(key, args);
+			default -> Component.translatable(key, args);
 		};
 	}
 
@@ -72,14 +72,14 @@ public final class ClientFeedback {
 	 * Per-tick cooldown watcher: an expiry that passes since last tick yields
 	 * one "X ready" actionbar notice naming the ability key.
 	 */
-	public static void tickReadyWatcher(MinecraftClient client,
-			KeyBinding abilityKey) {
+	public static void tickReadyWatcher(Minecraft client,
+			KeyMapping abilityKey) {
 		var snapshot = ClientCharacterState.snapshot();
 		long now = System.currentTimeMillis();
-		Map<Identifier, Long> current = snapshot == null
+		Map<ResourceLocation, Long> current = snapshot == null
 				? Map.of() : snapshot.cooldowns();
 		// Fire transitions: armed cooldowns whose expiry has now passed.
-		Iterator<Map.Entry<Identifier, Long>> it =
+		Iterator<Map.Entry<ResourceLocation, Long>> it =
 				SEEN_COOLDOWNS.entrySet().iterator();
 		while (it.hasNext()) {
 			var e = it.next();
@@ -95,9 +95,9 @@ public final class ClientFeedback {
 							.abilities().get(e.getKey().toString());
 					String name = ability != null
 							? ability.name() : e.getKey().getPath();
-					client.player.sendMessage(Text.translatable(
+					client.player.displayClientMessage(Component.translatable(
 							"feedback.lifepath.ability_ready", name,
-							abilityKey.getBoundKeyLocalizedText()), true);
+							abilityKey.getTranslatedKeyMessage()), true);
 				}
 			}
 		}

@@ -9,14 +9,13 @@ import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.resource.ResourceService;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -43,14 +42,14 @@ public final class ConditionService {
 	}
 
 	/** Grants the condition at stage 0 + materializes its declared resources. */
-	public static boolean acquire(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
-			Identifier conditionId, long nowMs) {
+	public static boolean acquire(PlayerCharacterData data, @Nullable ServerPlayer player,
+			ResourceLocation conditionId, long nowMs) {
 		ConditionDefinition def = LifepathContent.conditions().get(conditionId);
 		if (def == null || data.conditions().contains(conditionId)) {
 			return false;
 		}
 		data.putCondition(conditionId, ConditionState.fresh(nowMs));
-		for (Identifier res : def.resources()) {
+		for (ResourceLocation res : def.resources()) {
 			var rdef = LifepathContent.resources().get(res);
 			if (rdef != null && data.resources().get(res) == null) {
 				data.setResource(res, new PlayerCharacterData.ResourceState(
@@ -62,14 +61,14 @@ public final class ConditionService {
 	}
 
 	/** Removes the condition and drops its declared resource state. */
-	public static boolean cure(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
-			Identifier conditionId) {
+	public static boolean cure(PlayerCharacterData data, @Nullable ServerPlayer player,
+			ResourceLocation conditionId) {
 		ConditionDefinition def = LifepathContent.conditions().get(conditionId);
 		if (def == null || !data.conditions().contains(conditionId)) {
 			return false;
 		}
 		data.removeCondition(conditionId);
-		for (Identifier res : def.resources()) {
+		for (ResourceLocation res : def.resources()) {
 			data.removeResource(res);
 		}
 		mark(player);
@@ -77,9 +76,9 @@ public final class ConditionService {
 	}
 
 	/** Every ability id the held conditions graft at their current stages. */
-	public static List<Identifier> activeAbilities(PlayerCharacterData data) {
-		List<Identifier> out = new ArrayList<>();
-		for (Identifier id : data.conditions()) {
+	public static List<ResourceLocation> activeAbilities(PlayerCharacterData data) {
+		List<ResourceLocation> out = new ArrayList<>();
+		for (ResourceLocation id : data.conditions()) {
 			ConditionDefinition def = LifepathContent.conditions().get(id);
 			if (def == null) {
 				continue; // unloaded content — held id survives a reload
@@ -91,8 +90,8 @@ public final class ConditionService {
 	}
 
 	/** Advances one stage if under the declared count; re-timers the stage. */
-	public static boolean advance(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
-			Identifier conditionId, long nowMs) {
+	public static boolean advance(PlayerCharacterData data, @Nullable ServerPlayer player,
+			ResourceLocation conditionId, long nowMs) {
 		ConditionDefinition def = LifepathContent.conditions().get(conditionId);
 		ConditionState st = data.conditionState(conditionId);
 		if (def == null || st == null || st.stage() + 1 >= def.stageCount()) {
@@ -104,9 +103,9 @@ public final class ConditionService {
 	}
 
 	/** Event-driven advancement: matching {@code advance_events} count up. */
-	public static void onActivity(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
+	public static void onActivity(PlayerCharacterData data, @Nullable ServerPlayer player,
 			ActivityEvent event, long nowMs) {
-		for (Identifier id : data.conditions()) {
+		for (ResourceLocation id : data.conditions()) {
 			ConditionDefinition def = LifepathContent.conditions().get(id);
 			ConditionState st = data.conditionState(id);
 			// A stage index at/above the last has no next stage to advance to.
@@ -128,9 +127,9 @@ public final class ConditionService {
 	}
 
 	/** Time-driven advancement — {@code advance_after_seconds} elapsed. */
-	public static void tick(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
+	public static void tick(PlayerCharacterData data, @Nullable ServerPlayer player,
 			long nowMs) {
-		for (Identifier id : data.conditions()) {
+		for (ResourceLocation id : data.conditions()) {
 			ConditionDefinition def = LifepathContent.conditions().get(id);
 			ConditionState st = data.conditionState(id);
 			if (def == null || st == null || st.stage() + 1 >= def.stageCount()) {
@@ -147,7 +146,7 @@ public final class ConditionService {
 	 * {@code type:attack} acquisition — each un-held condition whose rule's
 	 * {@code entity} matches the attacker rolls its {@code chance}.
 	 */
-	public static void onDamagedBy(ServerPlayerEntity victim, Entity attacker, Random random,
+	public static void onDamagedBy(ServerPlayer victim, Entity attacker, RandomSource random,
 			long nowMs) {
 		PlayerCharacterData data = CharacterManager.getCharacter(victim);
 		if (data == null) {
@@ -172,13 +171,13 @@ public final class ConditionService {
 	 * {@code type:item} rules on an eaten stack: cures first (held
 	 * conditions), then item-based acquisition (un-held conditions).
 	 */
-	public static void onItemEaten(ServerPlayerEntity player, ItemStack stack, long nowMs) {
+	public static void onItemEaten(ServerPlayer player, ItemStack stack, long nowMs) {
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
 		if (data == null || stack.isEmpty()) {
 			return;
 		}
-		Identifier itemId = Registries.ITEM.getId(stack.getItem());
-		for (Identifier id : List.copyOf(data.conditions())) {
+		ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		for (ResourceLocation id : List.copyOf(data.conditions())) {
 			ConditionDefinition def = LifepathContent.conditions().get(id);
 			if (def != null && def.cures().stream().anyMatch(c ->
 					"item".equals(c.type()) && c.item().map(itemId::equals).orElse(false))) {
@@ -199,19 +198,19 @@ public final class ConditionService {
 
 	private static boolean entityMatches(Entity entity, String idOrTag) {
 		if (idOrTag.startsWith("#")) {
-			Identifier tagId = Identifier.tryParse(idOrTag.substring(1));
-			return tagId != null && entity.getType().getRegistryEntry()
-					.isIn(TagKey.of(Registries.ENTITY_TYPE.getKey(), tagId));
+			ResourceLocation tagId = ResourceLocation.tryParse(idOrTag.substring(1));
+			return tagId != null && entity.getType().builtInRegistryHolder()
+					.is(TagKey.create(BuiltInRegistries.ENTITY_TYPE.key(), tagId));
 		}
-		Identifier id = Identifier.tryParse(idOrTag);
-		return id != null && Registries.ENTITY_TYPE.getId(entity.getType()).equals(id);
+		ResourceLocation id = ResourceLocation.tryParse(idOrTag);
+		return id != null && BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).equals(id);
 	}
 
 	private static int clampStage(ConditionDefinition def, int stage) {
 		return Math.max(0, Math.min(stage, def.stageCount() - 1));
 	}
 
-	private static void mark(@Nullable ServerPlayerEntity player) {
+	private static void mark(@Nullable ServerPlayer player) {
 		if (player != null) {
 			CharacterManager.changed(player);
 		}

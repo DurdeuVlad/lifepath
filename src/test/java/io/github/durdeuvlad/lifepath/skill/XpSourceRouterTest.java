@@ -15,7 +15,7 @@ import io.github.durdeuvlad.lifepath.event.ActivityTypes;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
  * progress — with zero vanilla/gameplay imports in the skill layer.
  */
 class XpSourceRouterTest {
-	private static final Identifier MINING_SKILL = Identifier.of("lifepath", "mining");
-	private static final Identifier STONE = Identifier.of("minecraft", "stone");
+	private static final ResourceLocation MINING_SKILL = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
+	private static final ResourceLocation STONE = ResourceLocation.fromNamespaceAndPath("minecraft", "stone");
 
 	@BeforeEach
 	void setUp() {
@@ -47,7 +47,7 @@ class XpSourceRouterTest {
 		LifepathContent.skills().register(MINING_SKILL, SkillDefinition.fromFile(MINING_SKILL, file));
 	}
 
-	private static void registerSource(String json, Identifier id) {
+	private static void registerSource(String json, ResourceLocation id) {
 		XpSourceDefinition.XpSourceFile file = XpSourceDefinition.XpSourceFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).result().orElseThrow();
 		LifepathContent.xpSources().register(id, XpSourceDefinition.fromFile(id, file));
@@ -59,10 +59,10 @@ class XpSourceRouterTest {
 		registerSource("""
 				{"activity": "lifepath:mining", "skill": "lifepath:mining",
 				 "per_subject": {"minecraft:stone": 0.05}}
-				""", Identifier.of("lifepath", "test_mining"));
+				""", ResourceLocation.fromNamespaceAndPath("lifepath", "test_mining"));
 
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		// Test sink: no ServerPlayerEntity needed — award lands on the model.
+		// Test sink: no ServerPlayer needed — award lands on the model.
 		XpSourceRouter.setSinkForTests((player, skillId, amount, src) ->
 				SkillXpService.awardXpCore(data, skillId, amount, src));
 		XpSourceRouter.init();
@@ -80,7 +80,7 @@ class XpSourceRouterTest {
 				 "required_tags": ["lifepath:ore"],
 				 "excluded_subjects": ["minecraft:bedrock"],
 				 "per_subject": {"minecraft:stone": 2.0}}
-				""", Identifier.of("lifepath", "strict_mining"));
+				""", ResourceLocation.fromNamespaceAndPath("lifepath", "strict_mining"));
 
 		// Wrong activity type.
 		assertTrue(XpSourceRouter.plan(ActivityEvent.of(ActivityTypes.FARMING, STONE)).isEmpty());
@@ -88,7 +88,7 @@ class XpSourceRouterTest {
 		assertTrue(XpSourceRouter.plan(ActivityEvent.of(ActivityTypes.MINING, STONE)).isEmpty());
 		// Excluded subject.
 		assertTrue(XpSourceRouter.plan(new ActivityEvent(null, ActivityTypes.MINING,
-				Identifier.of("minecraft", "bedrock"), Set.of(LifepathMod.id("ore")),
+				ResourceLocation.fromNamespaceAndPath("minecraft", "bedrock"), Set.of(LifepathMod.id("ore")),
 				ActivityEvent.Cause.PLAYER, 0L, Map.of())).isEmpty());
 		// Non-player cause when player_caused_only.
 		assertTrue(XpSourceRouter.plan(new ActivityEvent(null, ActivityTypes.MINING,
@@ -109,12 +109,12 @@ class XpSourceRouterTest {
 		registerSource("""
 				{"activity": "lifepath:mining", "skill": "lifepath:mining",
 				 "base_xp": 0.5, "per_subject": {"minecraft:diamond_ore": 4.0}}
-				""", Identifier.of("lifepath", "mining_base"));
+				""", ResourceLocation.fromNamespaceAndPath("lifepath", "mining_base"));
 
 		var stoneAward = XpSourceRouter.plan(ActivityEvent.of(ActivityTypes.MINING, STONE));
 		assertEquals(0.5, stoneAward.get(0).amount());
 		var oreAward = XpSourceRouter.plan(ActivityEvent.of(ActivityTypes.MINING,
-				Identifier.of("minecraft", "diamond_ore")));
+				ResourceLocation.fromNamespaceAndPath("minecraft", "diamond_ore")));
 		assertEquals(4.0, oreAward.get(0).amount());
 	}
 
@@ -124,7 +124,7 @@ class XpSourceRouterTest {
 		registerSource("""
 				{"activity": "lifepath:mining", "skill": "lifepath:mining",
 				 "base_xp": 0.5, "per_subject": {"minecraft:stone": 2.0}}
-				""", Identifier.of("lifepath", "gated"));
+				""", ResourceLocation.fromNamespaceAndPath("lifepath", "gated"));
 
 		var dir = java.nio.file.Files.createTempDirectory("unmapped_cfg");
 		java.nio.file.Files.writeString(dir.resolve("skills.toml"),
@@ -140,7 +140,7 @@ class XpSourceRouterTest {
 			assertEquals(2.0, XpSourceRouter.plan(
 					ActivityEvent.of(ActivityTypes.MINING, STONE)).get(0).amount());
 			assertTrue(XpSourceRouter.plan(ActivityEvent.of(ActivityTypes.MINING,
-					Identifier.of("minecraft", "dirt"))).isEmpty());
+					ResourceLocation.fromNamespaceAndPath("minecraft", "dirt"))).isEmpty());
 		} finally {
 			io.github.durdeuvlad.lifepath.config.LifepathConfig.resetForTests();
 		}
@@ -153,7 +153,7 @@ class XpSourceRouterTest {
 		registerSkill();
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 		assertTrue(XpSourceRouter.plan(ActivityEvent.of(ActivityTypes.COMBAT,
-				Identifier.of("minecraft", "zombie"))).isEmpty());
+				ResourceLocation.fromNamespaceAndPath("minecraft", "zombie"))).isEmpty());
 		assertEquals(0, data.skills().size());
 	}
 }

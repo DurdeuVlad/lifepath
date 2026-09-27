@@ -13,8 +13,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.nio.file.Path;
 import java.util.UUID;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
  * validated model out.
  *
  * <p>Persistence mechanism: a {@code copyOnDeath} Fabric entity attachment
- * holding raw {@link NbtCompound} (see {@code CharacterAttachments}). Raw NBT
+ * holding raw {@link CompoundTag} (see {@code CharacterAttachments}). Raw NBT
  * is stored rather than a typed attachment so that (a) migrations can reshape
  * the blob before the codec sees it, and (b) a corrupt blob can be quarantined
  * to a backup file instead of breaking player login.
@@ -44,8 +44,8 @@ public final class CharacterPersistence {
 		contentIndex = index;
 	}
 
-	public static NbtCompound serialize(PlayerCharacterData data) {
-		return (NbtCompound) Serialization.toNbt(PlayerCharacterData.CODEC, data);
+	public static CompoundTag serialize(PlayerCharacterData data) {
+		return (CompoundTag) Serialization.toNbt(PlayerCharacterData.CODEC, data);
 	}
 
 	/**
@@ -54,8 +54,8 @@ public final class CharacterPersistence {
 	 * blobs keep their version (matching {@link CharacterMigrations}' forward-compat
 	 * rule — a downgrade never rewrites data it doesn't understand).
 	 */
-	public static PlayerCharacterData deserialize(NbtCompound raw) {
-		NbtCompound migrated = CharacterMigrations.migrate(raw.copy());
+	public static PlayerCharacterData deserialize(CompoundTag raw) {
+		CompoundTag migrated = CharacterMigrations.migrate(raw.copy());
 		PlayerCharacterData data = Serialization.fromNbt(PlayerCharacterData.CODEC, migrated);
 		if (data.dataVersion() < LifepathMod.DATA_VERSION) {
 			data.setDataVersion(LifepathMod.DATA_VERSION);
@@ -73,7 +73,7 @@ public final class CharacterPersistence {
 	}
 
 	/** {@link #deserialize} with graceful degradation: backup + fresh defaults + ERROR on failure. */
-	public static PlayerCharacterData loadSafe(NbtCompound raw, UUID owner, @Nullable Path backupDir) {
+	public static PlayerCharacterData loadSafe(CompoundTag raw, UUID owner, @Nullable Path backupDir) {
 		try {
 			return deserialize(raw);
 		} catch (Exception e) {
@@ -104,7 +104,7 @@ public final class CharacterPersistence {
 			drop("specialization", data.specializationId());
 			data.setSpecializationId(null);
 		}
-		for (Identifier id : new ArrayList<>(data.skills().keySet())) {
+		for (ResourceLocation id : new ArrayList<>(data.skills().keySet())) {
 			if (unknown("skill", id)) {
 				drop("skill", id);
 				data.removeSkill(id);
@@ -117,7 +117,7 @@ public final class CharacterPersistence {
 				}
 			}
 		}
-		for (Identifier id : new ArrayList<>(data.resources().keySet())) {
+		for (ResourceLocation id : new ArrayList<>(data.resources().keySet())) {
 			if (unknown("resource", id)) {
 				drop("resource", id);
 				data.removeResource(id);
@@ -144,7 +144,7 @@ public final class CharacterPersistence {
 		}
 		long cooldownMinPersistMs = (long) (LifepathConfig.getOrDefault(
 				LifepathMod.id("abilities"), "persist_min_seconds", 5.0) * 1000.0);
-		for (Identifier id : new ArrayList<>(data.cooldowns().keySet())) {
+		for (ResourceLocation id : new ArrayList<>(data.cooldowns().keySet())) {
 			// `schedule/*` keys are the ability engine's passive-eval markers —
 			// engine bookkeeping, not ability references (M4-1).
 			if (CooldownService.isScheduleKey(id)) {
@@ -169,7 +169,7 @@ public final class CharacterPersistence {
 				case ATTUNEMENTS -> "attunement";
 				case UNLOCKS -> "unlock_content";
 			};
-			for (Identifier id : new ArrayList<>(data.list(list))) {
+			for (ResourceLocation id : new ArrayList<>(data.list(list))) {
 				if (unknown(domain, id)) {
 					drop(domain, id);
 					data.removeId(list, id);
@@ -179,11 +179,11 @@ public final class CharacterPersistence {
 		return data;
 	}
 
-	private static boolean unknown(String domain, @Nullable Identifier id) {
+	private static boolean unknown(String domain, @Nullable ResourceLocation id) {
 		return id != null && !contentIndex.exists(domain, id);
 	}
 
-	private static void drop(String domain, Identifier id) {
+	private static void drop(String domain, ResourceLocation id) {
 		LifepathMod.LOGGER.warn("dropping reference to missing {} definition {}", domain, id);
 	}
 
@@ -192,7 +192,7 @@ public final class CharacterPersistence {
 	 * manual recovery. Returns the written path, or null if {@code backupDir}
 	 * is null or the write fails (logged).
 	 */
-	public static Path writeBackup(NbtCompound raw, UUID owner, @Nullable Path backupDir) {
+	public static Path writeBackup(CompoundTag raw, UUID owner, @Nullable Path backupDir) {
 		if (backupDir == null) {
 			return null;
 		}

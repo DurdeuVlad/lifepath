@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
  * match logic is covered through {@link UnlockService#itemSourceFor}.
  */
 class UnlockServiceTest {
-	private static final Identifier GATE = LifepathMod.id("gated_thing");
+	private static final ResourceLocation GATE = LifepathMod.id("gated_thing");
 
 	private PlayerCharacterData data;
 
@@ -43,22 +43,22 @@ class UnlockServiceTest {
 		LifepathContent.unlocks().clear();
 	}
 
-	private static UnlockDefinition def(Identifier id, List<Identifier> unlocks,
+	private static UnlockDefinition def(ResourceLocation id, List<ResourceLocation> unlocks,
 			UnlockDefinition.SourceRule... sources) {
 		return new UnlockDefinition(id, id.toString(), Optional.empty(),
 				unlocks, List.of(sources));
 	}
 
 	private static UnlockDefinition.SourceRule rule(String type,
-			Identifier item, Identifier event, Identifier subject,
-			Identifier tag, Identifier advancement, double chance, boolean consume) {
+			ResourceLocation item, ResourceLocation event, ResourceLocation subject,
+			ResourceLocation tag, ResourceLocation advancement, double chance, boolean consume) {
 		return new UnlockDefinition.SourceRule(type,
 				Optional.ofNullable(item), Optional.ofNullable(event),
 				Optional.ofNullable(subject), Optional.ofNullable(tag),
 				Optional.ofNullable(advancement), chance, consume);
 	}
 
-	private static ActivityEvent combat(Identifier victimType, Set<Identifier> tags) {
+	private static ActivityEvent combat(ResourceLocation victimType, Set<ResourceLocation> tags) {
 		return new ActivityEvent(null, ActivityTypes.COMBAT, victimType,
 				tags, ActivityEvent.Cause.PLAYER, 0L, Map.of());
 	}
@@ -82,40 +82,40 @@ class UnlockServiceTest {
 
 	@Test
 	void eventSourceMatchesTypeSubjectAndTag() {
-		Identifier defId = LifepathMod.id("hunt_unlock");
+		ResourceLocation defId = LifepathMod.id("hunt_unlock");
 		LifepathContent.unlocks().register(defId, def(defId, List.of(GATE),
-				rule("event", null, ActivityTypes.COMBAT, Identifier.of("minecraft", "phantom"),
+				rule("event", null, ActivityTypes.COMBAT, ResourceLocation.fromNamespaceAndPath("minecraft", "phantom"),
 						null, null, 1.0, false)));
 		// Wrong subject -> no grant.
 		UnlockService.onActivity(data, null,
-				combat(Identifier.of("minecraft", "zombie"), Set.of()), 0L);
+				combat(ResourceLocation.fromNamespaceAndPath("minecraft", "zombie"), Set.of()), 0L);
 		assertFalse(data.unlocks().contains(GATE));
 		// Matching subject -> grant.
 		UnlockService.onActivity(data, null,
-				combat(Identifier.of("minecraft", "phantom"), Set.of()), 0L);
+				combat(ResourceLocation.fromNamespaceAndPath("minecraft", "phantom"), Set.of()), 0L);
 		assertTrue(data.unlocks().contains(GATE));
 	}
 
 	@Test
 	void eventSourceTagFilterNarrows() {
-		Identifier defId = LifepathMod.id("undead_slayer");
-		Identifier undeadTag = Identifier.of("minecraft", "undead");
+		ResourceLocation defId = LifepathMod.id("undead_slayer");
+		ResourceLocation undeadTag = ResourceLocation.fromNamespaceAndPath("minecraft", "undead");
 		LifepathContent.unlocks().register(defId, def(defId, List.of(GATE),
 				rule("event", null, ActivityTypes.COMBAT, null,
 						undeadTag, null, 1.0, false)));
 		// Event lacks the required tag.
 		UnlockService.onActivity(data, null,
-				combat(Identifier.of("minecraft", "cow"), Set.of()), 0L);
+				combat(ResourceLocation.fromNamespaceAndPath("minecraft", "cow"), Set.of()), 0L);
 		assertFalse(data.unlocks().contains(GATE));
 		UnlockService.onActivity(data, null,
-				combat(Identifier.of("minecraft", "zombie"), Set.of(undeadTag)), 0L);
+				combat(ResourceLocation.fromNamespaceAndPath("minecraft", "zombie"), Set.of(undeadTag)), 0L);
 		assertTrue(data.unlocks().contains(GATE));
 	}
 
 	@Test
 	void advancementSourceMatchesTheId() {
-		Identifier defId = LifepathMod.id("quest_unlock");
-		Identifier adv = Identifier.of("minecraft", "story/enter_the_end");
+		ResourceLocation defId = LifepathMod.id("quest_unlock");
+		ResourceLocation adv = ResourceLocation.fromNamespaceAndPath("minecraft", "story/enter_the_end");
 		LifepathContent.unlocks().register(defId, def(defId, List.of(GATE),
 				rule("advancement", null, null, null, null, adv, 1.0, false)));
 		// onAdvancement needs a live player for CharacterManager — the pure
@@ -127,19 +127,19 @@ class UnlockServiceTest {
 		assertTrue(matches);
 		boolean otherMatches = loaded.sources().stream().anyMatch(r ->
 				"advancement".equals(r.type())
-						&& r.advancement().map(Identifier.of("minecraft", "end/root")::equals)
+						&& r.advancement().map(ResourceLocation.fromNamespaceAndPath("minecraft", "end/root")::equals)
 								.orElse(false));
 		assertFalse(otherMatches);
 	}
 
 	@Test
 	void itemSourceForMatchesExactItemOnly() {
-		Identifier totem = Identifier.of("minecraft", "totem_of_undying");
+		ResourceLocation totem = ResourceLocation.fromNamespaceAndPath("minecraft", "totem_of_undying");
 		UnlockDefinition d = def(LifepathMod.id("contract"), List.of(GATE),
 				rule("item", totem, null, null, null, null, 1.0, true));
 		var match = UnlockService.itemSourceFor(d, totem);
 		assertTrue(match != null && match.consume());
-		assertNull(UnlockService.itemSourceFor(d, Identifier.of("minecraft", "diamond")));
+		assertNull(UnlockService.itemSourceFor(d, ResourceLocation.fromNamespaceAndPath("minecraft", "diamond")));
 		// An event-rule def never matches the item seam.
 		UnlockDefinition eventOnly = def(LifepathMod.id("e"), List.of(GATE),
 				rule("event", null, ActivityTypes.COMBAT, null, null, null, 1.0, false));

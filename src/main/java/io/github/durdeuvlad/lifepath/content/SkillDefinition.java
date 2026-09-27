@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Data definition of a skill — something the character can actually practice
@@ -14,31 +14,31 @@ import net.minecraft.util.Identifier;
  * carries the structure.
  */
 public record SkillDefinition(
-		Identifier id,
+		ResourceLocation id,
 		String displayName,
 		String description,
 		String improveHint,
 		Category category,
 		int maxLevel,
-		Optional<Identifier> levelCurve,
+		Optional<ResourceLocation> levelCurve,
 		List<Milestone> milestones,
-		List<Identifier> xpSources,
-		Optional<Identifier> passiveScaling,
-		Optional<Identifier> icon) {
+		List<ResourceLocation> xpSources,
+		Optional<ResourceLocation> passiveScaling,
+		Optional<ResourceLocation> icon) {
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
-	public SkillDefinition(Identifier id, String displayName, String description,
+	public SkillDefinition(ResourceLocation id, String displayName, String description,
 			String improveHint, Category category, int maxLevel,
-			Optional<Identifier> levelCurve, List<Milestone> milestones,
-			List<Identifier> xpSources, Optional<Identifier> passiveScaling) {
+			Optional<ResourceLocation> levelCurve, List<Milestone> milestones,
+			List<ResourceLocation> xpSources, Optional<ResourceLocation> passiveScaling) {
 		this(id, displayName, description, improveHint, category, maxLevel,
 				levelCurve, milestones, xpSources, passiveScaling, Optional.empty());
 	}
 
 	/** Back-compatible constructor for call sites that don't set UI strings. */
-	public SkillDefinition(Identifier id, String displayName, Category category,
-			int maxLevel, Optional<Identifier> levelCurve, List<Milestone> milestones,
-			List<Identifier> xpSources, Optional<Identifier> passiveScaling) {
+	public SkillDefinition(ResourceLocation id, String displayName, Category category,
+			int maxLevel, Optional<ResourceLocation> levelCurve, List<Milestone> milestones,
+			List<ResourceLocation> xpSources, Optional<ResourceLocation> passiveScaling) {
 		this(id, displayName, "", "", category, maxLevel, levelCurve, milestones,
 				xpSources, passiveScaling);
 	}
@@ -53,15 +53,15 @@ public record SkillDefinition(
 	}
 
 	/** A named level breakpoint: display-text key + references to effects (M4+). */
-	public record Milestone(int level, String descriptionKey, List<Identifier> effectRefs) {
+	public record Milestone(int level, String descriptionKey, List<ResourceLocation> effectRefs) {
 		public static final Codec<Milestone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.intRange(1, 10000).fieldOf("level").forGetter(Milestone::level),
 				Codec.STRING.optionalFieldOf("description_key", "").forGetter(Milestone::descriptionKey),
-				Identifier.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Milestone::effectRefs)
+				ResourceLocation.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Milestone::effectRefs)
 		).apply(instance, Milestone::new));
 	}
 
-	public static SkillDefinition fromFile(Identifier id, SkillDefinitionFile file) {
+	public static SkillDefinition fromFile(ResourceLocation id, SkillDefinitionFile file) {
 		return new SkillDefinition(id, file.displayName(), file.description(),
 				file.improveHint(), file.category(), file.maxLevel(),
 				file.levelCurve(), file.milestones(), file.xpSources(), file.passiveScaling(),
@@ -75,10 +75,10 @@ public record SkillDefinition(
 			String improveHint,
 			Category category,
 			int maxLevel,
-			Optional<Identifier> levelCurve,
+			Optional<ResourceLocation> levelCurve,
 			List<Milestone> milestones,
-			List<Identifier> xpSources,
-			Optional<Identifier> passiveScaling,
+			List<ResourceLocation> xpSources,
+			Optional<ResourceLocation> passiveScaling,
 			Optional<String> icon) {
 
 		public static final Codec<SkillDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -87,10 +87,10 @@ public record SkillDefinition(
 				Codec.STRING.optionalFieldOf("improve_hint", "").forGetter(SkillDefinitionFile::improveHint),
 				Category.CODEC.fieldOf("category").forGetter(SkillDefinitionFile::category),
 				Codec.intRange(1, 10000).optionalFieldOf("max_level", 100).forGetter(SkillDefinitionFile::maxLevel),
-				Identifier.CODEC.optionalFieldOf("level_curve").forGetter(SkillDefinitionFile::levelCurve),
+				ResourceLocation.CODEC.optionalFieldOf("level_curve").forGetter(SkillDefinitionFile::levelCurve),
 				Milestone.CODEC.listOf().optionalFieldOf("milestones", List.of()).forGetter(SkillDefinitionFile::milestones),
-				Identifier.CODEC.listOf().optionalFieldOf("xp_sources", List.of()).forGetter(SkillDefinitionFile::xpSources),
-				Identifier.CODEC.optionalFieldOf("passive_scaling").forGetter(SkillDefinitionFile::passiveScaling),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("xp_sources", List.of()).forGetter(SkillDefinitionFile::xpSources),
+				ResourceLocation.CODEC.optionalFieldOf("passive_scaling").forGetter(SkillDefinitionFile::passiveScaling),
 				Codec.STRING.optionalFieldOf("icon").forGetter(SkillDefinitionFile::icon)
 		).apply(instance, SkillDefinitionFile::new));
 	}

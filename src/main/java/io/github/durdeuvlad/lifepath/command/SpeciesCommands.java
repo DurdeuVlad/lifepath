@@ -1,7 +1,7 @@
 package io.github.durdeuvlad.lifepath.command;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import io.github.durdeuvlad.lifepath.LifepathMod;
@@ -9,12 +9,12 @@ import io.github.durdeuvlad.lifepath.character.CharacterManager;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * {@code /lifepath species} tree (M5-1; M9-4 added the enforced player path).
@@ -49,29 +49,29 @@ public final class SpeciesCommands {
 				// without permission 2).
 				.executes(ctx -> usage(ctx.getSource()))
 				.then(literal("get")
-						.requires(src -> src.hasPermissionLevel(LifepathCommands.ADMIN_PERMISSION))
-						.then(argument("player", EntityArgumentType.player())
+						.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> get(ctx.getSource(),
-										EntityArgumentType.getPlayer(ctx, "player")))))
+										EntityArgument.getPlayer(ctx, "player")))))
 				.then(literal("set")
-						.requires(src -> src.hasPermissionLevel(LifepathCommands.ADMIN_PERMISSION))
-						.then(argument("player", EntityArgumentType.player())
-								.then(argument("id", IdentifierArgumentType.identifier())
+						.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
+						.then(argument("player", EntityArgument.player())
+								.then(argument("id", ResourceLocationArgument.id())
 										.suggests((ctx, builder) -> {
 											LifepathContent.species().all().keySet()
 													.forEach(id -> builder.suggest(id.toString()));
 											return builder.buildFuture();
 										})
 										.executes(ctx -> set(ctx.getSource(),
-												EntityArgumentType.getPlayer(ctx, "player"),
-												IdentifierArgumentType.getIdentifier(ctx, "id"))))))
+												EntityArgument.getPlayer(ctx, "player"),
+												ResourceLocationArgument.getId(ctx, "id"))))))
 				.then(literal("choose")
-						.then(argument("id", IdentifierArgumentType.identifier())
+						.then(argument("id", ResourceLocationArgument.id())
 								.suggests((ctx, builder) -> {
 									// Player-facing picker: hidden species are
 									// not offered (admins suggest all).
 									boolean admin = ctx.getSource()
-											.hasPermissionLevel(LifepathCommands.ADMIN_PERMISSION);
+											.hasPermission(LifepathCommands.ADMIN_PERMISSION);
 									LifepathContent.species().all().values().stream()
 											.filter(def -> admin
 													|| def.visibility() != SpeciesDefinition.Visibility.HIDDEN)
@@ -79,7 +79,7 @@ public final class SpeciesCommands {
 									return builder.buildFuture();
 								})
 								.executes(ctx -> choose(ctx.getSource(),
-										IdentifierArgumentType.getIdentifier(ctx, "id"))))));
+										ResourceLocationArgument.getId(ctx, "id"))))));
 	}
 
 	/**
@@ -88,34 +88,34 @@ public final class SpeciesCommands {
 	 * {@code set} (logged admin path); {@code unlocked} requires the id in the
 	 * player's {@code unlocks[]} (granted by the unlock-source framework).
 	 */
-	private static int choose(ServerCommandSource source, Identifier speciesId) {
-		ServerPlayerEntity player;
+	private static int choose(CommandSourceStack source, ResourceLocation speciesId) {
+		ServerPlayer player;
 		try {
-			player = source.getPlayerOrThrow();
+			player = source.getPlayerOrException();
 		} catch (Exception e) {
-			source.sendError(Text.literal("only a player can choose a species"));
+			source.sendFailure(Component.literal("only a player can choose a species"));
 			return 0;
 		}
 		SpeciesDefinition def = LifepathContent.species().get(speciesId);
 		if (def == null) {
-			source.sendError(Text.literal("unknown species: " + speciesId));
+			source.sendFailure(Component.literal("unknown species: " + speciesId));
 			return 0;
 		}
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
 		if (!chooseAllowed(data, def)) {
-			source.sendError(Text.literal(def.selection() == SpeciesDefinition.Selection.UNLOCKED
+			source.sendFailure(Component.literal(def.selection() == SpeciesDefinition.Selection.UNLOCKED
 					? "species " + speciesId + " requires an unlock you don't hold"
 					: "species " + speciesId + " is not selectable"));
 			return 0;
 		}
 		data.setSpeciesId(speciesId);
 		CharacterManager.changed(player);
-		source.sendFeedback(() -> Text.literal("species set to "
+		source.sendSuccess(() -> Component.literal("species set to "
 				+ def.displayName()), false);
 		// Same consequence line `set` delivers — the player learns what the
 		// pick means (M6-4 zero-confusion rule).
 		def.description().ifPresent(d ->
-				player.sendMessage(Text.literal(d), false));
+				player.displayClientMessage(Component.literal(d), false));
 		return Command.SINGLE_SUCCESS;
 	}
 
@@ -134,22 +134,22 @@ public final class SpeciesCommands {
 		};
 	}
 
-	private static int usage(ServerCommandSource source) {
-		source.sendFeedback(() -> Text.literal(
+	private static int usage(CommandSourceStack source) {
+		source.sendSuccess(() -> Component.literal(
 				"usage: /lifepath species choose <id> | species get|set <player> <id> (admin)"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int get(ServerCommandSource source, ServerPlayerEntity target) {
+	private static int get(CommandSourceStack source, ServerPlayer target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
-		Identifier speciesId = data.speciesId();
+		ResourceLocation speciesId = data.speciesId();
 		if (speciesId == null) {
-			source.sendFeedback(() -> Text.literal(
+			source.sendSuccess(() -> Component.literal(
 					target.getName().getString() + " has no species"), false);
 			return Command.SINGLE_SUCCESS;
 		}
 		SpeciesDefinition def = LifepathContent.species().get(speciesId);
-		source.sendFeedback(() -> Text.literal(target.getName().getString()
+		source.sendSuccess(() -> Component.literal(target.getName().getString()
 				+ " species: " + speciesId
 				+ (def == null ? " (definition missing — effects inactive)"
 						: " \"" + def.displayName() + "\""
@@ -160,9 +160,9 @@ public final class SpeciesCommands {
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int set(ServerCommandSource source, ServerPlayerEntity target, Identifier speciesId) {
+	private static int set(CommandSourceStack source, ServerPlayer target, ResourceLocation speciesId) {
 		if (!LifepathContent.species().contains(speciesId)) {
-			source.sendError(Text.literal("unknown species: " + speciesId));
+			source.sendFailure(Component.literal("unknown species: " + speciesId));
 			return 0;
 		}
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
@@ -171,14 +171,14 @@ public final class SpeciesCommands {
 		CharacterManager.saveCharacter(target);
 		CharacterManager.syncCharacter(target);
 		LifepathMod.LOGGER.info("admin action: {} set {} ({}) species to {}",
-				source.getName(), target.getName().getString(), target.getUuid(), speciesId);
-		source.sendFeedback(() -> Text.literal("set " + target.getName().getString()
+				source.getTextName(), target.getName().getString(), target.getUUID(), speciesId);
+		source.sendSuccess(() -> Component.literal("set " + target.getName().getString()
 				+ " species to " + speciesId), true);
 		// M6-4 consequence preview: species_assigned carries only the name —
 		// the recipient also gets the identity description line.
 		var def = LifepathContent.species().get(speciesId);
 		if (def != null && def.description().isPresent()) {
-			target.sendMessage(Text.literal(def.description().get()), false);
+			target.displayClientMessage(Component.literal(def.description().get()), false);
 		}
 		return Command.SINGLE_SUCCESS;
 	}

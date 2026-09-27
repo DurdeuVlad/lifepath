@@ -21,8 +21,8 @@ import io.github.durdeuvlad.lifepath.relation.DispositionService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,9 +35,9 @@ import org.junit.jupiter.api.Test;
  */
 class UndeadSpeciesTest {
 	private static final Path DATA = Path.of("src/main/resources/data/lifepath");
-	private static final Identifier UNDEAD = LifepathMod.id("undead");
-	private static final Identifier NECROPHAGE = LifepathMod.id("necrophage");
-	private static final Identifier UNDEAD_KIN = LifepathMod.id("undead_kin");
+	private static final ResourceLocation UNDEAD = LifepathMod.id("undead");
+	private static final ResourceLocation NECROPHAGE = LifepathMod.id("necrophage");
+	private static final ResourceLocation UNDEAD_KIN = LifepathMod.id("undead_kin");
 
 	private PlayerCharacterData data;
 
@@ -81,12 +81,12 @@ class UndeadSpeciesTest {
 		assertTrue(tagRule.tagId() != null
 						&& tagRule.tagId().equals(LifepathMod.id("undead_foods")),
 				"diet allowed list should point at #lifepath:undead_foods");
-		assertFalse(tagRule.matches(Identifier.of("minecraft", "rotten_flesh"),
-				null, RegistryKeys.ITEM), "tag rule without an entry fails closed");
+		assertFalse(tagRule.matches(ResourceLocation.fromNamespaceAndPath("minecraft", "rotten_flesh"),
+				null, Registries.ITEM), "tag rule without an entry fails closed");
 		assertTrue(IdTagRef.parse("minecraft:rotten_flesh").matches(
-				Identifier.of("minecraft", "rotten_flesh"), null, RegistryKeys.ITEM));
+				ResourceLocation.fromNamespaceAndPath("minecraft", "rotten_flesh"), null, Registries.ITEM));
 		assertFalse(IdTagRef.parse("minecraft:rotten_flesh").matches(
-				Identifier.of("minecraft", "bread"), null, RegistryKeys.ITEM));
+				ResourceLocation.fromNamespaceAndPath("minecraft", "bread"), null, Registries.ITEM));
 	}
 
 	@Test
@@ -98,15 +98,15 @@ class UndeadSpeciesTest {
 				def.rules().get(0).disposition());
 		// Tag rule: no registry entry → no match; a synthetic exact rule pins
 		// the precedence contract (first match wins).
-		assertNull(def.dispositionFor(Identifier.of("minecraft", "zombie"), null));
+		assertNull(def.dispositionFor(ResourceLocation.fromNamespaceAndPath("minecraft", "zombie"), null));
 		RelationDefinition exact = new RelationDefinition(UNDEAD_KIN, List.of(
 				new RelationDefinition.Rule(IdTagRef.parse("minecraft:zombie"),
 						RelationDefinition.Disposition.NEUTRAL),
 				new RelationDefinition.Rule(IdTagRef.parse("#lifepath:undead"),
 						RelationDefinition.Disposition.HOSTILE)));
 		assertEquals(RelationDefinition.Disposition.NEUTRAL,
-				exact.dispositionFor(Identifier.of("minecraft", "zombie"), null));
-		assertNull(exact.dispositionFor(Identifier.of("minecraft", "bee"), null));
+				exact.dispositionFor(ResourceLocation.fromNamespaceAndPath("minecraft", "zombie"), null));
+		assertNull(exact.dispositionFor(ResourceLocation.fromNamespaceAndPath("minecraft", "bee"), null));
 	}
 
 	@Test

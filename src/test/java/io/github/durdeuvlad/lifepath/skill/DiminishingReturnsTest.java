@@ -11,7 +11,7 @@ import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,12 +20,12 @@ import org.junit.jupiter.api.Test;
  * relog persistence, and the award-path integration.
  */
 class DiminishingReturnsTest {
-	private static final Identifier SKILL = Identifier.of("lifepath", "mining");
-	private static final Identifier CURVE = Identifier.of("lifepath", "dim_curve");
+	private static final ResourceLocation SKILL = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
+	private static final ResourceLocation CURVE = ResourceLocation.fromNamespaceAndPath("lifepath", "dim_curve");
 	private static final ActivityEvent STONE = ActivityEvent.of(
-			Identifier.of("lifepath", "mining"), Identifier.of("minecraft", "stone"));
+			ResourceLocation.fromNamespaceAndPath("lifepath", "mining"), ResourceLocation.fromNamespaceAndPath("minecraft", "stone"));
 	private static final ActivityEvent DIRT = ActivityEvent.of(
-			Identifier.of("lifepath", "mining"), Identifier.of("minecraft", "dirt"));
+			ResourceLocation.fromNamespaceAndPath("lifepath", "mining"), ResourceLocation.fromNamespaceAndPath("minecraft", "dirt"));
 	private static final long HOUR = 3_600_000L;
 	private static final long T0 = 1_700_000_000_000L;
 	private static final long WINDOW = 4 * HOUR;
@@ -128,8 +128,8 @@ class DiminishingReturnsTest {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 		// A single activity event fanned out to two awards must record ONE
 		// signature entry — the ledger counts actions, not awards.
-		ActivityEvent event = new ActivityEvent(null, Identifier.of("lifepath", "mining"),
-				Identifier.of("minecraft", "stone"), java.util.Set.of(),
+		ActivityEvent event = new ActivityEvent(null, ResourceLocation.fromNamespaceAndPath("lifepath", "mining"),
+				ResourceLocation.fromNamespaceAndPath("minecraft", "stone"), java.util.Set.of(),
 				ActivityEvent.Cause.PLAYER, T0, java.util.Map.of());
 		SkillXpService.awardXpCore(data, SKILL, 0.5, event);
 		SkillXpService.awardXpCore(data, SKILL, 0.5, event);

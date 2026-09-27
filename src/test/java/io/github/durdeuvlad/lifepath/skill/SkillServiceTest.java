@@ -11,15 +11,15 @@ import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SkillServiceTest {
-	private static final Identifier MINING = Identifier.of("lifepath", "mining");
-	private static final Identifier UNKNOWN = Identifier.of("lifepath", "does_not_exist");
+	private static final ResourceLocation MINING = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
+	private static final ResourceLocation UNKNOWN = ResourceLocation.fromNamespaceAndPath("lifepath", "does_not_exist");
 
-	private static void registerSkill(Identifier id, int maxLevel) {
+	private static void registerSkill(ResourceLocation id, int maxLevel) {
 		SkillDefinition.SkillDefinitionFile file = SkillDefinition.SkillDefinitionFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString("""
 						{"display_name": "S", "category": "gathering", "max_level": %d}

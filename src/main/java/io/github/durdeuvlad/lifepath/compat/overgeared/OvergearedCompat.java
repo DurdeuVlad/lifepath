@@ -9,7 +9,7 @@ import io.github.durdeuvlad.lifepath.event.ActivityTypes;
 import java.util.Map;
 import java.util.Set;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -42,8 +42,8 @@ public final class OvergearedCompat implements ExternalActivityAdapter {
 	/** The external mod id — the only place it appears in Java (compat/). */
 	public static final String MOD_ID = "overgeared";
 	/** Pseudo workstation id stamped on translated forging events. */
-	public static final Identifier FORGE_WORKSTATION =
-			Identifier.of(MOD_ID, "smithing_anvil");
+	public static final ResourceLocation FORGE_WORKSTATION =
+			ResourceLocation.fromNamespaceAndPath(MOD_ID, "smithing_anvil");
 	/** Marker attr so logs/debug can trace adapter-emitted events. */
 	public static final String ATTR = "compat";
 	public static final String ATTR_VALUE = "overgeared";
@@ -61,7 +61,7 @@ public final class OvergearedCompat implements ExternalActivityAdapter {
 	}
 
 	@Override
-	public Identifier id() {
+	public ResourceLocation id() {
 		return LifepathMod.id("overgeared");
 	}
 
@@ -91,7 +91,7 @@ public final class OvergearedCompat implements ExternalActivityAdapter {
 		if (event.type() != ActivityTypes.CRAFTING) {
 			return;
 		}
-		Identifier output = event.sourceId();
+		ResourceLocation output = event.sourceId();
 		boolean forged = output.getNamespace().equals(MOD_ID)
 				|| event.tags().contains(LifepathMod.id("forged_outputs"));
 		if (!forged) {

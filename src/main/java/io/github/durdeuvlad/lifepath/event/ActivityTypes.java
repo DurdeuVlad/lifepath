@@ -1,6 +1,6 @@
 package io.github.durdeuvlad.lifepath.event;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Canonical activity-type ids. These are domain VOCABULARY (what kinds of
@@ -11,14 +11,14 @@ public final class ActivityTypes {
 	private ActivityTypes() {
 	}
 
-	public static final Identifier MINING = Identifier.of("lifepath", "mining");
-	public static final Identifier FARMING = Identifier.of("lifepath", "farming");
-	public static final Identifier SMITHING = Identifier.of("lifepath", "smithing");
-	public static final Identifier FISHING = Identifier.of("lifepath", "fishing");
-	public static final Identifier CRAFTING = Identifier.of("lifepath", "crafting");
-	public static final Identifier COMBAT = Identifier.of("lifepath", "combat");
+	public static final ResourceLocation MINING = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
+	public static final ResourceLocation FARMING = ResourceLocation.fromNamespaceAndPath("lifepath", "farming");
+	public static final ResourceLocation SMITHING = ResourceLocation.fromNamespaceAndPath("lifepath", "smithing");
+	public static final ResourceLocation FISHING = ResourceLocation.fromNamespaceAndPath("lifepath", "fishing");
+	public static final ResourceLocation CRAFTING = ResourceLocation.fromNamespaceAndPath("lifepath", "crafting");
+	public static final ResourceLocation COMBAT = ResourceLocation.fromNamespaceAndPath("lifepath", "combat");
 	/** Ranged kills — emitted alongside {@link #COMBAT} for projectile kills (M8-3). */
-	public static final Identifier ARCHERY = Identifier.of("lifepath", "archery");
+	public static final ResourceLocation ARCHERY = ResourceLocation.fromNamespaceAndPath("lifepath", "archery");
 	/** Hostile damage survived — emitted when a mob damages a player (M8-3). */
-	public static final Identifier DEFENCE = Identifier.of("lifepath", "defence");
+	public static final ResourceLocation DEFENCE = ResourceLocation.fromNamespaceAndPath("lifepath", "defence");
 }

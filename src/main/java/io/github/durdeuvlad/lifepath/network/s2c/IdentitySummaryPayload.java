@@ -4,10 +4,10 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * Server-resolved display strings for the M6-1 character screen
@@ -35,18 +35,18 @@ public record IdentitySummaryPayload(IdentityCore identity,
 		List<Entry> specFocus,
 		Map<String, List<Entry>> sections,
 		Map<String, AbilityEntry> abilities,
-		List<ResourceDisplay> resourceDisplays) implements CustomPayload {
+		List<ResourceDisplay> resourceDisplays) implements CustomPacketPayload {
 
 	/**
 	 * One displayable content reference (M12-1): the content id, its
 	 * server-resolved display name, and its icon texture id ("" when none).
 	 */
 	public record Entry(String id, String name, String icon) {
-		public static final PacketCodec<RegistryByteBuf, Entry> CODEC =
-				PacketCodec.tuple(
-						PacketCodecs.STRING, Entry::id,
-						PacketCodecs.STRING, Entry::name,
-						PacketCodecs.STRING, Entry::icon,
+		public static final StreamCodec<RegistryFriendlyByteBuf, Entry> CODEC =
+				StreamCodec.composite(
+						ByteBufCodecs.STRING_UTF8, Entry::id,
+						ByteBufCodecs.STRING_UTF8, Entry::name,
+						ByteBufCodecs.STRING_UTF8, Entry::icon,
 						Entry::new);
 	}
 
@@ -57,27 +57,27 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	 */
 	public record AbilityEntry(String id, String name, String icon,
 			boolean active) {
-		public static final PacketCodec<RegistryByteBuf, AbilityEntry> CODEC =
-				PacketCodec.tuple(
-						PacketCodecs.STRING, AbilityEntry::id,
-						PacketCodecs.STRING, AbilityEntry::name,
-						PacketCodecs.STRING, AbilityEntry::icon,
-						PacketCodecs.BOOL, AbilityEntry::active,
+		public static final StreamCodec<RegistryFriendlyByteBuf, AbilityEntry> CODEC =
+				StreamCodec.composite(
+						ByteBufCodecs.STRING_UTF8, AbilityEntry::id,
+						ByteBufCodecs.STRING_UTF8, AbilityEntry::name,
+						ByteBufCodecs.STRING_UTF8, AbilityEntry::icon,
+						ByteBufCodecs.BOOL, AbilityEntry::active,
 						AbilityEntry::new);
 	}
 
 	/** Static display info for one resource def (M6-3 HUD; icon added M12-3). */
 	public record ResourceDisplay(String id, String name, double defaultValue,
 			int restBandIndex, List<String> bandNames, String icon) {
-		static final PacketCodec<RegistryByteBuf, ResourceDisplay> CODEC =
-				PacketCodec.tuple(
-						PacketCodecs.STRING, ResourceDisplay::id,
-						PacketCodecs.STRING, ResourceDisplay::name,
-						PacketCodecs.DOUBLE, ResourceDisplay::defaultValue,
-						PacketCodecs.INTEGER, ResourceDisplay::restBandIndex,
-						PacketCodecs.STRING.collect(PacketCodecs.toList()),
+		static final StreamCodec<RegistryFriendlyByteBuf, ResourceDisplay> CODEC =
+				StreamCodec.composite(
+						ByteBufCodecs.STRING_UTF8, ResourceDisplay::id,
+						ByteBufCodecs.STRING_UTF8, ResourceDisplay::name,
+						ByteBufCodecs.DOUBLE, ResourceDisplay::defaultValue,
+						ByteBufCodecs.INT, ResourceDisplay::restBandIndex,
+						ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
 								ResourceDisplay::bandNames,
-						PacketCodecs.STRING, ResourceDisplay::icon,
+						ByteBufCodecs.STRING_UTF8, ResourceDisplay::icon,
 						ResourceDisplay::new);
 	}
 
@@ -86,43 +86,43 @@ public record IdentitySummaryPayload(IdentityCore identity,
 			String speciesDescription, String speciesIcon,
 			String specId, String specName, String specIcon) {
 		// Seven strings — past PacketCodec.tuple's arity, so write it out.
-		private static final PacketCodec<RegistryByteBuf, IdentityCore> CORE_CODEC =
-				PacketCodec.ofStatic(
+		private static final StreamCodec<RegistryFriendlyByteBuf, IdentityCore> CORE_CODEC =
+				StreamCodec.of(
 						(buf, c) -> {
-							PacketCodecs.STRING.encode(buf, c.speciesId());
-							PacketCodecs.STRING.encode(buf, c.speciesName());
-							PacketCodecs.STRING.encode(buf, c.speciesDescription());
-							PacketCodecs.STRING.encode(buf, c.speciesIcon());
-							PacketCodecs.STRING.encode(buf, c.specId());
-							PacketCodecs.STRING.encode(buf, c.specName());
-							PacketCodecs.STRING.encode(buf, c.specIcon());
+							ByteBufCodecs.STRING_UTF8.encode(buf, c.speciesId());
+							ByteBufCodecs.STRING_UTF8.encode(buf, c.speciesName());
+							ByteBufCodecs.STRING_UTF8.encode(buf, c.speciesDescription());
+							ByteBufCodecs.STRING_UTF8.encode(buf, c.speciesIcon());
+							ByteBufCodecs.STRING_UTF8.encode(buf, c.specId());
+							ByteBufCodecs.STRING_UTF8.encode(buf, c.specName());
+							ByteBufCodecs.STRING_UTF8.encode(buf, c.specIcon());
 						},
 						buf -> new IdentityCore(
-								PacketCodecs.STRING.decode(buf),
-								PacketCodecs.STRING.decode(buf),
-								PacketCodecs.STRING.decode(buf),
-								PacketCodecs.STRING.decode(buf),
-								PacketCodecs.STRING.decode(buf),
-								PacketCodecs.STRING.decode(buf),
-								PacketCodecs.STRING.decode(buf)));
+								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ByteBufCodecs.STRING_UTF8.decode(buf)));
 	}
 
-	public static final CustomPayload.Id<IdentitySummaryPayload> ID =
+	public static final CustomPacketPayload.Type<IdentitySummaryPayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("sync/identity"));
 
-	public static final PacketCodec<RegistryByteBuf, IdentitySummaryPayload> PACKET_CODEC =
-			PacketCodec.tuple(
+	public static final StreamCodec<RegistryFriendlyByteBuf, IdentitySummaryPayload> PACKET_CODEC =
+			StreamCodec.composite(
 					IdentityCore.CORE_CODEC, IdentitySummaryPayload::identity,
-					Entry.CODEC.collect(PacketCodecs.toList()),
+					Entry.CODEC.apply(ByteBufCodecs.list()),
 							IdentitySummaryPayload::specFocus,
-					PacketCodecs.map(java.util.HashMap::new, PacketCodecs.STRING,
-							Entry.CODEC.collect(PacketCodecs.toList())),
+					ByteBufCodecs.map(java.util.HashMap::new, ByteBufCodecs.STRING_UTF8,
+							Entry.CODEC.apply(ByteBufCodecs.list())),
 							IdentitySummaryPayload::sections,
 					// LinkedHashMap so the server's owned-set order survives the
 					// wire — the character screen iterates these values directly.
-					PacketCodecs.map(java.util.LinkedHashMap::new, PacketCodecs.STRING,
+					ByteBufCodecs.map(java.util.LinkedHashMap::new, ByteBufCodecs.STRING_UTF8,
 							AbilityEntry.CODEC), IdentitySummaryPayload::abilities,
-					ResourceDisplay.CODEC.collect(PacketCodecs.toList()),
+					ResourceDisplay.CODEC.apply(ByteBufCodecs.list()),
 							IdentitySummaryPayload::resourceDisplays,
 					IdentitySummaryPayload::new);
 
@@ -134,7 +134,7 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

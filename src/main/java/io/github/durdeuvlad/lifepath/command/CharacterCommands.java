@@ -1,7 +1,7 @@
 package io.github.durdeuvlad.lifepath.command;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import io.github.durdeuvlad.lifepath.LifepathMod;
@@ -12,11 +12,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -48,27 +48,27 @@ public final class CharacterCommands {
 		}
 		initialized = true;
 		LifepathCommands.register(literal("character")
-				.requires(src -> src.hasPermissionLevel(LifepathCommands.ADMIN_PERMISSION))
+				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 				.executes(ctx -> usage(ctx.getSource()))
 				.then(literal("inspect")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> inspect(ctx.getSource(),
-										EntityArgumentType.getPlayer(ctx, "player")))))
+										EntityArgument.getPlayer(ctx, "player")))))
 				.then(literal("reset")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> refuseReset(ctx.getSource()))
 								.then(literal("confirm")
 										.executes(ctx -> reset(ctx.getSource(),
-												EntityArgumentType.getPlayer(ctx, "player")))))));
+												EntityArgument.getPlayer(ctx, "player")))))));
 	}
 
-	private static int usage(ServerCommandSource source) {
-		source.sendFeedback(() -> Text.literal(
+	private static int usage(CommandSourceStack source) {
+		source.sendSuccess(() -> Component.literal(
 				"usage: /lifepath character inspect <player> | reset <player> confirm"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int inspect(ServerCommandSource source, ServerPlayerEntity target) {
+	private static int inspect(CommandSourceStack source, ServerPlayer target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		// Lazy decay trigger (M3-3): inspection shows current, decayed values.
 		if (io.github.durdeuvlad.lifepath.skill.SkillDecayService.applyLazyAll(
@@ -76,21 +76,21 @@ public final class CharacterCommands {
 			CharacterManager.markDirty(target);
 			CharacterManager.syncCharacter(target);
 		}
-		source.sendFeedback(() -> Text.literal("Lifepath character: "
-				+ target.getName().getString() + " (" + target.getUuid() + ")"), false);
-		for (Text line : describe(data, System.currentTimeMillis())) {
-			source.sendFeedback(() -> line, false);
+		source.sendSuccess(() -> Component.literal("Lifepath character: "
+				+ target.getName().getString() + " (" + target.getUUID() + ")"), false);
+		for (Component line : describe(data, System.currentTimeMillis())) {
+			source.sendSuccess(() -> line, false);
 		}
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int refuseReset(ServerCommandSource source) {
-		source.sendError(Text.literal(
+	private static int refuseReset(CommandSourceStack source) {
+		source.sendFailure(Component.literal(
 				"refusing: reset destroys all character data — append the literal 'confirm'"));
 		return 0;
 	}
 
-	private static int reset(ServerCommandSource source, ServerPlayerEntity target) {
+	private static int reset(CommandSourceStack source, ServerPlayer target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		data.reset();
 		// markDirty covers the edge where saveCharacter no-ops (selector resolved a
@@ -100,8 +100,8 @@ public final class CharacterCommands {
 		CharacterManager.saveCharacter(target);
 		CharacterManager.syncCharacter(target);
 		LifepathMod.LOGGER.info("admin action: {} reset character data for {} ({})",
-				source.getName(), target.getName().getString(), target.getUuid());
-		source.sendFeedback(() -> Text.literal(
+				source.getTextName(), target.getName().getString(), target.getUUID());
+		source.sendSuccess(() -> Component.literal(
 				"reset character data for " + target.getName().getString()), true);
 		return Command.SINGLE_SUCCESS;
 	}
@@ -110,17 +110,17 @@ public final class CharacterCommands {
 	 * Readable multi-line dump of every persisted field — kept pure (model +
 	 * clock in, lines out) so tests assert exact output.
 	 */
-	static List<Text> describe(PlayerCharacterData data, long nowMillis) {
-		List<Text> lines = new ArrayList<>();
-		lines.add(Text.literal("  species: " + orNone(data.speciesId())
+	static List<Component> describe(PlayerCharacterData data, long nowMillis) {
+		List<Component> lines = new ArrayList<>();
+		lines.add(Component.literal("  species: " + orNone(data.speciesId())
 				+ "  specialization: " + orNone(data.specializationId())
 				+ "  data_version: " + data.dataVersion()));
 		if (data.skills().isEmpty()) {
-			lines.add(Text.literal("  skills: <none>"));
+			lines.add(Component.literal("  skills: <none>"));
 		} else {
-			for (Map.Entry<Identifier, SkillProgress> skill : data.skills().entrySet()) {
+			for (Map.Entry<ResourceLocation, SkillProgress> skill : data.skills().entrySet()) {
 				SkillProgress p = skill.getValue();
-				lines.add(Text.literal("  skill " + skill.getKey()
+				lines.add(Component.literal("  skill " + skill.getKey()
 						+ "  level=" + p.level()
 						+ "  xp=" + p.xp()
 						+ "  highest=" + p.highestLevel()
@@ -129,16 +129,16 @@ public final class CharacterCommands {
 						+ "  last_use=" + formatUse(p.lastMeaningfulUse())));
 			}
 		}
-		lines.add(Text.literal("  traits: " + ids(data.traits())));
-		lines.add(Text.literal("  conditions: " + ids(data.conditions())));
-		lines.add(Text.literal("  attunements: " + ids(data.attunements())));
-		lines.add(Text.literal("  unlocks: " + ids(data.unlocks())));
+		lines.add(Component.literal("  traits: " + ids(data.traits())));
+		lines.add(Component.literal("  conditions: " + ids(data.conditions())));
+		lines.add(Component.literal("  attunements: " + ids(data.attunements())));
+		lines.add(Component.literal("  unlocks: " + ids(data.unlocks())));
 		if (data.resources().isEmpty()) {
-			lines.add(Text.literal("  resources: <none>"));
+			lines.add(Component.literal("  resources: <none>"));
 		} else {
-			for (Map.Entry<Identifier, PlayerCharacterData.ResourceState> res : data.resources().entrySet()) {
+			for (Map.Entry<ResourceLocation, PlayerCharacterData.ResourceState> res : data.resources().entrySet()) {
 				PlayerCharacterData.ResourceState s = res.getValue();
-				lines.add(Text.literal("  resource " + res.getKey()
+				lines.add(Component.literal("  resource " + res.getKey()
 						+ "  " + s.current() + "/" + s.min() + "-" + s.max()));
 			}
 		}
@@ -149,11 +149,11 @@ public final class CharacterCommands {
 						.isScheduleKey(e.getKey()))
 				.toList();
 		if (visibleCooldowns.isEmpty()) {
-			lines.add(Text.literal("  cooldowns: <none>"));
+			lines.add(Component.literal("  cooldowns: <none>"));
 		} else {
-			for (Map.Entry<Identifier, Long> cd : visibleCooldowns) {
+			for (Map.Entry<ResourceLocation, Long> cd : visibleCooldowns) {
 				long remaining = cd.getValue() - nowMillis;
-				lines.add(Text.literal("  cooldown " + cd.getKey()
+				lines.add(Component.literal("  cooldown " + cd.getKey()
 						+ (remaining <= 0
 								? "  expired " + (-remaining) + "ms ago"
 								: "  expires in " + remaining + "ms")));
@@ -163,14 +163,14 @@ public final class CharacterCommands {
 		// in-window counts — the balance-tuning surface for diminishing returns.
 		Map<String, List<Long>> sigs = data.actionSignatures();
 		if (sigs.isEmpty()) {
-			lines.add(Text.literal("  action signatures: <none>"));
+			lines.add(Component.literal("  action signatures: <none>"));
 		} else {
 			long cutoff = nowMillis
 					- io.github.durdeuvlad.lifepath.skill.DiminishingReturns.windowMs();
 			for (Map.Entry<String, List<Long>> sig : sigs.entrySet()) {
 				long active = sig.getValue().stream().filter(t -> t > cutoff).count();
 				if (active > 0) {
-					lines.add(Text.literal("  sig " + sig.getKey() + "  count=" + active
+					lines.add(Component.literal("  sig " + sig.getKey() + "  count=" + active
 							+ "  mult=" + io.github.durdeuvlad.lifepath.skill
 									.DiminishingReturns.multiplierFor((int) active)));
 				}
@@ -179,7 +179,7 @@ public final class CharacterCommands {
 		return List.copyOf(lines);
 	}
 
-	private static String orNone(@Nullable Identifier id) {
+	private static String orNone(@Nullable ResourceLocation id) {
 		return id == null ? "<none>" : id.toString();
 	}
 
@@ -188,7 +188,7 @@ public final class CharacterCommands {
 		initialized = false;
 	}
 
-	private static String ids(List<Identifier> list) {
+	private static String ids(List<ResourceLocation> list) {
 		return list.isEmpty() ? "<none>" : list.toString();
 	}
 

@@ -3,7 +3,7 @@ package io.github.durdeuvlad.lifepath.compat;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Registry for {@link ExternalActivityAdapter}s. With zero adapters the
@@ -35,7 +35,7 @@ public final class ExternalAdapterRegistry {
 			LifepathMod.LOGGER.error("lifepath:adapter entrypoint discovery failed", t);
 		}
 		for (ExternalActivityAdapter adapter : ADAPTERS) {
-			Identifier id = safeId(adapter);
+			ResourceLocation id = safeId(adapter);
 			try {
 				adapter.register();
 				LifepathMod.LOGGER.info("External activity adapter registered: {}", id);
@@ -66,15 +66,15 @@ public final class ExternalAdapterRegistry {
 		ADAPTERS.add(adapter);
 	}
 
-	private static Identifier safeId(ExternalActivityAdapter adapter) {
+	private static ResourceLocation safeId(ExternalActivityAdapter adapter) {
 		try {
 			return adapter.id();
 		} catch (Throwable t) {
-			return Identifier.of("lifepath", "unknown_adapter");
+			return ResourceLocation.fromNamespaceAndPath("lifepath", "unknown_adapter");
 		}
 	}
 
-	static List<Identifier> registeredIds() {
+	static List<ResourceLocation> registeredIds() {
 		return ADAPTERS.stream().map(ExternalActivityAdapter::id).toList();
 	}
 

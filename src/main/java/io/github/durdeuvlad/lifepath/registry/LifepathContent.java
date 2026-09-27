@@ -22,9 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -80,7 +80,7 @@ public final class LifepathContent {
 			UNLOCKS = new ContentRegistry<>(LifepathMod.id("unlock"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
-	public record UnresolvedReference(String domain, Identifier source, Identifier ref, String targetDomain) {
+	public record UnresolvedReference(String domain, ResourceLocation source, ResourceLocation ref, String targetDomain) {
 	}
 
 	private static final List<UnresolvedReference> UNRESOLVED = new ArrayList<>();
@@ -223,7 +223,7 @@ public final class LifepathContent {
 	 * attunements, …) answer permissively so nothing gets dropped before its
 	 * own milestone lands.
 	 */
-	public static boolean exists(String domain, Identifier id) {
+	public static boolean exists(String domain, ResourceLocation id) {
 		return switch (domain) {
 			case "species" -> SPECIES.contains(id);
 			case "specialization" -> SPECIALIZATIONS.contains(id);
@@ -258,7 +258,7 @@ public final class LifepathContent {
 	 * vanilla registries are not available at datapack-decode time on every
 	 * code path — see docs/ABILITIES.md.
 	 */
-	public static AbilityDefinition decodeAbility(Identifier id, AbilityDefinition.AbilityFile file) {
+	public static AbilityDefinition decodeAbility(ResourceLocation id, AbilityDefinition.AbilityFile file) {
 		AbilityDefinition def = AbilityDefinition.fromFile(id, file);
 		java.util.Set<String> errors = new java.util.LinkedHashSet<>();
 		// Reserved: the C2S activation AUTO sentinel — an ability with this id
@@ -267,7 +267,7 @@ public final class LifepathContent {
 				.ActivateAbilityPayload.AUTO)) {
 			errors.add("id is reserved for the activation AUTO sentinel");
 		}
-		for (Identifier t : io.github.durdeuvlad.lifepath.ability
+		for (ResourceLocation t : io.github.durdeuvlad.lifepath.ability
 				.AbilityVocabulary.unknownNodeTypes(def)) {
 			errors.add("unknown spec node type " + t);
 		}
@@ -302,7 +302,7 @@ public final class LifepathContent {
 			checkRef(errors, id, node, "resource", RESOURCES);
 			checkRef(errors, id, node, "skill", SKILLS);
 		}
-		for (Identifier event : def.trigger().events()) {
+		for (ResourceLocation event : def.trigger().events()) {
 			if (!KNOWN_EVENT_TYPES.contains(event)) {
 				LifepathMod.LOGGER.warn("ability {} subscribes to unknown event "
 						+ "type {} — typo? it may never fire", id, event);
@@ -333,7 +333,7 @@ public final class LifepathContent {
 	}
 
 	/** Activity ids the bus can actually produce — unknown subscribers warn. */
-	private static final java.util.Set<Identifier> KNOWN_EVENT_TYPES = java.util.Set.of(
+	private static final java.util.Set<ResourceLocation> KNOWN_EVENT_TYPES = java.util.Set.of(
 			io.github.durdeuvlad.lifepath.event.ActivityTypes.MINING,
 			io.github.durdeuvlad.lifepath.event.ActivityTypes.FARMING,
 			io.github.durdeuvlad.lifepath.event.ActivityTypes.SMITHING,
@@ -354,7 +354,7 @@ public final class LifepathContent {
 		return all;
 	}
 
-	private static void checkRef(java.util.Set<String> errors, Identifier file,
+	private static void checkRef(java.util.Set<String> errors, ResourceLocation file,
 			AbilityDefinition.SpecNode node, String key, ContentRegistry<?> registry) {
 		var el = node.raw().get(key);
 		if (el == null || !el.isJsonPrimitive() || !el.getAsJsonPrimitive().isString()) {
@@ -364,7 +364,7 @@ public final class LifepathContent {
 		if (raw.startsWith("#")) {
 			return; // tag reference — validated fail-closed at use time
 		}
-		Identifier ref = Identifier.tryParse(raw);
+		ResourceLocation ref = ResourceLocation.tryParse(raw);
 		if (ref == null) {
 			errors.add("node " + node.type() + " " + key + "=\"" + raw
 					+ "\" is not a valid identifier");
@@ -380,10 +380,10 @@ public final class LifepathContent {
 	 * registered action types (the same contract as ability spec nodes).
 	 */
 	public static io.github.durdeuvlad.lifepath.content.ResourceDefinition decodeResource(
-			Identifier id,
+			ResourceLocation id,
 			io.github.durdeuvlad.lifepath.content.ResourceDefinition.ResourceFile file) {
 		var def = io.github.durdeuvlad.lifepath.content.ResourceDefinition.fromFile(id, file);
-		java.util.List<Identifier> unknown = new ArrayList<>();
+		java.util.List<ResourceLocation> unknown = new ArrayList<>();
 		java.util.Set<String> dangling = new java.util.LinkedHashSet<>();
 		if (io.github.durdeuvlad.lifepath.ability.AbilityVocabulary.isInitialized()) {
 			for (var band : def.bands()) {
@@ -406,8 +406,8 @@ public final class LifepathContent {
 		try {
 			for (var band : def.bands()) {
 				for (var fx : band.effects()) {
-					var entry = net.minecraft.registry.Registries.STATUS_EFFECT
-							.getEntry(fx.effect());
+					var entry = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT
+							.getHolder(fx.effect());
 					if (entry.isEmpty()) {
 						throw new IllegalArgumentException("resource " + id
 								+ " band effect names unknown status effect "
@@ -415,7 +415,7 @@ public final class LifepathContent {
 					}
 					// Instant effects re-fire onApplied every sweep — they
 					// cannot be "sustained" and would pulse each interval.
-					if (entry.get().value().isInstant()) {
+					if (entry.get().value().isInstantenous()) {
 						throw new IllegalArgumentException("resource " + id
 								+ " band effect " + fx.effect()
 								+ " is instant — sustained effects require a "
@@ -453,7 +453,7 @@ public final class LifepathContent {
 
 	@FunctionalInterface
 	public interface FileDecoder<F, T> {
-		T decode(Identifier id, F file);
+		T decode(ResourceLocation id, F file);
 	}
 
 	/**
@@ -466,21 +466,21 @@ public final class LifepathContent {
 			Codec<F> fileCodec, FileDecoder<F, T> decoder, ContentRegistry<T> registry) {
 		// Read stage first: the registry keeps its previous contents if the
 		// scan itself fails — only a completed read replaces the domain.
-		Map<Identifier, JsonElement> parsed = new LinkedHashMap<>();
+		Map<ResourceLocation, JsonElement> parsed = new LinkedHashMap<>();
 		// findResources recurses — only DIRECT children of the domain dir are
 		// entries; nested paths belong to their own domain (e.g. skill/curve).
 		// The startsWith guard is required too: non-vanilla PackResources may
 		// prefix-match loosely and feed sibling dirs back through.
-		Map<Identifier, Resource> files =
-				manager.findResources(directory, id -> {
+		Map<ResourceLocation, Resource> files =
+				manager.listResources(directory, id -> {
 					String path = id.getPath();
 					if (!path.startsWith(directory + "/") || !path.endsWith(".json")) {
 						return false;
 					}
 					return !path.substring(directory.length() + 1).contains("/");
 				});
-		for (Map.Entry<Identifier, Resource> file : files.entrySet()) {
-			try (var reader = new InputStreamReader(file.getValue().getInputStream(), StandardCharsets.UTF_8)) {
+		for (Map.Entry<ResourceLocation, Resource> file : files.entrySet()) {
+			try (var reader = new InputStreamReader(file.getValue().open(), StandardCharsets.UTF_8)) {
 				parsed.put(entryId(file.getKey(), directory), JsonParser.parseReader(reader));
 			} catch (Exception e) {
 				LifepathMod.LOGGER.error("skipping {} file {}: {}", directory, file.getKey(), e.getMessage());
@@ -496,10 +496,10 @@ public final class LifepathContent {
 	 * registered. Separated from {@link #loadDomain} so it can be unit-tested
 	 * without a {@link ResourceManager}.
 	 */
-	public static <F, T> int registerAll(String directory, Map<Identifier, JsonElement> files,
+	public static <F, T> int registerAll(String directory, Map<ResourceLocation, JsonElement> files,
 			Codec<F> fileCodec, FileDecoder<F, T> decoder, ContentRegistry<T> registry) {
 		int loaded = 0;
-		for (Map.Entry<Identifier, JsonElement> file : files.entrySet()) {
+		for (Map.Entry<ResourceLocation, JsonElement> file : files.entrySet()) {
 			try {
 				F parsed = fileCodec.parse(JsonOps.INSTANCE, file.getValue())
 						.getOrThrow(err -> new IllegalArgumentException(
@@ -515,10 +515,10 @@ public final class LifepathContent {
 	}
 
 	/** {@code ns:species/foo.json} under directory {@code species} → {@code ns:foo}. */
-	static Identifier entryId(Identifier fileId, String directory) {
+	static ResourceLocation entryId(ResourceLocation fileId, String directory) {
 		String path = fileId.getPath();
 		String stripped = path.substring(directory.length() + 1, path.length() - ".json".length());
-		return Identifier.of(fileId.getNamespace(), stripped);
+		return ResourceLocation.fromNamespaceAndPath(fileId.getNamespace(), stripped);
 	}
 
 	/** The most recent validation pass's report (startup or reload — same path). */
@@ -597,7 +597,7 @@ public final class LifepathContent {
 			recordRef(issues, "condition", def.id(), def.dietRules(), "diet");
 			for (var stage : def.stages()) {
 				recordRefs(issues, "condition", def.id(), stage.abilities(), "ability");
-				for (Identifier event : stage.advanceEvents()) {
+				for (ResourceLocation event : stage.advanceEvents()) {
 					if (!KNOWN_EVENT_TYPES.contains(event)) {
 						LifepathMod.LOGGER.warn("condition {} stage {} advances on "
 								+ "unknown event type {} — typo? it may never fire",
@@ -621,7 +621,7 @@ public final class LifepathContent {
 		for (var def : UNLOCKS.all().values()) {
 			// Unlockable content today is species (selection:"unlocked") —
 			// other domains warn rather than error since the field is generic.
-			for (Identifier ref : def.unlocks()) {
+			for (ResourceLocation ref : def.unlocks()) {
 				if (!SPECIES.contains(ref)) {
 					LifepathMod.LOGGER.warn("unlock {} names {} — not a species "
 							+ "id; it only gates selection when a locked species "
@@ -648,14 +648,14 @@ public final class LifepathContent {
 	}
 
 	private static void recordRefs(List<ValidationReport.Issue> issues, String domain,
-			Identifier source, Iterable<Identifier> refs, String targetDomain) {
-		for (Identifier ref : refs) {
+			ResourceLocation source, Iterable<ResourceLocation> refs, String targetDomain) {
+		for (ResourceLocation ref : refs) {
 			recordRef(issues, domain, source, Optional.of(ref), targetDomain);
 		}
 	}
 
 	private static void recordRef(List<ValidationReport.Issue> issues, String domain,
-			Identifier source, Optional<Identifier> ref, String targetDomain) {
+			ResourceLocation source, Optional<ResourceLocation> ref, String targetDomain) {
 		ref.ifPresent(id -> {
 			ContentRegistry<?> registry = registryFor(targetDomain);
 			if (registry == null || !registry.contains(id)) {
@@ -675,7 +675,7 @@ public final class LifepathContent {
 		for (SpeciesDefinition def : SPECIES.all().values()) {
 			var overlap = new java.util.HashSet<>(def.passiveAbilities());
 			overlap.retainAll(def.activeAbilities());
-			for (Identifier dup : overlap) {
+			for (ResourceLocation dup : overlap) {
 				issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
 						"species", def.id(), "passive_abilities/active_abilities",
 						dup + " listed in BOTH passive and active — it would evaluate twice"));
@@ -724,10 +724,10 @@ public final class LifepathContent {
 		}
 	}
 
-	private static void duplicates(String domain, Identifier file, String field,
-			List<Identifier> refs, List<ValidationReport.Issue> issues) {
-		java.util.Set<Identifier> seen = new java.util.HashSet<>();
-		for (Identifier ref : refs) {
+	private static void duplicates(String domain, ResourceLocation file, String field,
+			List<ResourceLocation> refs, List<ValidationReport.Issue> issues) {
+		java.util.Set<ResourceLocation> seen = new java.util.HashSet<>();
+		for (ResourceLocation ref : refs) {
 			if (!seen.add(ref)) {
 				issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
 						domain, file, field, "duplicate reference " + ref));
@@ -742,7 +742,7 @@ public final class LifepathContent {
 	 * loudly so the author breaks it (data fix, not engine clamp).
 	 */
 	private static void detectCycles(List<ValidationReport.Issue> issues) {
-		Map<Identifier, java.util.Set<Identifier>> edges = new java.util.HashMap<>();
+		Map<ResourceLocation, java.util.Set<ResourceLocation>> edges = new java.util.HashMap<>();
 		for (var def : RESOURCES.all().values()) {
 			for (var band : def.bands()) {
 				for (var node : band.actions()) {
@@ -750,7 +750,7 @@ public final class LifepathContent {
 						var el = node.raw().get("resource");
 						if (el != null && el.isJsonPrimitive() && el.getAsJsonPrimitive().isString()
 								&& !el.getAsString().startsWith("#")) {
-							Identifier target = Identifier.tryParse(el.getAsString());
+							ResourceLocation target = ResourceLocation.tryParse(el.getAsString());
 							if (target != null && RESOURCES.contains(target)) {
 								edges.computeIfAbsent(def.id(), k -> new java.util.HashSet<>())
 										.add(target);
@@ -761,24 +761,24 @@ public final class LifepathContent {
 			}
 		}
 		// DFS over the resource->resource graph; report each back-edge target.
-		java.util.Set<Identifier> visited = new java.util.HashSet<>();
-		java.util.Set<Identifier> stack = new java.util.HashSet<>();
-		java.util.List<Identifier> path = new java.util.ArrayList<>();
+		java.util.Set<ResourceLocation> visited = new java.util.HashSet<>();
+		java.util.Set<ResourceLocation> stack = new java.util.HashSet<>();
+		java.util.List<ResourceLocation> path = new java.util.ArrayList<>();
 		java.util.Set<String> reported = new java.util.HashSet<>();
-		for (Identifier start : edges.keySet()) {
+		for (ResourceLocation start : edges.keySet()) {
 			dfsCycles(start, edges, visited, stack, path, reported, issues);
 		}
 	}
 
-	private static void dfsCycles(Identifier at,
-			Map<Identifier, java.util.Set<Identifier>> edges,
-			java.util.Set<Identifier> visited, java.util.Set<Identifier> stack,
-			java.util.List<Identifier> path, java.util.Set<String> reported,
+	private static void dfsCycles(ResourceLocation at,
+			Map<ResourceLocation, java.util.Set<ResourceLocation>> edges,
+			java.util.Set<ResourceLocation> visited, java.util.Set<ResourceLocation> stack,
+			java.util.List<ResourceLocation> path, java.util.Set<String> reported,
 			List<ValidationReport.Issue> issues) {
 		if (stack.contains(at)) {
 			int from = path.indexOf(at);
 			String cycle = String.join(" -> ",
-					path.subList(from, path.size()).stream().map(Identifier::toString).toList())
+					path.subList(from, path.size()).stream().map(ResourceLocation::toString).toList())
 					+ " -> " + at;
 			if (reported.add(cycle)) {
 				issues.add(new ValidationReport.Issue(ValidationReport.Severity.ERROR,
@@ -792,7 +792,7 @@ public final class LifepathContent {
 		}
 		stack.add(at);
 		path.add(at);
-		for (Identifier next : edges.getOrDefault(at, java.util.Set.of())) {
+		for (ResourceLocation next : edges.getOrDefault(at, java.util.Set.of())) {
 			dfsCycles(next, edges, visited, stack, path, reported, issues);
 		}
 		path.remove(path.size() - 1);

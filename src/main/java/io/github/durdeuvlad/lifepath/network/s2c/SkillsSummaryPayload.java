@@ -3,10 +3,10 @@ package io.github.durdeuvlad.lifepath.network.s2c;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import java.util.List;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * Per-skill display cards for the M6-2 skills screens (server → client).
@@ -20,7 +20,7 @@ import net.minecraft.network.packet.CustomPayload;
  * language ("Protected for 2 days") without exposing timers or red arrows.
  */
 public record SkillsSummaryPayload(List<SkillCard> skills)
-		implements CustomPayload {
+		implements CustomPacketPayload {
 
 	/** One skill's display card. */
 	public record SkillCard(String id, Display display, Progress progress,
@@ -29,56 +29,56 @@ public record SkillsSummaryPayload(List<SkillCard> skills)
 		 * {@code icon} field, or "" when none (M12-1). */
 		public record Display(String name, String description, String rankKey,
 				String aptitude, String improveHint, String icon) {
-			static final PacketCodec<RegistryByteBuf, Display> CODEC =
-					PacketCodec.tuple(
-							PacketCodecs.STRING, Display::name,
-							PacketCodecs.STRING, Display::description,
-							PacketCodecs.STRING, Display::rankKey,
-							PacketCodecs.STRING, Display::aptitude,
-							PacketCodecs.STRING, Display::improveHint,
-							PacketCodecs.STRING, Display::icon,
+			static final StreamCodec<RegistryFriendlyByteBuf, Display> CODEC =
+					StreamCodec.composite(
+							ByteBufCodecs.STRING_UTF8, Display::name,
+							ByteBufCodecs.STRING_UTF8, Display::description,
+							ByteBufCodecs.STRING_UTF8, Display::rankKey,
+							ByteBufCodecs.STRING_UTF8, Display::aptitude,
+							ByteBufCodecs.STRING_UTF8, Display::improveHint,
+							ByteBufCodecs.STRING_UTF8, Display::icon,
 							Display::new);
 		}
 
 		public record Progress(int level, double xpIn, double xpNeed,
 				int protectedFloor, long graceEndsEpochMs) {
-			static final PacketCodec<RegistryByteBuf, Progress> CODEC =
-					PacketCodec.tuple(
-							PacketCodecs.INTEGER, Progress::level,
-							PacketCodecs.DOUBLE, Progress::xpIn,
-							PacketCodecs.DOUBLE, Progress::xpNeed,
-							PacketCodecs.INTEGER, Progress::protectedFloor,
-							PacketCodecs.VAR_LONG, Progress::graceEndsEpochMs,
+			static final StreamCodec<RegistryFriendlyByteBuf, Progress> CODEC =
+					StreamCodec.composite(
+							ByteBufCodecs.INT, Progress::level,
+							ByteBufCodecs.DOUBLE, Progress::xpIn,
+							ByteBufCodecs.DOUBLE, Progress::xpNeed,
+							ByteBufCodecs.INT, Progress::protectedFloor,
+							ByteBufCodecs.VAR_LONG, Progress::graceEndsEpochMs,
 							Progress::new);
 		}
 
 		public record Details(int nextMilestoneLevel, String nextMilestoneText,
 				List<IdentitySummaryPayload.Entry> bonuses) {
-			static final PacketCodec<RegistryByteBuf, Details> CODEC =
-					PacketCodec.tuple(
-							PacketCodecs.INTEGER, Details::nextMilestoneLevel,
-							PacketCodecs.STRING, Details::nextMilestoneText,
+			static final StreamCodec<RegistryFriendlyByteBuf, Details> CODEC =
+					StreamCodec.composite(
+							ByteBufCodecs.INT, Details::nextMilestoneLevel,
+							ByteBufCodecs.STRING_UTF8, Details::nextMilestoneText,
 							IdentitySummaryPayload.Entry.CODEC
-									.collect(PacketCodecs.toList()),
+									.apply(ByteBufCodecs.list()),
 									Details::bonuses,
 							Details::new);
 		}
 
-		static final PacketCodec<RegistryByteBuf, SkillCard> CODEC =
-				PacketCodec.tuple(
-						PacketCodecs.STRING, SkillCard::id,
+		static final StreamCodec<RegistryFriendlyByteBuf, SkillCard> CODEC =
+				StreamCodec.composite(
+						ByteBufCodecs.STRING_UTF8, SkillCard::id,
 						Display.CODEC, SkillCard::display,
 						Progress.CODEC, SkillCard::progress,
 						Details.CODEC, SkillCard::details,
 						SkillCard::new);
 	}
 
-	public static final CustomPayload.Id<SkillsSummaryPayload> ID =
+	public static final CustomPacketPayload.Type<SkillsSummaryPayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("sync/skills"));
 
-	public static final PacketCodec<RegistryByteBuf, SkillsSummaryPayload> PACKET_CODEC =
-			PacketCodec.tuple(
-					SkillCard.CODEC.collect(PacketCodecs.toList()),
+	public static final StreamCodec<RegistryFriendlyByteBuf, SkillsSummaryPayload> PACKET_CODEC =
+			StreamCodec.composite(
+					SkillCard.CODEC.apply(ByteBufCodecs.list()),
 					SkillsSummaryPayload::skills,
 					SkillsSummaryPayload::new);
 
@@ -87,7 +87,7 @@ public record SkillsSummaryPayload(List<SkillCard> skills)
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

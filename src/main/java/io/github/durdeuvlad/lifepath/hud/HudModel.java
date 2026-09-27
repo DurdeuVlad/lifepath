@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Pure read-model for the M6-3 HUD overlay. Computes the visible rows from the
@@ -66,7 +66,7 @@ public final class HudModel {
 	 */
 	public static View compute(IdentitySummaryPayload identity,
 			PlayerCharacterData snapshot,
-			Map<Identifier, Integer> bandIndices, long nowMs) {
+			Map<ResourceLocation, Integer> bandIndices, long nowMs) {
 		if (snapshot == null || identity == null) {
 			return View.EMPTY;
 		}
@@ -76,12 +76,12 @@ public final class HudModel {
 	}
 
 	private static List<ResourceRow> resourceRows(IdentitySummaryPayload identity,
-			PlayerCharacterData snapshot, Map<Identifier, Integer> bandIndices) {
+			PlayerCharacterData snapshot, Map<ResourceLocation, Integer> bandIndices) {
 		List<ResourceRow> rows = new ArrayList<>();
 		for (IdentitySummaryPayload.ResourceDisplay rd : identity.resourceDisplays()) {
-			Identifier id;
+			ResourceLocation id;
 			try {
-				id = Identifier.of(rd.id());
+				id = ResourceLocation.parse(rd.id());
 			} catch (Exception e) {
 				continue; // malformed id in payload — skip, never crash the HUD
 			}
@@ -110,7 +110,7 @@ public final class HudModel {
 	private static List<CooldownRow> cooldownRows(IdentitySummaryPayload identity,
 			PlayerCharacterData snapshot, long nowMs) {
 		List<CooldownRow> rows = new ArrayList<>();
-		for (Map.Entry<Identifier, Long> e : snapshot.cooldowns().entrySet()) {
+		for (Map.Entry<ResourceLocation, Long> e : snapshot.cooldowns().entrySet()) {
 			double left = (e.getValue() - nowMs) / 1000.0;
 			if (left <= 0) {
 				continue;

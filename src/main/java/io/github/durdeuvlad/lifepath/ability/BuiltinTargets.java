@@ -6,10 +6,10 @@ import io.github.durdeuvlad.lifepath.character.CharacterManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 /**
  * AoE target resolvers (M4-3): {@code entities_in_radius} and
@@ -45,15 +45,15 @@ final class BuiltinTargets {
 			Predicate<Entity> type = entityMatcher(idOrTag);
 			double r2 = radius * radius;
 			List<TargetContext> out = new ArrayList<>();
-			for (Entity e : p.getWorld().getOtherEntities(p, p.getBoundingBox().expand(radius),
+			for (Entity e : p.level().getEntities(p, p.getBoundingBox().inflate(radius),
 					e -> !e.isSpectator()
 							&& (!livingOnly || e instanceof LivingEntity)
-							&& e.squaredDistanceTo(p) <= r2)) {
+							&& e.distanceToSqr(p) <= r2)) {
 				if (type == null || type.test(e)) {
 					// Player targets carry their OWN model — resource/XP
 					// actions act per-target; non-players get null.
-					out.add(new TargetContext(e, e.getBlockPos(),
-							e instanceof ServerPlayerEntity sp
+					out.add(new TargetContext(e, e.blockPosition(),
+							e instanceof ServerPlayer sp
 									? CharacterManager.getCharacter(sp) : null));
 				}
 			}
@@ -73,22 +73,22 @@ final class BuiltinTargets {
 			int radius = Math.min(BuiltinConditions.radius(params), 32);
 			int limit = Math.min(Math.max(1,
 					(int) BuiltinConditions.num(params, "limit", 64)), 512);
-			Predicate<net.minecraft.block.BlockState> match = blockMatcher(idOrTag);
+			Predicate<net.minecraft.world.level.block.state.BlockState> match = blockMatcher(idOrTag);
 			if (match == null) {
 				return List.of();
 			}
-			BlockPos center = p.getBlockPos();
+			BlockPos center = p.blockPosition();
 			List<TargetContext> out = new ArrayList<>();
-			for (BlockPos pos : BlockPos.iterateOutwards(center, radius, radius, radius)) {
+			for (BlockPos pos : BlockPos.withinManhattan(center, radius, radius, radius)) {
 				if (out.size() >= limit) {
 					break;
 				}
-				if (pos.isWithinDistance(center, radius + 0.5)
-						&& p.getWorld().isChunkLoaded(pos)
-						&& match.test(p.getWorld().getBlockState(pos))) {
+				if (pos.closerThan(center, radius + 0.5)
+						&& p.level().hasChunkAt(pos)
+						&& match.test(p.level().getBlockState(pos))) {
 					// Block targets carry no character model — caster-model
 					// actions (resources/XP) don't multiply per resolved block.
-					out.add(new TargetContext(null, pos.toImmutable(), null));
+					out.add(new TargetContext(null, pos.immutable(), null));
 				}
 			}
 			return out;
@@ -104,7 +104,7 @@ final class BuiltinTargets {
 	}
 
 	@org.jetbrains.annotations.Nullable
-	private static Predicate<net.minecraft.block.BlockState> blockMatcher(
+	private static Predicate<net.minecraft.world.level.block.state.BlockState> blockMatcher(
 			@org.jetbrains.annotations.Nullable String idOrTag) {
 		return BuiltinConditions.blockMatcher(idOrTag);
 	}

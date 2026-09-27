@@ -9,7 +9,7 @@ import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,9 +35,9 @@ class PerfBenchmarkTest {
 		// Passive that runs real vocabulary work: a fail-closed condition
 		// (null self) after matcher construction — representative of a
 		// condition-gated passive's non-world cost.
-		List<Identifier> passives = new ArrayList<>();
+		List<ResourceLocation> passives = new ArrayList<>();
 		for (int i = 0; i < PASSIVES; i++) {
-			Identifier id = LifepathMod.id("bench_p" + i);
+			ResourceLocation id = LifepathMod.id("bench_p" + i);
 			AbilityDefinition.AbilityFile file = AbilityDefinition.AbilityFile.CODEC
 					.parse(JsonOps.INSTANCE, JsonParser.parseString("""
 							{"display_name": "B", "trigger": {"type": "passive", "interval_ticks": 20},
@@ -50,7 +50,7 @@ class PerfBenchmarkTest {
 			LifepathContent.abilities().register(id, AbilityDefinition.fromFile(id, file));
 			passives.add(id);
 		}
-		Identifier species = LifepathMod.id("bench_species");
+		ResourceLocation species = LifepathMod.id("bench_species");
 		LifepathContent.species().register(species, new SpeciesDefinition(
 				species, "Bench", SpeciesDefinition.Visibility.NORMAL,
 				SpeciesDefinition.Selection.OPEN, passives, List.of(),

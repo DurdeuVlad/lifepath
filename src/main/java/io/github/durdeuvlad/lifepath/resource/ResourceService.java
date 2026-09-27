@@ -19,10 +19,10 @@ import java.util.Map;
 import java.util.Set;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -53,9 +53,9 @@ public final class ResourceService {
 	private ResourceService() {}
 
 	/** Activity type emitted when a resource enters a band (attribute {@code band}=index). */
-	public static final Identifier BAND_ENTER = LifepathMod.id("resource_band_enter");
+	public static final ResourceLocation BAND_ENTER = LifepathMod.id("resource_band_enter");
 	/** Activity type emitted when a resource leaves a band. */
-	public static final Identifier BAND_EXIT = LifepathMod.id("resource_band_exit");
+	public static final ResourceLocation BAND_EXIT = LifepathMod.id("resource_band_exit");
 
 	/**
 	 * Reentrancy guard: a band-entry action that itself mutates resources can
@@ -84,13 +84,13 @@ public final class ResourceService {
 			}
 			long now = System.currentTimeMillis();
 			double dtSeconds = interval / 20.0;
-			for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				try {
 					io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
 							"resource.sweep", () -> tickPlayer(
 									CharacterManager.getCharacter(player), player, now, dtSeconds));
 				} catch (Exception e) {
-					LifepathMod.LOGGER.error("resource sweep failed for {}", player.getUuid(), e);
+					LifepathMod.LOGGER.error("resource sweep failed for {}", player.getUUID(), e);
 				}
 			}
 		});
@@ -101,7 +101,7 @@ public final class ResourceService {
 	 * definition's {@code default}; unknown resources read as 0 (fail closed).
 	 * Pure read — never materializes.
 	 */
-	public static double current(PlayerCharacterData data, Identifier resourceId) {
+	public static double current(PlayerCharacterData data, ResourceLocation resourceId) {
 		var state = data.resources().get(resourceId);
 		if (state != null) {
 			// Clamp on read: a def reload may have shrunk bounds under a stored
@@ -118,14 +118,14 @@ public final class ResourceService {
 	}
 
 	/** Applies {@code delta} through the definition's bounds; returns the new value. */
-	public static double modify(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
-			Identifier resourceId, double delta, long nowMs) {
+	public static double modify(PlayerCharacterData data, @Nullable ServerPlayer player,
+			ResourceLocation resourceId, double delta, long nowMs) {
 		return apply(data, player, resourceId, current(data, resourceId) + delta, nowMs);
 	}
 
 	/** Sets the resource to {@code value} through the definition's bounds. */
-	public static double setTo(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
-			Identifier resourceId, double value, long nowMs) {
+	public static double setTo(PlayerCharacterData data, @Nullable ServerPlayer player,
+			ResourceLocation resourceId, double value, long nowMs) {
 		return apply(data, player, resourceId, value, nowMs);
 	}
 
@@ -135,23 +135,23 @@ public final class ResourceService {
 	 * Data-path callable for tests ({@code player} may be null — status
 	 * effects simply don't apply; transitions and events still run).
 	 */
-	static void tickPlayer(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
+	static void tickPlayer(PlayerCharacterData data, @Nullable ServerPlayer player,
 			long nowMs, double intervalSeconds) {
-		Set<Identifier> owned = new LinkedHashSet<>(data.resources().keySet());
+		Set<ResourceLocation> owned = new LinkedHashSet<>(data.resources().keySet());
 		SpeciesDefinition species = data.speciesId() == null ? null
 				: LifepathContent.species().get(data.speciesId());
 		if (species != null) {
 			owned.addAll(species.resources());
 		}
 		// M9-1: held conditions declare their own resources (e.g. blood).
-		for (Identifier condId : data.conditions()) {
+		for (ResourceLocation condId : data.conditions()) {
 			var cond = LifepathContent.conditions().get(condId);
 			if (cond != null) {
 				owned.addAll(cond.resources());
 			}
 		}
 		boolean changed = false;
-		for (Identifier id : owned) {
+		for (ResourceLocation id : owned) {
 			ResourceDefinition def = LifepathContent.resources().get(id);
 			if (def == null) {
 				continue;
@@ -175,8 +175,8 @@ public final class ResourceService {
 
 	// ------------------------------------------------------------------
 
-	private static double apply(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
-			Identifier resourceId, double requested, long nowMs) {
+	private static double apply(PlayerCharacterData data, @Nullable ServerPlayer player,
+			ResourceLocation resourceId, double requested, long nowMs) {
 		ResourceDefinition def = LifepathContent.resources().get(resourceId);
 		var stored = data.resources().get(resourceId);
 		if (def == null && stored == null) {
@@ -217,7 +217,7 @@ public final class ResourceService {
 	}
 
 	private static void onBandTransition(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity player, Identifier resourceId,
+			@Nullable ServerPlayer player, ResourceLocation resourceId,
 			@Nullable ResourceDefinition def, int fromBand, int toBand, long nowMs) {
 		if (fromBand == toBand) {
 			return;
@@ -247,15 +247,15 @@ public final class ResourceService {
 	}
 
 	/** Sustained channel: (re)applies a band's status effects — call on entry and every sweep inside. */
-	private static void applyBandEffects(@Nullable ServerPlayerEntity player,
+	private static void applyBandEffects(@Nullable ServerPlayer player,
 			ResourceDefinition.Band band) {
 		if (player == null) {
 			return;
 		}
 		for (ResourceDefinition.BandEffect fx : band.effects()) {
-			var entry = Registries.STATUS_EFFECT.getEntry(fx.effect()).orElse(null);
+			var entry = BuiltInRegistries.MOB_EFFECT.getHolder(fx.effect()).orElse(null);
 			if (entry != null) {
-				player.addStatusEffect(new StatusEffectInstance(entry,
+				player.addEffect(new MobEffectInstance(entry,
 						fx.durationTicks(), fx.amplifier()));
 			}
 		}
@@ -266,20 +266,20 @@ public final class ResourceService {
 	 * no source marker — this strips the effect type even if another source
 	 * also applied it (documented; pick band-exclusive effects in data).
 	 */
-	private static void stripBandEffects(@Nullable ServerPlayerEntity player,
+	private static void stripBandEffects(@Nullable ServerPlayer player,
 			ResourceDefinition.Band band) {
 		if (player == null) {
 			return;
 		}
 		for (ResourceDefinition.BandEffect fx : band.effects()) {
-			Registries.STATUS_EFFECT.getEntry(fx.effect())
-					.ifPresent(player::removeStatusEffect);
+			BuiltInRegistries.MOB_EFFECT.getHolder(fx.effect())
+					.ifPresent(player::removeEffect);
 		}
 	}
 
 	/** Entry channel: runs a band's embedded actions exactly once, exception-isolated. */
 	private static void runEntryActions(PlayerCharacterData data,
-			@Nullable ServerPlayerEntity player, Identifier resourceId,
+			@Nullable ServerPlayer player, ResourceLocation resourceId,
 			ResourceDefinition.Band band, long nowMs) {
 		if (band.actions().isEmpty()) {
 			return;
@@ -304,8 +304,8 @@ public final class ResourceService {
 		}
 	}
 
-	private static void publish(@Nullable ServerPlayerEntity player, Identifier type,
-			Identifier resourceId, int bandIndex, long nowMs) {
+	private static void publish(@Nullable ServerPlayer player, ResourceLocation type,
+			ResourceLocation resourceId, int bandIndex, long nowMs) {
 		ActivityDispatcher.publish(new ActivityEvent(player, type, resourceId,
 				Set.of(), ActivityEvent.Cause.SYSTEM, nowMs,
 				Map.of("band", Integer.toString(bandIndex))));
@@ -317,9 +317,9 @@ public final class ResourceService {
 	 * initial snapshot so a quiescent meter still reports its band for M6.
 	 * Registered after {@code CharacterManager}'s JOIN sync so deltas land last.
 	 */
-	private static void sendSnapshotDeltas(ServerPlayerEntity player) {
+	private static void sendSnapshotDeltas(ServerPlayer player) {
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
-		for (Identifier id : data.resources().keySet()) {
+		for (ResourceLocation id : data.resources().keySet()) {
 			ResourceDefinition def = LifepathContent.resources().get(id);
 			var s = data.resources().get(id);
 			ServerPlayNetworking.send(player, new ResourceUpdatePayload(id,

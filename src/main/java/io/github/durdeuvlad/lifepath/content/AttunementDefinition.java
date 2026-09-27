@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Data definition of an attunement (M9-2, GAMEDESIGN §16) — an elemental
@@ -26,17 +26,17 @@ import net.minecraft.util.Identifier;
  * </ul>
  */
 public record AttunementDefinition(
-		Identifier id,
+		ResourceLocation id,
 		String displayName,
 		Optional<String> description,
-		List<Identifier> abilities,
+		List<ResourceLocation> abilities,
 		List<AcquisitionRule> acquisition,
 		List<RemovalRule> removal,
-		Optional<Identifier> icon) {
+		Optional<ResourceLocation> icon) {
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
-	public AttunementDefinition(Identifier id, String displayName,
-			Optional<String> description, List<Identifier> abilities,
+	public AttunementDefinition(ResourceLocation id, String displayName,
+			Optional<String> description, List<ResourceLocation> abilities,
 			List<AcquisitionRule> acquisition, List<RemovalRule> removal) {
 		this(id, displayName, description, abilities, acquisition, removal,
 				Optional.empty());
@@ -55,31 +55,31 @@ public record AttunementDefinition(
 	 * entity), {@code event} (each matching activity event rolls {@code
 	 * chance}), {@code admin} (command only).
 	 */
-	public record AcquisitionRule(String type, Optional<Identifier> item,
+	public record AcquisitionRule(String type, Optional<ResourceLocation> item,
 			Optional<String> damageType, Optional<String> entity,
-			Optional<Identifier> event, double chance, boolean consume) {
+			Optional<ResourceLocation> event, double chance, boolean consume) {
 
 		public static final Codec<AcquisitionRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(AcquisitionRule::type),
-				Identifier.CODEC.optionalFieldOf("item").forGetter(AcquisitionRule::item),
+				ResourceLocation.CODEC.optionalFieldOf("item").forGetter(AcquisitionRule::item),
 				Codec.STRING.optionalFieldOf("damage_type").forGetter(AcquisitionRule::damageType),
 				Codec.STRING.optionalFieldOf("entity").forGetter(AcquisitionRule::entity),
-				Identifier.CODEC.optionalFieldOf("event").forGetter(AcquisitionRule::event),
+				ResourceLocation.CODEC.optionalFieldOf("event").forGetter(AcquisitionRule::event),
 				Codec.doubleRange(0.0, 1.0).optionalFieldOf("chance", 1.0).forGetter(AcquisitionRule::chance),
 				Codec.BOOL.optionalFieldOf("consume", true).forGetter(AcquisitionRule::consume)
 		).apply(instance, AcquisitionRule::new));
 	}
 
 	/** How the attunement is lost. {@code type}: {@code item} | {@code admin}. */
-	public record RemovalRule(String type, Optional<Identifier> item) {
+	public record RemovalRule(String type, Optional<ResourceLocation> item) {
 
 		public static final Codec<RemovalRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(RemovalRule::type),
-				Identifier.CODEC.optionalFieldOf("item").forGetter(RemovalRule::item)
+				ResourceLocation.CODEC.optionalFieldOf("item").forGetter(RemovalRule::item)
 		).apply(instance, RemovalRule::new));
 	}
 
-	public static AttunementDefinition fromFile(Identifier id, AttunementFile file) {
+	public static AttunementDefinition fromFile(ResourceLocation id, AttunementFile file) {
 		return new AttunementDefinition(id, file.displayName(), file.description(),
 				file.abilities(), file.acquisition(), file.removal(),
 				file.icon().map(raw -> IconRef.resolve("attunement", id, raw)));
@@ -89,7 +89,7 @@ public record AttunementDefinition(
 	public record AttunementFile(
 			String displayName,
 			Optional<String> description,
-			List<Identifier> abilities,
+			List<ResourceLocation> abilities,
 			List<AcquisitionRule> acquisition,
 			List<RemovalRule> removal,
 			Optional<String> icon) {
@@ -97,7 +97,7 @@ public record AttunementDefinition(
 		public static final Codec<AttunementFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(AttunementFile::displayName),
 				Codec.STRING.optionalFieldOf("description").forGetter(AttunementFile::description),
-				Identifier.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(AttunementFile::abilities),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(AttunementFile::abilities),
 				AcquisitionRule.CODEC.listOf().optionalFieldOf("acquisition", List.of()).forGetter(AttunementFile::acquisition),
 				RemovalRule.CODEC.listOf().optionalFieldOf("removal", List.of()).forGetter(AttunementFile::removal),
 				Codec.STRING.optionalFieldOf("icon").forGetter(AttunementFile::icon)

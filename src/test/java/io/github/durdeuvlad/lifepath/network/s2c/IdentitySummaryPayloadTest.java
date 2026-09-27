@@ -6,8 +6,8 @@ import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload.Entry;
 import io.netty.buffer.Unpooled;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -50,8 +50,8 @@ class IdentitySummaryPayloadTest {
 						List.of("Cold", "Hot"),
 						"lifepath:textures/gui/resource/temp.png")));
 
-		RegistryByteBuf buf = new RegistryByteBuf(
-				Unpooled.buffer(), DynamicRegistryManager.EMPTY);
+		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
+				Unpooled.buffer(), RegistryAccess.EMPTY);
 		IdentitySummaryPayload.PACKET_CODEC.encode(buf, p);
 		IdentitySummaryPayload d = IdentitySummaryPayload.PACKET_CODEC.decode(buf);
 
@@ -67,8 +67,8 @@ class IdentitySummaryPayloadTest {
 
 	@Test
 	void emptyPayloadRoundTrips() {
-		RegistryByteBuf buf = new RegistryByteBuf(
-				Unpooled.buffer(), DynamicRegistryManager.EMPTY);
+		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
+				Unpooled.buffer(), RegistryAccess.EMPTY);
 		IdentitySummaryPayload p = IdentitySummaryPayload.empty();
 		IdentitySummaryPayload.PACKET_CODEC.encode(buf, p);
 		IdentitySummaryPayload d = IdentitySummaryPayload.PACKET_CODEC.decode(buf);

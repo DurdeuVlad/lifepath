@@ -1,7 +1,7 @@
 package io.github.durdeuvlad.lifepath.command;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -12,12 +12,12 @@ import io.github.durdeuvlad.lifepath.condition.ConditionService;
 import io.github.durdeuvlad.lifepath.condition.ConditionState;
 import io.github.durdeuvlad.lifepath.content.ConditionDefinition;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Admin {@code /lifepath condition} tree (M9-1, GAMEDESIGN §22):
@@ -44,110 +44,110 @@ public final class ConditionCommands {
 			return;
 		}
 		initialized = true;
-		var idArg = argument("id", IdentifierArgumentType.identifier())
+		var idArg = argument("id", ResourceLocationArgument.id())
 				.suggests((ctx, builder) -> {
 					LifepathContent.conditions().all().keySet()
 							.forEach(id -> builder.suggest(id.toString()));
 					return builder.buildFuture();
 				});
 		LifepathCommands.register(literal("condition")
-				.requires(src -> src.hasPermissionLevel(LifepathCommands.ADMIN_PERMISSION))
+				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 				.executes(ctx -> usage(ctx.getSource()))
 				.then(literal("get")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> get(ctx.getSource(),
-										EntityArgumentType.getPlayer(ctx, "player")))))
+										EntityArgument.getPlayer(ctx, "player")))))
 				.then(literal("add")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.then(idArg.executes(ctx -> add(ctx.getSource(),
-										EntityArgumentType.getPlayer(ctx, "player"),
-										IdentifierArgumentType.getIdentifier(ctx, "id"))))))
+										EntityArgument.getPlayer(ctx, "player"),
+										ResourceLocationArgument.getId(ctx, "id"))))))
 				.then(literal("remove")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.then(idArg.executes(ctx -> remove(ctx.getSource(),
-										EntityArgumentType.getPlayer(ctx, "player"),
-										IdentifierArgumentType.getIdentifier(ctx, "id"))))))
+										EntityArgument.getPlayer(ctx, "player"),
+										ResourceLocationArgument.getId(ctx, "id"))))))
 				.then(literal("stage")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.then(idArg.then(argument("n", IntegerArgumentType.integer(0))
 										.executes(ctx -> stage(ctx.getSource(),
-												EntityArgumentType.getPlayer(ctx, "player"),
-												IdentifierArgumentType.getIdentifier(ctx, "id"),
+												EntityArgument.getPlayer(ctx, "player"),
+												ResourceLocationArgument.getId(ctx, "id"),
 												IntegerArgumentType.getInteger(ctx, "n"))))))));
 	}
 
-	private static int usage(ServerCommandSource source) {
-		source.sendFeedback(() -> Text.literal(
+	private static int usage(CommandSourceStack source) {
+		source.sendSuccess(() -> Component.literal(
 				"usage: /lifepath condition get|add|remove|stage <player> [<id> [<n>]]"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int get(ServerCommandSource source, ServerPlayerEntity target) {
+	private static int get(CommandSourceStack source, ServerPlayer target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		if (data.conditions().isEmpty()) {
-			source.sendFeedback(() -> Text.literal(
+			source.sendSuccess(() -> Component.literal(
 					target.getName().getString() + " has no conditions"), false);
 			return Command.SINGLE_SUCCESS;
 		}
-		for (Identifier id : data.conditions()) {
+		for (ResourceLocation id : data.conditions()) {
 			ConditionDefinition def = LifepathContent.conditions().get(id);
 			ConditionState st = data.conditionState(id);
 			String stage = def == null || st == null ? "?" :
 					def.stages().get(Math.min(st.stage(), def.stageCount() - 1)).id()
 							+ " (" + st.stage() + "/" + def.stageCount() + ")";
-			source.sendFeedback(() -> Text.literal(target.getName().getString()
+			source.sendSuccess(() -> Component.literal(target.getName().getString()
 					+ " condition: " + id + " \"" + (def == null ? "missing" : def.displayName())
 					+ "\" stage " + stage), false);
 		}
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int add(ServerCommandSource source, ServerPlayerEntity target, Identifier id) {
+	private static int add(CommandSourceStack source, ServerPlayer target, ResourceLocation id) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		boolean ok = ConditionService.acquire(data, target, id, System.currentTimeMillis());
 		if (!ok) {
-			source.sendError(Text.literal("cannot add " + id
+			source.sendFailure(Component.literal("cannot add " + id
 					+ " (unknown definition or already held)"));
 			return 0;
 		}
 		LifepathMod.LOGGER.info("admin action: {} added condition {} to {} ({})",
-				source.getName(), id, target.getName().getString(), target.getUuid());
-		source.sendFeedback(() -> Text.literal("added condition " + id + " to "
+				source.getTextName(), id, target.getName().getString(), target.getUUID());
+		source.sendSuccess(() -> Component.literal("added condition " + id + " to "
 				+ target.getName().getString()), true);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int remove(ServerCommandSource source, ServerPlayerEntity target, Identifier id) {
+	private static int remove(CommandSourceStack source, ServerPlayer target, ResourceLocation id) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		boolean ok = ConditionService.cure(data, target, id);
 		if (!ok) {
-			source.sendError(Text.literal("cannot remove " + id
+			source.sendFailure(Component.literal("cannot remove " + id
 					+ " (unknown definition or not held)"));
 			return 0;
 		}
 		LifepathMod.LOGGER.info("admin action: {} removed condition {} from {} ({})",
-				source.getName(), id, target.getName().getString(), target.getUuid());
-		source.sendFeedback(() -> Text.literal("removed condition " + id + " from "
+				source.getTextName(), id, target.getName().getString(), target.getUUID());
+		source.sendSuccess(() -> Component.literal("removed condition " + id + " from "
 				+ target.getName().getString()), true);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int stage(ServerCommandSource source, ServerPlayerEntity target,
-			Identifier id, int n) {
+	private static int stage(CommandSourceStack source, ServerPlayer target,
+			ResourceLocation id, int n) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		ConditionDefinition def = LifepathContent.conditions().get(id);
 		ConditionState st = data.conditionState(id);
 		if (def == null || st == null) {
-			source.sendError(Text.literal(id + " is not held by " + target.getName().getString()));
+			source.sendFailure(Component.literal(id + " is not held by " + target.getName().getString()));
 			return 0;
 		}
 		int clamped = Math.max(0, Math.min(n, def.stageCount() - 1));
 		data.putCondition(id, new ConditionState(clamped, System.currentTimeMillis(), 0));
 		CharacterManager.changed(target);
 		LifepathMod.LOGGER.info("admin action: {} set {} condition {} stage to {}",
-				source.getName(), target.getName().getString(), id, clamped);
+				source.getTextName(), target.getName().getString(), id, clamped);
 		int c = clamped;
-		source.sendFeedback(() -> Text.literal("set " + target.getName().getString()
+		source.sendSuccess(() -> Component.literal("set " + target.getName().getString()
 				+ " condition " + id + " to stage " + c), true);
 		return Command.SINGLE_SUCCESS;
 	}

@@ -2,11 +2,11 @@ package io.github.durdeuvlad.lifepath.network.s2c;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Single-resource delta sent server → client when a resource's value changes
@@ -19,22 +19,22 @@ import net.minecraft.util.Identifier;
  *
  * <p>Advisory only — the server owns resource mutation; there is no C2S path.
  */
-public record ResourceUpdatePayload(Identifier resourceId, double current,
-		double min, double max, int bandIndex) implements CustomPayload {
-	public static final CustomPayload.Id<ResourceUpdatePayload> ID =
+public record ResourceUpdatePayload(ResourceLocation resourceId, double current,
+		double min, double max, int bandIndex) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<ResourceUpdatePayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("sync/resource"));
 
-	public static final PacketCodec<RegistryByteBuf, ResourceUpdatePayload> PACKET_CODEC =
-			PacketCodec.tuple(
-					Identifier.PACKET_CODEC, ResourceUpdatePayload::resourceId,
-					PacketCodecs.DOUBLE, ResourceUpdatePayload::current,
-					PacketCodecs.DOUBLE, ResourceUpdatePayload::min,
-					PacketCodecs.DOUBLE, ResourceUpdatePayload::max,
-					PacketCodecs.INTEGER, ResourceUpdatePayload::bandIndex,
+	public static final StreamCodec<RegistryFriendlyByteBuf, ResourceUpdatePayload> PACKET_CODEC =
+			StreamCodec.composite(
+					ResourceLocation.STREAM_CODEC, ResourceUpdatePayload::resourceId,
+					ByteBufCodecs.DOUBLE, ResourceUpdatePayload::current,
+					ByteBufCodecs.DOUBLE, ResourceUpdatePayload::min,
+					ByteBufCodecs.DOUBLE, ResourceUpdatePayload::max,
+					ByteBufCodecs.INT, ResourceUpdatePayload::bandIndex,
 					ResourceUpdatePayload::new);
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,8 +26,8 @@ class ExternalAdapterRegistryTest {
 		AtomicBoolean called = new AtomicBoolean();
 		ExternalAdapterRegistry.register(new ExternalActivityAdapter() {
 			@Override
-			public Identifier id() {
-				return Identifier.of("example", "adapter");
+			public ResourceLocation id() {
+				return ResourceLocation.fromNamespaceAndPath("example", "adapter");
 			}
 
 			@Override
@@ -37,7 +37,7 @@ class ExternalAdapterRegistryTest {
 		});
 		ExternalAdapterRegistry.init();
 		assertTrue(called.get());
-		assertEquals(java.util.List.of(Identifier.of("example", "adapter")),
+		assertEquals(java.util.List.of(ResourceLocation.fromNamespaceAndPath("example", "adapter")),
 				ExternalAdapterRegistry.registeredIds());
 	}
 
@@ -46,8 +46,8 @@ class ExternalAdapterRegistryTest {
 		AtomicBoolean secondRan = new AtomicBoolean();
 		ExternalAdapterRegistry.register(new ExternalActivityAdapter() {
 			@Override
-			public Identifier id() {
-				return Identifier.of("example", "bad");
+			public ResourceLocation id() {
+				return ResourceLocation.fromNamespaceAndPath("example", "bad");
 			}
 
 			@Override
@@ -57,8 +57,8 @@ class ExternalAdapterRegistryTest {
 		});
 		ExternalAdapterRegistry.register(new ExternalActivityAdapter() {
 			@Override
-			public Identifier id() {
-				return Identifier.of("example", "good");
+			public ResourceLocation id() {
+				return ResourceLocation.fromNamespaceAndPath("example", "good");
 			}
 
 			@Override

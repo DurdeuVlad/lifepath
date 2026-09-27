@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +43,7 @@ class OvergearedCompatTest {
 	@Test
 	void overgearedResultRepublishesAsSmithing() {
 		wireAdapter();
-		Identifier forged = Identifier.of("overgeared", "steel_sword");
+		ResourceLocation forged = ResourceLocation.fromNamespaceAndPath("overgeared", "steel_sword");
 		ActivityDispatcher.publish(ActivityEvents.crafting(null, forged));
 		assertEquals(2, seen.size(), "original crafting + translated smithing");
 		ActivityEvent re = seen.stream()
@@ -61,7 +61,7 @@ class OvergearedCompatTest {
 		// the id namespace needn't be overgeared.
 		wireAdapter();
 		ActivityEvent ev = new ActivityEvent(null, ActivityTypes.CRAFTING,
-				Identifier.of("somefuturemod", "forged_plate"),
+				ResourceLocation.fromNamespaceAndPath("somefuturemod", "forged_plate"),
 				Set.of(LifepathMod.id("forged_outputs")),
 				ActivityEvent.Cause.PLAYER, 0L, Map.of());
 		ActivityDispatcher.publish(ev);
@@ -74,9 +74,9 @@ class OvergearedCompatTest {
 	void vanillaAndUnrelatedEventsAreUntouched() {
 		wireAdapter();
 		ActivityDispatcher.publish(ActivityEvents.crafting(null,
-				Identifier.of("minecraft", "crafting_table")));
+				ResourceLocation.fromNamespaceAndPath("minecraft", "crafting_table")));
 		ActivityDispatcher.publish(new ActivityEvent(null,
-				ActivityTypes.MINING, Identifier.of("minecraft", "iron_ore"),
+				ActivityTypes.MINING, ResourceLocation.fromNamespaceAndPath("minecraft", "iron_ore"),
 				Set.of(), ActivityEvent.Cause.PLAYER, 0L, Map.of()));
 		assertEquals(2, seen.size(), "no translations for unrelated events");
 		assertTrue(seen.stream().allMatch(e -> e.type() != ActivityTypes.SMITHING));

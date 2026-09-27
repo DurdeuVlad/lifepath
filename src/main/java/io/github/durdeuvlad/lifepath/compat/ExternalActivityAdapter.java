@@ -1,6 +1,6 @@
 package io.github.durdeuvlad.lifepath.compat;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Adapter seam for external mods (M2-5). An integration — e.g. the M7-1
@@ -30,7 +30,7 @@ import net.minecraft.util.Identifier;
 public interface ExternalActivityAdapter {
 
 	/** Stable adapter id (e.g. the integrating mod's id). Used in logs only. */
-	Identifier id();
+	ResourceLocation id();
 
 	/**
 	 * Wire the foreign mod's event surface to {@code ActivityDispatcher}.

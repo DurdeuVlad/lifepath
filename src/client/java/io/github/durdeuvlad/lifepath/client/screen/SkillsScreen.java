@@ -6,9 +6,9 @@ import io.github.durdeuvlad.lifepath.network.s2c.SkillsSummaryPayload.SkillCard;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 /**
  * M6-2 skills list — every skill with level, rank band, and XP progress.
@@ -30,11 +30,11 @@ public class SkillsScreen extends Screen {
 	private int scroll;
 
 	public SkillsScreen() {
-		super(Text.translatable("screen.lifepath.skills.title"));
+		super(Component.translatable("screen.lifepath.skills.title"));
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		renderBackground(context, mouseX, mouseY, delta);
 		int left = width / 2 - 120;
 		int top = height / 2 - 90;
@@ -43,14 +43,14 @@ public class SkillsScreen extends Screen {
 		context.fill(left - 4, top - 4, left + panelW + 4, top + panelH + 4, PANEL_EDGE);
 		context.fill(left - 3, top - 3, left + panelW + 3, top + panelH + 3, PANEL);
 
-		context.drawCenteredTextWithShadow(textRenderer,
-				Text.translatable("screen.lifepath.skills.title"),
+		context.drawCenteredString(font,
+				Component.translatable("screen.lifepath.skills.title"),
 				width / 2, top + 4, ACCENT);
 
 		List<SkillCard> skills = ClientCharacterState.skills();
 		if (skills.isEmpty()) {
-			context.drawCenteredTextWithShadow(textRenderer,
-					Text.translatable("screen.lifepath.skills.empty"),
+			context.drawCenteredString(font,
+					Component.translatable("screen.lifepath.skills.empty"),
 					width / 2, top + panelH / 2, DIM);
 			return;
 		}
@@ -72,15 +72,15 @@ public class SkillsScreen extends Screen {
 				// absent so rows keep one aligned column.
 				final int iconRowY = y;
 				ClientIcons.resolve("skill", c.display().icon())
-						.ifPresent(tex -> context.drawTexture(tex,
+						.ifPresent(tex -> context.blit(tex,
 								left + 6, iconRowY + 1, 0, 0, 16, 16, 16, 16));
-				context.drawTextWithShadow(textRenderer,
-						Text.literal(c.display().name()), left + 26, y, TEXT);
-				String levelText = Text.translatable(
+				context.drawString(font,
+						Component.literal(c.display().name()), left + 26, y, TEXT);
+				String levelText = Component.translatable(
 						"screen.lifepath.skills.level", c.progress().level())
-						.getString() + " · " + Text.translatable(
+						.getString() + " · " + Component.translatable(
 								"lifepath.rank." + c.display().rankKey()).getString();
-				context.drawTextWithShadow(textRenderer, levelText,
+				context.drawString(font, levelText,
 						left + 26, y + 9, DIM);
 
 				// Progress bar: xpIn/xpNeed (0-need = max level → full bar).
@@ -92,8 +92,8 @@ public class SkillsScreen extends Screen {
 				context.fill(barX, barY, barX + (int) (80 * frac), barY + 5, BAR_FG);
 				if (mouseX >= barX && mouseX <= barX + 80
 						&& mouseY >= barY && mouseY < barY + 6) {
-					context.drawTooltip(textRenderer,
-							Text.translatable("screen.lifepath.skills.xp",
+					context.renderTooltip(font,
+							Component.translatable("screen.lifepath.skills.xp",
 									(int) c.progress().xpIn(),
 									(int) c.progress().xpNeed()),
 							mouseX, mouseY);
@@ -104,8 +104,8 @@ public class SkillsScreen extends Screen {
 		context.disableScissor();
 
 		// M6-4 discoverability: rows are clickable — say so.
-		context.drawCenteredTextWithShadow(textRenderer,
-				Text.translatable("screen.lifepath.skills.click_hint"),
+		context.drawCenteredString(font,
+				Component.translatable("screen.lifepath.skills.click_hint"),
 				width / 2, top + panelH + 8, DIM);
 	}
 
@@ -121,7 +121,7 @@ public class SkillsScreen extends Screen {
 			double rowTop = y + idx * ROW_H;
 			if (mouseY >= rowTop && mouseY < rowTop + ROW_H
 					&& mouseY >= top + 18) {
-				client.setScreen(new SkillDetailScreen(skills.get(idx), this));
+				minecraft.setScreen(new SkillDetailScreen(skills.get(idx), this));
 				return true;
 			}
 		}

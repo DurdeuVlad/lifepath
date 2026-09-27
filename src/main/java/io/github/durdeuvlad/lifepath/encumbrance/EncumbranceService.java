@@ -7,11 +7,11 @@ import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import io.github.durdeuvlad.lifepath.resource.ResourceService;
 import java.util.Map;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -37,9 +37,9 @@ public final class EncumbranceService {
 	private EncumbranceService() {
 	}
 
-	public static final Identifier CONFIG = LifepathMod.id("encumbrance");
+	public static final ResourceLocation CONFIG = LifepathMod.id("encumbrance");
 	/** The resource every player carries — written by the scan, never regen'd. */
-	public static final Identifier LOAD = LifepathMod.id("load");
+	public static final ResourceLocation LOAD = LifepathMod.id("load");
 
 	private static long ticks;
 	private static boolean initialized;
@@ -60,7 +60,7 @@ public final class EncumbranceService {
 						return;
 					}
 					long now = System.currentTimeMillis();
-					for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+					for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 						try {
 							io.github.durdeuvlad.lifepath.perf.PerfCounters.time(
 									"encumbrance.scan", () -> scan(
@@ -68,7 +68,7 @@ public final class EncumbranceService {
 											player, now));
 						} catch (Exception e) {
 							LifepathMod.LOGGER.error("encumbrance scan failed for {}",
-									player.getUuid(), e);
+									player.getUUID(), e);
 						}
 					}
 				});
@@ -81,7 +81,7 @@ public final class EncumbranceService {
 	 * Data-path callable ({@code player} null ⇒ inventory read is skipped —
 	 * the service only changes persisted state when it has a live entity).
 	 */
-	public static void scan(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
+	public static void scan(PlayerCharacterData data, @Nullable ServerPlayer player,
 			long nowMs) {
 		if (LifepathContent.resources().get(LOAD) == null) {
 			return; // no load resource def loaded — feature self-disables
@@ -99,11 +99,11 @@ public final class EncumbranceService {
 	}
 
 	/** Total carried weight across the whole player inventory (main+armor+offhand). */
-	public static double totalWeight(ServerPlayerEntity player) {
+	public static double totalWeight(ServerPlayer player) {
 		double total = 0.0;
 		var inv = player.getInventory();
-		for (int i = 0; i < inv.size(); i++) {
-			ItemStack stack = inv.getStack(i);
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			ItemStack stack = inv.getItem(i);
 			total += weightOf(stack) * stack.getCount();
 		}
 		return total;
@@ -114,7 +114,7 @@ public final class EncumbranceService {
 		if (stack.isEmpty()) {
 			return 0.0;
 		}
-		Identifier itemId = Registries.ITEM.getId(stack.getItem());
+		ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
 		double tagHit = Double.NaN;
 		for (Map<String, Double> table : LifepathContent.itemWeights().all().values()) {
 			Double exact = table.get(itemId.toString());
@@ -127,9 +127,9 @@ public final class EncumbranceService {
 					if (!key.startsWith("#")) {
 						continue;
 					}
-					Identifier tagId = Identifier.tryParse(key.substring(1));
-					if (tagId != null && stack.isIn(
-							TagKey.of(Registries.ITEM.getKey(), tagId))) {
+					ResourceLocation tagId = ResourceLocation.tryParse(key.substring(1));
+					if (tagId != null && stack.is(
+							TagKey.create(BuiltInRegistries.ITEM.key(), tagId))) {
 						tagHit = e.getValue();
 						break;
 					}
@@ -158,7 +158,7 @@ public final class EncumbranceService {
 	}
 
 	/** Weight as a percent of effective capacity, clamped to [0, 100]. */
-	public static double loadPercent(PlayerCharacterData data, ServerPlayerEntity player) {
+	public static double loadPercent(PlayerCharacterData data, ServerPlayer player) {
 		return toPercent(totalWeight(player), capacityOf(data));
 	}
 

@@ -6,15 +6,15 @@ import io.github.durdeuvlad.lifepath.content.AttunementDefinition;
 import io.github.durdeuvlad.lifepath.event.ActivityEvent;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import java.util.List;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -39,8 +39,8 @@ public final class AttunementService {
 	}
 
 	/** Grants the attunement. Idempotent; false on unknown id or already held. */
-	public static boolean attune(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
-			Identifier attunementId) {
+	public static boolean attune(PlayerCharacterData data, @Nullable ServerPlayer player,
+			ResourceLocation attunementId) {
 		if (LifepathContent.attunements().get(attunementId) == null
 				|| data.attunements().contains(attunementId)) {
 			return false;
@@ -51,8 +51,8 @@ public final class AttunementService {
 	}
 
 	/** Removes the attunement. False on unknown id or not held. */
-	public static boolean unattune(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
-			Identifier attunementId) {
+	public static boolean unattune(PlayerCharacterData data, @Nullable ServerPlayer player,
+			ResourceLocation attunementId) {
 		if (LifepathContent.attunements().get(attunementId) == null
 				|| !data.attunements().contains(attunementId)) {
 			return false;
@@ -63,9 +63,9 @@ public final class AttunementService {
 	}
 
 	/** Every ability id the held attunements grant. */
-	public static List<Identifier> activeAbilities(PlayerCharacterData data) {
-		List<Identifier> out = new java.util.ArrayList<>();
-		for (Identifier id : data.attunements()) {
+	public static List<ResourceLocation> activeAbilities(PlayerCharacterData data) {
+		List<ResourceLocation> out = new java.util.ArrayList<>();
+		for (ResourceLocation id : data.attunements()) {
 			AttunementDefinition def = LifepathContent.attunements().get(id);
 			if (def != null) { // unloaded content — held id survives a reload
 				out.addAll(def.abilities());
@@ -79,14 +79,14 @@ public final class AttunementService {
 	 * for held attunements, then acquisition for un-held ones. {@code
 	 * consume} decrements the stack on a successful acquisition only.
 	 */
-	public static void onUseItem(ServerPlayerEntity player, ItemStack stack,
+	public static void onUseItem(ServerPlayer player, ItemStack stack,
 			long nowMs) {
 		PlayerCharacterData data = CharacterManager.getCharacter(player);
 		if (data == null || stack.isEmpty()) {
 			return;
 		}
-		Identifier itemId = Registries.ITEM.getId(stack.getItem());
-		for (Identifier id : List.copyOf(data.attunements())) {
+		ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		for (ResourceLocation id : List.copyOf(data.attunements())) {
 			AttunementDefinition def = LifepathContent.attunements().get(id);
 			if (def != null && def.removal().stream().anyMatch(r ->
 					"item".equals(r.type()) && r.item().map(itemId::equals).orElse(false))) {
@@ -103,7 +103,7 @@ public final class AttunementService {
 					continue;
 				}
 				if (attune(data, player, def.id()) && rule.consume()) {
-					stack.decrement(1);
+					stack.shrink(1);
 				}
 				break;
 			}
@@ -115,13 +115,13 @@ public final class AttunementService {
 	 * {@code #tag} — covers attacker-less sources like lightning), then
 	 * {@code type:attack} matches a living attacker's entity id/tag.
 	 */
-	public static void onDamaged(ServerPlayerEntity victim, DamageSource source,
-			Random random, long nowMs) {
+	public static void onDamaged(ServerPlayer victim, DamageSource source,
+			RandomSource random, long nowMs) {
 		PlayerCharacterData data = CharacterManager.getCharacter(victim);
 		if (data == null) {
 			return;
 		}
-		Entity attacker = source.getAttacker();
+		Entity attacker = source.getEntity();
 		for (AttunementDefinition def : LifepathContent.attunements().all().values()) {
 			if (data.attunements().contains(def.id())) {
 				continue;
@@ -144,7 +144,7 @@ public final class AttunementService {
 	}
 
 	/** {@code type:event} rules — each matching activity event rolls chance. */
-	public static void onActivity(PlayerCharacterData data, @Nullable ServerPlayerEntity player,
+	public static void onActivity(PlayerCharacterData data, @Nullable ServerPlayer player,
 			ActivityEvent event, long nowMs) {
 		for (AttunementDefinition def : LifepathContent.attunements().all().values()) {
 			if (data.attunements().contains(def.id())) {
@@ -153,8 +153,8 @@ public final class AttunementService {
 			for (AttunementDefinition.AcquisitionRule rule : def.acquisition()) {
 				if ("event".equals(rule.type())
 						&& rule.event().map(event.type()::equals).orElse(false)) {
-					Random random = player != null ? player.getWorld().getRandom()
-							: Random.create();
+					RandomSource random = player != null ? player.level().getRandom()
+							: RandomSource.create();
 					if (random.nextDouble() < rule.chance()) {
 						attune(data, player, def.id());
 					}
@@ -166,25 +166,25 @@ public final class AttunementService {
 
 	private static boolean damageMatches(DamageSource source, String idOrTag) {
 		if (idOrTag.startsWith("#")) {
-			Identifier tagId = Identifier.tryParse(idOrTag.substring(1));
-			return tagId != null && source.isIn(
-					TagKey.of(net.minecraft.registry.RegistryKeys.DAMAGE_TYPE, tagId));
+			ResourceLocation tagId = ResourceLocation.tryParse(idOrTag.substring(1));
+			return tagId != null && source.is(
+					TagKey.create(net.minecraft.core.registries.Registries.DAMAGE_TYPE, tagId));
 		}
-		Identifier id = Identifier.tryParse(idOrTag);
-		return id != null && source.getTypeRegistryEntry().matchesId(id);
+		ResourceLocation id = ResourceLocation.tryParse(idOrTag);
+		return id != null && source.typeHolder().is(id);
 	}
 
 	private static boolean entityMatches(Entity entity, String idOrTag) {
 		if (idOrTag.startsWith("#")) {
-			Identifier tagId = Identifier.tryParse(idOrTag.substring(1));
-			return tagId != null && entity.getType().getRegistryEntry()
-					.isIn(TagKey.of(Registries.ENTITY_TYPE.getKey(), tagId));
+			ResourceLocation tagId = ResourceLocation.tryParse(idOrTag.substring(1));
+			return tagId != null && entity.getType().builtInRegistryHolder()
+					.is(TagKey.create(BuiltInRegistries.ENTITY_TYPE.key(), tagId));
 		}
-		Identifier id = Identifier.tryParse(idOrTag);
-		return id != null && Registries.ENTITY_TYPE.getId(entity.getType()).equals(id);
+		ResourceLocation id = ResourceLocation.tryParse(idOrTag);
+		return id != null && BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).equals(id);
 	}
 
-	private static void mark(@Nullable ServerPlayerEntity player) {
+	private static void mark(@Nullable ServerPlayer player) {
 		if (player != null) {
 			CharacterManager.changed(player);
 		}

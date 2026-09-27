@@ -6,7 +6,7 @@ import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Data definition of a specialization — an initial focus, NOT a rigid class
@@ -14,25 +14,25 @@ import net.minecraft.util.Identifier;
  * effect through later mechanics (M2/M3); this record is pure structure.
  */
 public record SpecializationDefinition(
-		Identifier id,
+		ResourceLocation id,
 		String displayName,
-		Map<Identifier, Integer> startingSkills,
-		Map<Identifier, Aptitude> aptitudes,
-		Map<Identifier, Double> xpModifiers,
-		Map<Identifier, Double> decayModifiers,
-		Map<Identifier, Integer> protectedFloors,
-		List<Identifier> signatureRefs,
+		Map<ResourceLocation, Integer> startingSkills,
+		Map<ResourceLocation, Aptitude> aptitudes,
+		Map<ResourceLocation, Double> xpModifiers,
+		Map<ResourceLocation, Double> decayModifiers,
+		Map<ResourceLocation, Integer> protectedFloors,
+		List<ResourceLocation> signatureRefs,
 		double capacityMultiplier,
-		Optional<Identifier> icon) {
+		Optional<ResourceLocation> icon) {
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
-	public SpecializationDefinition(Identifier id, String displayName,
-			Map<Identifier, Integer> startingSkills,
-			Map<Identifier, Aptitude> aptitudes,
-			Map<Identifier, Double> xpModifiers,
-			Map<Identifier, Double> decayModifiers,
-			Map<Identifier, Integer> protectedFloors,
-			List<Identifier> signatureRefs,
+	public SpecializationDefinition(ResourceLocation id, String displayName,
+			Map<ResourceLocation, Integer> startingSkills,
+			Map<ResourceLocation, Aptitude> aptitudes,
+			Map<ResourceLocation, Double> xpModifiers,
+			Map<ResourceLocation, Double> decayModifiers,
+			Map<ResourceLocation, Integer> protectedFloors,
+			List<ResourceLocation> signatureRefs,
 			double capacityMultiplier) {
 		this(id, displayName, startingSkills, aptitudes, xpModifiers,
 				decayModifiers, protectedFloors, signatureRefs, capacityMultiplier,
@@ -40,18 +40,18 @@ public record SpecializationDefinition(
 	}
 
 	/** Convenience for call sites predating {@code capacityMultiplier} (M9-3). */
-	public SpecializationDefinition(Identifier id, String displayName,
-			Map<Identifier, Integer> startingSkills,
-			Map<Identifier, Aptitude> aptitudes,
-			Map<Identifier, Double> xpModifiers,
-			Map<Identifier, Double> decayModifiers,
-			Map<Identifier, Integer> protectedFloors,
-			List<Identifier> signatureRefs) {
+	public SpecializationDefinition(ResourceLocation id, String displayName,
+			Map<ResourceLocation, Integer> startingSkills,
+			Map<ResourceLocation, Aptitude> aptitudes,
+			Map<ResourceLocation, Double> xpModifiers,
+			Map<ResourceLocation, Double> decayModifiers,
+			Map<ResourceLocation, Integer> protectedFloors,
+			List<ResourceLocation> signatureRefs) {
 		this(id, displayName, startingSkills, aptitudes, xpModifiers,
 				decayModifiers, protectedFloors, signatureRefs, 1.0);
 	}
 
-	public static SpecializationDefinition fromFile(Identifier id, SpecializationDefinitionFile file) {
+	public static SpecializationDefinition fromFile(ResourceLocation id, SpecializationDefinitionFile file) {
 		return new SpecializationDefinition(id, file.displayName(), file.startingSkills(),
 				file.aptitudes(), file.xpModifiers(), file.decayModifiers(), file.protectedFloors(),
 				file.signatureRefs(), file.capacityMultiplier(),
@@ -61,23 +61,23 @@ public record SpecializationDefinition(
 	/** JSON shape of {@code data/<ns>/specialization/<name>.json} (id excluded). */
 	public record SpecializationDefinitionFile(
 			String displayName,
-			Map<Identifier, Integer> startingSkills,
-			Map<Identifier, Aptitude> aptitudes,
-			Map<Identifier, Double> xpModifiers,
-			Map<Identifier, Double> decayModifiers,
-			Map<Identifier, Integer> protectedFloors,
-			List<Identifier> signatureRefs,
+			Map<ResourceLocation, Integer> startingSkills,
+			Map<ResourceLocation, Aptitude> aptitudes,
+			Map<ResourceLocation, Double> xpModifiers,
+			Map<ResourceLocation, Double> decayModifiers,
+			Map<ResourceLocation, Integer> protectedFloors,
+			List<ResourceLocation> signatureRefs,
 			double capacityMultiplier,
 			Optional<String> icon) {
 
 		public static final Codec<SpecializationDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SpecializationDefinitionFile::displayName),
-				Codec.unboundedMap(Identifier.CODEC, Codec.intRange(0, 10000)).optionalFieldOf("starting_skills", Map.of()).forGetter(SpecializationDefinitionFile::startingSkills),
-				Codec.unboundedMap(Identifier.CODEC, Aptitude.CODEC).optionalFieldOf("aptitudes", Map.of()).forGetter(SpecializationDefinitionFile::aptitudes),
-				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 100.0)).optionalFieldOf("xp_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::xpModifiers),
-				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 1.0)).optionalFieldOf("decay_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::decayModifiers),
-				Codec.unboundedMap(Identifier.CODEC, Codec.intRange(0, 10000)).optionalFieldOf("protected_floors", Map.of()).forGetter(SpecializationDefinitionFile::protectedFloors),
-				Identifier.CODEC.listOf().optionalFieldOf("signature", List.of()).forGetter(SpecializationDefinitionFile::signatureRefs),
+				Codec.unboundedMap(ResourceLocation.CODEC, Codec.intRange(0, 10000)).optionalFieldOf("starting_skills", Map.of()).forGetter(SpecializationDefinitionFile::startingSkills),
+				Codec.unboundedMap(ResourceLocation.CODEC, Aptitude.CODEC).optionalFieldOf("aptitudes", Map.of()).forGetter(SpecializationDefinitionFile::aptitudes),
+				Codec.unboundedMap(ResourceLocation.CODEC, Codec.doubleRange(0.0, 100.0)).optionalFieldOf("xp_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::xpModifiers),
+				Codec.unboundedMap(ResourceLocation.CODEC, Codec.doubleRange(0.0, 1.0)).optionalFieldOf("decay_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::decayModifiers),
+				Codec.unboundedMap(ResourceLocation.CODEC, Codec.intRange(0, 10000)).optionalFieldOf("protected_floors", Map.of()).forGetter(SpecializationDefinitionFile::protectedFloors),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("signature", List.of()).forGetter(SpecializationDefinitionFile::signatureRefs),
 			Codec.doubleRange(0.0, 100.0).optionalFieldOf("capacity_multiplier", 1.0).forGetter(SpecializationDefinitionFile::capacityMultiplier),
 			Codec.STRING.optionalFieldOf("icon").forGetter(SpecializationDefinitionFile::icon)
 		).apply(instance, SpecializationDefinitionFile::new));

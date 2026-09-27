@@ -9,8 +9,8 @@ import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData.ResourceState;
 import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.github.durdeuvlad.lifepath.util.Serialization;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 class PlayerCharacterDataCodecTest {
@@ -19,7 +19,7 @@ class PlayerCharacterDataCodecTest {
 	void defaultDataRoundTrips() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 
-		NbtElement nbt = Serialization.toNbt(PlayerCharacterData.CODEC, data);
+		Tag nbt = Serialization.toNbt(PlayerCharacterData.CODEC, data);
 
 		assertEquals(data, Serialization.fromNbt(PlayerCharacterData.CODEC, nbt));
 	}
@@ -27,31 +27,31 @@ class PlayerCharacterDataCodecTest {
 	@Test
 	void fullyPopulatedDataRoundTrips() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setSpeciesId(Identifier.of("lifepath", "test_species"));
-		data.setSpecializationId(Identifier.of("lifepath", "test_spec"));
-		data.setSkillProgress(Identifier.of("lifepath", "test_skill"),
+		data.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_species"));
+		data.setSpecializationId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_spec"));
+		data.setSkillProgress(ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill"),
 				new SkillProgress(123.5, 4, 6, 2, Aptitude.B, 1727000000000L));
-		data.addId(PlayerCharacterData.ListKind.TRAITS, Identifier.of("lifepath", "t1"));
-		data.addId(PlayerCharacterData.ListKind.CONDITIONS, Identifier.of("lifepath", "c1"));
-		data.addId(PlayerCharacterData.ListKind.ATTUNEMENTS, Identifier.of("lifepath", "a1"));
-		data.addId(PlayerCharacterData.ListKind.UNLOCKS, Identifier.of("lifepath", "u1"));
-		data.setResource(Identifier.of("lifepath", "mana"), new ResourceState(40.0, 0.0, 100.0));
-		data.setCooldown(Identifier.of("lifepath", "ab1"), 999999L);
+		data.addId(PlayerCharacterData.ListKind.TRAITS, ResourceLocation.fromNamespaceAndPath("lifepath", "t1"));
+		data.addId(PlayerCharacterData.ListKind.CONDITIONS, ResourceLocation.fromNamespaceAndPath("lifepath", "c1"));
+		data.addId(PlayerCharacterData.ListKind.ATTUNEMENTS, ResourceLocation.fromNamespaceAndPath("lifepath", "a1"));
+		data.addId(PlayerCharacterData.ListKind.UNLOCKS, ResourceLocation.fromNamespaceAndPath("lifepath", "u1"));
+		data.setResource(ResourceLocation.fromNamespaceAndPath("lifepath", "mana"), new ResourceState(40.0, 0.0, 100.0));
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "ab1"), 999999L);
 		data.setDataVersion(1);
 
 		PlayerCharacterData decoded = Serialization.fromNbt(
 				PlayerCharacterData.CODEC, Serialization.toNbt(PlayerCharacterData.CODEC, data));
 
 		assertEquals(data, decoded);
-		assertEquals(123.5, decoded.skill(Identifier.of("lifepath", "test_skill")).xp());
-		assertEquals(Aptitude.B, decoded.skill(Identifier.of("lifepath", "test_skill")).aptitude());
+		assertEquals(123.5, decoded.skill(ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill")).xp());
+		assertEquals(Aptitude.B, decoded.skill(ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill")).aptitude());
 	}
 
 	@Test
 	void jsonRoundTripMatchesNbtRoundTrip() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setSpeciesId(Identifier.of("lifepath", "test_species"));
-		data.setSkillProgress(Identifier.of("lifepath", "s"), new SkillProgress(1.0, 1, 1, 0, Aptitude.A, 7L));
+		data.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_species"));
+		data.setSkillProgress(ResourceLocation.fromNamespaceAndPath("lifepath", "s"), new SkillProgress(1.0, 1, 1, 0, Aptitude.A, 7L));
 
 		PlayerCharacterData viaJson = Serialization.fromJson(
 				PlayerCharacterData.CODEC, Serialization.toJson(PlayerCharacterData.CODEC, data));
@@ -62,7 +62,7 @@ class PlayerCharacterDataCodecTest {
 	@Test
 	void absentSpeciesDecodesAsNull() {
 		PlayerCharacterData decoded = Serialization.fromNbt(
-				PlayerCharacterData.CODEC, new net.minecraft.nbt.NbtCompound());
+				PlayerCharacterData.CODEC, new net.minecraft.nbt.CompoundTag());
 
 		assertNull(decoded.speciesId());
 		assertNull(decoded.specializationId());
@@ -74,7 +74,7 @@ class PlayerCharacterDataCodecTest {
 	@Test
 	void duplicateListEntriesAreRejected() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		Identifier id = Identifier.of(LifepathMod.MOD_ID, "x");
+		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(LifepathMod.MOD_ID, "x");
 
 		assertTrue(data.addId(PlayerCharacterData.ListKind.TRAITS, id));
 		assertEquals(1, data.traits().size());
@@ -84,9 +84,9 @@ class PlayerCharacterDataCodecTest {
 	@Test
 	void clearExpiredCooldownsBoundary() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		Identifier active = Identifier.of("lifepath", "active");
-		Identifier boundary = Identifier.of("lifepath", "boundary");
-		Identifier expired = Identifier.of("lifepath", "expired");
+		ResourceLocation active = ResourceLocation.fromNamespaceAndPath("lifepath", "active");
+		ResourceLocation boundary = ResourceLocation.fromNamespaceAndPath("lifepath", "boundary");
+		ResourceLocation expired = ResourceLocation.fromNamespaceAndPath("lifepath", "expired");
 		data.setCooldown(active, 101L);
 		data.setCooldown(boundary, 100L);
 		data.setCooldown(expired, 50L);

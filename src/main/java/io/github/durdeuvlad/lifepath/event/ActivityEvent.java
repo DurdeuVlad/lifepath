@@ -2,8 +2,8 @@ package io.github.durdeuvlad.lifepath.event;
 
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -24,10 +24,10 @@ import org.jetbrains.annotations.Nullable;
  * ambient/unknown sources; {@link #timestamp()} supports time windows.
  */
 public record ActivityEvent(
-		@Nullable ServerPlayerEntity player,
-		Identifier type,
-		Identifier sourceId,
-		Set<Identifier> tags,
+		@Nullable ServerPlayer player,
+		ResourceLocation type,
+		ResourceLocation sourceId,
+		Set<ResourceLocation> tags,
 		Cause cause,
 		long timestamp,
 		Map<String, String> attributes) {
@@ -57,12 +57,12 @@ public record ActivityEvent(
 	}
 
 	/** Convenience for data paths/tests where no player is attached. */
-	public static ActivityEvent of(Identifier type, Identifier sourceId) {
+	public static ActivityEvent of(ResourceLocation type, ResourceLocation sourceId) {
 		return new ActivityEvent(null, type, sourceId, Set.of(), Cause.UNKNOWN, 0L, Map.of());
 	}
 
 	/** Source marker for non-activity mutations (admin set-level/set-xp). */
-	public static ActivityEvent admin(Identifier commandId) {
+	public static ActivityEvent admin(ResourceLocation commandId) {
 		return new ActivityEvent(null, commandId, commandId, Set.of(), Cause.SYSTEM,
 				System.currentTimeMillis(), Map.of());
 	}

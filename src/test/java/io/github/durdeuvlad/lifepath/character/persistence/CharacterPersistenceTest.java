@@ -18,10 +18,10 @@ import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -43,7 +43,7 @@ class CharacterPersistenceTest {
 
 	@Test
 	void corruptBlobYieldsDefaultsPlusBackup() {
-		NbtCompound corrupt = new NbtCompound();
+		CompoundTag corrupt = new CompoundTag();
 		corrupt.putString("skills", "not_a_map"); // wrong shape -> decode fails
 
 		PlayerCharacterData data = CharacterPersistence.loadSafe(
@@ -56,8 +56,8 @@ class CharacterPersistenceTest {
 	@Test
 	void scheduleMarkersSurviveSanitize() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		Identifier marker = Identifier.of("lifepath", "schedule/lifepath/passive_x");
-		Identifier real = Identifier.of("lifepath", "real_ability");
+		ResourceLocation marker = ResourceLocation.fromNamespaceAndPath("lifepath", "schedule/lifepath/passive_x");
+		ResourceLocation real = ResourceLocation.fromNamespaceAndPath("lifepath", "real_ability");
 		data.setCooldown(marker, 123L);
 		data.setCooldown(real, 456L);
 		CharacterPersistence.setContentIndex((domain, id) -> false); // strictest: all unknown
@@ -77,7 +77,7 @@ class CharacterPersistenceTest {
 		PlayerCharacterData data = sampleData();
 		CharacterPersistence.setContentIndex(new ContentIndex() {
 			@Override
-			public boolean exists(String domain, Identifier id) {
+			public boolean exists(String domain, ResourceLocation id) {
 				// Everything is gone except the skill and the species.
 				return "skill".equals(domain) || "species".equals(domain);
 			}
@@ -86,8 +86,8 @@ class CharacterPersistenceTest {
 			PlayerCharacterData sanitized = CharacterPersistence.deserialize(
 					CharacterPersistence.serialize(data));
 
-			assertTrue(sanitized.skills().containsKey(Identifier.of("lifepath", "test_skill")));
-			assertEquals(Identifier.of("lifepath", "test_species"), sanitized.speciesId());
+			assertTrue(sanitized.skills().containsKey(ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill")));
+			assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "test_species"), sanitized.speciesId());
 			assertNull(sanitized.specializationId());
 			assertTrue(sanitized.traits().isEmpty());
 			assertTrue(sanitized.resources().isEmpty());
@@ -108,7 +108,7 @@ class CharacterPersistenceTest {
 		PlayerCharacterData data = sampleData();
 		CharacterPersistence.setContentIndex(new ContentIndex() {
 			@Override
-			public boolean exists(String domain, Identifier id) {
+			public boolean exists(String domain, ResourceLocation id) {
 				// Everything gone except skill/species — and unlock_content,
 				// which the real index resolves via species or granting defs.
 				return "skill".equals(domain) || "species".equals(domain)
@@ -119,7 +119,7 @@ class CharacterPersistenceTest {
 			PlayerCharacterData sanitized = CharacterPersistence.deserialize(
 					CharacterPersistence.serialize(data));
 			assertTrue(sanitized.unlocks()
-					.contains(Identifier.of("lifepath", "u1")),
+					.contains(ResourceLocation.fromNamespaceAndPath("lifepath", "u1")),
 					"a held unlock id must survive relog while its content exists");
 		} finally {
 			CharacterPersistence.setContentIndex(ContentIndex.PERMISSIVE);
@@ -133,31 +133,31 @@ class CharacterPersistenceTest {
 	 */
 	@Test
 	void v1FixtureMigratesThroughTheRealPath() {
-		NbtCompound v1 = new NbtCompound();
+		CompoundTag v1 = new CompoundTag();
 		v1.putInt("data_version", 1);
 		v1.putString("species_id", "lifepath:human");
-		NbtList oldConditions = new NbtList();
-		oldConditions.add(NbtString.of("lifepath:vampirism"));
-		oldConditions.add(NbtString.of("lifepath:lycanthropy"));
+		ListTag oldConditions = new ListTag();
+		oldConditions.add(StringTag.valueOf("lifepath:vampirism"));
+		oldConditions.add(StringTag.valueOf("lifepath:lycanthropy"));
 		v1.put("conditions", oldConditions);
-		NbtList unlocks = new NbtList();
-		unlocks.add(NbtString.of("lifepath:phantom"));
+		ListTag unlocks = new ListTag();
+		unlocks.add(StringTag.valueOf("lifepath:phantom"));
 		v1.put("unlocks", unlocks);
-		v1.put("skills", new NbtCompound());
-		v1.put("cooldowns", new NbtCompound());
-		v1.put("resources", new NbtCompound());
+		v1.put("skills", new CompoundTag());
+		v1.put("cooldowns", new CompoundTag());
+		v1.put("resources", new CompoundTag());
 
 		PlayerCharacterData data = CharacterPersistence.deserialize(v1);
 
 		assertEquals(LifepathMod.DATA_VERSION, data.dataVersion(),
 				"migrated blob must stamp the current data version");
-		assertEquals(Identifier.of("lifepath", "human"), data.speciesId());
-		assertTrue(data.conditionState(Identifier.of("lifepath", "vampirism")) != null,
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "human"), data.speciesId());
+		assertTrue(data.conditionState(ResourceLocation.fromNamespaceAndPath("lifepath", "vampirism")) != null,
 				"v1 bare condition ids must become v2 condition state entries");
 		assertEquals(0, data.conditionState(
-				Identifier.of("lifepath", "vampirism")).stage(),
+				ResourceLocation.fromNamespaceAndPath("lifepath", "vampirism")).stage(),
 				"migrated conditions land at stage 0");
-		assertTrue(data.unlocks().contains(Identifier.of("lifepath", "phantom")),
+		assertTrue(data.unlocks().contains(ResourceLocation.fromNamespaceAndPath("lifepath", "phantom")),
 				"unlocks were already a bare id list in v1 and survive untouched");
 	}
 
@@ -167,12 +167,12 @@ class CharacterPersistenceTest {
 	 */
 	@Test
 	void removedContentIdDropsWithoutCorrupting() {
-		NbtCompound v2 = CharacterPersistence.serialize(sampleData());
+		CompoundTag v2 = CharacterPersistence.serialize(sampleData());
 		// Simulate a datapack that deleted a species while a save references
 		// it — every other domain still resolves.
 		CharacterPersistence.setContentIndex(new ContentIndex() {
 			@Override
-			public boolean exists(String domain, Identifier id) {
+			public boolean exists(String domain, ResourceLocation id) {
 				return !"species".equals(domain);
 			}
 		});
@@ -182,7 +182,7 @@ class CharacterPersistenceTest {
 					"removed species id -> null, not crash or dangling ref");
 			// The rest of the blob is untouched — drop is surgical.
 			assertTrue(sanitized.skills()
-					.containsKey(Identifier.of("lifepath", "test_skill")),
+					.containsKey(ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill")),
 					"unrelated known content survives the same load");
 			assertEquals(LifepathMod.DATA_VERSION, sanitized.dataVersion());
 		} finally {
@@ -192,7 +192,7 @@ class CharacterPersistenceTest {
 
 	@Test
 	void knownSkillWithBrokenInvariantsIsRepairedOnLoad() {
-		Identifier skill = Identifier.of("lifepath", "test_skill");
+		ResourceLocation skill = ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill");
 		SkillDefinition.SkillDefinitionFile file = SkillDefinition.SkillDefinitionFile.CODEC
 				.parse(JsonOps.INSTANCE, JsonParser.parseString(
 						"{\"display_name\": \"T\", \"category\": \"gathering\", \"max_level\": 60}"))
@@ -221,25 +221,25 @@ class CharacterPersistenceTest {
 		// v1 stored conditions as a list of bare id strings; v2 stores
 		// {id: {stage,…}}. The migration must preserve every held id at
 		// stage 0 and drop nothing.
-		NbtCompound raw = CharacterPersistence.serialize(sampleData());
+		CompoundTag raw = CharacterPersistence.serialize(sampleData());
 		raw.putInt("data_version", 1);
-		net.minecraft.nbt.NbtList legacy = new net.minecraft.nbt.NbtList();
-		legacy.add(net.minecraft.nbt.NbtString.of("lifepath:vampirism"));
-		legacy.add(net.minecraft.nbt.NbtString.of("lifepath:lycanthropy"));
+		net.minecraft.nbt.ListTag legacy = new net.minecraft.nbt.ListTag();
+		legacy.add(net.minecraft.nbt.StringTag.valueOf("lifepath:vampirism"));
+		legacy.add(net.minecraft.nbt.StringTag.valueOf("lifepath:lycanthropy"));
 		raw.put("conditions", legacy);
 
 		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
 
 		assertEquals(2, decoded.conditionStates().size());
-		assertEquals(0, decoded.conditionState(Identifier.of("lifepath", "vampirism")).stage());
-		assertEquals(0, decoded.conditionState(Identifier.of("lifepath", "lycanthropy")).stage());
+		assertEquals(0, decoded.conditionState(ResourceLocation.fromNamespaceAndPath("lifepath", "vampirism")).stage());
+		assertEquals(0, decoded.conditionState(ResourceLocation.fromNamespaceAndPath("lifepath", "lycanthropy")).stage());
 	}
 
 	@Test
 	void emptyV1ConditionListMigratesCleanly() {
-		NbtCompound raw = CharacterPersistence.serialize(sampleData());
+		CompoundTag raw = CharacterPersistence.serialize(sampleData());
 		raw.putInt("data_version", 1);
-		raw.put("conditions", new net.minecraft.nbt.NbtList());
+		raw.put("conditions", new net.minecraft.nbt.ListTag());
 
 		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
 
@@ -250,7 +250,7 @@ class CharacterPersistenceTest {
 	@Test
 	void migrationRunsBeforeDecode() {
 		// A v0 blob: no data_version, otherwise valid v1 shape.
-		NbtCompound raw = CharacterPersistence.serialize(sampleData());
+		CompoundTag raw = CharacterPersistence.serialize(sampleData());
 		raw.remove("data_version");
 
 		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
@@ -263,7 +263,7 @@ class CharacterPersistenceTest {
 		// Forward-compat: a blob from a NEWER mod version must not be restamped
 		// to the current version (that would defeat the migration chain's
 		// "leave what we don't understand" contract and invite double-migrations).
-		NbtCompound raw = CharacterPersistence.serialize(sampleData());
+		CompoundTag raw = CharacterPersistence.serialize(sampleData());
 		raw.putInt("data_version", LifepathMod.DATA_VERSION + 4);
 
 		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
@@ -273,16 +273,16 @@ class CharacterPersistenceTest {
 
 	@Test
 	void unknownAptitudeDefaultsToBWithoutNukingBlob() {
-		NbtCompound raw = CharacterPersistence.serialize(sampleData());
-		NbtCompound skill = raw.getCompound("skills").getCompound("lifepath:test_skill");
+		CompoundTag raw = CharacterPersistence.serialize(sampleData());
+		CompoundTag skill = raw.getCompound("skills").getCompound("lifepath:test_skill");
 		skill.putString("aptitude", "zzz");
 
 		PlayerCharacterData decoded = CharacterPersistence.deserialize(raw);
 
 		assertEquals(Aptitude.B, decoded.skills()
-				.get(Identifier.of("lifepath", "test_skill")).aptitude());
+				.get(ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill")).aptitude());
 		assertEquals(10.0, decoded.skills()
-				.get(Identifier.of("lifepath", "test_skill")).xp());
+				.get(ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill")).xp());
 	}
 
 	private long backupFiles() {
@@ -295,17 +295,17 @@ class CharacterPersistenceTest {
 
 	private static PlayerCharacterData sampleData() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
-		data.setSpeciesId(Identifier.of("lifepath", "test_species"));
-		data.setSpecializationId(Identifier.of("lifepath", "test_spec"));
-		data.setSkillProgress(Identifier.of("lifepath", "test_skill"),
+		data.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_species"));
+		data.setSpecializationId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_spec"));
+		data.setSkillProgress(ResourceLocation.fromNamespaceAndPath("lifepath", "test_skill"),
 				new SkillProgress(10.0, 2, 3, 1, Aptitude.A, 42L));
-		data.addId(ListKind.TRAITS, Identifier.of("lifepath", "t1"));
-		data.addId(ListKind.UNLOCKS, Identifier.of("lifepath", "u1"));
-		data.setResource(Identifier.of("lifepath", "mana"), new ResourceState(5.0, 0.0, 10.0));
+		data.addId(ListKind.TRAITS, ResourceLocation.fromNamespaceAndPath("lifepath", "t1"));
+		data.addId(ListKind.UNLOCKS, ResourceLocation.fromNamespaceAndPath("lifepath", "u1"));
+		data.setResource(ResourceLocation.fromNamespaceAndPath("lifepath", "mana"), new ResourceState(5.0, 0.0, 10.0));
 		// Live cooldown (M4-4): entries with <= persist_min_seconds remaining at
 		// load are dropped by sanitize, so the round-trip fixture must use a
 		// genuinely live expiry.
-		data.setCooldown(Identifier.of("lifepath", "ab1"),
+		data.setCooldown(ResourceLocation.fromNamespaceAndPath("lifepath", "ab1"),
 				System.currentTimeMillis() + 60_000L);
 		data.setDataVersion(LifepathMod.DATA_VERSION);
 		return data;

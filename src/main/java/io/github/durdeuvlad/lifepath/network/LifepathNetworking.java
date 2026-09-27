@@ -2,10 +2,10 @@ package io.github.durdeuvlad.lifepath.network;
 
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Central registration point for all Lifepath play payloads.
@@ -30,19 +30,19 @@ public final class LifepathNetworking {
 	}
 
 	/** Builds the typed channel id used by payload records' {@code ID} constants. */
-	public static <T extends CustomPayload> CustomPayload.Id<T> payloadId(Identifier channel) {
-		return new CustomPayload.Id<>(channel);
+	public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadId(ResourceLocation channel) {
+		return new CustomPacketPayload.Type<>(channel);
 	}
 
 	/** Registers a server → client payload type. Call during common mod init. */
-	public static <T extends CustomPayload> void registerS2C(
-			CustomPayload.Id<T> id, PacketCodec<? super RegistryByteBuf, T> codec) {
+	public static <T extends CustomPacketPayload> void registerS2C(
+			CustomPacketPayload.Type<T> id, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
 		PayloadTypeRegistry.playS2C().register(id, codec);
 	}
 
 	/** Registers a client → server payload type. Call during common mod init. */
-	public static <T extends CustomPayload> void registerC2S(
-			CustomPayload.Id<T> id, PacketCodec<? super RegistryByteBuf, T> codec) {
+	public static <T extends CustomPacketPayload> void registerC2S(
+			CustomPacketPayload.Type<T> id, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
 		PayloadTypeRegistry.playC2S().register(id, codec);
 	}
 
@@ -54,8 +54,8 @@ public final class LifepathNetworking {
 	 * @throws IllegalStateException    if a receiver is already registered for the type
 	 *         (duplicate registration is a bug — the first would silently win)
 	 */
-	public static <T extends CustomPayload> void onC2S(
-			CustomPayload.Id<T> id, ServerPlayNetworking.PlayPayloadHandler<T> handler) {
+	public static <T extends CustomPacketPayload> void onC2S(
+			CustomPacketPayload.Type<T> id, ServerPlayNetworking.PlayPayloadHandler<T> handler) {
 		if (!ServerPlayNetworking.registerGlobalReceiver(id, handler)) {
 			throw new IllegalStateException("duplicate C2S receiver for payload " + id.id());
 		}

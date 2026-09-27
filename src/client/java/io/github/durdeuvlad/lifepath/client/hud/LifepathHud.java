@@ -9,10 +9,10 @@ import io.github.durdeuvlad.lifepath.hud.HudModel.ResourceRow;
 import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.text.Text;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 
 /**
  * M6-3 HUD overlay — draws the {@link HudModel} view: relevant resources,
@@ -46,12 +46,12 @@ public final class LifepathHud {
 	}
 
 	/** Entry point wired into {@code HudRenderCallback}. */
-	public static void render(DrawContext context, RenderTickCounter tickCounter) {
+	public static void render(GuiGraphics context, DeltaTracker tickCounter) {
 		if (!LifepathConfig.getBoolean(LifepathConfig.CLIENT, "hud_enabled")) {
 			return;
 		}
-		MinecraftClient client = MinecraftClient.getInstance();
-		if (client.player == null || client.options.hudHidden) {
+		Minecraft client = Minecraft.getInstance();
+		if (client.player == null || client.options.hideGui) {
 			return;
 		}
 		HudModel.View view = HudModel.compute(ClientCharacterState.identity(),
@@ -69,8 +69,8 @@ public final class LifepathHud {
 
 		int width = contentWidth(view, client);
 		int height = contentHeight(view);
-		int sw = context.getScaledWindowWidth();
-		int sh = context.getScaledWindowHeight();
+		int sw = context.guiWidth();
+		int sh = context.guiHeight();
 		int ax = switch (position) {
 			case "top_right", "bottom_right" -> sw - MARGIN - width;
 			default -> MARGIN;
@@ -80,9 +80,9 @@ public final class LifepathHud {
 			default -> MARGIN;
 		};
 
-		context.getMatrices().push();
-		context.getMatrices().translate(ax, ay, 0);
-		context.getMatrices().scale(scale, scale, 1.0f);
+		context.pose().pushPose();
+		context.pose().translate(ax, ay, 0);
+		context.pose().scale(scale, scale, 1.0f);
 
 		int y = 0;
 		for (ResourceRow row : view.resources()) {
@@ -91,31 +91,31 @@ public final class LifepathHud {
 		}
 		for (CooldownRow row : view.cooldowns()) {
 			drawIcon(context, "ability", row.icon(), y);
-			context.drawTextWithShadow(client.textRenderer,
-					Text.translatable("hud.lifepath.cooldown", row.label(),
+			context.drawString(client.font,
+					Component.translatable("hud.lifepath.cooldown", row.label(),
 							String.format("%.0f", row.secondsLeft())),
 					ICON_W, y, COL_TEXT);
 			y += ROW_STEP;
 		}
 		for (IdentitySummaryPayload.Entry state : view.states()) {
 			drawIcon(context, "condition", state.icon(), y);
-			context.drawTextWithShadow(client.textRenderer, state.name(),
+			context.drawString(client.font, state.name(),
 					ICON_W, y, COL_BAND);
 			y += ROW_STEP;
 		}
-		context.getMatrices().pop();
+		context.pose().popPose();
 	}
 
-	private static void drawIcon(DrawContext context, String domain,
+	private static void drawIcon(GuiGraphics context, String domain,
 			String iconRef, int y) {
 		// 9-arg form: 10x10 box sampling the full 16x16 sprite.
 		ClientIcons.resolve(domain, iconRef)
-				.ifPresent(tex -> context.drawTexture(tex, 0, y,
+				.ifPresent(tex -> context.blit(tex, 0, y,
 						10, 10, 0, 0, 16, 16, 16, 16));
 	}
 
-	private static void drawResourceRow(DrawContext context,
-			MinecraftClient client, ResourceRow row, int y) {
+	private static void drawResourceRow(GuiGraphics context,
+			Minecraft client, ResourceRow row, int y) {
 		// Layout: [icon][bar][text "Label BandName value"] — text carries the
 		// information so color is never the only signal.
 		drawIcon(context, "resource", row.icon(), y);
@@ -127,23 +127,23 @@ public final class LifepathHud {
 				: " " + row.bandName();
 		String text = row.label() + band + " "
 				+ String.format("%.0f", row.value());
-		context.drawTextWithShadow(client.textRenderer, text,
+		context.drawString(client.font, text,
 				ICON_W + BAR_W + 4, y, COL_TEXT);
 	}
 
-	private static int contentWidth(HudModel.View view, MinecraftClient client) {
+	private static int contentWidth(HudModel.View view, Minecraft client) {
 		int w = ICON_W + BAR_W + 4;
 		for (ResourceRow row : view.resources()) {
-			w = Math.max(w, ICON_W + BAR_W + 4 + client.textRenderer
-					.getWidth(row.label() + " " + row.bandName() + " 000"));
+			w = Math.max(w, ICON_W + BAR_W + 4 + client.font
+					.width(row.label() + " " + row.bandName() + " 000"));
 		}
 		for (CooldownRow row : view.cooldowns()) {
-			w = Math.max(w, ICON_W + client.textRenderer
-					.getWidth(row.label() + " 000"));
+			w = Math.max(w, ICON_W + client.font
+					.width(row.label() + " 000"));
 		}
 		for (IdentitySummaryPayload.Entry state : view.states()) {
-			w = Math.max(w, ICON_W + client.textRenderer
-					.getWidth(state.name()));
+			w = Math.max(w, ICON_W + client.font
+					.width(state.name()));
 		}
 		return w;
 	}

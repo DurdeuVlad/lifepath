@@ -3,11 +3,11 @@ package io.github.durdeuvlad.lifepath.network.s2c;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
-import net.minecraft.nbt.NbtSizeTracker;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * Full character-state snapshot sent server → client.
@@ -26,19 +26,19 @@ import net.minecraft.network.packet.CustomPayload;
  * corresponding C2S mutation channel, so client state can never be pushed
  * back to the server.
  */
-public record CharacterSyncPayload(PlayerCharacterData snapshot) implements CustomPayload {
-	public static final CustomPayload.Id<CharacterSyncPayload> ID =
+public record CharacterSyncPayload(PlayerCharacterData snapshot) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<CharacterSyncPayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("sync/character"));
 
 	private static final long MAX_SYNC_NBT_BYTES = 1_048_576L;
 
-	public static final PacketCodec<RegistryByteBuf, CharacterSyncPayload> PACKET_CODEC = PacketCodec.tuple(
-			PacketCodecs.codec(PlayerCharacterData.CODEC, () -> NbtSizeTracker.of(MAX_SYNC_NBT_BYTES)),
+	public static final StreamCodec<RegistryFriendlyByteBuf, CharacterSyncPayload> PACKET_CODEC = StreamCodec.composite(
+			ByteBufCodecs.fromCodec(PlayerCharacterData.CODEC, () -> NbtAccounter.create(MAX_SYNC_NBT_BYTES)),
 			CharacterSyncPayload::snapshot,
 			CharacterSyncPayload::new);
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

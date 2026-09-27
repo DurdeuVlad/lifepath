@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,8 +36,8 @@ class IcebornSpeciesTest {
 			Path.of("src/main/resources/data/lifepath/species");
 	private static final Path RESOURCE_DIR =
 			Path.of("src/main/resources/data/lifepath/resource");
-	private static final Identifier TEMPERATURE = LifepathMod.id("temperature");
-	private static final Identifier ICEBORN = LifepathMod.id("iceborn");
+	private static final ResourceLocation TEMPERATURE = LifepathMod.id("temperature");
+	private static final ResourceLocation ICEBORN = LifepathMod.id("iceborn");
 
 	private PlayerCharacterData data;
 
@@ -86,7 +86,7 @@ class IcebornSpeciesTest {
 													Files.readString(f)))
 									.result().orElseThrow(() -> new AssertionError(
 											f + " failed to parse"));
-							Identifier id = LifepathMod.id(f.getFileName().toString()
+							ResourceLocation id = LifepathMod.id(f.getFileName().toString()
 									.replace(".json", ""));
 							return LifepathContent.decodeAbility(id, parsed);
 						} catch (Exception e) {
@@ -123,7 +123,7 @@ class IcebornSpeciesTest {
 		}
 		// Every environmental driver is generic composition: modify_resource
 		// (drivers), damage (overheat), freeze_water (frost walk).
-		Set<Identifier> allowedActions = Set.of(LifepathMod.id("modify_resource"),
+		Set<ResourceLocation> allowedActions = Set.of(LifepathMod.id("modify_resource"),
 				LifepathMod.id("damage"), LifepathMod.id("freeze_water"));
 		for (var def : defs) {
 			for (var action : def.actions()) {

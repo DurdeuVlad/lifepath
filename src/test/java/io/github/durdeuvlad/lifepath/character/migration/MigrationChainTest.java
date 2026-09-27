@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 
 class MigrationChainTest {
@@ -18,27 +18,27 @@ class MigrationChainTest {
 				.step(step(1, ran))
 				.build();
 
-		chain.migrate(new NbtCompound());
+		chain.migrate(new CompoundTag());
 
 		assertEquals(List.of(0, 1), ran);
 	}
 
 	@Test
 	void concreteChainStampsDataVersion() {
-		NbtCompound raw = new NbtCompound();
+		CompoundTag raw = new CompoundTag();
 
-		NbtCompound migrated = CharacterMigrations.migrate(raw);
+		CompoundTag migrated = CharacterMigrations.migrate(raw);
 
 		assertEquals(io.github.durdeuvlad.lifepath.LifepathMod.DATA_VERSION, migrated.getInt("data_version"));
 	}
 
 	@Test
 	void newerVersionDataIsLeftUntouched() {
-		NbtCompound raw = new NbtCompound();
+		CompoundTag raw = new CompoundTag();
 		raw.putInt("data_version", 99);
 		raw.putString("future_field", "keepme");
 
-		NbtCompound migrated = CharacterMigrations.migrate(raw);
+		CompoundTag migrated = CharacterMigrations.migrate(raw);
 
 		assertEquals(99, migrated.getInt("data_version"));
 		assertEquals("keepme", migrated.getString("future_field"));
@@ -50,7 +50,7 @@ class MigrationChainTest {
 				.step(step(1, new ArrayList<>()))
 				.build();
 
-		assertThrows(IllegalStateException.class, () -> chain.migrate(new NbtCompound()));
+		assertThrows(IllegalStateException.class, () -> chain.migrate(new CompoundTag()));
 	}
 
 	@Test
@@ -68,7 +68,7 @@ class MigrationChainTest {
 			}
 
 			@Override
-			public void migrate(NbtCompound data) {
+			public void migrate(CompoundTag data) {
 			}
 		};
 
@@ -88,7 +88,7 @@ class MigrationChainTest {
 			}
 
 			@Override
-			public void migrate(NbtCompound data) {
+			public void migrate(CompoundTag data) {
 				ran.add(from);
 			}
 		};

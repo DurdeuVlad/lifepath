@@ -3,10 +3,10 @@ package io.github.durdeuvlad.lifepath.network.s2c;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import java.util.List;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * S2C one-shot player-feedback event (M6-4). {@code kind} selects the
@@ -22,19 +22,19 @@ import net.minecraft.network.packet.CustomPayload;
  * {@code ability_denied} [abilityName, reasonKey, secondsLeft],
  * {@code ability_ready} is client-generated (see {@code ClientFeedback}).
  */
-public record FeedbackPayload(String kind, List<String> args) implements CustomPayload {
-	public static final CustomPayload.Id<FeedbackPayload> ID =
+public record FeedbackPayload(String kind, List<String> args) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<FeedbackPayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("feedback"));
 
-	public static final PacketCodec<RegistryByteBuf, FeedbackPayload> PACKET_CODEC =
-			PacketCodec.tuple(
-					PacketCodecs.STRING, FeedbackPayload::kind,
-					PacketCodecs.STRING.collect(PacketCodecs.toList()),
+	public static final StreamCodec<RegistryFriendlyByteBuf, FeedbackPayload> PACKET_CODEC =
+			StreamCodec.composite(
+					ByteBufCodecs.STRING_UTF8, FeedbackPayload::kind,
+					ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
 							FeedbackPayload::args,
 					FeedbackPayload::new);
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

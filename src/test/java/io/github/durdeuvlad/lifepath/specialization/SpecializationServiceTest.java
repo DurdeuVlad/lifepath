@@ -13,14 +13,14 @@ import io.github.durdeuvlad.lifepath.skill.SkillXpService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SpecializationServiceTest {
-	private static final Identifier MINING = Identifier.of("lifepath", "mining");
-	private static final Identifier SMITHING = Identifier.of("lifepath", "smithing");
-	private static final Identifier SPEC = Identifier.of("lifepath", "test_spec");
+	private static final ResourceLocation MINING = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
+	private static final ResourceLocation SMITHING = ResourceLocation.fromNamespaceAndPath("lifepath", "smithing");
+	private static final ResourceLocation SPEC = ResourceLocation.fromNamespaceAndPath("lifepath", "test_spec");
 
 	@BeforeEach
 	void setUp() {
@@ -31,15 +31,15 @@ class SpecializationServiceTest {
 		registerSkill(SMITHING);
 	}
 
-	private static void registerSkill(Identifier id) {
+	private static void registerSkill(ResourceLocation id) {
 		LifepathContent.skills().register(id, new SkillDefinition(id, "S",
 				SkillDefinition.Category.CRAFTING, 100, Optional.empty(), List.of(),
 				List.of(), Optional.empty()));
 	}
 
-	private static void registerSpec(Map<Identifier, Integer> starts,
-			Map<Identifier, Aptitude> aptitudes, Map<Identifier, Double> xpMods,
-			Map<Identifier, Double> decayMods, Map<Identifier, Integer> floors) {
+	private static void registerSpec(Map<ResourceLocation, Integer> starts,
+			Map<ResourceLocation, Aptitude> aptitudes, Map<ResourceLocation, Double> xpMods,
+			Map<ResourceLocation, Double> decayMods, Map<ResourceLocation, Integer> floors) {
 		LifepathContent.specializations().register(SPEC,
 				new SpecializationDefinition(SPEC, "Test Spec", starts, aptitudes,
 						xpMods, decayMods, floors, List.of()));
@@ -87,7 +87,7 @@ class SpecializationServiceTest {
 	void applyUnknownSpecFailsClean() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 		assertEquals(SpecializationService.ApplyResult.UNKNOWN_SPEC,
-				SpecializationService.apply(data, Identifier.of("lifepath", "nope")));
+				SpecializationService.apply(data, ResourceLocation.fromNamespaceAndPath("lifepath", "nope")));
 		assertEquals(null, data.specializationId());
 	}
 

@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.durdeuvlad.lifepath.content.AbilityDefinition.SpecNode;
 import java.util.Comparator;
 import java.util.List;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -42,13 +42,13 @@ import org.jetbrains.annotations.Nullable;
  * recursion-capped; when the cap trips the value write has already landed —
  * world-side effects of the resting band are skipped for that pass (logged).
  */
-public record ResourceDefinition(Identifier id, String displayName,
+public record ResourceDefinition(ResourceLocation id, String displayName,
 		double min, double max,
 		double defaultValue, double regenPerSecond, List<Band> bands,
-		java.util.Optional<Identifier> icon) {
+		java.util.Optional<ResourceLocation> icon) {
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
-	public ResourceDefinition(Identifier id, String displayName, double min,
+	public ResourceDefinition(ResourceLocation id, String displayName, double min,
 			double max, double defaultValue, double regenPerSecond,
 			List<Band> bands) {
 		this(id, displayName, min, max, defaultValue, regenPerSecond, bands,
@@ -56,7 +56,7 @@ public record ResourceDefinition(Identifier id, String displayName,
 	}
 
 	/** Back-compatible constructor — display name defaults to the id path. */
-	public ResourceDefinition(Identifier id, double min, double max,
+	public ResourceDefinition(ResourceLocation id, double min, double max,
 			double defaultValue, double regenPerSecond, List<Band> bands) {
 		this(id, id.getPath(), min, max, defaultValue, regenPerSecond, bands);
 	}
@@ -66,9 +66,9 @@ public record ResourceDefinition(Identifier id, String displayName,
 	 * (should exceed the resource tick interval — reapplied each sweep) +
 	 * {@code amplifier}.
 	 */
-	public record BandEffect(Identifier effect, int durationTicks, int amplifier) {
+	public record BandEffect(ResourceLocation effect, int durationTicks, int amplifier) {
 		public static final Codec<BandEffect> CODEC = RecordCodecBuilder.create(i -> i.group(
-				Identifier.CODEC.fieldOf("effect").forGetter(BandEffect::effect),
+				ResourceLocation.CODEC.fieldOf("effect").forGetter(BandEffect::effect),
 				Codec.intRange(1, 20 * 3600).optionalFieldOf("duration_ticks", 60)
 						.forGetter(BandEffect::durationTicks),
 				Codec.intRange(0, 255).optionalFieldOf("amplifier", 0)
@@ -132,7 +132,7 @@ public record ResourceDefinition(Identifier id, String displayName,
 	 * band ranges ordered ({@code lo <= hi}), within {@code [min,max]}, and
 	 * non-overlapping. Throws on violation — the loader ERRORs and skips.
 	 */
-	public static ResourceDefinition fromFile(Identifier id, ResourceFile file) {
+	public static ResourceDefinition fromFile(ResourceLocation id, ResourceFile file) {
 		if (!(file.min() < file.max())) {
 			throw new IllegalArgumentException("resource " + id + " requires min < max");
 		}

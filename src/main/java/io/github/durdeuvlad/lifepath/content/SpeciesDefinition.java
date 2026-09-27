@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Data definition of a species — what a character biologically/metaphysically
@@ -16,38 +16,38 @@ import net.minecraft.util.Identifier;
  * milestones). Missing refs are recorded as unresolved, never fatal.
  */
 public record SpeciesDefinition(
-		Identifier id,
+		ResourceLocation id,
 		String displayName,
 		Optional<String> description,
 		Visibility visibility,
 		Selection selection,
-		List<Identifier> passiveAbilities,
-		List<Identifier> activeAbilities,
-		Map<Identifier, Aptitude> minAptitudes,
-		List<Identifier> resources,
-		Optional<Identifier> dietRules,
-		Optional<Identifier> mobDispositions,
+		List<ResourceLocation> passiveAbilities,
+		List<ResourceLocation> activeAbilities,
+		Map<ResourceLocation, Aptitude> minAptitudes,
+		List<ResourceLocation> resources,
+		Optional<ResourceLocation> dietRules,
+		Optional<ResourceLocation> mobDispositions,
 		double capacityMultiplier,
-		Optional<Identifier> icon) {
+		Optional<ResourceLocation> icon) {
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
-	public SpeciesDefinition(Identifier id, String displayName,
+	public SpeciesDefinition(ResourceLocation id, String displayName,
 			Optional<String> description, Visibility visibility,
-			Selection selection, List<Identifier> passiveAbilities,
-			List<Identifier> activeAbilities, Map<Identifier, Aptitude> minAptitudes,
-			List<Identifier> resources, Optional<Identifier> dietRules,
-			Optional<Identifier> mobDispositions, double capacityMultiplier) {
+			Selection selection, List<ResourceLocation> passiveAbilities,
+			List<ResourceLocation> activeAbilities, Map<ResourceLocation, Aptitude> minAptitudes,
+			List<ResourceLocation> resources, Optional<ResourceLocation> dietRules,
+			Optional<ResourceLocation> mobDispositions, double capacityMultiplier) {
 		this(id, displayName, description, visibility, selection,
 				passiveAbilities, activeAbilities, minAptitudes, resources,
 				dietRules, mobDispositions, capacityMultiplier, Optional.empty());
 	}
 
 	/** Convenience for call sites predating {@code description} (M5-1). */
-	public SpeciesDefinition(Identifier id, String displayName, Visibility visibility,
-			Selection selection, List<Identifier> passiveAbilities,
-			List<Identifier> activeAbilities, Map<Identifier, Aptitude> minAptitudes,
-			List<Identifier> resources, Optional<Identifier> dietRules,
-			Optional<Identifier> mobDispositions) {
+	public SpeciesDefinition(ResourceLocation id, String displayName, Visibility visibility,
+			Selection selection, List<ResourceLocation> passiveAbilities,
+			List<ResourceLocation> activeAbilities, Map<ResourceLocation, Aptitude> minAptitudes,
+			List<ResourceLocation> resources, Optional<ResourceLocation> dietRules,
+			Optional<ResourceLocation> mobDispositions) {
 		this(id, displayName, Optional.empty(), visibility, selection,
 				passiveAbilities, activeAbilities, minAptitudes, resources,
 				dietRules, mobDispositions, 1.0);
@@ -76,7 +76,7 @@ public record SpeciesDefinition(
 	 * not decoded from JSON. {@code icon} is decoded leniently — a malformed
 	 * value warns and drops to no-icon rather than failing the file (M12-1).
 	 */
-	public static SpeciesDefinition fromFile(Identifier id, SpeciesDefinitionFile file) {
+	public static SpeciesDefinition fromFile(ResourceLocation id, SpeciesDefinitionFile file) {
 		return new SpeciesDefinition(id, file.displayName(), file.description(),
 				file.visibility(), file.selection(),
 				file.passiveAbilities(), file.activeAbilities(), file.minAptitudes(),
@@ -94,12 +94,12 @@ public record SpeciesDefinition(
 			Optional<String> description,
 			Visibility visibility,
 			Selection selection,
-			List<Identifier> passiveAbilities,
-			List<Identifier> activeAbilities,
-			Map<Identifier, Aptitude> minAptitudes,
-			List<Identifier> resources,
-			Optional<Identifier> dietRules,
-			Optional<Identifier> mobDispositions,
+			List<ResourceLocation> passiveAbilities,
+			List<ResourceLocation> activeAbilities,
+			Map<ResourceLocation, Aptitude> minAptitudes,
+			List<ResourceLocation> resources,
+			Optional<ResourceLocation> dietRules,
+			Optional<ResourceLocation> mobDispositions,
 			double capacityMultiplier,
 			Optional<String> icon) {
 
@@ -108,12 +108,12 @@ public record SpeciesDefinition(
 				Codec.STRING.optionalFieldOf("description").forGetter(SpeciesDefinitionFile::description),
 				Visibility.CODEC.optionalFieldOf("visibility", Visibility.NORMAL).forGetter(SpeciesDefinitionFile::visibility),
 				Selection.CODEC.optionalFieldOf("selection", Selection.OPEN).forGetter(SpeciesDefinitionFile::selection),
-				Identifier.CODEC.listOf().optionalFieldOf("passive_abilities", List.of()).forGetter(SpeciesDefinitionFile::passiveAbilities),
-				Identifier.CODEC.listOf().optionalFieldOf("active_abilities", List.of()).forGetter(SpeciesDefinitionFile::activeAbilities),
-				Codec.unboundedMap(Identifier.CODEC, Aptitude.CODEC).optionalFieldOf("min_aptitudes", Map.of()).forGetter(SpeciesDefinitionFile::minAptitudes),
-				Identifier.CODEC.listOf().optionalFieldOf("resources", List.of()).forGetter(SpeciesDefinitionFile::resources),
-				Identifier.CODEC.optionalFieldOf("diet_rules").forGetter(SpeciesDefinitionFile::dietRules),
-				Identifier.CODEC.optionalFieldOf("mob_dispositions").forGetter(SpeciesDefinitionFile::mobDispositions),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("passive_abilities", List.of()).forGetter(SpeciesDefinitionFile::passiveAbilities),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("active_abilities", List.of()).forGetter(SpeciesDefinitionFile::activeAbilities),
+				Codec.unboundedMap(ResourceLocation.CODEC, Aptitude.CODEC).optionalFieldOf("min_aptitudes", Map.of()).forGetter(SpeciesDefinitionFile::minAptitudes),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("resources", List.of()).forGetter(SpeciesDefinitionFile::resources),
+				ResourceLocation.CODEC.optionalFieldOf("diet_rules").forGetter(SpeciesDefinitionFile::dietRules),
+				ResourceLocation.CODEC.optionalFieldOf("mob_dispositions").forGetter(SpeciesDefinitionFile::mobDispositions),
 			Codec.doubleRange(0.0, 100.0).optionalFieldOf("capacity_multiplier", 1.0).forGetter(SpeciesDefinitionFile::capacityMultiplier),
 			Codec.STRING.optionalFieldOf("icon").forGetter(SpeciesDefinitionFile::icon)
 		).apply(instance, SpeciesDefinitionFile::new));

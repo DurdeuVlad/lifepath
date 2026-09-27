@@ -1,7 +1,7 @@
 package io.github.durdeuvlad.lifepath.command;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import io.github.durdeuvlad.lifepath.LifepathMod;
@@ -19,12 +19,12 @@ import io.github.durdeuvlad.lifepath.skill.SkillProgress;
 import io.github.durdeuvlad.lifepath.skill.SkillService;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * M7-4 operator debug tooling. {@code /lifepath debug …} reports EFFECTIVE
@@ -56,43 +56,43 @@ public final class DebugCommands {
 		}
 		initialized = true;
 		LifepathCommands.register(literal("debug")
-				.requires(src -> src.hasPermissionLevel(LifepathCommands.ADMIN_PERMISSION))
+				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 				.executes(ctx -> usage(ctx.getSource()))
 				.then(literal("character")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> character(ctx.getSource(),
-										EntityArgumentType.getPlayer(ctx, "player")))))
+										EntityArgument.getPlayer(ctx, "player")))))
 				.then(literal("ability")
-						.then(argument("player", EntityArgumentType.player())
-								.then(argument("ability", IdentifierArgumentType.identifier())
+						.then(argument("player", EntityArgument.player())
+								.then(argument("ability", ResourceLocationArgument.id())
 										.executes(ctx -> ability(ctx.getSource(),
-												EntityArgumentType.getPlayer(ctx, "player"),
-												IdentifierArgumentType.getIdentifier(ctx, "ability"))))))
+												EntityArgument.getPlayer(ctx, "player"),
+												ResourceLocationArgument.getId(ctx, "ability"))))))
 				.then(literal("skill")
-						.then(argument("player", EntityArgumentType.player())
-								.then(argument("skill", IdentifierArgumentType.identifier())
+						.then(argument("player", EntityArgument.player())
+								.then(argument("skill", ResourceLocationArgument.id())
 										.executes(ctx -> skill(ctx.getSource(),
-												EntityArgumentType.getPlayer(ctx, "player"),
-												IdentifierArgumentType.getIdentifier(ctx, "skill")))))));
+												EntityArgument.getPlayer(ctx, "player"),
+												ResourceLocationArgument.getId(ctx, "skill")))))));
 		LifepathCommands.register(literal("cooldown")
-				.requires(src -> src.hasPermissionLevel(LifepathCommands.ADMIN_PERMISSION))
+				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 				.then(literal("clear")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> clearAll(ctx.getSource(),
-										EntityArgumentType.getPlayer(ctx, "player")))
-								.then(argument("ability", IdentifierArgumentType.identifier())
+										EntityArgument.getPlayer(ctx, "player")))
+								.then(argument("ability", ResourceLocationArgument.id())
 										.executes(ctx -> clearOne(ctx.getSource(),
-												EntityArgumentType.getPlayer(ctx, "player"),
-												IdentifierArgumentType.getIdentifier(ctx, "ability")))))));
+												EntityArgument.getPlayer(ctx, "player"),
+												ResourceLocationArgument.getId(ctx, "ability")))))));
 	}
 
-	private static int usage(ServerCommandSource source) {
-		source.sendFeedback(() -> Text.literal(
+	private static int usage(CommandSourceStack source) {
+		source.sendSuccess(() -> Component.literal(
 				"usage: /lifepath debug character|ability|skill <player> [id]"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int character(ServerCommandSource source, ServerPlayerEntity target) {
+	private static int character(CommandSourceStack source, ServerPlayer target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		long now = System.currentTimeMillis();
 		// Charge lazy decay first — the dump shows post-decay truth.
@@ -100,26 +100,26 @@ public final class DebugCommands {
 			CharacterManager.markDirty(target);
 			CharacterManager.syncCharacter(target);
 		}
-		source.sendFeedback(() -> Text.literal("Lifepath debug character: "
-				+ target.getName().getString() + " (" + target.getUuid() + ")"), false);
-		for (Text line : CharacterCommands.describe(data, now)) {
-			source.sendFeedback(() -> line, false);
+		source.sendSuccess(() -> Component.literal("Lifepath debug character: "
+				+ target.getName().getString() + " (" + target.getUUID() + ")"), false);
+		for (Component line : CharacterCommands.describe(data, now)) {
+			source.sendSuccess(() -> line, false);
 		}
 		// Modifiers in effect: the XP pipeline ids (registration order = eval order).
-		source.sendFeedback(() -> Text.literal("  xp modifiers: "
+		source.sendSuccess(() -> Component.literal("  xp modifiers: "
 				+ io.github.durdeuvlad.lifepath.skill.SkillXpService.modifierIds()), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int ability(ServerCommandSource source, ServerPlayerEntity target,
-			Identifier abilityId) {
+	private static int ability(CommandSourceStack source, ServerPlayer target,
+			ResourceLocation abilityId) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		long now = System.currentTimeMillis();
-		source.sendFeedback(() -> Text.literal("Lifepath debug ability " + abilityId
+		source.sendSuccess(() -> Component.literal("Lifepath debug ability " + abilityId
 				+ " for " + target.getName().getString()), false);
 		AbilityDefinition def = LifepathContent.abilities().get(abilityId);
 		boolean owned = AbilityEngine.ownedAbilities(data).contains(abilityId);
-		source.sendFeedback(() -> Text.literal("  owned=" + owned
+		source.sendSuccess(() -> Component.literal("  owned=" + owned
 				+ "  defined=" + (def != null)
 				+ (def == null ? "" : "  enabled=" + def.enabled()
 						+ "  trigger=" + def.trigger().kind())), false);
@@ -130,16 +130,16 @@ public final class DebugCommands {
 		var ctx = new AbilityVocabulary.EvalContext(target, data, now, abilityId);
 		for (AbilityDefinition.SpecNode cond : def.conditions().all()) {
 			String result = evalCondition(cond, ctx);
-			source.sendFeedback(() -> Text.literal(
+			source.sendSuccess(() -> Component.literal(
 					"  all: " + cond.type() + " -> " + result), false);
 		}
 		for (AbilityDefinition.SpecNode cond : def.conditions().any()) {
 			String result = evalCondition(cond, ctx);
-			source.sendFeedback(() -> Text.literal(
+			source.sendSuccess(() -> Component.literal(
 					"  any: " + cond.type() + " -> " + result), false);
 		}
 		long cd = CooldownService.remainingMillis(data, abilityId, now);
-		source.sendFeedback(() -> Text.literal("  cooldown: "
+		source.sendSuccess(() -> Component.literal("  cooldown: "
 				+ (cd > 0 ? cd + "ms remaining" : "ready")), false);
 		return Command.SINGLE_SUCCESS;
 	}
@@ -158,26 +158,26 @@ public final class DebugCommands {
 		}
 	}
 
-	private static int skill(ServerCommandSource source, ServerPlayerEntity target,
-			Identifier skillId) {
+	private static int skill(CommandSourceStack source, ServerPlayer target,
+			ResourceLocation skillId) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		long now = System.currentTimeMillis();
-		source.sendFeedback(() -> Text.literal("Lifepath debug skill " + skillId
+		source.sendSuccess(() -> Component.literal("Lifepath debug skill " + skillId
 				+ " for " + target.getName().getString()), false);
 		SkillProgress p = data.skill(skillId);
 		SkillDefinition def = SkillService.definition(skillId).orElse(null);
 		if (p == null) {
-			source.sendFeedback(() -> Text.literal("  <no progress recorded>"), false);
+			source.sendSuccess(() -> Component.literal("  <no progress recorded>"), false);
 		} else {
 			SkillProgress pp = p;
-			source.sendFeedback(() -> Text.literal("  level=" + pp.level()
+			source.sendSuccess(() -> Component.literal("  level=" + pp.level()
 					+ "  xp=" + pp.xp()
 					+ "  highest=" + pp.highestLevel()
 					+ "  floor=" + pp.protectedFloor()
 					+ "  aptitude=" + pp.aptitude()
 					+ "  effective_aptitude="
 					+ SkillService.effectiveAptitude(data.speciesId(), skillId, pp)), false);
-			source.sendFeedback(() -> Text.literal("  last_use="
+			source.sendSuccess(() -> Component.literal("  last_use="
 					+ (pp.lastMeaningfulUse() <= 0 ? "<never>"
 							: java.time.Instant.ofEpochMilli(pp.lastMeaningfulUse()).toString())
 					+ "  checkpoint=" + (pp.lastDecayCheckpoint() <= 0 ? "<never>"
@@ -186,11 +186,11 @@ public final class DebugCommands {
 			if (def != null && SkillDecayService.enabled()) {
 				double projected = SkillDecayService
 						.decayedFractionalLevel(pp, def, data, now);
-				source.sendFeedback(() -> Text.literal("  decay projection: frac="
+				source.sendSuccess(() -> Component.literal("  decay projection: frac="
 						+ String.format("%.2f", projected)
 						+ " (floor " + pp.protectedFloor() + ")"), false);
 			} else {
-				source.sendFeedback(() -> Text.literal("  decay projection: <disabled or undefined>"),
+				source.sendSuccess(() -> Component.literal("  decay projection: <disabled or undefined>"),
 						false);
 			}
 		}
@@ -207,30 +207,30 @@ public final class DebugCommands {
 			}
 		});
 		if (hits.isEmpty()) {
-			source.sendFeedback(() -> Text.literal("  diminishing returns: <no in-window hits>"),
+			source.sendSuccess(() -> Component.literal("  diminishing returns: <no in-window hits>"),
 					false);
 		} else {
 			for (String hit : hits) {
-				source.sendFeedback(() -> Text.literal("  diminishing: " + hit), false);
+				source.sendSuccess(() -> Component.literal("  diminishing: " + hit), false);
 			}
 		}
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int clearAll(ServerCommandSource source, ServerPlayerEntity target) {
+	private static int clearAll(CommandSourceStack source, ServerPlayer target) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		int n = CooldownService.clearAll(data);
 		CharacterManager.markDirty(target);
 		CharacterManager.syncCharacter(target);
 		LifepathMod.LOGGER.info("admin action: {} cleared all cooldowns for {} ({})",
-				source.getName(), target.getName().getString(), target.getUuid());
-		source.sendFeedback(() -> Text.literal(
+				source.getTextName(), target.getName().getString(), target.getUUID());
+		source.sendSuccess(() -> Component.literal(
 				"cleared " + n + " cooldowns for " + target.getName().getString()), true);
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int clearOne(ServerCommandSource source, ServerPlayerEntity target,
-			Identifier abilityId) {
+	private static int clearOne(CommandSourceStack source, ServerPlayer target,
+			ResourceLocation abilityId) {
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		boolean cleared = CooldownService.clear(data, abilityId);
 		if (cleared) {
@@ -238,9 +238,9 @@ public final class DebugCommands {
 			CharacterManager.syncCharacter(target);
 		}
 		LifepathMod.LOGGER.info("admin action: {} cleared cooldown {} for {} ({}) [{}]",
-				source.getName(), abilityId, target.getName().getString(),
-				target.getUuid(), cleared ? "cleared" : "absent");
-		source.sendFeedback(() -> Text.literal(cleared
+				source.getTextName(), abilityId, target.getName().getString(),
+				target.getUUID(), cleared ? "cleared" : "absent");
+		source.sendSuccess(() -> Component.literal(cleared
 				? "cleared cooldown " + abilityId + " for " + target.getName().getString()
 				: "no cooldown on " + abilityId + " for " + target.getName().getString()), true);
 		return cleared ? Command.SINGLE_SUCCESS : 0;

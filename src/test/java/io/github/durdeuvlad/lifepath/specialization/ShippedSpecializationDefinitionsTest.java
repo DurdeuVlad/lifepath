@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -51,9 +51,9 @@ class ShippedSpecializationDefinitionsTest {
 				.parse(JsonOps.INSTANCE, JsonParser.parseString(
 						Files.readString(SPEC_DIR.resolve("blacksmith.json"))))
 				.result().orElseThrow(() -> new AssertionError("blacksmith failed to parse"));
-		Identifier smithing = Identifier.of("lifepath", "smithing");
-		Identifier engineering = Identifier.of("lifepath", "engineering");
-		Identifier mining = Identifier.of("lifepath", "mining");
+		ResourceLocation smithing = ResourceLocation.fromNamespaceAndPath("lifepath", "smithing");
+		ResourceLocation engineering = ResourceLocation.fromNamespaceAndPath("lifepath", "engineering");
+		ResourceLocation mining = ResourceLocation.fromNamespaceAndPath("lifepath", "mining");
 
 		// §5.1 pinned values.
 		assertEquals(Map.of(smithing, 20, engineering, 15, mining, 10),
@@ -63,6 +63,6 @@ class ShippedSpecializationDefinitionsTest {
 		assertEquals(0.3, file.decayModifiers().get(smithing));
 		assertEquals(0.2, file.decayModifiers().get(engineering));
 		assertEquals(Map.of(smithing, 30), file.protectedFloors());
-		assertEquals(List.of(Identifier.of("lifepath", "forge_mastery_i")), file.signatureRefs());
+		assertEquals(List.of(ResourceLocation.fromNamespaceAndPath("lifepath", "forge_mastery_i")), file.signatureRefs());
 	}
 }
