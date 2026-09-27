@@ -77,9 +77,11 @@ Fabric is supported secondarily. Same version, same content, same features.
 
 Lifepath is **standalone** — no Origins, no other progression mod required.
 It's designed to sit underneath content mods that provide gameplay loops:
-an **Overgeared-style integration adapter** ships in the jar and activates
-only if a compatible partner mod is present (today it is dormant — see
-`docs/COMPAT.md` for the honest state).
+an **Overgeared integration adapter** ships in the jar and activates only
+when the partner mod is present. Verified live on NeoForge 1.21.1 — crafting
+an Overgeared alloy furnace grants Smithing XP (`docs/evidence/m13-6/`). On
+Fabric the adapter stays dormant: Overgeared ships no Fabric 1.21.1 build —
+see `docs/COMPAT.md` for the honest state.
 
 ## Support
 

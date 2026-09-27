@@ -45,9 +45,12 @@ different version logs an error and is skipped, never crashes init.
 
 Overgeared ships **no Fabric build for 1.21.1** (1.20.1 only; 1.21.1 is
 NeoForge) and exposes no stable event API — so the shipped adapter is
-deliberately declarative. On NeoForge the partner mod *can* load beside
-Lifepath (`overgeared-neoforge` 1.21.1 builds exist); live co-load
-validation is tracked in issue #138. On Fabric the adapter stays dormant:
+deliberately declarative. **Validated live on NeoForge 1.21.1**
+(`overgeared-neoforge-1.21.1-1.6.19` + `lifepath-1.0.0-beta.1-neoforge`,
+NeoForge 21.1.252): co-load is clean, the adapter activates via `ModList`
+detection, and crafting `overgeared:alloy_furnace` produced Smithing
+progression — evidence in `docs/evidence/m13-6/` (issue #138). On Fabric the
+adapter stays dormant:
 
 - Watches normalized `lifepath:crafting` events; when the result id is
   `overgeared:*` or carries `#lifepath:forged_outputs`, republishes it as
@@ -67,7 +70,7 @@ validation is tracked in issue #138. On Fabric the adapter stays dormant:
 | Scenario | Result |
 |---|---|
 | Overgeared absent | `register()` logs one debug line, wires nothing; vanilla paths untouched (boot-verified on both loaders) |
-| Overgeared present (NeoForge) | dispatcher subscription active; crafting events with forged results translate to smithing XP — live co-load verification is #138 |
+| Overgeared present (NeoForge) | dispatcher subscription active; `overgeared:alloy_furnace` craft → `lifepath:smithing` XP observed live (`docs/evidence/m13-6/`, issue #138) |
 | Item id changed/renamed | tag entries simply miss; `required:false` entries never fail tag load |
 | Recipe removed | fewer events fire; nothing errors |
 | Adapter API drift (bridge built vs different Lifepath) | entrypoint throws `LinkageError` → caught per-adapter, error logged, init continues |
