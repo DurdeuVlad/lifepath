@@ -19,6 +19,7 @@ Species defines what a character *is*. Specialization defines what they *chose t
 | [docs/ADMIN_COMMANDS.md](docs/ADMIN_COMMANDS.md) | The full `/lifepath` command tree, permissions, and examples |
 | [docs/MIGRATIONS.md](docs/MIGRATIONS.md) | Save-compatibility rules: the dataVersion chain, removed-id fallbacks, how to add the next migration |
 | [docs/RELEASE_MATRIX.md](docs/RELEASE_MATRIX.md) | M10-4 evidence: the nine stabilization tests and seven 1.0 release criteria, per-cell verdicts |
+| [docs/RELEASE_ENGINEERING.md](docs/RELEASE_ENGINEERING.md) | Build/versioning/changelog/CI — reproducible release process |
 | [docs/MULTIPLAYER.md](docs/MULTIPLAYER.md) | Server-authoritative correctness: sync, persistence, respawn ownership |
 | [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Profiling harness and explicit tick budgets |
 | [docs/COMPAT.md](docs/COMPAT.md) | External-mod compatibility validation (Origins/Apoli absent, graceful degradation) |
