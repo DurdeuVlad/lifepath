@@ -10,7 +10,7 @@
 		{
 			"id": "moonbound",
 			"abilities": ["lifepath:lycanthropy_feral_senses"],
-			"advance_events": ["lifepath:hunting"],
+			"advance_events": ["lifepath:combat"],
 			"advance_count": 5
 		},
 		{
