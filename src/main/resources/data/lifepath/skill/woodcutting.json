@@ -1,0 +1,29 @@
+{
+	"display_name": "Woodcutting",
+	"description": "Felling timber of every kind \u2014 from oak to nether stems.",
+	"improve_hint": "Chop logs and wood.",
+	"category": "gathering",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.woodcutting.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.woodcutting.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.woodcutting.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.woodcutting.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.woodcutting.milestone.95"
+		}
+	]
+}

@@ -1,0 +1,29 @@
+{
+	"display_name": "Scholarship",
+	"description": "Reading, writing, and charting the world.",
+	"improve_hint": "Craft books, maps, and scholarly tools.",
+	"category": "knowledge",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.scholarship.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.scholarship.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.scholarship.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.scholarship.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.scholarship.milestone.95"
+		}
+	]
+}

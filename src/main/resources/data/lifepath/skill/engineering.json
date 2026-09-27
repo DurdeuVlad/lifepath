@@ -3,5 +3,27 @@
 	"description": "Assembling mechanisms, tools, and devices.",
 	"improve_hint": "Craft items at a crafting table.",
 	"category": "crafting",
-	"max_level": 100
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.engineering.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.engineering.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.engineering.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.engineering.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.engineering.milestone.95"
+		}
+	]
 }

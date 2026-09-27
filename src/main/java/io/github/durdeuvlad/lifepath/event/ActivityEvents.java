@@ -139,6 +139,27 @@ public final class ActivityEvents {
 				Set.copyOf(entityTags), cause, now(), Map.of());
 	}
 
+	/**
+	 * Projectile kill (M8-3) — emitted in addition to {@link #combat} when the
+	 * killing blow's damage source is a projectile. Same payload shape.
+	 */
+	public static ActivityEvent archery(ServerPlayerEntity player, Identifier entityTypeId,
+			Set<Identifier> entityTags, ActivityEvent.Cause cause) {
+		return new ActivityEvent(player, ActivityTypes.ARCHERY, entityTypeId,
+				Set.copyOf(entityTags), cause, now(), Map.of());
+	}
+
+	/**
+	 * Hostile hit survived (M8-3) — sourceId/tags describe the ATTACKER's
+	 * entity type; the event's player is the victim. Cause is
+	 * {@code NON_PLAYER} — the damage was mob-caused, not player action.
+	 */
+	public static ActivityEvent defence(ServerPlayerEntity victim, Identifier attackerTypeId,
+			Set<Identifier> attackerTags, ActivityEvent.Cause cause) {
+		return new ActivityEvent(victim, ActivityTypes.DEFENCE, attackerTypeId,
+				Set.copyOf(attackerTags), cause, now(), Map.of());
+	}
+
 	private static Set<Identifier> tags(@Nullable Identifier extra) {
 		return extra == null ? Set.of() : Set.of(extra);
 	}

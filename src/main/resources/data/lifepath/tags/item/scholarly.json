@@ -1,0 +1,19 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:paper",
+		"minecraft:book",
+		"minecraft:writable_book",
+		"minecraft:map",
+		"minecraft:bookshelf",
+		"minecraft:chiseled_bookshelf",
+		"minecraft:lectern",
+		"minecraft:cartography_table",
+		"minecraft:compass",
+		"minecraft:recovery_compass",
+		"minecraft:item_frame",
+		"minecraft:glow_item_frame",
+		"minecraft:painting",
+		"minecraft:spyglass"
+	]
+}

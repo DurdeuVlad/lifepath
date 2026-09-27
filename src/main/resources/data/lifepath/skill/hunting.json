@@ -1,0 +1,29 @@
+{
+	"display_name": "Hunting",
+	"description": "Tracking and slaying game for meat, hides, and trophies.",
+	"improve_hint": "Hunt animals for their bounty.",
+	"category": "gathering",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.hunting.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.hunting.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.hunting.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.hunting.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.hunting.milestone.95"
+		}
+	]
+}

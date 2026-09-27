@@ -1,22 +1,24 @@
 {
 	"display_name": "Cook",
 	"starting_skills": {
+		"lifepath:cooking": 20,
 		"lifepath:farming": 15,
-		"lifepath:fishing": 15
+		"lifepath:fishing": 10
 	},
 	"aptitudes": {
+		"lifepath:cooking": "a",
 		"lifepath:farming": "b",
-		"lifepath:fishing": "b"
+		"lifepath:fishing": "c"
 	},
 	"xp_modifiers": {
-		"lifepath:farming": 1.25,
-		"lifepath:fishing": 1.25
+		"lifepath:cooking": 1.35,
+		"lifepath:farming": 1.1
 	},
 	"decay_modifiers": {
-		"lifepath:farming": 0.25,
-		"lifepath:fishing": 0.25
+		"lifepath:cooking": 0.3,
+		"lifepath:farming": 0.2
 	},
 	"protected_floors": {
-		"lifepath:farming": 25
+		"lifepath:cooking": 30
 	}
 }

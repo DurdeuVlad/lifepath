@@ -1,7 +1,6 @@
 {
 	"replace": false,
 	"values": [
-		"#minecraft:logs",
 		"#minecraft:leaves",
 		"#minecraft:flowers",
 		"#minecraft:saplings"

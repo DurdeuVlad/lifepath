@@ -99,6 +99,26 @@ class ActivityPipelineTest {
 		// An untagged kill falls back to base_xp (still awards — combat is universal).
 		assertEquals(0.4, def.resolve(Identifier.of("minecraft", "slime"),
 				Set.of()).amount(), 1e-6);
+
+		// Archery (M8-3): same payload shape as combat, distinct activity id —
+		// emitted alongside combat when the killing blow is a projectile.
+		ActivityEvent a = ActivityEvents.archery(null,
+				Identifier.of("minecraft", "skeleton"),
+				Set.of(Identifier.of("minecraft", "undead")),
+				ActivityEvent.Cause.PLAYER);
+		assertEquals(ActivityTypes.ARCHERY, a.type());
+		assertEquals(Identifier.of("minecraft", "skeleton"), a.sourceId());
+		assertTrue(a.tags().contains(Identifier.of("minecraft", "undead")));
+
+		// Defence (M8-3): sourceId/tags describe the ATTACKER; the victim is
+		// the xp subject. Cause is NON_PLAYER — mob-caused, not player action.
+		ActivityEvent df = ActivityEvents.defence(null,
+				Identifier.of("minecraft", "zombie"),
+				Set.of(Identifier.of("minecraft", "undead")),
+				ActivityEvent.Cause.NON_PLAYER);
+		assertEquals(ActivityTypes.DEFENCE, df.type());
+		assertEquals(Identifier.of("minecraft", "zombie"), df.sourceId());
+		assertEquals(ActivityEvent.Cause.NON_PLAYER, df.cause());
 	}
 
 	@Test

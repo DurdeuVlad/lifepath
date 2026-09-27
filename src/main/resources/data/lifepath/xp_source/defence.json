@@ -1,0 +1,13 @@
+{
+	"activity": "lifepath:defence",
+	"skill": "lifepath:defence",
+	"base_xp": 0.3,
+	"per_subject": {
+		"minecraft:warden": 3.0,
+		"minecraft:ravager": 1.5
+	},
+	"per_tag": {
+		"minecraft:raiders": 0.5,
+		"minecraft:undead": 0.35
+	}
+}

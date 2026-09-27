@@ -1,7 +1,29 @@
 {
 	"display_name": "Athletics",
-	"description": "Raw physical exertion — the strength and stamina won by fighting, surviving, and pushing the body.",
+	"description": "Raw physical exertion \u00e2\u20ac\u201d the strength and stamina won by fighting, surviving, and pushing the body.",
 	"improve_hint": "Defeat hostile creatures in combat.",
 	"category": "physical",
-	"max_level": 100
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.athletics.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.athletics.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.athletics.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.athletics.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.athletics.milestone.95"
+		}
+	]
 }

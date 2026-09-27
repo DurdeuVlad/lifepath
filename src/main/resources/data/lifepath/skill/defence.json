@@ -1,0 +1,29 @@
+{
+	"display_name": "Defence",
+	"description": "Enduring blows and wearing the fight.",
+	"improve_hint": "Survive attacks from hostile creatures.",
+	"category": "physical",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.defence.milestone.20"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.defence.milestone.40"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.defence.milestone.60"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.defence.milestone.80"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.defence.milestone.95"
+		}
+	]
+}
