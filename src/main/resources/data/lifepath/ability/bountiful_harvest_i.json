@@ -1,0 +1,9 @@
+{
+	"display_name": "Bountiful Harvest I",
+	"trigger": {"type": "passive", "interval_ticks": 100},
+	"target": {"type": "lifepath:blocks_in_radius",
+	           "block": "#minecraft:crops", "radius": 5, "limit": 64},
+	"actions": [
+		{"type": "lifepath:grow_blocks", "growth_rolls": 2}
+	]
+}

@@ -1,0 +1,11 @@
+{
+	"display_name": "Patient Waters I",
+	"trigger": {"type": "passive", "interval_ticks": 40},
+	"conditions": {"all": [{"type": "lifepath:equipment_contains",
+	                        "item": "minecraft:fishing_rod", "slot": "mainhand"}]},
+	"target": {"type": "lifepath:self"},
+	"actions": [
+		{"type": "lifepath:apply_effect",
+		 "effect": "minecraft:luck_of_the_sea", "duration": 80, "amplifier": 0}
+	]
+}
