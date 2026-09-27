@@ -20,12 +20,25 @@ public record SpecializationDefinition(
 		Map<Identifier, Double> xpModifiers,
 		Map<Identifier, Double> decayModifiers,
 		Map<Identifier, Integer> protectedFloors,
-		List<Identifier> signatureRefs) {
+		List<Identifier> signatureRefs,
+		double capacityMultiplier) {
+
+	/** Convenience for call sites predating {@code capacityMultiplier} (M9-3). */
+	public SpecializationDefinition(Identifier id, String displayName,
+			Map<Identifier, Integer> startingSkills,
+			Map<Identifier, Aptitude> aptitudes,
+			Map<Identifier, Double> xpModifiers,
+			Map<Identifier, Double> decayModifiers,
+			Map<Identifier, Integer> protectedFloors,
+			List<Identifier> signatureRefs) {
+		this(id, displayName, startingSkills, aptitudes, xpModifiers,
+				decayModifiers, protectedFloors, signatureRefs, 1.0);
+	}
 
 	public static SpecializationDefinition fromFile(Identifier id, SpecializationDefinitionFile file) {
 		return new SpecializationDefinition(id, file.displayName(), file.startingSkills(),
 				file.aptitudes(), file.xpModifiers(), file.decayModifiers(), file.protectedFloors(),
-				file.signatureRefs());
+				file.signatureRefs(), file.capacityMultiplier());
 	}
 
 	/** JSON shape of {@code data/<ns>/specialization/<name>.json} (id excluded). */
@@ -36,7 +49,8 @@ public record SpecializationDefinition(
 			Map<Identifier, Double> xpModifiers,
 			Map<Identifier, Double> decayModifiers,
 			Map<Identifier, Integer> protectedFloors,
-			List<Identifier> signatureRefs) {
+			List<Identifier> signatureRefs,
+			double capacityMultiplier) {
 
 		public static final Codec<SpecializationDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SpecializationDefinitionFile::displayName),
@@ -45,7 +59,8 @@ public record SpecializationDefinition(
 				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 100.0)).optionalFieldOf("xp_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::xpModifiers),
 				Codec.unboundedMap(Identifier.CODEC, Codec.doubleRange(0.0, 1.0)).optionalFieldOf("decay_modifiers", Map.of()).forGetter(SpecializationDefinitionFile::decayModifiers),
 				Codec.unboundedMap(Identifier.CODEC, Codec.intRange(0, 10000)).optionalFieldOf("protected_floors", Map.of()).forGetter(SpecializationDefinitionFile::protectedFloors),
-				Identifier.CODEC.listOf().optionalFieldOf("signature", List.of()).forGetter(SpecializationDefinitionFile::signatureRefs)
+				Identifier.CODEC.listOf().optionalFieldOf("signature", List.of()).forGetter(SpecializationDefinitionFile::signatureRefs),
+			Codec.doubleRange(0.0, 100.0).optionalFieldOf("capacity_multiplier", 1.0).forGetter(SpecializationDefinitionFile::capacityMultiplier)
 		).apply(instance, SpecializationDefinitionFile::new));
 	}
 }

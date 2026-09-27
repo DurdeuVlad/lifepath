@@ -1,0 +1,38 @@
+{
+	"min": 0,
+	"max": 100,
+	"default": 0,
+	"regen_per_second": 0.0,
+	"display_name": "Load",
+	"bands": [
+		{
+			"range": [0, 40],
+			"name": "Normal",
+			"effects": []
+		},
+		{
+			"range": [40.001, 70],
+			"name": "Burdened",
+			"effects": [
+				{"effect": "minecraft:slowness", "duration_ticks": 60}
+			]
+		},
+		{
+			"range": [70.001, 90],
+			"name": "Heavy",
+			"effects": [
+				{"effect": "minecraft:slowness", "duration_ticks": 60, "amplifier": 1},
+				{"effect": "minecraft:weakness", "duration_ticks": 60}
+			]
+		},
+		{
+			"range": [90.001, 100],
+			"name": "Overloaded",
+			"effects": [
+				{"effect": "minecraft:slowness", "duration_ticks": 60, "amplifier": 2},
+				{"effect": "minecraft:weakness", "duration_ticks": 60, "amplifier": 1},
+				{"effect": "minecraft:mining_fatigue", "duration_ticks": 60}
+			]
+		}
+	]
+}

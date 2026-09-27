@@ -177,6 +177,10 @@ class VerticalSliceTest {
 		for (String s : List.of("air", "earth", "lightning"))
 			assertTrue(LifepathContent.attunements().contains(LifepathMod.id(s)),
 					"missing attunement " + s);
+		// M9-3: the load resource ships and carries the four spec bands.
+		var load = LifepathContent.resources().get(LifepathMod.id("load"));
+		assertTrue(load != null, "missing lifepath:load resource");
+		assertEquals(4, load.bands().size());
 	}
 
 	@Test
