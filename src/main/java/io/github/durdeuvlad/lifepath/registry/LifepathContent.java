@@ -533,6 +533,13 @@ public final class LifepathContent {
 	 */
 	public static ValidationReport validateAll() {
 		List<ValidationReport.Issue> issues = new ArrayList<>();
+		// M12-1: leniently-decoded icon fields land here — a malformed icon
+		// warns inside the report instead of failing its file.
+		for (io.github.durdeuvlad.lifepath.content.IconRef.Warning w :
+				io.github.durdeuvlad.lifepath.content.IconRef.drainWarnings()) {
+			issues.add(new ValidationReport.Issue(ValidationReport.Severity.WARN,
+					w.domain(), w.file(), w.field(), w.message()));
+		}
 		validateReferences(issues);
 		validateStructures(issues);
 		detectCycles(issues);

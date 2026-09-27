@@ -42,7 +42,18 @@ public record ConditionDefinition(
 		List<Identifier> resources,
 		List<Stage> stages,
 		List<AcquisitionRule> acquisition,
-		List<CureRule> cures) {
+		List<CureRule> cures,
+		Optional<Identifier> icon) {
+
+	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
+	public ConditionDefinition(Identifier id, String displayName,
+			Optional<String> description, List<Identifier> abilities,
+			Optional<Identifier> dietRules, List<Identifier> resources,
+			List<Stage> stages, List<AcquisitionRule> acquisition,
+			List<CureRule> cures) {
+		this(id, displayName, description, abilities, dietRules, resources,
+				stages, acquisition, cures, Optional.empty());
+	}
 
 	public ConditionDefinition {
 		abilities = List.copyOf(abilities);
@@ -116,7 +127,8 @@ public record ConditionDefinition(
 	public static ConditionDefinition fromFile(Identifier id, ConditionFile file) {
 		return new ConditionDefinition(id, file.displayName(), file.description(),
 				file.abilities(), file.dietRules(), file.resources(), file.stages(),
-				file.acquisition(), file.cures());
+				file.acquisition(), file.cures(),
+				file.icon().map(raw -> IconRef.resolve("condition", id, raw)));
 	}
 
 	/** JSON shape of {@code data/<ns>/condition/<name>.json} (id excluded). */
@@ -128,7 +140,8 @@ public record ConditionDefinition(
 			List<Identifier> resources,
 			List<Stage> stages,
 			List<AcquisitionRule> acquisition,
-			List<CureRule> cures) {
+			List<CureRule> cures,
+			Optional<String> icon) {
 
 		public static final Codec<ConditionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(ConditionFile::displayName),
@@ -138,7 +151,8 @@ public record ConditionDefinition(
 				Identifier.CODEC.listOf().optionalFieldOf("resources", List.of()).forGetter(ConditionFile::resources),
 				Stage.CODEC.listOf().optionalFieldOf("stages", List.of()).forGetter(ConditionFile::stages),
 				AcquisitionRule.CODEC.listOf().optionalFieldOf("acquisition", List.of()).forGetter(ConditionFile::acquisition),
-				CureRule.CODEC.listOf().optionalFieldOf("cures", List.of()).forGetter(ConditionFile::cures)
+				CureRule.CODEC.listOf().optionalFieldOf("cures", List.of()).forGetter(ConditionFile::cures),
+				Codec.STRING.optionalFieldOf("icon").forGetter(ConditionFile::icon)
 		).apply(instance, ConditionFile::new));
 	}
 }
