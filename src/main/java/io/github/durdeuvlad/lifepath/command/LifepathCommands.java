@@ -93,7 +93,15 @@ public final class LifepathCommands {
 		source.sendFeedback(() -> Text.literal(
 				"Lifepath reload finished: " + results.size() + " reloadables, " + failureCount + " failed"),
 				true);
-		return failureCount == 0 ? Command.SINGLE_SUCCESS : 0;
+		// M7-5: the content_validation reloader ran last — surface its grouped
+		// report to the command source, not just the log.
+		var report = io.github.durdeuvlad.lifepath.registry.LifepathContent
+				.lastValidationReport();
+		source.sendFeedback(() -> Text.literal(report.summaryLine()), true);
+		for (String line : report.detailLines()) {
+			source.sendFeedback(() -> Text.literal(line), false);
+		}
+		return failureCount == 0 && !report.hasErrors() ? Command.SINGLE_SUCCESS : 0;
 	}
 
 	/** Test hook: clears contributed subcommands and the init flag. Not for production use. */
