@@ -23,7 +23,17 @@ public record SkillDefinition(
 		Optional<Identifier> levelCurve,
 		List<Milestone> milestones,
 		List<Identifier> xpSources,
-		Optional<Identifier> passiveScaling) {
+		Optional<Identifier> passiveScaling,
+		Optional<Identifier> icon) {
+
+	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
+	public SkillDefinition(Identifier id, String displayName, String description,
+			String improveHint, Category category, int maxLevel,
+			Optional<Identifier> levelCurve, List<Milestone> milestones,
+			List<Identifier> xpSources, Optional<Identifier> passiveScaling) {
+		this(id, displayName, description, improveHint, category, maxLevel,
+				levelCurve, milestones, xpSources, passiveScaling, Optional.empty());
+	}
 
 	/** Back-compatible constructor for call sites that don't set UI strings. */
 	public SkillDefinition(Identifier id, String displayName, Category category,
@@ -54,7 +64,8 @@ public record SkillDefinition(
 	public static SkillDefinition fromFile(Identifier id, SkillDefinitionFile file) {
 		return new SkillDefinition(id, file.displayName(), file.description(),
 				file.improveHint(), file.category(), file.maxLevel(),
-				file.levelCurve(), file.milestones(), file.xpSources(), file.passiveScaling());
+				file.levelCurve(), file.milestones(), file.xpSources(), file.passiveScaling(),
+				file.icon().map(raw -> IconRef.resolve("skill", id, raw)));
 	}
 
 	/** JSON shape of {@code data/<ns>/skill/<name>.json} (id excluded). */
@@ -67,7 +78,8 @@ public record SkillDefinition(
 			Optional<Identifier> levelCurve,
 			List<Milestone> milestones,
 			List<Identifier> xpSources,
-			Optional<Identifier> passiveScaling) {
+			Optional<Identifier> passiveScaling,
+			Optional<String> icon) {
 
 		public static final Codec<SkillDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SkillDefinitionFile::displayName),
@@ -78,7 +90,8 @@ public record SkillDefinition(
 				Identifier.CODEC.optionalFieldOf("level_curve").forGetter(SkillDefinitionFile::levelCurve),
 				Milestone.CODEC.listOf().optionalFieldOf("milestones", List.of()).forGetter(SkillDefinitionFile::milestones),
 				Identifier.CODEC.listOf().optionalFieldOf("xp_sources", List.of()).forGetter(SkillDefinitionFile::xpSources),
-				Identifier.CODEC.optionalFieldOf("passive_scaling").forGetter(SkillDefinitionFile::passiveScaling)
+				Identifier.CODEC.optionalFieldOf("passive_scaling").forGetter(SkillDefinitionFile::passiveScaling),
+				Codec.STRING.optionalFieldOf("icon").forGetter(SkillDefinitionFile::icon)
 		).apply(instance, SkillDefinitionFile::new));
 	}
 }

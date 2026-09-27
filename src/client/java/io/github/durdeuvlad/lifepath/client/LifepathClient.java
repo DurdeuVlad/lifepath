@@ -77,6 +77,24 @@ public class LifepathClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT
 				.register(io.github.durdeuvlad.lifepath.client.hud.LifepathHud::render);
 
+		// M12-1: icon texture existence is memoized — drop the memo on
+		// resource reload (F3+T / pack change) so a texture that just arrived
+		// is picked up and warn-once can re-fire for genuinely missing ones.
+		net.fabricmc.fabric.api.resource.ResourceManagerHelper
+				.get(net.minecraft.resource.ResourceType.CLIENT_RESOURCES)
+				.registerReloadListener(new net.fabricmc.fabric.api.resource
+						.SimpleSynchronousResourceReloadListener() {
+					@Override
+					public net.minecraft.util.Identifier getFabricId() {
+						return LifepathMod.id("icon_cache");
+					}
+
+					@Override
+					public void reload(net.minecraft.resource.ResourceManager manager) {
+						io.github.durdeuvlad.lifepath.client.icon.ClientIcons.invalidate();
+					}
+				});
+
 		// M4-1: rebindable ability key (default G) — sends a C2S activation
 		// request for the client-selected ability; the server validates all.
 		abilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(

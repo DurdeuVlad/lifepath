@@ -44,7 +44,16 @@ import org.jetbrains.annotations.Nullable;
  */
 public record ResourceDefinition(Identifier id, String displayName,
 		double min, double max,
-		double defaultValue, double regenPerSecond, List<Band> bands) {
+		double defaultValue, double regenPerSecond, List<Band> bands,
+		java.util.Optional<Identifier> icon) {
+
+	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
+	public ResourceDefinition(Identifier id, String displayName, double min,
+			double max, double defaultValue, double regenPerSecond,
+			List<Band> bands) {
+		this(id, displayName, min, max, defaultValue, regenPerSecond, bands,
+				java.util.Optional.empty());
+	}
 
 	/** Back-compatible constructor — display name defaults to the id path. */
 	public ResourceDefinition(Identifier id, double min, double max,
@@ -96,7 +105,8 @@ public record ResourceDefinition(Identifier id, String displayName,
 
 	/** The datapack file shape for {@code data/<ns>/resource/<name>.json}. */
 	public record ResourceFile(String displayName, double min, double max,
-			double defaultValue, double regenPerSecond, List<Band> bands) {
+			double defaultValue, double regenPerSecond, List<Band> bands,
+			java.util.Optional<String> icon) {
 		private static final Codec<Double> BOUNDED_DOUBLE =
 				Codec.doubleRange(-1.0e9, 1.0e9);
 
@@ -110,9 +120,11 @@ public record ResourceDefinition(Identifier id, String displayName,
 				BOUNDED_DOUBLE.optionalFieldOf("regen_per_second", 0.0)
 						.forGetter(ResourceFile::regenPerSecond),
 				Band.CODEC.listOf().optionalFieldOf("bands", List.of())
-						.forGetter(ResourceFile::bands))
-				.apply(i, (name, min, max, def, regen, bands) -> new ResourceFile(name,
-						min, max, def.orElse(min), regen, bands)));
+						.forGetter(ResourceFile::bands),
+				Codec.STRING.optionalFieldOf("icon")
+						.forGetter(ResourceFile::icon))
+				.apply(i, (name, min, max, def, regen, bands, icon) -> new ResourceFile(name,
+						min, max, def.orElse(min), regen, bands, icon)));
 	}
 
 	/**
@@ -143,7 +155,8 @@ public record ResourceDefinition(Identifier id, String displayName,
 		return new ResourceDefinition(id,
 				file.displayName().isEmpty() ? id.getPath() : file.displayName(),
 				file.min(), file.max(), file.defaultValue(),
-				file.regenPerSecond(), sorted);
+				file.regenPerSecond(), sorted,
+				file.icon().map(raw -> IconRef.resolve("resource", id, raw)));
 	}
 
 	/** Index of the band containing {@code value}, or -1 when in no band. */

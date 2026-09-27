@@ -106,4 +106,46 @@ class LifepathContentTest {
 		assertTrue(unresolved.stream().anyMatch(u -> u.targetDomain().equals("ability")));
 		assertTrue(unresolved.stream().anyMatch(u -> u.targetDomain().equals("resource")));
 	}
+
+	// M12-1: icon field — optional, shorthand-normalized, lenient on
+	// malformed values (warns into the validation report; file still loads).
+	@Test
+	void iconFieldLoadsNormalizedAndOptional() {
+		Map<Identifier, com.google.gson.JsonElement> files = new LinkedHashMap<>();
+		files.put(Identifier.of("lifepath", "mining"), JsonParser.parseString(
+				"{\"display_name\": \"Mining\", \"category\": \"gathering\", \"icon\": \"skill/mining\"}"));
+		files.put(Identifier.of("lifepath", "foraging"), JsonParser.parseString(
+				"{\"display_name\": \"Foraging\", \"category\": \"gathering\"}"));
+
+		LifepathContent.registerAll("skill", files,
+				SkillDefinition.SkillDefinitionFile.CODEC, SkillDefinition::fromFile,
+				LifepathContent.skills());
+
+		assertEquals(java.util.Optional.of(
+						Identifier.of("lifepath", "textures/gui/skill/mining.png")),
+				LifepathContent.skills().get(Identifier.of("lifepath", "mining")).icon());
+		assertTrue(LifepathContent.skills().get(Identifier.of("lifepath", "foraging"))
+				.icon().isEmpty());
+	}
+
+	@Test
+	void malformedIconWarnsButFileLoads() {
+		Map<Identifier, com.google.gson.JsonElement> files = new LinkedHashMap<>();
+		files.put(Identifier.of("lifepath", "mining"), JsonParser.parseString(
+				"{\"display_name\": \"Mining\", \"category\": \"gathering\", \"icon\": \"bad icon!!\"}"));
+
+		int loaded = LifepathContent.registerAll("skill", files,
+				SkillDefinition.SkillDefinitionFile.CODEC, SkillDefinition::fromFile,
+				LifepathContent.skills());
+
+		assertEquals(1, loaded);
+		assertTrue(LifepathContent.skills().get(Identifier.of("lifepath", "mining"))
+				.icon().isEmpty());
+
+		var report = LifepathContent.validateAll();
+		assertTrue(report.issues().stream().anyMatch(i ->
+				i.severity() == io.github.durdeuvlad.lifepath.registry.ValidationReport.Severity.WARN
+						&& i.field().equals("icon")
+						&& i.file().equals(Identifier.of("lifepath", "mining"))));
+	}
 }

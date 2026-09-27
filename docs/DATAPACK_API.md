@@ -20,6 +20,24 @@ tag and payload id is `docs/API.md`. Primitive semantics (what each
 condition/action/target does) live in `docs/ABILITIES.md`; balance knobs in
 `docs/CONFIGURATION.md`; save-format history in `docs/MIGRATIONS.md`.
 
+## Common field: `icon`
+
+Every UI-rendered domain — `species`, `specialization`, `skill`, `ability`,
+`attunement`, `condition`, `resource` — accepts an optional `icon` string:
+
+```jsonc
+"icon": "species/human"                          // → lifepath:textures/gui/species/human.png
+"icon": "othermod:textures/gui/species/human.png" // explicit id, taken literally
+```
+
+A bare path is shorthand resolved under `lifepath:textures/gui/` (`.png`
+appended if absent); an explicit `namespace:path` is used verbatim. The value
+is a *reference*: the texture lives under `assets/` and is read client-side
+only — dedicated servers never need it. Resolution order in the UI is
+declared icon → generic per-domain placeholder (`textures/gui/placeholder/
+<domain>.png`) → text-only. A malformed string warns in the validation report
+and degrades to no-icon; it never fails the file.
+
 ## `skill/` — skill definition
 
 ```json

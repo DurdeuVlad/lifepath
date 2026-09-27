@@ -31,7 +31,16 @@ public record AttunementDefinition(
 		Optional<String> description,
 		List<Identifier> abilities,
 		List<AcquisitionRule> acquisition,
-		List<RemovalRule> removal) {
+		List<RemovalRule> removal,
+		Optional<Identifier> icon) {
+
+	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
+	public AttunementDefinition(Identifier id, String displayName,
+			Optional<String> description, List<Identifier> abilities,
+			List<AcquisitionRule> acquisition, List<RemovalRule> removal) {
+		this(id, displayName, description, abilities, acquisition, removal,
+				Optional.empty());
+	}
 
 	public AttunementDefinition {
 		abilities = List.copyOf(abilities);
@@ -72,7 +81,8 @@ public record AttunementDefinition(
 
 	public static AttunementDefinition fromFile(Identifier id, AttunementFile file) {
 		return new AttunementDefinition(id, file.displayName(), file.description(),
-				file.abilities(), file.acquisition(), file.removal());
+				file.abilities(), file.acquisition(), file.removal(),
+				file.icon().map(raw -> IconRef.resolve("attunement", id, raw)));
 	}
 
 	/** JSON shape of {@code data/<ns>/attunement/<name>.json} (id excluded). */
@@ -81,14 +91,16 @@ public record AttunementDefinition(
 			Optional<String> description,
 			List<Identifier> abilities,
 			List<AcquisitionRule> acquisition,
-			List<RemovalRule> removal) {
+			List<RemovalRule> removal,
+			Optional<String> icon) {
 
 		public static final Codec<AttunementFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(AttunementFile::displayName),
 				Codec.STRING.optionalFieldOf("description").forGetter(AttunementFile::description),
 				Identifier.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(AttunementFile::abilities),
 				AcquisitionRule.CODEC.listOf().optionalFieldOf("acquisition", List.of()).forGetter(AttunementFile::acquisition),
-				RemovalRule.CODEC.listOf().optionalFieldOf("removal", List.of()).forGetter(AttunementFile::removal)
+				RemovalRule.CODEC.listOf().optionalFieldOf("removal", List.of()).forGetter(AttunementFile::removal),
+				Codec.STRING.optionalFieldOf("icon").forGetter(AttunementFile::icon)
 		).apply(instance, AttunementFile::new));
 	}
 }
