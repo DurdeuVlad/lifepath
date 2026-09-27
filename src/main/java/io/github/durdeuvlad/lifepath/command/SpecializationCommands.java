@@ -100,6 +100,13 @@ public final class SpecializationCommands {
 				source.getName(), target.getName().getString(), target.getUuid(), specId);
 		source.sendFeedback(() -> Text.literal("set " + target.getName().getString()
 				+ " specialization to " + specId), true);
+		// M6-4 consequence preview: the recipient is told what this means.
+		SpecializationDefinition def = LifepathContent.specializations().get(specId);
+		if (def != null && target != null) {
+			target.sendMessage(Text.literal("Specialization: " + def.displayName()
+					+ " — a starting focus, not a lock: you can still train"
+					+ " every skill."), false);
+		}
 		return Command.SINGLE_SUCCESS;
 	}
 

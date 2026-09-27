@@ -120,8 +120,8 @@ public final class CharacterManager {
 		});
 		// Lazy decay trigger (M3-3): offline elapsed time is charged once here —
 		// deterministic because the window anchors on persisted timestamps.
-		if (io.github.durdeuvlad.lifepath.skill.SkillDecayService.applyLazyAll(
-				getCharacter(player), System.currentTimeMillis()) > 0) {
+		if (io.github.durdeuvlad.lifepath.feedback.FeedbackService
+				.applyDecayWithFeedback(player, System.currentTimeMillis()) > 0) {
 			markDirty(player);
 		}
 		syncCharacter(player);
@@ -179,6 +179,11 @@ public final class CharacterManager {
 			ServerPlayNetworking.send(player,
 					io.github.durdeuvlad.lifepath.skill.SkillSummary.build(data,
 							System.currentTimeMillis()));
+			// M6-4: identity/condition deltas become feedback events — the
+			// funnel covers every mutation path, so no caller needs to
+			// remember to notify.
+			io.github.durdeuvlad.lifepath.feedback.FeedbackService
+					.onSync(player, data);
 		} catch (Exception e) {
 			LifepathMod.LOGGER.error("failed to send character sync to {}", player.getUuid(), e);
 		}

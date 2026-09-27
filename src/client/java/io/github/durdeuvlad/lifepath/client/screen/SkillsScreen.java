@@ -93,6 +93,11 @@ public class SkillsScreen extends Screen {
 			y += ROW_H;
 		}
 		context.disableScissor();
+
+		// M6-4 discoverability: rows are clickable — say so.
+		context.drawCenteredTextWithShadow(textRenderer,
+				Text.translatable("screen.lifepath.skills.click_hint"),
+				width / 2, top + panelH + 8, DIM);
 	}
 
 	@Override
