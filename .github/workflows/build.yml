@@ -1,0 +1,38 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Grant wrapper
+        run: chmod +x gradlew
+
+      - name: Build, test, assemble
+        run: ./gradlew build --console=plain
+
+      - name: Upload mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifepath-jar
+          path: build/libs/lifepath-*.jar
+          if-no-files-found: error
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/reports/tests/test/**
