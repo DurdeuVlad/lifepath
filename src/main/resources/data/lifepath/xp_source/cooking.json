@@ -1,0 +1,13 @@
+{
+	"activity": "lifepath:crafting",
+	"skill": "lifepath:cooking",
+	"player_caused_only": true,
+	"base_xp": 0.4,
+	"per_subject": {
+		"minecraft:cake": 1.2,
+		"minecraft:rabbit_stew": 0.8
+	},
+	"required_tags": [
+		"lifepath:cookable_foods"
+	]
+}

@@ -1,7 +1,7 @@
 {
 	"display_name": "Foraging",
 	"description": "Gathering wood, leaves, and wild plants.",
-	"improve_hint": "Chop logs and gather wild plants.",
+	"improve_hint": "Gather wild plants, berries, leaves, and shoots.",
 	"category": "gathering",
 	"max_level": 100
 }

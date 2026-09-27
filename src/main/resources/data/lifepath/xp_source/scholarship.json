@@ -1,0 +1,14 @@
+{
+	"activity": "lifepath:crafting",
+	"skill": "lifepath:scholarship",
+	"player_caused_only": true,
+	"base_xp": 0.4,
+	"per_subject": {
+		"minecraft:writable_book": 0.8,
+		"minecraft:bookshelf": 0.6,
+		"minecraft:lectern": 0.8
+	},
+	"required_tags": [
+		"lifepath:scholarly"
+	]
+}

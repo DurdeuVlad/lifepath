@@ -4,9 +4,9 @@
 	"player_caused_only": true,
 	"base_xp": 0.04,
 	"per_tag": {
-		"minecraft:logs": 0.15,
 		"minecraft:leaves": 0.02,
-		"minecraft:flowers": 0.1
+		"minecraft:flowers": 0.1,
+		"minecraft:saplings": 0.05
 	},
 	"required_tags": [
 		"lifepath:forageable"

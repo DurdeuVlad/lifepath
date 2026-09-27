@@ -1,20 +1,20 @@
 {
 	"display_name": "Lumberjack",
 	"starting_skills": {
-		"lifepath:foraging": 20,
-		"lifepath:athletics": 10
+		"lifepath:woodcutting": 20,
+		"lifepath:foraging": 10
 	},
 	"aptitudes": {
-		"lifepath:foraging": "a",
-		"lifepath:athletics": "c"
+		"lifepath:woodcutting": "a",
+		"lifepath:foraging": "c"
 	},
 	"xp_modifiers": {
-		"lifepath:foraging": 1.35
+		"lifepath:woodcutting": 1.35
 	},
 	"decay_modifiers": {
-		"lifepath:foraging": 0.3
+		"lifepath:woodcutting": 0.3
 	},
 	"protected_floors": {
-		"lifepath:foraging": 30
+		"lifepath:woodcutting": 30
 	}
 }

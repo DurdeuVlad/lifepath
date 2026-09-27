@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.block.CropBlock;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
@@ -84,6 +85,33 @@ public final class VanillaGameplayProducers {
 							.collect(Collectors.toCollection(HashSet::new));
 					ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents
 							.combat(killer, typeId, entityTags, ActivityEvent.Cause.PLAYER));
+					// Archery: the same kill also counts as ranged-combat
+					// activity when the killing blow was a projectile.
+					var killSource = killedEntity.getRecentDamageSource();
+					if (killSource != null && killSource.isIn(
+							net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)) {
+						ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event
+								.ActivityEvents.archery(killer, typeId, entityTags,
+										ActivityEvent.Cause.PLAYER));
+					}
+				});
+		// M8-3 defence: hostile damage survived is the player's activity;
+		// the attacker is the cause. Environment/self damage can't train it.
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DAMAGE
+				.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
+					if (!(entity instanceof ServerPlayerEntity victim)
+							|| !(source.getAttacker() instanceof LivingEntity attacker)
+							|| attacker == entity) {
+						return;
+					}
+					Identifier attackerId = net.minecraft.registry.Registries.ENTITY_TYPE
+							.getId(attacker.getType());
+					Set<Identifier> attackerTags = attacker.getType().getRegistryEntry()
+							.streamTags().map(TagKey::id)
+							.collect(Collectors.toCollection(HashSet::new));
+					ActivityDispatcher.publish(io.github.durdeuvlad.lifepath.event.ActivityEvents
+							.defence(victim, attackerId, attackerTags,
+									ActivityEvent.Cause.NON_PLAYER));
 				});
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
 			if (world.isClient() || !(player instanceof ServerPlayerEntity serverPlayer)) {

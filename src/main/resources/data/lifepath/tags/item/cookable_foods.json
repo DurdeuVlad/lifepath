@@ -1,0 +1,16 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:bread",
+		"minecraft:cake",
+		"minecraft:cookie",
+		"minecraft:pumpkin_pie",
+		"minecraft:mushroom_stew",
+		"minecraft:rabbit_stew",
+		"minecraft:beetroot_soup",
+		"minecraft:suspicious_stew",
+		"minecraft:honey_bottle",
+		"minecraft:golden_carrot",
+		"minecraft:golden_apple"
+	]
+}

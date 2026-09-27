@@ -17,4 +17,8 @@ public final class ActivityTypes {
 	public static final Identifier FISHING = Identifier.of("lifepath", "fishing");
 	public static final Identifier CRAFTING = Identifier.of("lifepath", "crafting");
 	public static final Identifier COMBAT = Identifier.of("lifepath", "combat");
+	/** Ranged kills — emitted alongside {@link #COMBAT} for projectile kills (M8-3). */
+	public static final Identifier ARCHERY = Identifier.of("lifepath", "archery");
+	/** Hostile damage survived — emitted when a mob damages a player (M8-3). */
+	public static final Identifier DEFENCE = Identifier.of("lifepath", "defence");
 }
