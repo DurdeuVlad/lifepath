@@ -115,6 +115,11 @@ shift. Report issues on the GitHub issue tracker linked from this page.</em></p>
 - Content counts verified against `data/lifepath/`: 15 species,
   13 specializations, 13 skills, 79 abilities, 3 attunements,
   2 conditions, 4 resources.
+- Branding: `art/branding/lifepath_icon_512.png` (logo upload),
+  `lifepath_banner.png` 1200×400 (banner upload). AI-generated source art
+  (Codex/gpt-image-2) post-processed onto a uniform pixel grid — the
+  stairway + waypoint motif matches the shipped mod icon. Full
+  provenance: `art/branding/candidates/PROVENANCE.txt`.
 - Overgeared framing verified against `docs/COMPAT.md` +
   `docs/evidence/m13-6/`: adapter validated live on NeoForge 1.21.1
   (issue #138); Overgeared still has no Fabric 1.21.1 build, so the copy

@@ -1,0 +1,44 @@
+Lifepath CurseForge branding candidates — provenance
+=====================================================
+
+Two independent candidate sets. Pick one set (or mix icon+banner).
+
+SET 1 — procedural composite (files: icon_a_*, banner_*)
+  Method: 100% procedural pixel-art (PIL), NOT AI-generated — the mod's
+  own shipped 16x16 ability glyphs + a hand-drawn 5x7 pixel font on a
+  flat palette. Guarantees "not-AI" since every pixel sits on a uniform
+  nearest-neighbor grid.
+  Generator:  art/branding/make_candidates.py  (re-runnable, deterministic)
+  Palette:    deep navy bg #161b2e, border #2b3454, panel #1f263f,
+              stone #b8c0cc/#828c9c/#555e6e, cream #f0e6c8,
+              cyan waypoint #7fe9ff/#3fa8c9, gold #e8c15a (~11 colors)
+  Files:
+    icon_a_stairs.png        512x512  stone stairway -> cyan waypoint
+    icon_a_stairs_64.png     64x64    small-size legibility check — PASS
+    banner_a_tiles.png       1200x400 wordmark + path dashes + 3 glyph tiles
+    banner_b_stairs.png      1200x400 wordmark + stairway scene + waypoint
+
+SET 2 — AI-generated source, pixel-grid post-processed (files: codex_*)
+  Method: OpenAI Codex CLI v0.154 (gpt-5.6-luna) built-in image
+  generation (gpt-image-2) produced the source art; then deterministic
+  post-process snapped it to a uniform block grid, composited onto the
+  navy field, and quantized to a fixed palette.
+  Raw sources: _raw/codex_icon_source.png, _raw/codex_banner_source.png
+  Post-process: postprocess.ps1 / verification logged in session
+  Verification (all PASS): exact dims, opaque, uniform block cells,
+    10-11 palette colors, no unknown colors, icon readable at 64px.
+  Files:
+    codex_icon.png           512x512  cobblestone stairway -> cyan waypoint
+    codex_icon_64.png        64x64    small-size legibility check — PASS
+    codex_banner.png         1200x400 frosted-pixel LIFEPATH wordmark +
+                                      stairway scene
+
+Note: hero-glyph icon variants were tried (enderian_blink ring,
+celestial_radiance orb) and rejected — 16x textures turn muddy at 16x
+scale. The stairway/waypoint motif reads cleaner and is the stronger
+"lifepath" metaphor anyway.
+
+Recommendation: codex_icon + codex_banner share one visual language
+(same stairway, same waypoint) and read the most authentically
+minecrafty of the four options.
+
