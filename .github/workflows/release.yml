@@ -3,6 +3,7 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -24,6 +25,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Verify tag matches project version
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           tag="${GITHUB_REF_NAME#v}"
           version="$(grep -E '^version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')"
@@ -64,7 +66,23 @@ jobs:
                     neoforge/build/libs/lifepath-*-neoforge*.jar > checksums.txt
           cat checksums.txt
 
+      # CurseForge file naming: beta/alpha/release derived from the version
+      # string so `v1.0.0` ships "release" while `v1.0.0-beta.2` ships "beta".
+      - name: Resolve publish metadata
+        id: meta
+        run: |
+          v="$(grep -E '^version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')"
+          case "$v" in
+            *alpha*) t=alpha ;;
+            *beta*)  t=beta ;;
+            *)       t=release ;;
+          esac
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "releasetype=$t" >> "$GITHUB_OUTPUT"
+          echo "resolved: version=$v releasetype=$t"
+
       - name: Draft release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           draft: true
@@ -87,3 +105,40 @@ jobs:
             checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # CurseForge uploads run only when the project exists and its id is
+      # configured — without `vars.CURSEFORGE_PROJECT_ID` these steps skip and
+      # the GitHub release flow is unaffected. See docs/RELEASE_ENGINEERING.md.
+      - name: Publish NeoForge jar to CurseForge
+        if: ${{ vars.CURSEFORGE_PROJECT_ID != '' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_API_TOKEN }}
+          files: neoforge/build/libs/lifepath-*-neoforge.jar
+          name: Lifepath ${{ steps.meta.outputs.version }} for NeoForge (MC 1.21.1)
+          version: ${{ steps.meta.outputs.version }}
+          version-type: ${{ steps.meta.outputs.releasetype }}
+          changelog-file: CHANGELOG.md
+          loaders: neoforge
+          game-versions: |
+            1.21.1
+            Java 21
+
+      - name: Publish Fabric jar to CurseForge
+        if: ${{ vars.CURSEFORGE_PROJECT_ID != '' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_API_TOKEN }}
+          files: fabric/build/libs/lifepath-*-fabric.jar
+          name: Lifepath ${{ steps.meta.outputs.version }} for Fabric (MC 1.21.1)
+          version: ${{ steps.meta.outputs.version }}
+          version-type: ${{ steps.meta.outputs.releasetype }}
+          changelog-file: CHANGELOG.md
+          loaders: fabric
+          game-versions: |
+            1.21.1
+            Java 21
+          dependencies: |
+            fabric-api(required)

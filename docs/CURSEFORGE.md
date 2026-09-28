@@ -110,8 +110,12 @@ shift. Report issues on the GitHub issue tracker linked from this page.</em></p>
   `neoforge.mods.toml` (`neoforge [21.1,)`, `minecraft [1.21.1,1.22)`),
   and `gradle.properties` — CI fails the release on skew.
 - Multi-loader: NeoForge jar is the headline artifact; Fabric jar is the
-  secondary listing. CurseForge loader tags deferred to the public-listing
-  milestone — set both NeoForge + Fabric tags on upload.
+  secondary listing. Both ship to CurseForge from CI (see
+  `docs/RELEASE_ENGINEERING.md` → "CurseForge publishing"): one
+  `mc-publish` upload per jar gives each file its own loader tag —
+  NeoForge / Fabric, `1.21.1` + `Java 21`, `fabric-api` marked required
+  on the Fabric file. CI handles files only; project creation, logo,
+  banner, and gallery stay manual.
 - Content counts verified against `data/lifepath/`: 15 species,
   13 specializations, 13 skills, 79 abilities, 3 attunements,
   2 conditions, 4 resources.

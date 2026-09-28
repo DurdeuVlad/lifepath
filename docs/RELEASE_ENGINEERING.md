@@ -57,6 +57,37 @@ curated changelog section is attached before anyone sees it. Tagging:
 git tag v1.0.0-beta.1 <commit> && git push origin v1.0.0-beta.1
 ```
 
+### CurseForge publishing
+
+`release.yml` also publishes both loader jars to CurseForge via
+`Kir-Antipov/mc-publish@v3.3` — **one upload step per jar** so each file
+gets its own loader tag (NeoForge / Fabric), `1.21.1` + `Java 21` game
+versions, `CHANGELOG.md` as the file changelog, and a release type derived
+from the version string (`*alpha*` → alpha, `*beta*` → beta, else
+release). The Fabric file declares `fabric-api` as a required dependency.
+Sources jars are never uploaded.
+
+The steps are gated on `vars.CURSEFORGE_PROJECT_ID` — with the variable
+unset they skip cleanly and the GitHub draft release still runs. One-time
+setup:
+
+1. **Create the CurseForge project once by hand** — the create form
+   requires a logo upload (`art/branding/lifepath_icon_512.png`) which
+   needs a native file dialog; automation can't reach it. Fill summary,
+   categories, links, banner (`lifepath_banner.png`) and gallery
+   (`art/release-gallery/`) in the same session — copy lives in
+   `docs/CURSEFORGE.md`.
+2. Grab the project's numeric **Project ID** from its overview page →
+   repo Settings → Variables → `CURSEFORGE_PROJECT_ID`.
+3. CurseForge authors dashboard → account → API tokens → create token →
+   repo Settings → Secrets → `CURSEFORGE_API_TOKEN`.
+4. Next `v*` tag (or `workflow_dispatch` re-run of the release workflow)
+   uploads both jars automatically. The dispatch trigger exists precisely
+   for the retroactive first publish after secrets land.
+
+Manual upload of future versions is no longer needed — only the initial
+project creation stays human.
+
 ## Dependency metadata
 
 `fabric.mod.json` `depends` — `fabricloader >=0.16.10`,
