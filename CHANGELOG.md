@@ -26,7 +26,7 @@ milestone M10 — every roadmap system below is shipped and exercised.
 - **Progression systems** — diminishing returns (rolling signature windows),
   skill decay (5-band real-time ladder), encumbrance (inventory load →
   resource bands), diets, mob dispositions.
-- **Ability engine** — 79 data-driven abilities over 22 conditions, 15
+- **Ability engine** — 79 data-driven abilities over 22 conditions, 18
   actions, 3 targets; passive/active/event/damage-taken triggers.
 - **Conditions & attunements** — staged conditions (Vampirism, Lycanthropy)
   and flat attunements (Air, Earth, Lightning), all data-defined.

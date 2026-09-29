@@ -67,7 +67,7 @@ Content and producers reference these; datapacks may append members.
 - **mob_effect**: `nature_purifiable`
 - **worldgen/biome**: `arid`, `cold`
 
-Lang keys (`lifepath.*`, e.g. `lifepath.skill.<id>.milestone_<n>`, item-tag
+Lang keys (`lifepath.*`, e.g. `lifepath.skill.<id>.milestone.<n>`, item-tag
 names, screen chrome) and `assets/lifepath/**` (icon, screen textures) are
 convention-stable for resource packs; individual asset contents may change.
 
@@ -94,6 +94,12 @@ their own ids.
 - **Conditions** (22): `always`, `has_resource`, `attacker_entity`, `biome_tag`, `block_nearby`, `condition_stage`, `damage_amount`, `damage_type` (`id` = id or `#tag`), `daylight`, `dimension`, `entity_nearby`, `equipment_contains`, `has_condition`, `health_threshold`, `inside_block`, `inventory_contains`, `night`, `on_fire`, `resource_threshold` (`resource`,`op`,`value`), `skill_level`, `submerged`, `weather`. Combinators: `all`, `any` on `conditions` nodes.
 - **Targets**: `self`, `entities_in_radius` (`radius`,`entity` idOrTag,`living_only`), `blocks_in_radius` (`radius`,`block` idOrTag).
 - **Actions** (18): `apply_effect`, `consume_item`, `damage`, `debug_log`, `freeze_water`, `grant_xp`, `grow_blocks`, `heal`, `highlight_entities`, `ignite`, `modify_attribute`, `modify_resource`, `play_sound`, `random_teleport`, `remove_effect`, `resource_delta`, `spawn_particle`, `toggle_resource`.
+
+The vocabulary is deliberately compact — it covers the primitives the
+shipped content needs rather than Apoli-scale breadth. The extension seam
+is Java: `AbilityVocabulary.registerCondition` / `registerAction` /
+`registerTarget` add primitives at runtime; datapacks then compose them.
+Only built-in `lifepath:*` ids are covered by the Frozen-name contract.
 
 ## 4. Commands — Frozen names + argument shapes
 
@@ -171,7 +177,7 @@ registrations (their *ids* are public; their code is not), `perf/*`,
   `unlocked` so their grant path is data-declared.
 - **`content_validation` is a report**, not a gate: bad refs warn, never
   block. Downstream must not depend on it failing a load.
-- **Milestone lang keys** (`lifepath.skill.<id>.milestone_<n>`) are
+- **Milestone lang keys** (`lifepath.skill.<id>.milestone.<n>`) are
   convention-only — skills without them ship fine.
 - `entity`/`block` params on AoE targets accept `#tag` — tag absence degrades
   to "matches nothing," not an error.

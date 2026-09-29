@@ -96,20 +96,14 @@ tasks.named('sourcesJar') {
 			project(':common').sourceSets.client.allJava)
 }
 
-// configure the maven publication
+// The publication exists so `publishToMavenLocal` gives API consumers a
+// resolvable dev artifact. Remote distribution is jar-based via CurseForge
+// (mc-publish in CI) — consumers pull it through the CurseForge maven, so no
+// repositories{} block belongs here.
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
 			from components.java
 		}
-	}
-
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for
-	// information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in
-		// the top level. The repositories here will be used for publishing your
-		// artifact, not for retrieving dependencies.
 	}
 }

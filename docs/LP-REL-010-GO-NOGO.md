@@ -32,7 +32,7 @@ the Overgeared blocker resolved on NeoForge — #138; one blocker remains.)
 
 | Gate | Status | Evidence |
 |---|---|---|
-| Clean build | ✅ | `./gradlew clean build` — 346 tests, 0 failures. |
+| Clean build | ✅ | `./gradlew clean build` — 355 tests, 0 failures. |
 | Fresh client boot | ✅ | Dev client booted, world joined, screens + HUD + ability verified live (gallery). |
 | Dedicated server | ⚠️ exercised earlier | Server boot + `/reload` verified in `RELEASE_MATRIX.md` (M10-4); not re-run this cycle — flag for release day. |
 | World upgrade / migration | ✅ | v0→v1→v2 chain + `CharacterPersistence` tests; documented in `docs/MIGRATIONS.md`. |

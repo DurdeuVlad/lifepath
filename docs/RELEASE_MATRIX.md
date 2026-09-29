@@ -2,7 +2,7 @@
 
 Executed against `main` @ `ac9bc6e` (post M10-1/M10-2/M10-3). Evidence is
 either **live** (dedicated-server boot logs quoted inline) or **suite**
-(automated test coverage — the suite is 331 tests, 0 failures on this commit).
+(automated test coverage — the suite is 355 tests, 0 failures on this commit).
 Cells that could not be exercised live in this environment are labelled
 `PARTIAL` rather than claimed.
 

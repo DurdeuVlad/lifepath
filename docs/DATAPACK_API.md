@@ -185,7 +185,7 @@ Top level: `display_name`, `enabled` (default `true`), `trigger`,
 `conditions` composes `{all:[…]} ∩ {any:[…]}` — every `all` node plus at
 least one `any` node when present. Conditions/actions/target are SpecNodes —
 `{ "type": "<primitive id>", ...params }` where the primitive set
-(22 conditions, 15 actions, 3 targets) is enumerated in `docs/ABILITIES.md`.
+(22 conditions, 18 actions, 3 targets) is enumerated in `docs/ABILITIES.md`.
 `cost` is `{resource, amount}` charged per fire; `resource_interactions` is
 the passive drain/regen seam (`{resource, per_second}`). Unknown primitive
 types fail validation loudly; malformed params fall back to defaults.
