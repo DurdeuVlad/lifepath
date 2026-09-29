@@ -51,6 +51,10 @@ public class CharacterScreen extends Screen {
 	 *  growing/shrinking content never leaves it stranded or overlapped. */
 	private net.minecraft.client.gui.components.Button skillsButton;
 
+	/** M14: the selection picker's manual entry point — label follows the
+	 *  still-outstanding choice (species → specialization → re-pick). */
+	private net.minecraft.client.gui.components.Button selectionButton;
+
 	/** Hit rect for one clickable ability row (screen coordinates). */
 	private record AbilityRow(String id, int x, int y, int w, int h) {}
 
@@ -64,11 +68,33 @@ public class CharacterScreen extends Screen {
 		skillsButton = addRenderableWidget(net.minecraft.client.gui.components.Button.builder(
 				Component.translatable("screen.lifepath.character.skills_button"),
 				b -> minecraft.setScreen(new SkillsScreen()))
-				.bounds(width / 2 - 60,
+				.bounds(width / 2 - 102,
 						panelTop() + panelHeight(
 								ClientCharacterState.identity()) + 6,
-						120, 18)
+						96, 18)
 				.build());
+		// M14: Choose… — opens the guided selection screen at whichever pick
+		// is still outstanding; the screen requests a fresh catalog on open.
+		selectionButton = addRenderableWidget(net.minecraft.client.gui.components.Button.builder(
+				Component.translatable("screen.lifepath.character.choose_species"),
+				b -> minecraft.setScreen(new SelectionScreen(selectionStep())))
+				.bounds(width / 2 + 6,
+						panelTop() + panelHeight(
+								ClientCharacterState.identity()) + 6,
+						96, 18)
+				.build());
+	}
+
+	/** Which pick the Choose button should open on, in identity state. */
+	private SelectionScreen.Step selectionStep() {
+		IdentitySummaryPayload.IdentityCore core =
+				ClientCharacterState.identity().identity();
+		if (core.speciesName().isEmpty()) {
+			return SelectionScreen.Step.SPECIES;
+		}
+		return core.specName().isEmpty()
+				? SelectionScreen.Step.SPECIALIZATION
+				: SelectionScreen.Step.SPECIES;
 	}
 
 	@Override
@@ -84,6 +110,15 @@ public class CharacterScreen extends Screen {
 		int top = panelTop(panelH);
 		if (skillsButton != null) {
 			skillsButton.setY(top + panelH + 6);
+		}
+		if (selectionButton != null) {
+			selectionButton.setY(top + panelH + 6);
+			selectionButton.setMessage(Component.translatable(
+					core.speciesName().isEmpty()
+							? "screen.lifepath.character.choose_species"
+							: core.specName().isEmpty()
+									? "screen.lifepath.character.choose_focus"
+									: "screen.lifepath.character.change_species"));
 		}
 		context.fill(left - 4, top - 4, left + panelW + 4, top + panelH + 4, PANEL_EDGE);
 		context.fill(left - 3, top - 3, left + panelW + 3, top + panelH + 3, PANEL);

@@ -59,6 +59,9 @@ public final class ClientFeedback {
 			case "ability_denied" -> Component.translatable(key, arg(p, 0),
 					Component.translatable("feedback.lifepath.reason." + arg(p, 1),
 							arg(p, 2)));
+			// Same shape as ability_denied minus the seconds arg.
+			case "selection_denied" -> Component.translatable(key, arg(p, 0),
+					Component.translatable("feedback.lifepath.reason." + arg(p, 1)));
 			default -> Component.translatable(key, args);
 		};
 	}

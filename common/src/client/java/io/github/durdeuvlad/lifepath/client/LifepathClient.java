@@ -45,6 +45,17 @@ public final class LifepathClient {
 				io.github.durdeuvlad.lifepath.network.s2c.SkillsSummaryPayload.ID,
 				(payload, client) -> client.execute(() ->
 						ClientCharacterState.applySkills(payload)));
+		// M14: the selection catalog drives the onboarding picker — on join
+		// it arrives after the identity sync, so "species still unset" is a
+		// trustworthy auto-open signal.
+		clientPlatform.onS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.SelectionCatalogPayload.ID,
+				(payload, client) -> client.execute(() -> {
+					io.github.durdeuvlad.lifepath.client.selection
+							.ClientSelectionState.apply(payload);
+					io.github.durdeuvlad.lifepath.client.selection
+							.ClientSelectionState.maybeOpenOnboarding(client);
+				}));
 		// M4-4: cooldown deltas keep the client read-model fresh between
 		// full snapshots (advisory — the server re-validates every eval).
 		clientPlatform.onS2C(
@@ -63,9 +74,13 @@ public final class LifepathClient {
 			ClientCharacterState.clear();
 			ClientAbilityState.clear();
 			ClientHighlights.clear();
+			io.github.durdeuvlad.lifepath.client.selection.ClientSelectionState.clear();
 			io.github.durdeuvlad.lifepath.client.feedback.ClientFeedback.clear();
 		});
-		clientPlatform.onClientJoin(ClientCharacterState::clear);
+		clientPlatform.onClientJoin(() -> {
+			ClientCharacterState.clear();
+			io.github.durdeuvlad.lifepath.client.selection.ClientSelectionState.clear();
+		});
 
 		// M6-4: feedback events — localized chat/actionbar; ready-watcher
 		// derives "ability ready" from the synced cooldown map.
