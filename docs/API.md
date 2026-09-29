@@ -100,8 +100,8 @@ their own ids.
 Root `/lifepath`. Subcommands: `version`, `reload` (admin), `character
 get|describe|reset <player>` (admin), `cooldown` (admin debug), `debug`
 (admin), `specialization get|set` (admin), `species get|set <player> <id>`
-(admin override) + `species choose <id>` (player-facing, enforces
-`visibility`/`selection`), `condition get|add|remove|stage` (admin),
+(admin override — the player path is the selection screen, not a command),
+`condition get|add|remove|stage` (admin),
 `attunement` (admin), `unlock get|add|remove <player> <unlock-id>` (admin).
 Suggestions draw from the live registries. **Breaking** = renaming a literal
 or changing argument order/type.
@@ -125,10 +125,12 @@ unparseable files rename to `<name>.toml.invalid` and defaults apply.
 
 ## 6. Networking — Frozen channel ids
 
-S2C payloads only (clients never mutate authoritative state):
+S2C payloads (clients never mutate authoritative state):
 `lifepath:sync/character`, `sync/identity`, `sync/skills`, `sync/resource`,
-`sync/cooldown`, `feedback`, `ability/highlight`. C2S: `lifepath:ability/activate`
-(the keybind → server re-validates everything). Packet contents are
+`sync/cooldown`, `feedback`, `ability/highlight`, `selection/catalog`.
+C2S: `lifepath:ability/activate` (keybind), `selection/species`,
+`selection/specialization`, `selection/catalog_request` (the picker → all
+re-validated server-side). Packet contents are
 **Internal** — third parties must not parse them; mods extend via
 events/data, not wire sniffing.
 

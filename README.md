@@ -61,14 +61,15 @@ Fabric is supported secondarily. Same version, same content, same features.
 
 ## First minutes
 
-1. Start a world and open the character screen (default key `C` — rebind
+1. Start a world — the species picker opens itself on first join (reopen
+   anytime: Character screen → "Choose Species", default key `C`, rebindable
    under Controls → "Lifepath").
-2. Pick a species with `/lifepath species choose` — tab-completion lists
-   the species, and its description prints when you pick
-   (hover the species row on the character screen to re-read it).
-3. Specializations are assigned by a server admin
-   (`/lifepath specialization set`) — playing solo with cheats, set your
-   own. It's a head start, not a contract: you can still train anything.
+2. Click a card to see what it gives you, then Confirm — the pick is
+   applied by the server, so `unlocked` species only open up when you hold
+   their unlock.
+3. Next the picker offers your specialization — your starting focus, not a
+   contract: you can still train anything. That choice is one-time (admins
+   can re-set via `/lifepath specialization set`).
 4. Go play. Skills level from play — watch them grow on the skills screen,
    and press the ability key (default `G`) to fire an active ability;
    click an ability row on the character screen to choose which.

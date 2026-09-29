@@ -184,17 +184,17 @@ class UnlockServiceTest {
 				SpeciesDefinition.Visibility.HIDDEN, SpeciesDefinition.Selection.ADMIN_ONLY,
 				List.of(), List.of(), Map.of(), List.of(),
 				Optional.empty(), Optional.empty(), 1.0);
-		assertTrue(io.github.durdeuvlad.lifepath.command.SpeciesCommands
+		assertTrue(io.github.durdeuvlad.lifepath.selection.SelectionService
 				.chooseAllowed(data, open));
 		// Locked without the grant -> denied; after grant -> allowed.
-		assertFalse(io.github.durdeuvlad.lifepath.command.SpeciesCommands
+		assertFalse(io.github.durdeuvlad.lifepath.selection.SelectionService
 				.chooseAllowed(data, locked));
 		UnlockService.grant(data, null, LifepathMod.id("phantom"));
-		assertTrue(io.github.durdeuvlad.lifepath.command.SpeciesCommands
+		assertTrue(io.github.durdeuvlad.lifepath.selection.SelectionService
 				.chooseAllowed(data, locked));
 		// admin_only is never player-choosable, unlock held or not.
 		UnlockService.grant(data, null, LifepathMod.id("x"));
-		assertFalse(io.github.durdeuvlad.lifepath.command.SpeciesCommands
+		assertFalse(io.github.durdeuvlad.lifepath.selection.SelectionService
 				.chooseAllowed(data, adminOnly));
 	}
 }

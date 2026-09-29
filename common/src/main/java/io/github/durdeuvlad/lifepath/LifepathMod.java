@@ -211,6 +211,10 @@ public final class LifepathMod {
 						"HUD anchor corner: top_left|top_right|bottom_left|bottom_right.")
 				.define("hud_scale", 1.0, v -> v >= 0.5 && v <= 2.0,
 						"HUD render scale multiplier (readable at GUI scales 1-4).")
+				.define("onboarding_auto_open", true,
+						"Pop the species picker once per session on join while you"
+								+ " haven't picked a species. The Character screen's"
+								+ " Choose button works regardless.")
 				.build());
 
 		ReloadManager.register(id("engine_config"), LifepathConfig::reload);
@@ -258,6 +262,24 @@ public final class LifepathMod {
 		io.github.durdeuvlad.lifepath.ability.AbilityEngine.init();
 		io.github.durdeuvlad.lifepath.resource.ResourceService.init();
 		io.github.durdeuvlad.lifepath.feedback.FeedbackService.init();
+		// M14: GUI-first identity onboarding — per-player selection catalog +
+		// server-validated select requests. Types register before the service
+		// installs receivers (onC2S rejects unregistered types), and the
+		// service inits after CharacterManager so its join listener runs with
+		// the character cache already populated.
+		LifepathNetworking.registerS2C(
+				io.github.durdeuvlad.lifepath.network.s2c.SelectionCatalogPayload.ID,
+				io.github.durdeuvlad.lifepath.network.s2c.SelectionCatalogPayload.PACKET_CODEC);
+		LifepathNetworking.registerC2S(
+				io.github.durdeuvlad.lifepath.network.c2s.RequestSelectionCatalogPayload.ID,
+				io.github.durdeuvlad.lifepath.network.c2s.RequestSelectionCatalogPayload.PACKET_CODEC);
+		LifepathNetworking.registerC2S(
+				io.github.durdeuvlad.lifepath.network.c2s.SelectSpeciesPayload.ID,
+				io.github.durdeuvlad.lifepath.network.c2s.SelectSpeciesPayload.PACKET_CODEC);
+		LifepathNetworking.registerC2S(
+				io.github.durdeuvlad.lifepath.network.c2s.SelectSpecializationPayload.ID,
+				io.github.durdeuvlad.lifepath.network.c2s.SelectSpecializationPayload.PACKET_CODEC);
+		io.github.durdeuvlad.lifepath.selection.SelectionService.init();
 		LifepathNetworking.registerS2C(
 				io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload.ID,
 				io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload.PACKET_CODEC);

@@ -12,8 +12,13 @@ milestone M10 — every roadmap system below is shipped and exercised.
   conditions, attunements, unlocks, cooldowns. Persisted per player with the
   v0→v1→v2 migration chain (`docs/MIGRATIONS.md`).
 - **15 species** — open, `unlocked` (Phantom/Phoenix/Celestial gated by
-  `unlock/` definitions), `admin_only`, and `hidden` visibility; player path
-  is `/lifepath species choose`.
+  `unlock/` definitions), `admin_only`, and `hidden` visibility.
+- **Guided selection screen** — species and specialization are picked on a
+  card picker that auto-opens on first join (reopen via the Character
+  screen's Choose button; `client.toml onboarding_auto_open` toggles the
+  auto-open). Shows name, description, what you get, and locked reasons;
+  choices apply through server-validated requests — `/lifepath` is now an
+  admin-only surface.
 - **13 specializations** — aptitude grades, XP/decay modifiers, signature
   abilities, protected floors, encumbrance capacity multipliers.
 - **13 skills** — gathering/crafting/combat/physical/knowledge categories,

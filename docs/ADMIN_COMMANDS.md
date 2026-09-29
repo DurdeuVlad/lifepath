@@ -1,8 +1,12 @@
 # Lifepath Admin Command Reference (M10-3)
 
-All commands live under `/lifepath`. **ADMIN_PERMISSION = 2** — any subtree
-marked *admin* requires permission level 2 (op / command block / console).
-Everything else is player-facing.
+All commands live under `/lifepath`. **ADMIN_PERMISSION = 2** — every
+subtree below requires permission level 2 (op / command block / console),
+except `version`. **Players never need commands**: species and
+specialization selection happens in the selection screen (auto-opens on
+join while species is unset; reopen anytime from the Character screen's
+Choose button). The screen enforces `selection`/`unlock` rules through
+server-validated requests — `set` commands below are the admin override.
 
 | Command | Access | Effect |
 |---|---|---|
@@ -11,8 +15,7 @@ Everything else is player-facing.
 | `character inspect <player>` | admin | Full character dump: species, specialization, skills + progress, traits, conditions, attunements, unlocks, resources, cooldowns, action signatures. |
 | `character reset <player> confirm` | admin | Wipe the target's character to defaults. `confirm` is required — this is the destructive path. |
 | `species get <player>` | admin | Show the target's species. |
-| `species set <player> <id>` | admin | Force a species, bypassing `selection` rules (the admin override path). |
-| `species choose <id>` | **player** | The enforced selection path: `unlocked` species require the unlock token held, `admin_only` is never choosable, `hidden` species don't tab-suggest. |
+| `species set <player> <id>` | admin | Force a species, bypassing `selection` rules (the admin override path — the player path is the selection screen). |
 | `specialization get <player>` | admin | Show the target's specialization. |
 | `specialization set <player> <id>` | admin | Force a specialization. |
 | `condition get <player>` | admin | List held conditions + stage/progress. |
@@ -28,10 +31,11 @@ Everything else is player-facing.
 
 Notes:
 
-- `<id>` arguments are identifiers (`namespace:path`); admin `set`/`add`/`remove`
-  target a *player*, while `species choose` acts on the source player only.
-- `species set` (admin) ignores unlock enforcement; `species choose` (player)
-  is the path that enforces `selection`/`unlocked`/`hidden` rules.
+- `<id>` arguments are identifiers (`namespace:path`); `set`/`add`/`remove`
+  target a *player*.
+- `species set` (admin) ignores unlock enforcement; the selection screen is
+  the path that enforces `selection`/`unlocked` rules (`hidden` species
+  surface in the picker once the player holds their unlock).
 - `unlock add <id>` takes an **unlock definition** id, not a content id — the
   definition's `content` list is what lands in `data.unlocks()`.
 - `condition stage`'s `<n>` is clamped to the definition's stage range.

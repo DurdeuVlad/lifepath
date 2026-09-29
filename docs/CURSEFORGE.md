@@ -84,12 +84,14 @@ exact compat state).</p>
 <ol>
 <li>Open the character screen (default <code>C</code>; the Controls menu
 lists both Lifepath keys).</li>
-<li>Pick a species with <code>/lifepath species choose</code> —
-tab-completion lists the species, and its description prints
-when you pick.</li>
-<li>Specializations are assigned by a server admin
-(<code>/lifepath specialization set</code>) — solo with cheats, set your
-own. It's a head start, not a contract.</li>
+<li>The species picker opens itself on first join (reopen anytime:
+Character screen, default <code>C</code> → "Choose Species"). Click a
+card to see what it gives you, then Confirm — the server applies the
+pick, so <code>unlocked</code> species open up when you hold their
+unlock.</li>
+<li>The same screen then offers your specialization — a head start, not a
+contract. That pick is one-time; admins can re-set it with
+<code>/lifepath specialization set</code>.</li>
 <li>Go play. Watch the skills screen fill in; press the ability key
 (default <code>G</code>) to fire an active ability — click an ability row
 on the character screen to choose which.</li>

@@ -129,7 +129,8 @@ Nested path: `data/<ns>/skill/curve/<name>.json` — referenced by `skill`'s
 Required: `display_name`. `selection`: `open` (always choosable),
 `unlocked` (needs the species id present in the player's unlocks — see
 `unlock/`), `admin_only` (only `/lifepath species set`). `visibility`: `normal`
-or `hidden` (omitted from `/lifepath species choose` suggestions).
+or `hidden` (omitted from the selection screen until the player holds the
+unlock — then it surfaces as a normal card).
 `diet_rules`/`mob_dispositions` are single ids into the `diet`/`relation`
 domains. `resources`/`passive_abilities`/`active_abilities` are id lists
 validated against `resource`/`ability`. `capacity_multiplier` scales

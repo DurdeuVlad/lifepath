@@ -17,7 +17,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * {@code /lifepath species} tree (M5-1; M9-4 added the enforced player path).
+ * {@code /lifepath species} tree (M5-1; M9-4 added the enforced player path;
+ * M14 made the whole tree admin-only — players pick in the selection screen,
+ * whose requests {@code SelectionService} validates against the same policy).
  *
  * <ul>
  *   <li>{@code get <player>} (admin) — show the current species and its key fields.</li>
@@ -26,9 +28,6 @@ import net.minecraft.server.level.ServerPlayer;
  *       needs no cleanup; materialized resources keep ticking as owned
  *       character state. Admin override: {@code selection} rules are not
  *       enforced here.</li>
- *   <li>{@code choose <id>} (player-facing) — the enforced selection path:
- *       {@code selection} + {@code visibility} rules apply, and
- *       {@code unlocked} species require a held unlock id.</li>
  * </ul>
  */
 public final class SpeciesCommands {
@@ -44,17 +43,15 @@ public final class SpeciesCommands {
 		}
 		initialized = true;
 		LifepathCommands.register(literal("species")
-				// Root is ungated so players can run `choose`; get/set carry the
-				// admin requirement themselves (M9-4 — choose must be reachable
-				// without permission 2).
+				// M14: admin-only surface — the player path is the GUI picker
+				// (SelectionService), so the root carries the requirement.
+				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 				.executes(ctx -> usage(ctx.getSource()))
 				.then(literal("get")
-						.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> get(ctx.getSource(),
 										EntityArgument.getPlayer(ctx, "player")))))
 				.then(literal("set")
-						.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 						.then(argument("player", EntityArgument.player())
 								.then(argument("id", ResourceLocationArgument.id())
 										.suggests((ctx, builder) -> {
@@ -64,79 +61,12 @@ public final class SpeciesCommands {
 										})
 										.executes(ctx -> set(ctx.getSource(),
 												EntityArgument.getPlayer(ctx, "player"),
-												ResourceLocationArgument.getId(ctx, "id"))))))
-				.then(literal("choose")
-						.then(argument("id", ResourceLocationArgument.id())
-								.suggests((ctx, builder) -> {
-									// Player-facing picker: hidden species are
-									// not offered (admins suggest all).
-									boolean admin = ctx.getSource()
-											.hasPermission(LifepathCommands.ADMIN_PERMISSION);
-									LifepathContent.species().all().values().stream()
-											.filter(def -> admin
-													|| def.visibility() != SpeciesDefinition.Visibility.HIDDEN)
-											.forEach(def -> builder.suggest(def.id().toString()));
-									return builder.buildFuture();
-								})
-								.executes(ctx -> choose(ctx.getSource(),
-										ResourceLocationArgument.getId(ctx, "id"))))));
-	}
-
-	/**
-	 * Player-facing selection (M9-4): enforces {@code selection} + unlocks.
-	 * {@code admin_only} species are denied for everyone — admins grant via
-	 * {@code set} (logged admin path); {@code unlocked} requires the id in the
-	 * player's {@code unlocks[]} (granted by the unlock-source framework).
-	 */
-	private static int choose(CommandSourceStack source, ResourceLocation speciesId) {
-		ServerPlayer player;
-		try {
-			player = source.getPlayerOrException();
-		} catch (Exception e) {
-			source.sendFailure(Component.literal("only a player can choose a species"));
-			return 0;
-		}
-		SpeciesDefinition def = LifepathContent.species().get(speciesId);
-		if (def == null) {
-			source.sendFailure(Component.literal("unknown species: " + speciesId));
-			return 0;
-		}
-		PlayerCharacterData data = CharacterManager.getCharacter(player);
-		if (!chooseAllowed(data, def)) {
-			source.sendFailure(Component.literal(def.selection() == SpeciesDefinition.Selection.UNLOCKED
-					? "species " + speciesId + " requires an unlock you don't hold"
-					: "species " + speciesId + " is not selectable"));
-			return 0;
-		}
-		data.setSpeciesId(speciesId);
-		CharacterManager.changed(player);
-		source.sendSuccess(() -> Component.literal("species set to "
-				+ def.displayName()), false);
-		// Same consequence line `set` delivers — the player learns what the
-		// pick means (M6-4 zero-confusion rule).
-		def.description().ifPresent(d ->
-				player.displayClientMessage(Component.literal(d), false));
-		return Command.SINGLE_SUCCESS;
-	}
-
-	/**
-	 * The selection policy {@code choose} enforces — pulled out so tests cover
-	 * the rule without a live command source. {@code open} always selects;
-	 * {@code unlocked} requires the species id in {@code unlocks[]};
-	 * {@code admin_only} is never player-choosable (admins use {@code set}).
-	 */
-	public static boolean chooseAllowed(PlayerCharacterData data, SpeciesDefinition def) {
-		return switch (def.selection()) {
-			case OPEN -> true;
-			case UNLOCKED -> io.github.durdeuvlad.lifepath.unlock.UnlockService
-					.isUnlocked(data, def.id());
-			case ADMIN_ONLY -> false;
-		};
+												ResourceLocationArgument.getId(ctx, "id")))))));
 	}
 
 	private static int usage(CommandSourceStack source) {
 		source.sendSuccess(() -> Component.literal(
-				"usage: /lifepath species choose <id> | species get|set <player> <id> (admin)"), false);
+				"usage: /lifepath species get|set <player> <id>"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
