@@ -34,6 +34,7 @@ class IdentitySummaryTest {
 		LifepathContent.specializations().clear();
 		LifepathContent.resources().clear();
 		LifepathContent.abilities().clear();
+		LifepathContent.morphForms().clear();
 	}
 
 	@AfterEach
@@ -42,6 +43,7 @@ class IdentitySummaryTest {
 		LifepathContent.specializations().clear();
 		LifepathContent.resources().clear();
 		LifepathContent.abilities().clear();
+		LifepathContent.morphForms().clear();
 	}
 
 	private static SpeciesDefinition species(String name) throws Exception {
@@ -211,6 +213,60 @@ class IdentitySummaryTest {
 		// A def without an icon field degrades to "" (no placeholder
 		// resolution on the wire — that is the client's job).
 		assertEquals("", p.identity().specIcon());
+	}
+
+	/**
+	 * M-1 (morph): a character with morph state carries the resolved
+	 * {@code MorphView} — form id, entity type, display name, icon, active —
+	 * so the client can render the disguise without the morph_form registry.
+	 */
+	@Test
+	void morphStateResolvesIntoMorphView() {
+		var formFile = io.github.durdeuvlad.lifepath.content.MorphFormDefinition.MorphFormFile.CODEC
+				.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+						{
+							"entity_type": "minecraft:fox",
+							"display_name": "Fox",
+							"icon": "morph/fox",
+							"stats": {"minecraft:generic.max_health": 10.0}
+						}
+						"""))
+				.result().orElseThrow();
+		LifepathContent.morphForms().register(LifepathMod.id("fox"),
+				io.github.durdeuvlad.lifepath.content.MorphFormDefinition
+						.fromFile(LifepathMod.id("fox"), formFile));
+		data.setMorph(new PlayerCharacterData.MorphState(
+				LifepathMod.id("fox"), true, 42L));
+
+		IdentitySummaryPayload p = IdentitySummary.build(data);
+
+		assertEquals("lifepath:fox", p.morph().formId());
+		assertEquals("minecraft:fox", p.morph().entityType());
+		assertEquals("Fox", p.morph().name().getString());
+		assertEquals("lifepath:textures/gui/morph/fox.png", p.morph().icon());
+		assertTrue(p.morph().active());
+	}
+
+	@Test
+	void morphViewDegradesOnDeletedForm() {
+		// Form id set but def absent (reload removed it mid-session) — the
+		// payload degrades to the id path with no entity_type so the client
+		// renders the plain player instead of crashing.
+		data.setMorph(new PlayerCharacterData.MorphState(
+				LifepathMod.id("gone"), true, 42L));
+
+		IdentitySummaryPayload p = IdentitySummary.build(data);
+
+		assertEquals("lifepath:gone", p.morph().formId());
+		assertEquals("", p.morph().entityType());
+		assertEquals("gone", p.morph().name().getString());
+		assertTrue(p.morph().active());
+	}
+
+	@Test
+	void noMorphGivesEmptyView() {
+		IdentitySummaryPayload p = IdentitySummary.build(data);
+		assertEquals(IdentitySummaryPayload.MorphView.EMPTY, p.morph());
 	}
 
 	private static String uncheckedRead(String rel) {

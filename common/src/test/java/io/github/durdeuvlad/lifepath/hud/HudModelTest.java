@@ -32,7 +32,7 @@ class HudModelTest {
 				Map.of("conditions",
 						List.of(new IdentitySummaryPayload.Entry(
 								"lifepath:chilled", Component.literal("Chilled"), ""))),
-				abilities, res);
+				abilities, res, IdentitySummaryPayload.MorphView.EMPTY);
 	}
 
 	private static ResourceDisplay tempDisplay(double def, int restBand,

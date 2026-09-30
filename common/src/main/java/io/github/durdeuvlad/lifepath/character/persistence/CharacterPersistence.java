@@ -96,13 +96,25 @@ public final class CharacterPersistence {
 	 * the player was offline fall under the same rule.
 	 */
 	public static PlayerCharacterData sanitize(PlayerCharacterData data, long nowMs) {
+		boolean speciesDropped = false;
 		if (unknown("species", data.speciesId())) {
 			drop("species", data.speciesId());
 			data.setSpeciesId(null);
+			speciesDropped = true;
 		}
 		if (unknown("specialization", data.specializationId())) {
 			drop("specialization", data.specializationId());
 			data.setSpecializationId(null);
+		}
+		// Morph feature (M-1): a deleted morph_form clears the whole morph
+		// state — an unknown form can neither render nor stat correctly. The
+		// same drop applies when the species was just dropped: morph only
+		// exists under a species that carries the morph ability, so a
+		// species-less character must not keep an active disguise.
+		if (data.morph() != null && (speciesDropped
+				|| unknown("morph_form", data.morph().formId()))) {
+			drop("morph_form", data.morph().formId());
+			data.setMorph(null);
 		}
 		for (ResourceLocation id : new ArrayList<>(data.skills().keySet())) {
 			if (unknown("skill", id)) {

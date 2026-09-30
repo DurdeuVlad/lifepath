@@ -37,7 +37,8 @@ public record IdentitySummaryPayload(IdentityCore identity,
 		List<Entry> specFocus,
 		Map<String, List<Entry>> sections,
 		Map<String, AbilityEntry> abilities,
-		List<ResourceDisplay> resourceDisplays) implements CustomPacketPayload {
+		List<ResourceDisplay> resourceDisplays,
+		MorphView morph) implements CustomPacketPayload {
 
 	/**
 	 * One displayable content reference (M12-1): the content id, its
@@ -69,6 +70,28 @@ public record IdentitySummaryPayload(IdentityCore identity,
 						ComponentSerialization.TRUSTED_STREAM_CODEC,
 								AbilityEntry::description,
 						AbilityEntry::new);
+	}
+
+	/**
+	 * Morph disguise view (morph feature M-1): everything a client needs to
+	 * render the owning player's morph without owning the morph_form registry
+	 * — the form id, the resolved vanilla {@code entity_type}, the display
+	 * name, an icon, and whether morph is currently active. {@link #EMPTY}
+	 * when the character has no morph state.
+	 */
+	public record MorphView(String formId, String entityType, Component name,
+			String icon, boolean active) {
+		public static final MorphView EMPTY =
+				new MorphView("", "", Component.empty(), "", false);
+
+		static final StreamCodec<RegistryFriendlyByteBuf, MorphView> CODEC =
+				StreamCodec.composite(
+						ByteBufCodecs.STRING_UTF8, MorphView::formId,
+						ByteBufCodecs.STRING_UTF8, MorphView::entityType,
+						ComponentSerialization.TRUSTED_STREAM_CODEC, MorphView::name,
+						ByteBufCodecs.STRING_UTF8, MorphView::icon,
+						ByteBufCodecs.BOOL, MorphView::active,
+						MorphView::new);
 	}
 
 	/** Static display info for one resource def (M6-3 HUD; icon added M12-3). */
@@ -136,6 +159,7 @@ public record IdentitySummaryPayload(IdentityCore identity,
 							AbilityEntry.CODEC), IdentitySummaryPayload::abilities,
 					ResourceDisplay.CODEC.apply(ByteBufCodecs.list()),
 							IdentitySummaryPayload::resourceDisplays,
+					MorphView.CODEC, IdentitySummaryPayload::morph,
 					IdentitySummaryPayload::new);
 
 	/** Empty payload — used when the character has no identity content yet. */
@@ -143,7 +167,7 @@ public record IdentitySummaryPayload(IdentityCore identity,
 		return new IdentitySummaryPayload(
 				new IdentityCore("", Component.empty(), Component.empty(), "",
 						"", Component.empty(), ""),
-				List.of(), Map.of(), Map.of(), List.of());
+				List.of(), Map.of(), Map.of(), List.of(), MorphView.EMPTY);
 	}
 
 	@Override

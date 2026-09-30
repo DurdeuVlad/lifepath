@@ -40,6 +40,27 @@ public final class PlayerCharacterData {
 		).apply(instance, ResourceState::new));
 	}
 
+	/**
+	 * Anima morph state (morph feature M-1): {@code formId} is the locked
+	 * {@code morph_form} pick made at species-select; {@code active} is the
+	 * current toggle; {@code lastMorphMs} is the epoch ms of the last morph
+	 * activation (the cooldown source for re-morphing). The whole record is
+	 * absent until a form is chosen — morph is opt-in state, not a field
+	 * every character carries.
+	 */
+	public record MorphState(ResourceLocation formId, boolean active, long lastMorphMs) {
+
+		public MorphState {
+			Objects.requireNonNull(formId, "morph form id");
+		}
+
+		public static final Codec<MorphState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				ResourceLocation.CODEC.fieldOf("form_id").forGetter(MorphState::formId),
+				Codec.BOOL.optionalFieldOf("active", false).forGetter(MorphState::active),
+				Codec.LONG.optionalFieldOf("last_morph_ms", 0L).forGetter(MorphState::lastMorphMs)
+		).apply(instance, MorphState::new));
+	}
+
 	public static final Codec<PlayerCharacterData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC.optionalFieldOf("species_id").forGetter(d -> Optional.ofNullable(d.speciesId)),
 			ResourceLocation.CODEC.optionalFieldOf("specialization_id").forGetter(d -> Optional.ofNullable(d.specializationId)),
@@ -58,6 +79,9 @@ public final class PlayerCharacterData {
 					.optionalFieldOf("cooldowns", Map.of()).forGetter(d -> d.cooldowns),
 			Codec.unboundedMap(Codec.STRING, Codec.LONG.listOf())
 					.optionalFieldOf("action_signatures", Map.of()).forGetter(d -> d.actionSignatures),
+			// M-1 (morph): optional record — absent on pre-v3 blobs and on
+			// characters that never picked a form.
+			MorphState.CODEC.optionalFieldOf("morph").forGetter(d -> Optional.ofNullable(d.morph)),
 			Codec.INT.optionalFieldOf("data_version", 0).forGetter(d -> d.dataVersion)
 	).apply(instance, PlayerCharacterData::fromCodec));
 
@@ -74,6 +98,8 @@ public final class PlayerCharacterData {
 	private final Map<ResourceLocation, ResourceState> resources = new LinkedHashMap<>();
 	private final Map<ResourceLocation, Long> cooldowns = new LinkedHashMap<>();
 	private final Map<String, List<Long>> actionSignatures = new LinkedHashMap<>();
+	@Nullable
+	private MorphState morph;
 	private int dataVersion = LifepathMod.DATA_VERSION;
 
 	/** Fresh default data for a brand-new character. */
@@ -93,6 +119,7 @@ public final class PlayerCharacterData {
 		resources.clear();
 		cooldowns.clear();
 		actionSignatures.clear();
+		morph = null;
 		dataVersion = LifepathMod.DATA_VERSION;
 	}
 
@@ -107,6 +134,7 @@ public final class PlayerCharacterData {
 			Map<ResourceLocation, ResourceState> resources,
 			Map<ResourceLocation, Long> cooldowns,
 			Map<String, List<Long>> actionSignatures,
+			Optional<MorphState> morph,
 			int dataVersion) {
 		PlayerCharacterData data = new PlayerCharacterData();
 		data.speciesId = speciesId.orElse(null);
@@ -121,6 +149,7 @@ public final class PlayerCharacterData {
 		actionSignatures.forEach((sig, times) -> data.actionSignatures.put(sig,
 				new ArrayList<>(times.size() > 4096
 						? times.subList(times.size() - 4096, times.size()) : times)));
+		data.morph = morph.orElse(null);
 		data.dataVersion = dataVersion;
 		return data;
 	}
@@ -141,6 +170,25 @@ public final class PlayerCharacterData {
 
 	public void setSpecializationId(@Nullable ResourceLocation specializationId) {
 		this.specializationId = specializationId;
+	}
+
+	/**
+	 * The character's morph state (morph feature M-1), or null when no form
+	 * has been picked. Identity ({@link MorphState#formId}) is chosen at
+	 * species-select; {@code active} toggles via the morph ability.
+	 */
+	@Nullable
+	public MorphState morph() {
+		return morph;
+	}
+
+	public void setMorph(@Nullable MorphState morph) {
+		this.morph = morph;
+	}
+
+	/** True while morphed — the fast read every gameplay/render check uses. */
+	public boolean isMorphed() {
+		return morph != null && morph.active();
 	}
 
 	public Map<ResourceLocation, SkillProgress> skills() {
@@ -331,12 +379,14 @@ public final class PlayerCharacterData {
 				&& unlocks.equals(other.unlocks)
 				&& resources.equals(other.resources)
 				&& cooldowns.equals(other.cooldowns)
-				&& actionSignatures.equals(other.actionSignatures);
+				&& actionSignatures.equals(other.actionSignatures)
+				&& Objects.equals(morph, other.morph);
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(speciesId, specializationId, skills, traits, conditions,
-				attunements, unlocks, resources, cooldowns, actionSignatures, dataVersion);
+				attunements, unlocks, resources, cooldowns, actionSignatures, morph,
+				dataVersion);
 	}
 }

@@ -23,6 +23,7 @@ class LifepathContentTest {
 		LifepathContent.specializations().clear();
 		LifepathContent.skills().clear();
 		LifepathContent.abilities().clear();
+		LifepathContent.morphForms().clear();
 		LifepathContent.validateAll();
 	}
 

@@ -61,7 +61,10 @@ class IdentitySummaryPayloadTest {
 				List.of(new IdentitySummaryPayload.ResourceDisplay(
 						"lifepath:temperature", Component.literal("Temperature"), 50, 1,
 						List.of(Component.literal("Cold"), Component.literal("Hot")),
-						"lifepath:textures/gui/resource/temp.png")));
+						"lifepath:textures/gui/resource/temp.png")),
+				new IdentitySummaryPayload.MorphView("lifepath:fox",
+						"minecraft:fox", Component.literal("Fox"),
+						"lifepath:textures/gui/morph/fox.png", true));
 
 		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
 				Unpooled.buffer(), RegistryAccess.EMPTY);
@@ -76,6 +79,7 @@ class IdentitySummaryPayloadTest {
 		assertEquals(List.copyOf(p.abilities().keySet()),
 				List.copyOf(d.abilities().keySet()));
 		assertEquals(p.resourceDisplays(), d.resourceDisplays());
+		assertEquals(p.morph(), d.morph());
 	}
 
 	@Test
@@ -104,7 +108,7 @@ class IdentitySummaryPayloadTest {
 										"lifepath.skill.smithing.name", "Smithing"),
 								20, "A"),
 						""))),
-				Map.of(), List.of());
+				Map.of(), List.of(), IdentitySummaryPayload.MorphView.EMPTY);
 		var buf = new net.minecraft.network.RegistryFriendlyByteBuf(
 				io.netty.buffer.Unpooled.buffer(),
 				net.minecraft.core.RegistryAccess.fromRegistryOfRegistries(
