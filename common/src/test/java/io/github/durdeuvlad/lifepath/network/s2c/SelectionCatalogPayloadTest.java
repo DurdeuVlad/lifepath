@@ -47,7 +47,13 @@ class SelectionCatalogPayloadTest {
 						List.of(Component.translatable(
 								"text.lifepath.detail.skill_start_apt",
 								"smithing", 20, "A")),
-						Entry.AVAILABLE)));
+						Entry.AVAILABLE)),
+				List.of(new Entry("lifepath:fox", Component.literal("Fox"),
+								Component.literal("Sneaky."),
+						"lifepath:textures/gui/morph/fox.png",
+						List.of(Component.literal("Max Health: 10")),
+						Entry.AVAILABLE)),
+				java.util.Set.of("lifepath:anima"));
 
 		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
 				Unpooled.buffer(), RegistryAccess.EMPTY);
@@ -57,6 +63,9 @@ class SelectionCatalogPayloadTest {
 		assertEquals(p, d);
 		assertEquals(2, d.species().size());
 		assertEquals(Entry.NEEDS_UNLOCK, d.species().get(1).availability());
+		assertEquals(1, d.morphForms().size());
+		assertEquals("lifepath:fox", d.morphForms().get(0).id());
+		assertEquals(java.util.Set.of("lifepath:anima"), d.morphSpecies());
 	}
 
 	@Test

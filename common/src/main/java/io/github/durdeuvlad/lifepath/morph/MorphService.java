@@ -8,6 +8,7 @@ import io.github.durdeuvlad.lifepath.character.IdentitySummary;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.AbilityDefinition;
 import io.github.durdeuvlad.lifepath.content.MorphFormDefinition;
+import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.feedback.FeedbackService;
 import io.github.durdeuvlad.lifepath.platform.Platform;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
@@ -124,6 +125,43 @@ public final class MorphService {
 		}
 		return LifepathContent.morphForms().get(morph.formId()) != null
 				? ToggleCheck.READY : ToggleCheck.FORM_MISSING;
+	}
+
+	/**
+	 * True when the species def's active abilities carry a
+	 * {@code morph_toggle} action — the data-driven answer to "does this
+	 * species pick a form", so datapack-added morph species light the
+	 * picker's form step without code changes. Resolved against ability
+	 * defs at call time — an ability whose ref dangles counts as absent.
+	 */
+	public static boolean speciesHasMorphToggle(SpeciesDefinition def) {
+		for (ResourceLocation ref : def.activeAbilities()) {
+			AbilityDefinition ability = LifepathContent.abilities().get(ref);
+			if (ability != null && ability.actions().stream()
+					.anyMatch(node -> node.type().equals(TOGGLE_ACTION))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Drops an active morph's stat profile — no cooldown, no feedback: the
+	 * re-pick/admin path's cleanup, so a form swap can't strand the old
+	 * shape's modifiers. The picked {@code formId} is left for the caller
+	 * to overwrite; inactive or absent morphs are a no-op.
+	 */
+	public static void clearActiveMorph(ServerPlayer player,
+			PlayerCharacterData data) {
+		var morph = data.morph();
+		if (morph == null || !morph.active()) {
+			return;
+		}
+		float morphMax = player.getMaxHealth();
+		float ratio = morphMax > 0 ? player.getHealth() / morphMax : 1.0f;
+		removeMorphModifiers(player);
+		player.setHealth(ratio * player.getMaxHealth());
+		player.refreshDimensions();
 	}
 
 	/** Proportional carry: {@code cur/fromMax} lands as the same ratio of {@code toMax}. */
