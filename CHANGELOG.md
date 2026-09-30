@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-beta.4 — GUI blur fix
+
+Hotfix over beta.3: the picker and character screens drew their content
+and then called `super.render`, whose internal `renderBackground` runs the
+framebuffer blur pass a second time — smearing every card, title, and
+detail line while vanilla buttons stayed sharp. Widgets now render
+explicitly after our content, so the blur only ever touches the world.
+Everyone on beta.3 sees it — take this build.
+
 ## 1.0.0-beta.3 — NeoForge launch fix
 
 Hotfix over beta.2: the NeoForge jar bundled night-config via JarJar even

@@ -272,7 +272,11 @@ public class CharacterScreen extends Screen {
 					width / 2, top + panelH - 14, DIM);
 		}
 		// Widgets draw last — Skills/Choose must sit above the panel.
-		super.render(context, mouseX, mouseY, delta);
+		// Rendered explicitly rather than via super.render: Screen.render
+		// calls renderBackground again, and the framebuffer blur pass would
+		// smear everything drawn so far under it.
+		skillsButton.render(context, mouseX, mouseY, delta);
+		selectionButton.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override
