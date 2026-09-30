@@ -260,6 +260,8 @@ public class CharacterScreen extends Screen {
 									.abilityKey.getTranslatedKeyMessage()),
 					width / 2, top + panelH - 14, DIM);
 		}
+		// Widgets draw last — Skills/Choose must sit above the panel.
+		super.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override

@@ -116,6 +116,8 @@ public class SelectionScreen extends Screen {
 		}
 
 		renderFooter(context, left, top + panelH - FOOTER_H, entries, mouseX, mouseY);
+		// Widgets draw last — Confirm/Later must sit above the panel/footer.
+		super.render(context, mouseX, mouseY, delta);
 	}
 
 	/** Card grid: scrollable, scissored; locked entries dim with a reason line. */

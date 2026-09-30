@@ -105,10 +105,12 @@ public final class LifepathClient {
 		abilityKey = clientPlatform.registerKeyMapping(new KeyMapping(
 				"key.lifepath.ability", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G,
 				"key.categories.lifepath"));
-		// M6-1: character screen key (default C) — opens the read-only
-		// identity hub; the screen renders synced state, never mutates it.
+		// M6-1: character screen key (default O — vanilla claims C for
+		// saveToolbarActivator, and O is the Origin-style convention players
+		// already know) — opens the read-only identity hub; the screen
+		// renders synced state, never mutates it.
 		characterKey = clientPlatform.registerKeyMapping(new KeyMapping(
-				"key.lifepath.character", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C,
+				"key.lifepath.character", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O,
 				"key.categories.lifepath"));
 		clientPlatform.onEndClientTick(client -> {
 			while (abilityKey.consumeClick()) {
@@ -124,6 +126,8 @@ public final class LifepathClient {
 			ClientHighlights.tick(client);
 			io.github.durdeuvlad.lifepath.client.feedback.ClientFeedback
 					.tickReadyWatcher(client, abilityKey);
+			io.github.durdeuvlad.lifepath.client.selection.ClientSelectionState
+					.tickAutoOpen(client);
 		});
 	}
 }
