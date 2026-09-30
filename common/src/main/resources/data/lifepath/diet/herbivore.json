@@ -18,6 +18,19 @@
 		"minecraft:mushroom_stew",
 		"minecraft:suspicious_stew",
 		"minecraft:pumpkin_pie",
-		"minecraft:cookie"
+		"minecraft:cookie",
+		"farmersdelight:mixed_salad",
+		"farmersdelight:fruit_salad",
+		"farmersdelight:vegetable_soup",
+		"farmersdelight:onion_soup",
+		"farmersdelight:pumpkin_soup",
+		"farmersdelight:ratatouille",
+		"farmersdelight:mushroom_rice",
+		"farmersdelight:vegetable_noodles",
+		"farmersdelight:cooked_rice",
+		"farmersdelight:melon_juice",
+		"farmersdelight:apple_cider",
+		"farmersdelight:melon_popsicle",
+		"farmersdelight:glow_berry_custard"
 	]
 }

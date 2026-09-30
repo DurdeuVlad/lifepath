@@ -5,7 +5,18 @@
 	"base_xp": 0.4,
 	"per_subject": {
 		"minecraft:cake": 1.2,
-		"minecraft:rabbit_stew": 0.8
+		"minecraft:rabbit_stew": 0.8,
+		"farmersdelight:roast_chicken": 1.2,
+		"farmersdelight:honey_glazed_ham": 1.4,
+		"farmersdelight:shepherds_pie": 1.2,
+		"farmersdelight:stuffed_pumpkin": 1.4,
+		"farmersdelight:beef_stew": 0.8,
+		"farmersdelight:baked_cod_stew": 0.8,
+		"farmersdelight:grilled_salmon": 0.8,
+		"farmersdelight:pasta_with_meatballs": 0.9,
+		"farmersdelight:steak_and_potatoes": 1.0,
+		"farmersdelight:apple_pie": 1.0,
+		"farmersdelight:chocolate_pie": 1.0
 	},
 	"required_tags": [
 		"lifepath:cookable_foods"

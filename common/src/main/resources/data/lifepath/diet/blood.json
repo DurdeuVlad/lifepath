@@ -10,6 +10,12 @@
 		"minecraft:tropical_fish",
 		"minecraft:pufferfish",
 		"minecraft:rotten_flesh",
-		"minecraft:spider_eye"
+		"minecraft:spider_eye",
+		"farmersdelight:minced_beef",
+		"farmersdelight:chicken_cuts",
+		"farmersdelight:mutton_chops",
+		"farmersdelight:cod_slice",
+		"farmersdelight:salmon_slice",
+		"farmersdelight:raw_pasta"
 	]
 }

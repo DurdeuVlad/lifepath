@@ -11,6 +11,9 @@
 		"minecraft:suspicious_stew",
 		"minecraft:honey_bottle",
 		"minecraft:golden_carrot",
-		"minecraft:golden_apple"
+		"minecraft:golden_apple",
+		{ "id": "#farmersdelight:meals", "required": false },
+		{ "id": "#farmersdelight:snacks", "required": false },
+		{ "id": "#farmersdelight:sweets", "required": false }
 	]
 }
