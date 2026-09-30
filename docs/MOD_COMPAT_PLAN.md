@@ -229,3 +229,10 @@ post-beta.6 flavor pass.
 - FD container internals may shift between 1.3.x versions (A4 tests pin the
   pack's version).
 - FakePlayer detection differs Fabric↔NeoForge (A2 must cover both loaders).
+
+
+## Status (post-beta.6)
+
+Shipped: #149 (B1 fake-player gate, c6caf91), #150 (B2 data sweep, cb596fe), #151 (B3 Overgeared, a84b717), #152 (B4 FD stations, 9c7c8ed), #156 (B6 vampire bridge, c768636), #157 (B5 skill milestones, 09c00fa), #158 (beta.6 release).
+
+Open: #153 (A5 Pehkui scale), #154 (A6 season condition), #155 (A7 fishing/harvest audit) — scheduled after the morph block (#159–#164); #165 tracks beta.7.
