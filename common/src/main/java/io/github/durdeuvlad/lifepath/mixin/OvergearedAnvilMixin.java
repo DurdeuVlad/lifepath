@@ -21,7 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Overgeared forge completion → Smithing XP (NeoForge-only, gated by the
- * {@code lifepath.compat.mixins.json} config's {@code requiredMods}). Verified
+ * {@code lifepath.compat.overgeared.mixins.json} config's
+ * {@code requiredMods}). Verified
  * against Overgeared's bytecode: {@code craftItem()} drops the forged result
  * straight into the world — it never passes a result slot, so no
  * {@code ItemCraftedEvent} exists to republish. Every concrete anvil tier
