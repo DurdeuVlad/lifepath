@@ -193,7 +193,7 @@ public final class LifepathMod {
 				ConfigSpec.builder()
 				.define("enabled", true,
 						"Encumbrance: inventory weight drives the lifepath:load resource bands (M9-3).")
-				.define("capacity", 200.0, v -> v > 0 && v <= 1.0e6,
+				.define("capacity", 400.0, v -> v > 0 && v <= 1.0e6,
 						"Base carry capacity before species/spec multipliers. "
 								+ "Load% = total weight / capacity * 100.")
 				.define("default_item_weight", 1.0, v -> v >= 0 && v <= 1.0e4,

@@ -97,8 +97,9 @@ within `window_hours` get progressively less XP.
 | Key | Default | Range | Effect |
 |---|---|---|---|
 | `enabled` | `true` | bool | Master switch; off = no load bookkeeping or penalties. |
-| `capacity` | `200.0` | `0 < v ≤ 1e6` | Base carry capacity before species/specialization multipliers. |
+| `capacity` | `400.0` | `0 < v ≤ 1e6` | Base carry capacity before species/specialization multipliers. |
 | `default_item_weight` | `1.0` | `0 – 1e4` | Weight of items with no `item_weight` entry. |
+| `container_contents_factor` | `0.75` | `0 – 1` | Fraction of contents weight containers still impose; `<id>@contents` entries in `item_weight` tables override per container. |
 | `scan_interval_ticks` | `40` | `10 – 1200` | Inventory recount cadence (batched, not per-tick). |
 
 ## `client.toml` — client-side only
