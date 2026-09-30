@@ -13,4 +13,14 @@
 	"active_abilities": [
 		"lifepath:hellborn_immolate"
 	]
+,
+	"strengths": [
+		"Piglins treat you as kin",
+		"Fire barely singes you",
+		"The Nether lends you strength",
+		"Ignite foes around you"
+	],
+	"weaknesses": [
+		"Standing water quenches your flame"
+	]
 }

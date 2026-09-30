@@ -119,6 +119,30 @@ class SelectionServiceTest {
 	}
 
 	@Test
+	void speciesDetailsLeadWithColoredProsCons() {
+		// Strengths ride as green "+ ..." literals, weaknesses as red
+		// "- ..." — the color is the signal, so pin both text and style.
+		LifepathContent.species().register(LifepathMod.id("s"),
+				new SpeciesDefinition(LifepathMod.id("s"), "S", Optional.of("desc"),
+						SpeciesDefinition.Visibility.NORMAL,
+						SpeciesDefinition.Selection.OPEN,
+						List.of(), List.of(), Map.of(), List.of(),
+						Optional.empty(), Optional.empty(), 1.0, Optional.empty(),
+						List.of("Breathes underwater"), List.of("Dries out")));
+
+		Entry e = SelectionService.buildCatalog(data).species().get(0);
+		assertEquals(2, e.details().size());
+		assertEquals("+ Breathes underwater", e.details().get(0).getString());
+		assertEquals(net.minecraft.network.chat.TextColor
+						.fromLegacyFormat(net.minecraft.ChatFormatting.GREEN),
+				e.details().get(0).getStyle().getColor());
+		assertEquals("- Dries out", e.details().get(1).getString());
+		assertEquals(net.minecraft.network.chat.TextColor
+						.fromLegacyFormat(net.minecraft.ChatFormatting.RED),
+				e.details().get(1).getStyle().getColor());
+	}
+
+	@Test
 	void canSelectSpecializationRequiresUnsetAndDefined() {
 		LifepathContent.specializations().register(LifepathMod.id("smith"), spec("smith"));
 

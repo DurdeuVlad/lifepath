@@ -19,4 +19,11 @@
 	"active_abilities": [
 		"lifepath:iceborn_frost_walk"
 	]
+,
+	"strengths": [
+		"Frost and ice keep you sharp and quick to mend"
+	],
+	"weaknesses": [
+		"Heat, fire and lava drag you toward sluggish weakness"
+	]
 }

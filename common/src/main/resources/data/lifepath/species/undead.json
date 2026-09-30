@@ -10,4 +10,12 @@
 	"active_abilities": [
 		"lifepath:undead_death_sight"
 	]
+,
+	"strengths": [
+		"Walk unbothered among the undead",
+		"See the living outlined at night"
+	],
+	"weaknesses": [
+		"Only necrotic flesh feeds you"
+	]
 }

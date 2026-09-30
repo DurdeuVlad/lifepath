@@ -13,4 +13,13 @@
 	"active_abilities": [
 		"lifepath:anima_beast_soothe"
 	]
+,
+	"strengths": [
+		"Animals never hunt you",
+		"Your touch mends the pack"
+	],
+	"weaknesses": [
+		"Hollow bones make falls hurt more",
+		"Herbivore diet: meat does not feed you"
+	]
 }

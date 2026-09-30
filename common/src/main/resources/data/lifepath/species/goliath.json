@@ -16,4 +16,15 @@
 		"lifepath:goliath_warcry"
 	],
 	"capacity_multiplier": 1.5
+,
+	"strengths": [
+		"Athletics aptitude never falls below B",
+		"Towering frame hits harder",
+		"Warcry rattles foes",
+		"Carry 50% more"
+	],
+	"weaknesses": [
+		"Arrows find you easier",
+		"Falls land harder"
+	]
 }

@@ -20,6 +20,7 @@ import io.github.durdeuvlad.lifepath.unlock.UnlockService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -204,11 +205,14 @@ public final class SelectionService {
 				new FeedbackPayload("selection_denied", List.of(name, reasonKey)));
 	}
 
-	/** Card footer lines: actives lead (the headline), then passive names.
-	 *  Sent as translatable components — the "Active:" chrome is the
-	 *  client's language, only the resolved ability name crosses the wire. */
+	/** Card footer lines: colored "+"/"-" strength/weakness lines first —
+	 *  the picker's way of communicating good vs bad without a legend —
+	 *  then actives (the headline) and passive names. Sent as translatable
+	 *  components — the "Active:" chrome is the client's language, only the
+	 *  resolved ability name crosses the wire. */
 	private static List<Component> speciesDetails(SpeciesDefinition def) {
 		List<Component> lines = new ArrayList<>();
+		addProsCons(lines, def.strengths(), def.weaknesses());
 		for (ResourceLocation id : def.activeAbilities()) {
 			lines.add(Component.translatable("text.lifepath.detail.active",
 					IdentitySummary.displayName(id)));
@@ -219,9 +223,11 @@ public final class SelectionService {
 		return cap(lines);
 	}
 
-	/** Card footer lines: starting skills with aptitude, then signatures. */
+	/** Card footer lines: colored "+"/"-" lines, then starting skills with
+	 *  aptitude, then signatures. */
 	private static List<Component> specDetails(SpecializationDefinition def) {
 		List<Component> lines = new ArrayList<>();
+		addProsCons(lines, def.strengths(), def.weaknesses());
 		def.startingSkills().forEach((skill, level) -> {
 			Aptitude aptitude = def.aptitudes().get(skill);
 			lines.add(aptitude == null
@@ -236,6 +242,19 @@ public final class SelectionService {
 					IdentitySummary.displayName(ref)));
 		}
 		return cap(lines);
+	}
+
+	/** Datapack-authored "+"/"-" lines — green for strengths, red for
+	 *  weaknesses. Literal text: datapack prose is server content, same
+	 *  class as {@code description}. */
+	private static void addProsCons(List<Component> lines, List<String> strengths,
+			List<String> weaknesses) {
+		for (String s : strengths) {
+			lines.add(Component.literal("+ " + s).withStyle(ChatFormatting.GREEN));
+		}
+		for (String w : weaknesses) {
+			lines.add(Component.literal("- " + w).withStyle(ChatFormatting.RED));
+		}
 	}
 
 	private static List<Component> cap(List<Component> lines) {

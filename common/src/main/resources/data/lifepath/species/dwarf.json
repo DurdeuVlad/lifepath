@@ -16,4 +16,14 @@
 		"lifepath:dwarf_stoneform"
 	],
 	"capacity_multiplier": 1.15
+,
+	"strengths": [
+		"Mining aptitude never falls below B",
+		"Cave-dark speeds hands and steadies falls",
+		"Stoneform can still a killing blow",
+		"Carry 15% more"
+	],
+	"weaknesses": [
+		"Water drags at you like a millstone"
+	]
 }

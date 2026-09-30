@@ -52,10 +52,17 @@ public class SelectionScreen extends Screen {
 	private static final int COLS = 2;
 	private static final int PANEL_W = COLS * CARD_W + CARD_GAP + 16;
 	private static final int HEADER_H = 30;
-	private static final int FOOTER_H = 104;
+	/** Buttons + padding — the footer is always at least this tall. */
+	private static final int BUTTONS_H = 24;
+	/** "What you get" label + up to 4 detail rows, shown only for a
+	 *  selected card that actually has details — an empty selection never
+	 *  reserves this space. */
+	private static final int DETAILS_H = 14 + 4 * 10;
+	private static final int SCROLLBAR_W = 4;
 
 	private Step step;
 	private int scroll;
+	private boolean scrollbarDrag;
 	/** Selected card id — resolved against the current catalog per frame so
 	 *  a refresh (unlock landed, reload) can re-lock or drop a stale pick. */
 	private @Nullable String selectedId;
@@ -100,12 +107,14 @@ public class SelectionScreen extends Screen {
 		context.fill(left - 3, top - 3, left + PANEL_W + 3, top + panelH + 3, PANEL);
 
 		context.drawCenteredString(font, stepTitle(), width / 2, top + 6, ACCENT);
-		context.drawCenteredString(font, Component.translatable(
-				"screen.lifepath.selection.pick_hint"), width / 2, top + 17, DIM);
+		context.drawCenteredString(font,
+				GuiText.fit(font, Component.translatable(
+						"screen.lifepath.selection.pick_hint"), PANEL_W - 20),
+				width / 2, top + 17, DIM);
 
 		List<Entry> entries = entries();
 		int gridTop = top + HEADER_H;
-		int gridBottom = top + panelH - FOOTER_H;
+		int gridBottom = top + panelH - footerHeight(entries);
 		if (entries.isEmpty()) {
 			context.drawCenteredString(font, Component.translatable(
 					"screen.lifepath.selection.empty"),
@@ -113,9 +122,15 @@ public class SelectionScreen extends Screen {
 		} else {
 			renderGrid(context, entries, left + 8, gridTop, gridBottom,
 					mouseX, mouseY);
+			renderScrollbar(context, left, gridTop, gridBottom);
 		}
 
-		renderFooter(context, left, top + panelH - FOOTER_H, entries, mouseX, mouseY);
+		renderFooter(context, left, gridBottom, entries, mouseX, mouseY);
+		// Buttons ride the panel bottom so the collapsing footer never
+		// leaves them floating over empty space.
+		int buttonY = top + panelH - 22;
+		confirmButton.setY(buttonY);
+		laterButton.setY(buttonY);
 		// Widgets draw last — Confirm/Later must sit above the panel/footer.
 		super.render(context, mouseX, mouseY, delta);
 	}
@@ -176,40 +191,63 @@ public class SelectionScreen extends Screen {
 	}
 
 	/**
-	 * The consequence strip: what the inspected card grants, plus the spec
-	 * permanence warning — consequences are read before commitment, never
-	 * after (M6-4 zero-confusion).
+	 * The consequence strip: what the SELECTED card grants (green "+"
+	 * strengths / red "-" weaknesses from the catalog, then ability lines),
+	 * plus the spec permanence warning. Selection-gated rather than
+	 * hover-gated — hover would resize the panel under the cursor — and the
+	 * whole strip collapses when nothing is selected, so no empty region is
+	 * ever reserved (M6-4 zero-confusion: consequences before commitment).
 	 */
 	private void renderFooter(GuiGraphics context, int left, int footerTop,
 			List<Entry> entries, int mouseX, int mouseY) {
-		Entry shown = selected(entries);
-		if (shown == null) {
-			shown = hovered(entries, mouseX, mouseY);
-		}
-		if (shown != null && !shown.details().isEmpty()) {
+		Entry sel = selected(entries);
+		int dy = footerTop + 4;
+		if (sel != null && !sel.details().isEmpty()) {
 			context.drawString(font, Component.translatable(
-					"screen.lifepath.selection.details"), left + 8, footerTop + 4, ACCENT);
-			int dy = footerTop + 14;
-			for (int i = 0; i < Math.min(4, shown.details().size()); i++) {
+					"screen.lifepath.selection.details"), left + 8, dy, ACCENT);
+			dy += 12;
+			for (int i = 0; i < Math.min(4, sel.details().size()); i++) {
 				context.drawString(font,
-						GuiText.fit(font, shown.details().get(i), PANEL_W - 16),
+						GuiText.fit(font, sel.details().get(i), PANEL_W - 16),
+						left + 8, dy, DIM);
+				dy += 10;
+			}
+			if (sel.details().size() > 4) {
+				context.drawString(font, Component.translatable(
+						"text.lifepath.detail.more", sel.details().size() - 4),
 						left + 8, dy, DIM);
 				dy += 10;
 			}
 		}
 		if (step == Step.SPECIALIZATION) {
-			// Between the details strip and the buttons — the last thing
-			// read before committing a one-time pick. Wrapped so longer
-			// translations stay inside the panel instead of bleeding out.
-			int wy = footerTop + 52;
+			// Directly under the details — the last thing read before
+			// committing a one-time pick. Wrapped so longer translations
+			// stay inside the panel instead of bleeding out.
 			for (var line : font.split(Component.translatable(
 					"screen.lifepath.selection.spec_warning"), PANEL_W - 16)) {
-				context.drawCenteredString(font, line, width / 2, wy, WARN);
-				wy += 10;
+				context.drawCenteredString(font, line, width / 2, dy, WARN);
+				dy += 10;
 			}
 		}
-		Entry sel = selected(entries);
 		confirmButton.active = sel != null && sel.availability() == Entry.AVAILABLE;
+	}
+
+	/** Track + proportional thumb on the grid's right edge, only when the
+	 *  list actually overflows — communicates both position and range. */
+	private void renderScrollbar(GuiGraphics context, int left, int gridTop,
+			int gridBottom) {
+		int max = maxScroll(gridBottom - gridTop);
+		if (max <= 0) {
+			return;
+		}
+		int trackX = left + PANEL_W - 3 - SCROLLBAR_W;
+		int gridH = gridBottom - gridTop;
+		int contentH = gridH + max;
+		int thumbH = Math.max(14, gridH * gridH / contentH);
+		int thumbY = gridTop + (gridH - thumbH) * scroll / max;
+		context.fill(trackX, gridTop, trackX + SCROLLBAR_W, gridBottom, 0x30FFFFFF);
+		context.fill(trackX, thumbY, trackX + SCROLLBAR_W, thumbY + thumbH,
+				scrollbarDrag ? 0xFFB0B0C0 : 0xFF7A7A8A);
 	}
 
 	/** The selected card resolved against the current catalog — null if the
@@ -226,21 +264,18 @@ public class SelectionScreen extends Screen {
 		return null;
 	}
 
-	private @Nullable Entry hovered(List<Entry> entries, int mouseX, int mouseY) {
-		int gridTop = panelTop() + HEADER_H;
-		int gridBottom = panelTop() + panelHeight() - FOOTER_H;
-		if (mouseY < gridTop || mouseY >= gridBottom) {
-			return null;
-		}
-		int idx = cardIndexAt(mouseX, mouseY);
-		return idx >= 0 && idx < entries.size() ? entries.get(idx) : null;
-	}
-
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if (button == 0) {
 			int gridTop = panelTop() + HEADER_H;
-			int gridBottom = panelTop() + panelHeight() - FOOTER_H;
+			int gridBottom = gridBottom();
+			// Scrollbar grab wins over card hits — it lives in the grid's
+			// right gutter.
+			if (scrollbarHit(mouseX, mouseY, gridTop, gridBottom)) {
+				scrollbarDrag = true;
+				scrollTo(mouseY, gridTop, gridBottom);
+				return true;
+			}
 			if (mouseY >= gridTop && mouseY < gridBottom) {
 				int idx = cardIndexAt(mouseX, mouseY);
 				List<Entry> entries = entries();
@@ -254,6 +289,46 @@ public class SelectionScreen extends Screen {
 			}
 		}
 		return super.mouseClicked(mouseX, mouseY, button);
+	}
+
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button,
+			double dragX, double dragY) {
+		if (scrollbarDrag) {
+			scrollTo(mouseY, panelTop() + HEADER_H, gridBottom());
+			return true;
+		}
+		return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+	}
+
+	@Override
+	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+		scrollbarDrag = false;
+		return super.mouseReleased(mouseX, mouseY, button);
+	}
+
+	private boolean scrollbarHit(double mouseX, double mouseY, int gridTop,
+			int gridBottom) {
+		if (maxScroll(gridBottom - gridTop) <= 0
+				|| mouseY < gridTop || mouseY >= gridBottom) {
+			return false;
+		}
+		int trackX = width / 2 - PANEL_W / 2 + PANEL_W - 3 - SCROLLBAR_W;
+		return mouseX >= trackX - 2 && mouseX < trackX + SCROLLBAR_W + 2;
+	}
+
+	/** Absolute cursor y → scroll offset, keeping the grabbed point of the
+	 *  thumb under the cursor. */
+	private void scrollTo(double mouseY, int gridTop, int gridBottom) {
+		int gridH = gridBottom - gridTop;
+		int max = maxScroll(gridH);
+		if (max <= 0) {
+			return;
+		}
+		int thumbH = Math.max(14, gridH * gridH / (gridH + max));
+		scroll = (int) Math.max(0, Math.min(max,
+				Math.round((mouseY - gridTop - thumbH / 2.0)
+						* max / (gridH - thumbH))));
 	}
 
 	private int cardIndexAt(double mouseX, double mouseY) {
@@ -275,9 +350,7 @@ public class SelectionScreen extends Screen {
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY,
 			double horizontalAmount, double verticalAmount) {
-		int rows = (entries().size() + COLS - 1) / COLS;
-		int gridH = panelHeight() - HEADER_H - FOOTER_H;
-		int max = Math.max(0, rows * (CARD_H + CARD_GAP) - CARD_GAP - gridH);
+		int max = maxScroll(gridBottom() - (panelTop() + HEADER_H));
 		scroll = (int) Math.max(0, Math.min(max, scroll - verticalAmount * 20));
 		return true;
 	}
@@ -377,8 +450,36 @@ public class SelectionScreen extends Screen {
 		};
 	}
 
+	/** Footer height is content-driven: buttons always, the details strip
+	 *  only when a selected card has lines, the permanence warning only on
+	 *  the spec step — an empty selection never reserves space for it. */
+	private int footerHeight(List<Entry> entries) {
+		int h = BUTTONS_H;
+		Entry sel = selected(entries);
+		if (sel != null && !sel.details().isEmpty()) {
+			h += 12 + Math.min(4, sel.details().size()) * 10
+					+ (sel.details().size() > 4 ? 10 : 0) + 4;
+		}
+		if (step == Step.SPECIALIZATION) {
+			h += font.split(Component.translatable(
+					"screen.lifepath.selection.spec_warning"),
+					PANEL_W - 16).size() * 10 + 4;
+		}
+		return h;
+	}
+
+	private int gridBottom() {
+		return panelTop() + panelHeight() - footerHeight(entries());
+	}
+
+	private int maxScroll(int gridH) {
+		int rows = (entries().size() + COLS - 1) / COLS;
+		return Math.max(0, rows * (CARD_H + CARD_GAP) - CARD_GAP - gridH);
+	}
+
 	private int panelHeight() {
-		return Math.min(height - 16, 30 + 3 * (CARD_H + CARD_GAP) + FOOTER_H);
+		return Math.min(height - 16, HEADER_H + 3 * (CARD_H + CARD_GAP)
+				+ footerHeight(entries()));
 	}
 
 	private int panelTop() {

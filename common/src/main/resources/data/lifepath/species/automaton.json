@@ -12,4 +12,13 @@
 	"active_abilities": [
 		"lifepath:automaton_overclock"
 	]
+,
+	"strengths": [
+		"Cannot drown",
+		"Iron hull turns blows aside",
+		"Overclock for short bursts"
+	],
+	"weaknesses": [
+		"Water gums your joints with rust"
+	]
 }

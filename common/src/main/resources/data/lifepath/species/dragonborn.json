@@ -12,4 +12,12 @@
 	"active_abilities": [
 		"lifepath:dragonborn_breath"
 	]
+,
+	"strengths": [
+		"Fire cannot hurt you and feeds your core",
+		"Unleash a furnace breath"
+	],
+	"weaknesses": [
+		"Deep cold bites twice as deep"
+	]
 }

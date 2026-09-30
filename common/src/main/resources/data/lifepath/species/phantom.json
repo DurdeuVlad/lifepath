@@ -15,4 +15,12 @@
 	"active_abilities": [
 		"lifepath:phantom_phase"
 	]
+,
+	"strengths": [
+		"Phase out: arrows pass through you",
+		"Drift while immaterial"
+	],
+	"weaknesses": [
+		"Sunlight destabilizes your veil"
+	]
 }
