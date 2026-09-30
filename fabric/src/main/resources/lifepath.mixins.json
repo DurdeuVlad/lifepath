@@ -2,6 +2,7 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "io.github.durdeuvlad.lifepath.mixin",
+	"refmap": "lifepath-common-refmap.json",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"AnvilScreenHandlerMixin",
@@ -13,11 +14,12 @@
 		"PlayerEntityMixin",
 		"PlayerMorphMixin",
 		"PlayerMorphHandsMixin",
-		"LivingEntityMorphMixin",
+		"PlayerMorphDimensionsMixin",
 		"EntityMorphMixin",
+		"ArmorStandMorphMixin",
 		"ServerGameModeMorphMixin",
-		"FurnaceResultSlotMixin",
-		"MerchantResultSlotMixin",
+		"SlotMorphPickupMixin",
+		"AbstractContainerMenuMorphMixin",
 		"TargetPredicateMixin",
 		"PlayerAdvancementTrackerMixin"
 	],

@@ -53,7 +53,7 @@ persistence, camera, and server authority — we do what they do.
 | HP carry | morph: `hpRatio = currentHp / humanMax` → new hp = `ratio × morphMax`; demorph: inverse. Forced demorph on lethal damage; carry proportional; if carry ≥ max → real death | damage hook in `AbilityEngine` damage_taken path or a LivingEntity mixin |
 | Client disguise | per-loader render hook: morphed player renders a cached entity of `form.entity_type` with pose/rotation copied; name tag optional (Identity hides it) | client mixin precedent |
 | Hitbox | `Player.getDimensions`/`getEyeHeight` reads morph state → entity type's dimensions; `refreshDimensions` on morph/demorph | one mixin, both loaders share it via common |
-| Restrictions | morphed ⇒ block-break speed zeroed (attribute), `Slot.mayPickup` denied on `ResultSlot` (kills 2×2 + crafting tables), block/item interaction cancelled via platform events | `CraftingResultSlotMixin`, platform event seam |
+| Restrictions | morphed ⇒ block-break speed zeroed (attribute), station-result extraction denied (`Slot.mayPickup`/`tryRemove` + the `clicked` funnel — covers 2×2, crafting tables, anvil/smithing, furnace, merchant, loom incl. double-click gather), block/item interaction cancelled | `SlotMorphPickupMixin`, `AbstractContainerMenuMorphMixin`, platform event seam |
 
 ## Out of scope (explicit non-goals)
 
@@ -83,9 +83,10 @@ Filed: [#159](https://github.com/DurdeuVlad/lifepath/issues/159) [#160](https://
 - **M-4 Client disguise rendering** — per-loader interception of the player
   renderer; morphed players render as their form entity (pose/rot copied);
   hitbox + eye-height swap; nametag policy (hidden while morphed).
-- **M-5 Morph restrictions** — zeroed break speed, `ResultSlot` pickup
-  denial (crafting grid + tables), platform-interaction cancels
-  (containers, blocks, item use); melee bite stays.
+- **M-5 Morph restrictions** — zeroed break speed, station-result
+  extraction denial (crafting grids + every station output, including the
+  PICKUP_ALL gather path), block/item interaction cancels; melee bite
+  stays.
 - **M-6 Roster + docs** — the handpicked form list with per-form stat
   tuning, `DATAPACK_API.md` + `ABILITIES.md` updates, anima species
   strings (`anima_morph` description EN+RO).

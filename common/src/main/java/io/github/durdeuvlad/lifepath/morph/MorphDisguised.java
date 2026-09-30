@@ -26,6 +26,13 @@ public interface MorphDisguised {
 	boolean lifepath$isMorphDataKey(EntityDataAccessor<?> key);
 
 	/**
+	 * The synced id parsed to a {@link ResourceLocation}, or null when not
+	 * morphed / malformed. Implementations memoize against the raw string —
+	 * this runs per frame per morphed player on the render path.
+	 */
+	@Nullable net.minecraft.resources.ResourceLocation lifepath$morphTypeId();
+
+	/**
 	 * The morphed entity's disguise type, or null when the entity isn't a
 	 * morphed player (or the synced value is malformed — written only by
 	 * the server, but never trust wire bytes blindly).
@@ -34,7 +41,6 @@ public interface MorphDisguised {
 		if (!(entity instanceof MorphDisguised d)) {
 			return null;
 		}
-		String id = d.lifepath$morphEntityType();
-		return id.isEmpty() ? null : net.minecraft.resources.ResourceLocation.tryParse(id);
+		return d.lifepath$morphTypeId();
 	}
 }

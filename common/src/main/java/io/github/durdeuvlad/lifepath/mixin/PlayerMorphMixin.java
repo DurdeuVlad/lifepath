@@ -32,12 +32,35 @@ public abstract class PlayerMorphMixin implements MorphDisguised {
 		builder.define(lifepath$MORPH_ENTITY_TYPE, "");
 	}
 
+	/** Parse cache for {@link #lifepath$morphTypeId()} — the raw synced
+	 *  string the cached id was parsed from. */
+	@Unique
+	private String lifepath$typeIdParsedFrom = "";
+	@Unique
+	private net.minecraft.resources.ResourceLocation lifepath$typeIdParsed;
+
 	@Override
 	public String lifepath$morphEntityType() {
 		// Entity's constructor may reach getDimensions (→ this read) before
 		// entityData is assigned — a null there means "not morphed".
 		var entityData = ((Entity) (Object) this).getEntityData();
 		return entityData == null ? "" : entityData.get(lifepath$MORPH_ENTITY_TYPE);
+	}
+
+	@Override
+	public net.minecraft.resources.ResourceLocation lifepath$morphTypeId() {
+		String raw = lifepath$morphEntityType();
+		if (raw.isEmpty()) {
+			lifepath$typeIdParsedFrom = "";
+			lifepath$typeIdParsed = null;
+			return null;
+		}
+		// Memoize on the raw string — the render path asks per frame.
+		if (!raw.equals(lifepath$typeIdParsedFrom)) {
+			lifepath$typeIdParsedFrom = raw;
+			lifepath$typeIdParsed = net.minecraft.resources.ResourceLocation.tryParse(raw);
+		}
+		return lifepath$typeIdParsed;
 	}
 
 	@Override

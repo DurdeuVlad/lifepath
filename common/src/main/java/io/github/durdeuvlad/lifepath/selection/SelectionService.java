@@ -254,6 +254,11 @@ public final class SelectionService {
 			return;
 		}
 		data.setSpeciesId(speciesId);
+		// A species swap retires the morph pick: the new species may not
+		// carry the toggle ability, and a stranded active shape could never
+		// demorph (the ability that flips it would be unowned).
+		MorphService.clearActiveMorph(player, data);
+		data.setMorph(null);
 		// changed() syncs; the species_assigned feedback + description come
 		// from the sync diff — no bespoke chat needed here.
 		CharacterManager.changed(player);
@@ -328,9 +333,12 @@ public final class SelectionService {
 	 */
 	private static List<Component> morphDetails(MorphFormDefinition def) {
 		List<Component> lines = new ArrayList<>();
-		var entityType = BuiltInRegistries.ENTITY_TYPE.get(def.entityType());
+		// getHolder, not get: ENTITY_TYPE is a DefaultedRegistry — get()
+		// answers AIR for unknown ids rather than null.
+		var entityType = BuiltInRegistries.ENTITY_TYPE.getHolder(def.entityType())
+				.orElse(null);
 		if (entityType != null) {
-			lines.add(Component.translatable(entityType.getDescriptionId()));
+			lines.add(Component.translatable(entityType.value().getDescriptionId()));
 		}
 		for (var stat : def.stats().entrySet()) {
 			var holder = BuiltInRegistries.ATTRIBUTE.getHolder(stat.getKey())
