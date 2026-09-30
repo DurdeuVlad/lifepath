@@ -32,6 +32,13 @@ public final class MorphDisguise {
 	/** Entity types that failed registry lookup — warn once, not per tick. */
 	private static final Set<ResourceLocation> WARNED = ConcurrentHashMap.newKeySet();
 
+	/** True while the entity is a morphed player — the both-sides check the
+	 *  M-5 restriction seams use (synced data, so client prediction agrees
+	 *  with the server). */
+	public static boolean isDisguised(Entity entity) {
+		return MorphDisguised.typeIdOf(entity) != null;
+	}
+
 	/** The morphed player's disguise dims, or null when not morphed / unknown type. */
 	public static @Nullable EntityDimensions dimsFor(Entity entity) {
 		ResourceLocation typeId = MorphDisguised.typeIdOf(entity);

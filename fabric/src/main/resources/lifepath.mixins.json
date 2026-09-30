@@ -12,8 +12,12 @@
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
 		"PlayerMorphMixin",
+		"PlayerMorphHandsMixin",
 		"LivingEntityMorphMixin",
 		"EntityMorphMixin",
+		"ServerGameModeMorphMixin",
+		"FurnaceResultSlotMixin",
+		"MerchantResultSlotMixin",
 		"TargetPredicateMixin",
 		"PlayerAdvancementTrackerMixin"
 	],
