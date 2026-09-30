@@ -1,0 +1,21 @@
+{
+	"display_name": "Delver's Grip II",
+	"description": "Trained hands work stone and ore measurably faster. (+8% block break speed)",
+	"icon": "skill/mining",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.block_break_speed",
+			"operation": "add_multiplied_base",
+			"value": 0.08,
+			"duration_ticks": 120
+		}
+	]
+}

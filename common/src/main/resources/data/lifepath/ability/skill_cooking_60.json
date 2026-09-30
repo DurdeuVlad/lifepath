@@ -1,0 +1,21 @@
+{
+	"display_name": "Well-Nourished III",
+	"description": "Good food keeps a body whole. (+3 max health)",
+	"icon": "skill/cooking",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.max_health",
+			"operation": "add_value",
+			"value": 3,
+			"duration_ticks": 120
+		}
+	]
+}

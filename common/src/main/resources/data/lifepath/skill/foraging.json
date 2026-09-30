@@ -4,5 +4,42 @@
 	"description": "Gathering wood, leaves, and wild plants.",
 	"improve_hint": "Gather wild plants, berries, leaves, and shoots.",
 	"category": "gathering",
-	"max_level": 100
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.foraging.milestone.20",
+			"effects": [
+				"lifepath:skill_foraging_20"
+			]
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.foraging.milestone.40",
+			"effects": [
+				"lifepath:skill_foraging_40"
+			]
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.foraging.milestone.60",
+			"effects": [
+				"lifepath:skill_foraging_60"
+			]
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.foraging.milestone.80",
+			"effects": [
+				"lifepath:skill_foraging_80"
+			]
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.foraging.milestone.95",
+			"effects": [
+				"lifepath:skill_foraging_95"
+			]
+		}
+	]
 }

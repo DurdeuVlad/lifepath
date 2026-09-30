@@ -1,0 +1,21 @@
+{
+	"display_name": "Sure-Footed I",
+	"description": "You land like you've done this a thousand times. (-10% fall damage)",
+	"icon": "skill/athletics",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.fall_damage_multiplier",
+			"operation": "add_value",
+			"value": -0.1,
+			"duration_ticks": 120
+		}
+	]
+}

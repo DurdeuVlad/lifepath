@@ -8,23 +8,38 @@
 	"milestones": [
 		{
 			"level": 20,
-			"description_key": "lifepath.skill.woodcutting.milestone.20"
+			"description_key": "lifepath.skill.woodcutting.milestone.20",
+			"effects": [
+				"lifepath:skill_woodcutting_20"
+			]
 		},
 		{
 			"level": 40,
-			"description_key": "lifepath.skill.woodcutting.milestone.40"
+			"description_key": "lifepath.skill.woodcutting.milestone.40",
+			"effects": [
+				"lifepath:skill_woodcutting_40"
+			]
 		},
 		{
 			"level": 60,
-			"description_key": "lifepath.skill.woodcutting.milestone.60"
+			"description_key": "lifepath.skill.woodcutting.milestone.60",
+			"effects": [
+				"lifepath:skill_woodcutting_60"
+			]
 		},
 		{
 			"level": 80,
-			"description_key": "lifepath.skill.woodcutting.milestone.80"
+			"description_key": "lifepath.skill.woodcutting.milestone.80",
+			"effects": [
+				"lifepath:skill_woodcutting_80"
+			]
 		},
 		{
 			"level": 95,
-			"description_key": "lifepath.skill.woodcutting.milestone.95"
+			"description_key": "lifepath.skill.woodcutting.milestone.95",
+			"effects": [
+				"lifepath:skill_woodcutting_95"
+			]
 		}
 	]
 }

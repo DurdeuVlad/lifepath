@@ -1,0 +1,21 @@
+{
+	"display_name": "Smith's Polish IV",
+	"description": "Gear you maintain holds its edge better. (+2 armor toughness)",
+	"icon": "skill/smithing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.armor_toughness",
+			"operation": "add_value",
+			"value": 2,
+			"duration_ticks": 120
+		}
+	]
+}

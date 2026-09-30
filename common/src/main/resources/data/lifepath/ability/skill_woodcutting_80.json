@@ -1,0 +1,29 @@
+{
+	"display_name": "Timber Rhythm IV",
+	"description": "Among timber your axe finds its own tempo. (Haste 4 near logs)",
+	"icon": "skill/woodcutting",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:haste",
+			"duration": 120,
+			"amplifier": 1
+		}
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:logs",
+				"radius": 6
+			}
+		]
+	}
+}

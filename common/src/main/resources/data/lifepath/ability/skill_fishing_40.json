@@ -1,0 +1,30 @@
+{
+	"display_name": "Tide Reader II",
+	"description": "You read the water's patience. (+2 Luck near open water)",
+	"icon": "skill/fishing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.luck",
+			"operation": "add_value",
+			"value": 2,
+			"duration_ticks": 120
+		}
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:water",
+				"radius": 6
+			}
+		]
+	}
+}

@@ -1,0 +1,21 @@
+{
+	"display_name": "Lucky Insight III",
+	"description": "The right book at the right time becomes its own luck. (+1.5 luck)",
+	"icon": "skill/scholarship",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.luck",
+			"operation": "add_value",
+			"value": 1.5,
+			"duration_ticks": 120
+		}
+	]
+}

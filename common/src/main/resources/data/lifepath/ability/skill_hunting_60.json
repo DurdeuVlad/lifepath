@@ -1,0 +1,21 @@
+{
+	"display_name": "Hunter's Eye III",
+	"description": "Years on the trail sharpen every strike. (+1.5 attack damage)",
+	"icon": "skill/hunting",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.attack_damage",
+			"operation": "add_value",
+			"value": 1.5,
+			"duration_ticks": 120
+		}
+	]
+}

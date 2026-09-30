@@ -1,0 +1,30 @@
+{
+	"display_name": "Green Thumb V",
+	"description": "Standing in your fields, fortune tilts your way. (+6 Luck amid crops)",
+	"icon": "skill/farming",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.luck",
+			"operation": "add_value",
+			"value": 6,
+			"duration_ticks": 120
+		}
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:crops",
+				"radius": 5
+			}
+		]
+	}
+}

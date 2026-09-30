@@ -1,0 +1,29 @@
+{
+	"display_name": "Gatherer's Sense V",
+	"description": "The forest shows its shelves to those who look. (+6 Luck in forests)",
+	"icon": "skill/foraging",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.luck",
+			"operation": "add_value",
+			"value": 6,
+			"duration_ticks": 120
+		}
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:biome_tag",
+				"tag": "#minecraft:is_forest"
+			}
+		]
+	}
+}

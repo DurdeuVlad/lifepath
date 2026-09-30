@@ -185,6 +185,12 @@ public final class FeedbackService {
 				Component.literal(String.valueOf(secs)));
 	}
 
+	/** Milestone-ability grant notice — "Learned: X" (B5). */
+	public static void abilityLearned(ServerPlayer player, ResourceLocation abilityId) {
+		send(player, "ability_learned",
+				IdentitySummary.displayNameComponent(abilityId));
+	}
+
 	/**
 	 * Decay pass with feedback (M6-4): runs {@code applyLazyAll} and reports
 	 * each skill that lost whole levels — "significant decay". Returns the

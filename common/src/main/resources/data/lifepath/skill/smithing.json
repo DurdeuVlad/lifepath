@@ -8,23 +8,38 @@
 	"milestones": [
 		{
 			"level": 20,
-			"description_key": "lifepath.skill.smithing.milestone.20"
+			"description_key": "lifepath.skill.smithing.milestone.20",
+			"effects": [
+				"lifepath:skill_smithing_20"
+			]
 		},
 		{
 			"level": 40,
-			"description_key": "lifepath.skill.smithing.milestone.40"
+			"description_key": "lifepath.skill.smithing.milestone.40",
+			"effects": [
+				"lifepath:skill_smithing_40"
+			]
 		},
 		{
 			"level": 60,
-			"description_key": "lifepath.skill.smithing.milestone.60"
+			"description_key": "lifepath.skill.smithing.milestone.60",
+			"effects": [
+				"lifepath:skill_smithing_60"
+			]
 		},
 		{
 			"level": 80,
-			"description_key": "lifepath.skill.smithing.milestone.80"
+			"description_key": "lifepath.skill.smithing.milestone.80",
+			"effects": [
+				"lifepath:skill_smithing_80"
+			]
 		},
 		{
 			"level": 95,
-			"description_key": "lifepath.skill.smithing.milestone.95"
+			"description_key": "lifepath.skill.smithing.milestone.95",
+			"effects": [
+				"lifepath:skill_smithing_95"
+			]
 		}
 	]
 }

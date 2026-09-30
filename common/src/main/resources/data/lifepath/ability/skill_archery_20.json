@@ -1,0 +1,21 @@
+{
+	"display_name": "Swift Stance I",
+	"description": "A practiced draw keeps you light on your feet. (+2% movement speed)",
+	"icon": "skill/archery",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.movement_speed",
+			"operation": "add_multiplied_base",
+			"value": 0.02,
+			"duration_ticks": 120
+		}
+	]
+}

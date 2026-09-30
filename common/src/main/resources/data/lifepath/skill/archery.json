@@ -8,23 +8,38 @@
 	"milestones": [
 		{
 			"level": 20,
-			"description_key": "lifepath.skill.archery.milestone.20"
+			"description_key": "lifepath.skill.archery.milestone.20",
+			"effects": [
+				"lifepath:skill_archery_20"
+			]
 		},
 		{
 			"level": 40,
-			"description_key": "lifepath.skill.archery.milestone.40"
+			"description_key": "lifepath.skill.archery.milestone.40",
+			"effects": [
+				"lifepath:skill_archery_40"
+			]
 		},
 		{
 			"level": 60,
-			"description_key": "lifepath.skill.archery.milestone.60"
+			"description_key": "lifepath.skill.archery.milestone.60",
+			"effects": [
+				"lifepath:skill_archery_60"
+			]
 		},
 		{
 			"level": 80,
-			"description_key": "lifepath.skill.archery.milestone.80"
+			"description_key": "lifepath.skill.archery.milestone.80",
+			"effects": [
+				"lifepath:skill_archery_80"
+			]
 		},
 		{
 			"level": 95,
-			"description_key": "lifepath.skill.archery.milestone.95"
+			"description_key": "lifepath.skill.archery.milestone.95",
+			"effects": [
+				"lifepath:skill_archery_95"
+			]
 		}
 	]
 }

@@ -1,0 +1,21 @@
+{
+	"display_name": "Engineer's Reach IV",
+	"description": "You know machines — and how far your wrench reaches. (+1.0 block interaction range)",
+	"icon": "skill/engineering",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.block_interaction_range",
+			"operation": "add_value",
+			"value": 1.0,
+			"duration_ticks": 120
+		}
+	]
+}

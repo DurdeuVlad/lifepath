@@ -1,0 +1,21 @@
+{
+	"display_name": "Stone Skin II",
+	"description": "Seasoned bruises harden into armor of their own. (+2 armor)",
+	"icon": "skill/defence",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.armor",
+			"operation": "add_value",
+			"value": 2,
+			"duration_ticks": 120
+		}
+	]
+}

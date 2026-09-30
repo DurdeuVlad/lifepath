@@ -258,6 +258,7 @@ public final class LifepathMod {
 		CharacterManager.init();
 		SkillXpService.init();
 		SkillDecayService.init();
+		io.github.durdeuvlad.lifepath.skill.SkillMilestoneService.init();
 		// Payload type must register before AbilityEngine.init() installs its
 		// receiver (onC2S rejects unregistered types).
 		LifepathNetworking.registerC2S(
