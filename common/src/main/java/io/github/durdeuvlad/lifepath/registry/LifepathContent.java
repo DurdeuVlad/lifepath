@@ -10,6 +10,7 @@ import io.github.durdeuvlad.lifepath.character.persistence.CharacterPersistence;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
 import io.github.durdeuvlad.lifepath.content.AbilityDefinition;
 import io.github.durdeuvlad.lifepath.content.LevelCurveDefinition;
+import io.github.durdeuvlad.lifepath.content.MorphFormDefinition;
 import io.github.durdeuvlad.lifepath.content.SkillDefinition;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
@@ -78,6 +79,10 @@ public final class LifepathContent {
 			ITEM_WEIGHTS = new ContentRegistry<>(LifepathMod.id("item_weight"));
 	private static final ContentRegistry<io.github.durdeuvlad.lifepath.content.UnlockDefinition>
 			UNLOCKS = new ContentRegistry<>(LifepathMod.id("unlock"));
+	/** Morph feature (M-1): the whitelist of animal forms — only authored
+	 *  {@code morph_form} entries can ever be morph targets. */
+	private static final ContentRegistry<MorphFormDefinition> MORPH_FORMS =
+			new ContentRegistry<>(LifepathMod.id("morph_form"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, ResourceLocation source, ResourceLocation ref, String targetDomain) {
@@ -158,6 +163,13 @@ public final class LifepathContent {
 				manager -> loadDomain(manager, "unlock",
 						io.github.durdeuvlad.lifepath.content.UnlockDefinition.UnlockFile.CODEC,
 						io.github.durdeuvlad.lifepath.content.UnlockDefinition::fromFile, UNLOCKS));
+		// Morph feature (M-1): no refs into other lifepath domains — load
+		// order is free. Vanilla-registry refs (entity_type, stats keys)
+		// validate inside decodeMorphForm, guarded for headless decodes.
+		ReloadManager.registerData(LifepathMod.id("morph_form"),
+				manager -> loadDomain(manager, "morph_form",
+						MorphFormDefinition.MorphFormFile.CODEC,
+						LifepathContent::decodeMorphForm, MORPH_FORMS));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateAll());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -217,6 +229,10 @@ public final class LifepathContent {
 		return UNLOCKS;
 	}
 
+	public static ContentRegistry<MorphFormDefinition> morphForms() {
+		return MORPH_FORMS;
+	}
+
 	/**
 	 * {@link ContentIndex} implementation. Domains backed by a real registry
 	 * answer definitively; domains without a registry yet (traits, conditions,
@@ -237,6 +253,7 @@ public final class LifepathContent {
 			case "condition" -> CONDITIONS.contains(id);
 			case "attunement" -> ATTUNEMENTS.contains(id);
 			case "unlock" -> UNLOCKS.contains(id);
+			case "morph_form" -> MORPH_FORMS.contains(id);
 			// M9-4: unlocks[] holds gated CONTENT ids (species today), not def
 			// ids — an entry is known iff it names gated content directly or a
 			// surviving def still grants it.
@@ -442,6 +459,54 @@ public final class LifepathContent {
 			all.addAll(dangling);
 			throw new IllegalArgumentException(
 					"resource " + id + " invalid — " + String.join("; ", all));
+		}
+		return def;
+	}
+
+	/**
+	 * Morph-form decode + validation (morph feature M-1): the whitelist fails
+	 * closed — {@code entity_type} and every {@code stats} attribute id must
+	 * resolve in the vanilla registries, and a {@code max_health} stat must be
+	 * positive (proportional HP carry divides by it). A non-land-animal entity
+	 * category warns rather than fails: the roster is curated by authored
+	 * files, and custom-content categories are datapack territory. Guarded the
+	 * same way as {@link #decodeResource} — headless decodes (tests without a
+	 * bootstrapped vanilla registry) defer these checks to runtime guards.
+	 */
+	public static MorphFormDefinition decodeMorphForm(ResourceLocation id,
+			MorphFormDefinition.MorphFormFile file) {
+		MorphFormDefinition def = MorphFormDefinition.fromFile(id, file);
+		try {
+			var entity = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+					.getHolder(def.entityType());
+			if (entity.isEmpty()) {
+				throw new IllegalArgumentException("morph_form " + id
+						+ " names unknown entity_type " + def.entityType());
+			}
+			var category = entity.get().value().getCategory();
+			switch (category) {
+				case CREATURE, AMBIENT -> { }
+				default -> LifepathMod.LOGGER.warn("morph_form {} entity {} has "
+						+ "category {} — the roster contract is land animals only",
+						id, def.entityType(), category);
+			}
+			for (ResourceLocation attribute : def.stats().keySet()) {
+				if (net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE
+						.getHolder(attribute).isEmpty()) {
+					throw new IllegalArgumentException("morph_form " + id
+							+ " stats name unknown attribute " + attribute);
+				}
+			}
+			ResourceLocation maxHealth = net.minecraft.core.registries.BuiltInRegistries
+					.ATTRIBUTE.getKey(net.minecraft.world.entity.ai.attributes
+							.Attributes.MAX_HEALTH.value());
+			Double health = maxHealth == null ? null : def.stats().get(maxHealth);
+			if (health != null && health <= 0.0) {
+				throw new IllegalArgumentException("morph_form " + id + " stats set "
+						+ maxHealth + " to " + health + " — must be positive");
+			}
+		} catch (ExceptionInInitializerError | NoClassDefFoundError e) {
+			// Headless decode (tests): skip registry-backed validation only.
 		}
 		return def;
 	}
@@ -811,6 +876,7 @@ public final class LifepathContent {
 			case "resource" -> RESOURCES;
 			case "diet" -> DIETS;
 			case "relation" -> RELATIONS;
+			case "morph_form" -> MORPH_FORMS;
 			default -> null;
 		};
 	}

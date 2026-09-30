@@ -76,6 +76,9 @@ public final class IdentitySummary {
 		if (LifepathContent.resources().get(id) != null) {
 			return "resource";
 		}
+		if (LifepathContent.morphForms().get(id) != null) {
+			return "morph_form";
+		}
 		return null;
 	}
 
@@ -165,10 +168,27 @@ public final class IdentitySummary {
 					rdef.icon().map(ResourceLocation::toString).orElse("")));
 		}
 
+		// M-1: morph disguise view — the resolved entity_type is what lets the
+		// client render the form without owning the morph_form registry. A
+		// deleted-form edge (reload mid-session) degrades to the id path with
+		// no entity — the client renders the plain player, never crashes.
+		IdentitySummaryPayload.MorphView morph = IdentitySummaryPayload.MorphView.EMPTY;
+		PlayerCharacterData.MorphState morphState = data.morph();
+		if (morphState != null) {
+			var form = LifepathContent.morphForms().get(morphState.formId());
+			morph = new IdentitySummaryPayload.MorphView(
+					morphState.formId().toString(),
+					form != null ? form.entityType().toString() : "",
+					keyedText(morphState.formId(), "morph_form", "name",
+							form != null ? form.displayName() : morphState.formId().getPath()),
+					form != null ? form.icon().map(ResourceLocation::toString).orElse("") : "",
+					morphState.active());
+		}
+
 		return new IdentitySummaryPayload(
 				new IdentitySummaryPayload.IdentityCore(speciesId, speciesName,
 						speciesDesc, speciesIcon, specId, specName, specIcon),
-				focus, sections, abilities, resourceDisplays);
+				focus, sections, abilities, resourceDisplays, morph);
 	}
 
 	/**
@@ -196,6 +216,13 @@ public final class IdentitySummary {
 		var species = LifepathContent.species().get(id);
 		if (species != null) {
 			return species.displayName();
+		}
+		// Keep the domain ordering identical to domainOf()/iconRef() —
+		// morph_form resolves last so a dual-registered id picks one def
+		// consistently for name, domain key, and icon alike.
+		var form = LifepathContent.morphForms().get(id);
+		if (form != null) {
+			return form.displayName();
 		}
 		return id.getPath();
 	}
@@ -229,6 +256,10 @@ public final class IdentitySummary {
 		var species = LifepathContent.species().get(id);
 		if (species != null) {
 			return species.icon().map(ResourceLocation::toString).orElse("");
+		}
+		var form = LifepathContent.morphForms().get(id);
+		if (form != null) {
+			return form.icon().map(ResourceLocation::toString).orElse("");
 		}
 		return "";
 	}

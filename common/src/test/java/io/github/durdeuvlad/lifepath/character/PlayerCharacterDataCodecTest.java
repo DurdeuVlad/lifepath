@@ -66,9 +66,45 @@ class PlayerCharacterDataCodecTest {
 
 		assertNull(decoded.speciesId());
 		assertNull(decoded.specializationId());
+		assertNull(decoded.morph());
 		assertTrue(decoded.skills().isEmpty());
 		assertTrue(decoded.traits().isEmpty());
 		assertEquals(0, decoded.dataVersion());
+	}
+
+	/**
+	 * M-1 (morph): the optional {@code morph} record round-trips and stays
+	 * absent on pre-v3 blobs — migration-safe by codec default.
+	 */
+	@Test
+	void morphStateRoundTrips() {
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setMorph(new PlayerCharacterData.MorphState(
+				ResourceLocation.fromNamespaceAndPath("lifepath", "fox"), true, 1727000000000L));
+
+		PlayerCharacterData decoded = Serialization.fromNbt(
+				PlayerCharacterData.CODEC, Serialization.toNbt(PlayerCharacterData.CODEC, data));
+
+		assertEquals(data, decoded);
+		assertTrue(decoded.isMorphed());
+		assertEquals(ResourceLocation.fromNamespaceAndPath("lifepath", "fox"),
+				decoded.morph().formId());
+		assertEquals(1727000000000L, decoded.morph().lastMorphMs());
+	}
+
+	@Test
+	void morphFieldOptionalInDecode() {
+		// A morph record with only form_id decodes with inactive/epoch-0 defaults.
+		net.minecraft.nbt.CompoundTag raw = new net.minecraft.nbt.CompoundTag();
+		net.minecraft.nbt.CompoundTag morph = new net.minecraft.nbt.CompoundTag();
+		morph.putString("form_id", "lifepath:fox");
+		raw.put("morph", morph);
+
+		PlayerCharacterData decoded = Serialization.fromNbt(PlayerCharacterData.CODEC, raw);
+
+		org.junit.jupiter.api.Assertions.assertNotNull(decoded.morph());
+		org.junit.jupiter.api.Assertions.assertFalse(decoded.isMorphed());
+		assertEquals(0L, decoded.morph().lastMorphMs());
 	}
 
 	@Test

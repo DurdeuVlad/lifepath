@@ -99,6 +99,32 @@ class CharacterPersistenceTest {
 	}
 
 	/**
+	 * M-1 (morph): a morph state naming a deleted morph_form clears entirely
+	 * on load — the form can't render or stat, so keeping it would corrupt.
+	 */
+	@Test
+	void unknownMorphFormDropsOnLoad() {
+		PlayerCharacterData data = sampleData();
+		data.setMorph(new PlayerCharacterData.MorphState(
+				ResourceLocation.fromNamespaceAndPath("lifepath", "fox"), true, 42L));
+		CharacterPersistence.setContentIndex(new ContentIndex() {
+			@Override
+			public boolean exists(String domain, ResourceLocation id) {
+				// Everything resolves except the morph_form domain.
+				return !"morph_form".equals(domain);
+			}
+		});
+		try {
+			PlayerCharacterData sanitized = CharacterPersistence.deserialize(
+					CharacterPersistence.serialize(data));
+			assertNull(sanitized.morph(),
+					"morph on a deleted form must drop with the rest of the state");
+		} finally {
+			CharacterPersistence.setContentIndex(ContentIndex.PERMISSIVE);
+		}
+	}
+
+	/**
 	 * M9-4: unlocks[] holds gated-content ids (species), so a granted unlock
 	 * must survive relog while the gated content still exists — the
 	 * {@code unlock_content} domain, not the ability registry, is its home.

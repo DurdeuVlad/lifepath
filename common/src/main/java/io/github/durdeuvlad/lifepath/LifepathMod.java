@@ -32,8 +32,9 @@ public final class LifepathMod {
 	 * Schema version of persisted Lifepath character data. Bump whenever the
 	 * serialized shape changes; M1 migration code reads this to upgrade old saves.
 	 */
-	/** v2: conditions become a condition-id → stage-state map (M9-1). */
-	public static final int DATA_VERSION = 2;
+	/** v2: conditions become a condition-id → stage-state map (M9-1).
+	 *  v3: optional {@code morph} state record added (morph feature M-1). */
+	public static final int DATA_VERSION = 3;
 
 	/**
 	 * Single engine logger (name {@code Lifepath}). Conventions: INFO for

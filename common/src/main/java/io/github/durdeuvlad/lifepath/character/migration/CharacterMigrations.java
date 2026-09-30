@@ -60,6 +60,24 @@ public final class CharacterMigrations {
 					data.put("conditions", map);
 				}
 			})
+			.step(new DataMigration() {
+				@Override
+				public int fromVersion() {
+					return 2;
+				}
+
+				@Override
+				public int toVersion() {
+					return 3;
+				}
+
+				@Override
+				public void migrate(CompoundTag data) {
+					// v3 adds the optional `morph` record — absent decodes to
+					// no-form defaults, so nothing reshapes. The step exists to
+					// keep the chain explicit about the schema bump.
+				}
+			})
 			.build();
 
 	private CharacterMigrations() {
