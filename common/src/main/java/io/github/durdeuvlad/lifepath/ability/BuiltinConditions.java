@@ -1,5 +1,6 @@
 package io.github.durdeuvlad.lifepath.ability;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.config.LifepathConfig;
@@ -284,6 +285,46 @@ public final class BuiltinConditions {
 			String op = str(params, "op");
 			return damage != null && op != null && hasNumber(params, "value")
 					&& compare(op, damage.amount(), num(params, "value", 0));
+		});
+		// B6: external faction probe — TeamLapen registry covers Vampirism AND
+		// Werewolves through one surface. Fail-closed: absent mod / cut bridge
+		// → false, so a deferred ability never wrongly fires.
+		// {"type":"lifepath:player_faction","faction":"vampirism:vampire","min_level":2}
+		register("player_faction", (ctx, params) -> {
+			ServerPlayer p = ctx.self();
+			ResourceLocation faction = id(params, "faction");
+			if (p == null || faction == null) {
+				return false;
+			}
+			var probe = io.github.durdeuvlad.lifepath.compat.vampirism
+					.VampirismFactions.factionId(p);
+			if (probe.isEmpty() || !probe.get().equals(faction)) {
+				return false;
+			}
+			return !hasNumber(params, "min_level")
+					|| io.github.durdeuvlad.lifepath.compat.vampirism.VampirismFactions
+							.factionLevel(p) >= num(params, "min_level", 0);
+		});
+		// Origins-style negation: {"type":"lifepath:not","condition":{...node}}.
+		// Fail-closed — malformed or throwing inner counts as "inner true",
+		// so the not yields false and a defer can never wrongly suppress.
+		register("not", (ctx, params) -> {
+			JsonElement inner = params.get("condition");
+			if (!(inner instanceof JsonObject obj)) {
+				return false;
+			}
+			JsonElement type = obj.get("type");
+			ResourceLocation typeId = type != null && type.isJsonPrimitive()
+					? ResourceLocation.tryParse(type.getAsString()) : null;
+			var eval = typeId == null ? null : AbilityVocabulary.condition(typeId);
+			if (eval == null) {
+				return false;
+			}
+			try {
+				return !eval.test(ctx, obj);
+			} catch (Exception e) {
+				return false;
+			}
 		});
 	}
 

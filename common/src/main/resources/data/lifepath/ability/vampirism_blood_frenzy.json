@@ -13,6 +13,13 @@
 				"resource": "lifepath:blood",
 				"op": "<=",
 				"value": 25
+			},
+			{
+				"type": "lifepath:not",
+				"condition": {
+					"type": "lifepath:player_faction",
+					"faction": "vampirism:vampire"
+				}
 			}
 		]
 	},

@@ -10,6 +10,13 @@
 		"all": [
 			{
 				"type": "lifepath:night"
+			},
+			{
+				"type": "lifepath:not",
+				"condition": {
+					"type": "lifepath:player_faction",
+					"faction": "vampirism:vampire"
+				}
 			}
 		]
 	},

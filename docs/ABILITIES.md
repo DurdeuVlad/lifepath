@@ -81,6 +81,8 @@ reference and skipped by the content-ref scan.
 | `damage_amount` | `op`, `value` — compares the pre-modifier amount; damage_taken only |
 | `has_condition` | `condition` (condition-def id) — true while the character holds it |
 | `condition_stage` | `condition`, `stage`, `op`? (default `>=`) — compares the held stage index |
+| `player_faction` | `faction` (id), `min_level`? — external faction membership via the TeamLapen bridge (Vampirism *and* Werewolves share it). Always false when the mod is absent or the bridge cut |
+| `not` | `condition` (an inline spec node) — negates one condition, Origins-style; a malformed or throwing inner node counts as true → the not yields false |
 
 ### Targets
 

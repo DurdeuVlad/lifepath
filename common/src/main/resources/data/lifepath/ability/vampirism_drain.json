@@ -22,5 +22,16 @@
 			"particle": "minecraft:damage_indicator",
 			"count": 8
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:not",
+				"condition": {
+					"type": "lifepath:player_faction",
+					"faction": "vampirism:vampire"
+				}
+			}
+		]
+	}
 }
