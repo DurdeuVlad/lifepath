@@ -33,6 +33,7 @@ class EncumbranceServiceTest {
 				.define("enabled", true, "")
 				.define("capacity", 200.0, "")
 				.define("default_item_weight", 1.0, "")
+				.define("container_contents_factor", 0.75, "")
 				.define("scan_interval_ticks", 40, "")
 				.build());
 		LifepathConfig.loadAll(configDir);
@@ -84,5 +85,36 @@ class EncumbranceServiceTest {
 		assertEquals(50.0, EncumbranceService.toPercent(100, 200));
 		assertEquals(100.0, EncumbranceService.toPercent(500, 200));
 		assertEquals(100.0, EncumbranceService.toPercent(10, 0));
+	}
+
+	@AfterEach
+	void clearWeights() {
+		LifepathContent.itemWeights().clear();
+	}
+
+	@Test
+	void contentsFactorDefaultsToConfig() {
+		// No @contents entries anywhere ⇒ the config default applies.
+		assertEquals(0.75, EncumbranceService.contentsFactorOf(
+				LifepathMod.id("sack"), tag -> false));
+	}
+
+	@Test
+	void contentsFactorExactEntryWinsOverTag() {
+		ResourceLocation sack = LifepathMod.id("sack");
+		ResourceLocation bagTag = LifepathMod.id("bags");
+		LifepathContent.itemWeights().register(LifepathMod.id("pack"),
+				Map.of(sack + "@contents", 0.5,
+						"#" + bagTag + "@contents", 0.9));
+
+		// Exact wins even when a tag would also match.
+		assertEquals(0.5, EncumbranceService.contentsFactorOf(sack,
+				tag -> tag.equals(bagTag)));
+		// Tag entry applies when no exact key exists.
+		assertEquals(0.9, EncumbranceService.contentsFactorOf(
+				LifepathMod.id("other_bag"), tag -> tag.equals(bagTag)));
+		// Non-matching tags fall back to config.
+		assertEquals(0.75, EncumbranceService.contentsFactorOf(
+				LifepathMod.id("other_bag"), tag -> false));
 	}
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +24,11 @@ import org.jetbrains.annotations.Nullable;
  * <p><b>Weights</b> are data: {@code data/<ns>/item_weight/<file>.json} files
  * each contribute a {@code values} map of {@code item_id} or {@code #tag_id}
  * → weight-per-stack-item. Exact item entries win over tag entries; unmapped
- * items use {@code default_item_weight} (config).
+ * items use {@code default_item_weight} (config). Containers recurse —
+ * {@code CONTAINER} and {@code BUNDLE_CONTENTS} components contribute their
+ * contents at a discount factor ({@code "<id>@contents"} /
+ * {@code "#<tag>@contents"} entries override, else the
+ * {@code container_contents_factor} config).
  *
  * <p><b>Capacity</b> = {@code capacity} (config) × species
  * {@code capacity_multiplier} × specialization {@code capacity_multiplier}.
@@ -102,10 +107,88 @@ public final class EncumbranceService {
 		double total = 0.0;
 		var inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize(); i++) {
-			ItemStack stack = inv.getItem(i);
-			total += weightOf(stack) * stack.getCount();
+			total += stackWeight(inv.getItem(i), 0);
 		}
 		return total;
+	}
+
+	/** Recursion bound for nested containers — deep enough for real packs. */
+	private static final int MAX_CONTAINER_DEPTH = 4;
+
+	/**
+	 * One stack's carried weight: its own weight, plus the weight of
+	 * everything it contains (bundles, shulker boxes, any container exposing
+	 * the vanilla {@code CONTAINER}/{@code BUNDLE_CONTENTS} components).
+	 * Contents count at the container's discount factor — a sack distributes
+	 * load better than bare arms, but a bag of steel is still heavy.
+	 */
+	static double stackWeight(ItemStack stack, int depth) {
+		if (stack.isEmpty()) {
+			return 0.0;
+		}
+		double w = weightOf(stack) * stack.getCount();
+		if (depth >= MAX_CONTAINER_DEPTH || !stack.has(DataComponents.CONTAINER)
+				&& !stack.has(DataComponents.BUNDLE_CONTENTS)) {
+			return w;
+		}
+		double factor = contentsFactor(stack);
+		if (factor <= 0.0) {
+			return w;
+		}
+		double inner = 0.0;
+		var container = stack.get(DataComponents.CONTAINER);
+		if (container != null) {
+			inner += container.stream().filter(s -> !s.isEmpty())
+					.mapToDouble(s -> stackWeight(s, depth + 1)).sum();
+		}
+		var bundle = stack.get(DataComponents.BUNDLE_CONTENTS);
+		if (bundle != null) {
+			inner += bundle.itemCopyStream()
+					.mapToDouble(s -> stackWeight(s, depth + 1)).sum();
+		}
+		return w + factor * inner;
+	}
+
+	/**
+	 * The fraction of carried contents weight a container still imposes:
+	 * {@code "<id>@contents"} or {@code "#<tag>@contents"} entries in
+	 * {@code item_weight} tables override; otherwise the
+	 * {@code container_contents_factor} config (0 ⇒ containers hide weight
+	 * entirely, 1 ⇒ contents count in full).
+	 */
+	static double contentsFactor(ItemStack stack) {
+		ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		return contentsFactorOf(itemId,
+				tag -> stack.is(TagKey.create(BuiltInRegistries.ITEM.key(), tag)));
+	}
+
+	/** Table lookup, split from {@link ItemStack} so tests stay headless. */
+	static double contentsFactorOf(ResourceLocation itemId,
+			java.util.function.Predicate<ResourceLocation> inTag) {
+		String exactKey = itemId + "@contents";
+		double tagHit = Double.NaN;
+		for (Map<String, Double> table : LifepathContent.itemWeights().all().values()) {
+			Double exact = table.get(exactKey);
+			if (exact != null) {
+				return exact;
+			}
+			if (Double.isNaN(tagHit)) {
+				for (Map.Entry<String, Double> e : table.entrySet()) {
+					String key = e.getKey();
+					if (!key.startsWith("#") || !key.endsWith("@contents")) {
+						continue;
+					}
+					ResourceLocation tagId = ResourceLocation.tryParse(
+							key.substring(1, key.length() - "@contents".length()));
+					if (tagId != null && inTag.test(tagId)) {
+						tagHit = e.getValue();
+						break;
+					}
+				}
+			}
+		}
+		return Double.isNaN(tagHit) ? LifepathConfig.getDouble(CONFIG,
+				"container_contents_factor") : tagHit;
 	}
 
 	/** Per-item weight: exact entry → first matching tag entry → default. */

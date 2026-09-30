@@ -330,7 +330,13 @@ as ability ids; avoid name collisions — a startup warn fires).
 ```
 
 A flat id/`#tag` → weight map per file; feeds `lifepath:load` with
-`encumbrance.toml`.
+`encumbrance.toml`. Container items recurse: stacks inside a
+`CONTAINER`/`BUNDLE_CONTENTS` component (bundles, shulker boxes, modded bags
+reusing the vanilla components) add their weight at a contents factor —
+`container_contents_factor` config (default `0.75`) or per-container
+`"<id>@contents"` / `"#<tag>@contents"` entries (`0.0` ⇒ contents weigh
+nothing, `1.0` ⇒ full weight). Modded bags with custom storage need the
+platform capability hook — not currently wired.
 
 ## Shipped tags (extend these from your pack)
 
