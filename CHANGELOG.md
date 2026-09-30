@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-beta.3 — NeoForge launch fix
+
+Hotfix over beta.2: the NeoForge jar bundled night-config via JarJar even
+though NeoForge already provides it, so launchers that also run Sinytra
+Connector died during mod discovery with `reads more than one module named
+com.electronwill.nightconfig.toml`. night-config is now compile-only on
+NeoForge (loader-provided at runtime). Fabric still bundles it — Fabric
+ships no TOML library. NeoForge testers on beta.2 should take this build.
+
 ## 1.0.0-beta.2 — guided onboarding + full localization
 
 Second beta build: the species/specialization pick is now a real GUI flow,

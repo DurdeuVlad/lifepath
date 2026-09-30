@@ -55,14 +55,13 @@ sourceSets {
 }
 
 dependencies {
-	// TOML config parsing (bundled jar-in-jar — night-config ships JiJ
-	// metadata designed for Forge/NeoForge).
-	jarJar(implementation("com.electronwill.night-config:toml:3.8.4")) {
-		version { strictly '[3.8.4]' }
-	}
-	jarJar(implementation("com.electronwill.night-config:core:3.8.4")) {
-		version { strictly '[3.8.4]' }
-	}
+	// TOML config parsing. NeoForge already ships night-config (its own
+	// ModConfigSpec runs on it) so it is compile-only here — bundling it via
+	// JarJar puts a second com.electronwill.nightconfig module on the module
+	// layer and crashes launchers that also load Sinytra Connector's quilt
+	// parsers ("reads more than one module named com.electronwill.nightconfig.toml").
+	compileOnly "com.electronwill.night-config:toml:3.8.4"
+	compileOnly "com.electronwill.night-config:core:3.8.4"
 }
 
 tasks.named('jar') {
