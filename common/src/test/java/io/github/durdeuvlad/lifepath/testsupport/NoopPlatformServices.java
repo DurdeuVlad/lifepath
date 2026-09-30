@@ -45,6 +45,11 @@ public final class NoopPlatformServices implements PlatformServices {
 	}
 
 	@Override
+	public boolean isAutomation(net.minecraft.world.entity.player.Player player) {
+		return false;
+	}
+
+	@Override
 	public Path configDir() {
 		return Path.of(System.getProperty("java.io.tmpdir"), "lifepath-test");
 	}

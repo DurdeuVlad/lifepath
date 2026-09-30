@@ -45,6 +45,14 @@ public interface PlatformServices {
 	/** Whether the mod with the given id is loaded in this instance. */
 	boolean isModLoaded(String modId);
 
+	/**
+	 * True for machine-driven players — Create deployers, fake players from
+	 * loader APIs — so gameplay producers can refuse to attribute activity to
+	 * them. {@code instanceof ServerPlayer} alone is not enough: loader
+	 * FakePlayers extend it.
+	 */
+	boolean isAutomation(Player player);
+
 	/** The loader's config directory (e.g. {@code run/config}). */
 	Path configDir();
 

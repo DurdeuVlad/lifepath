@@ -54,6 +54,18 @@ public final class VanillaGameplayProducers {
 	private VanillaGameplayProducers() {
 	}
 
+	/**
+	 * True for machine-driven players (Create deployers, loader FakePlayers)
+	 * — they pass {@code instanceof ServerPlayer}, so every player-gated
+	 * producer must check this before attributing activity. Uninitialized
+	 * platform (tests) conservatively means "real".
+	 */
+	private static boolean isAutomation(net.minecraft.world.entity.player.Player player) {
+		return io.github.durdeuvlad.lifepath.platform.Platform.isInitialized()
+				&& io.github.durdeuvlad.lifepath.platform.Platform.get()
+						.isAutomation(player);
+	}
+
 	private static final TagKey<net.minecraft.world.level.block.Block> HARVESTABLE =
 			TagKey.create(Registries.BLOCK, LifepathMod.id("harvestable"));
 	private static final TagKey<net.minecraft.world.level.block.Block> CLICK_HARVEST =
@@ -73,7 +85,8 @@ public final class VanillaGameplayProducers {
 		// The fired entity is the killer — same player-only boundary as
 		// block-break (a wolf/golem kill is not the player's exertion).
 		Platform.get().onEntityKilledOther((world, entity, killedEntity) -> {
-					if (!(entity instanceof ServerPlayer killer)) {
+					if (!(entity instanceof ServerPlayer killer)
+							|| isAutomation(killer)) {
 						return;
 					}
 					ResourceLocation typeId = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
@@ -97,7 +110,8 @@ public final class VanillaGameplayProducers {
 		// the attacker is the cause. Environment/self damage can't train it.
 		Platform.get().onLivingDamage(
 				(entity, source, baseDamageTaken, damageTaken, blocked) -> {
-					if (!(entity instanceof ServerPlayer victim)) {
+					if (!(entity instanceof ServerPlayer victim)
+							|| isAutomation(victim)) {
 						return;
 					}
 					// M9-2: damage-source attunement rules run even without a
@@ -124,7 +138,8 @@ public final class VanillaGameplayProducers {
 									System.currentTimeMillis());
 				});
 		Platform.get().onUseBlock((player, world, hand, hitResult) -> {
-			if (world.isClientSide() || !(player instanceof ServerPlayer serverPlayer)) {
+			if (world.isClientSide() || !(player instanceof ServerPlayer serverPlayer)
+					|| isAutomation(serverPlayer)) {
 				return InteractionResult.PASS;
 			}
 			BlockState state = world.getBlockState(hitResult.getBlockPos());
@@ -140,7 +155,8 @@ public final class VanillaGameplayProducers {
 		// always; consumption is handled by the service on success.
 		Platform.get().onUseItem((player, world, hand) -> {
 					if (world.isClientSide()
-							|| !(player instanceof ServerPlayer serverPlayer)) {
+							|| !(player instanceof ServerPlayer serverPlayer)
+							|| isAutomation(serverPlayer)) {
 						return net.minecraft.world.InteractionResultHolder.pass(
 								player.getItemInHand(hand));
 					}
@@ -159,7 +175,7 @@ public final class VanillaGameplayProducers {
 	private static void onBlockBroken(net.minecraft.world.level.Level world,
 			net.minecraft.world.entity.player.Player player, BlockPos pos,
 			BlockState state, net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
-		if (!(player instanceof ServerPlayer serverPlayer)) {
+		if (!(player instanceof ServerPlayer serverPlayer) || isAutomation(player)) {
 			return;
 		}
 		boolean wasPlayerPlaced = PlacedBlockTracker.consume(world, pos);
@@ -185,6 +201,9 @@ public final class VanillaGameplayProducers {
 	/** Called by {@code mixin.BlockItemMixin} after a successful block placement. */
 	public static void onBlockPlaced(ServerPlayer player, ServerLevel world,
 			BlockPos pos, BlockState placedState) {
+		if (isAutomation(player)) {
+			return;
+		}
 		PlacedBlockTracker.record(world, pos);
 		if (isFarmable(placedState)) {
 			Set<ResourceLocation> tags = placedState.getTags()
@@ -232,7 +251,8 @@ public final class VanillaGameplayProducers {
 	 */
 	public static void onForgeOutput(net.minecraft.world.entity.player.Player player,
 			net.minecraft.world.item.ItemStack output, ResourceLocation workstationId) {
-		if (!(player instanceof ServerPlayer serverPlayer) || output.isEmpty()) {
+		if (!(player instanceof ServerPlayer serverPlayer) || isAutomation(player)
+				|| output.isEmpty()) {
 			return;
 		}
 		Set<ResourceLocation> itemTags = output.getTags()
@@ -250,7 +270,8 @@ public final class VanillaGameplayProducers {
 	 */
 	public static void onCraftOutput(net.minecraft.world.entity.player.Player player,
 			net.minecraft.world.item.ItemStack output) {
-		if (!(player instanceof ServerPlayer serverPlayer) || output.isEmpty()) {
+		if (!(player instanceof ServerPlayer serverPlayer) || isAutomation(player)
+				|| output.isEmpty()) {
 			return;
 		}
 		Set<ResourceLocation> itemTags = output.getTags()
@@ -271,7 +292,8 @@ public final class VanillaGameplayProducers {
 	 */
 	public static void onFishCaught(net.minecraft.world.entity.player.Player player,
 			net.minecraft.world.item.ItemStack caught) {
-		if (!(player instanceof ServerPlayer serverPlayer) || caught.isEmpty()) {
+		if (!(player instanceof ServerPlayer serverPlayer) || isAutomation(player)
+				|| caught.isEmpty()) {
 			return;
 		}
 		Set<ResourceLocation> itemTags = caught.getTags()
