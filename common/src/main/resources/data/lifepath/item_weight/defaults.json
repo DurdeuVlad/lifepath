@@ -16,6 +16,8 @@
 	"minecraft:netherite_block": 36.0,
 	"minecraft:iron_ingot": 2.0,
 	"minecraft:gold_ingot": 3.0,
+	"#c:ingots/steel": 2.0,
+	"#c:storage_blocks/steel": 18.0,
 	"minecraft:diamond": 1.0,
 	"minecraft:emerald": 1.0,
 	"minecraft:coal": 1.0,
@@ -29,5 +31,7 @@
 	"minecraft:lava_bucket": 3.0,
 	"minecraft:feather": 0.1,
 	"minecraft:stick": 0.2,
-	"minecraft:torch": 0.2
+	"minecraft:torch": 0.2,
+	"supplementaries:sack@contents": 0.6,
+	"backpacked:backpack@contents": 0.5
 }
