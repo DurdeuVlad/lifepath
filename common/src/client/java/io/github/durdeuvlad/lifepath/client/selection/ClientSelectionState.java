@@ -15,7 +15,10 @@ import net.minecraft.client.Minecraft;
  *
  * <p>Also owns the once-per-session auto-open: when the join-time catalog
  * arrives and the player still has no species, the picker pops itself
- * (unless {@code client.toml onboarding_auto_open=false}). Dismissed or
+ * (unless {@code client.toml onboarding_auto_open=false}). The catalog lands
+ * while the terrain-download screen is still up, so the open is deferred to
+ * the first client tick with a free screen ({@link #tickAutoOpen}) rather
+ * than attempted — and lost — inside the packet callback. Dismissed or
  * denied-once it stays shut until the next session or a manual open via the
  * character screen's Choose button.
  */
@@ -23,6 +26,11 @@ import net.minecraft.client.Minecraft;
 public final class ClientSelectionState {
 	private static volatile SelectionCatalogPayload catalog = SelectionCatalogPayload.empty();
 	private static boolean autoOpenArmed = true;
+	/** Ticks left to find a free screen for the pending auto-open; negative = none. */
+	private static int autoOpenTicks = -1;
+	/** ~10s at 20 tps — long enough for slow chunk streams, short enough that
+	 * a screen that stays busy means the player is doing something else. */
+	private static final int AUTO_OPEN_WINDOW_TICKS = 200;
 
 	private ClientSelectionState() {
 	}
@@ -39,11 +47,13 @@ public final class ClientSelectionState {
 	public static void clear() {
 		catalog = SelectionCatalogPayload.empty();
 		autoOpenArmed = true;
+		autoOpenTicks = -1;
 	}
 
 	/**
-	 * Called from the catalog handler: pops the picker on join while the
-	 * species pick is outstanding. One-shot per session — any skip disarms
+	 * Called from the catalog handler: arms the picker while the species
+	 * pick is outstanding. The open itself happens in {@link #tickAutoOpen}
+	 * once the join screens clear. One-shot per session — any skip disarms
 	 * (the manual entry point always remains).
 	 */
 	public static void maybeOpenOnboarding(Minecraft client) {
@@ -51,9 +61,7 @@ public final class ClientSelectionState {
 			return;
 		}
 		autoOpenArmed = false;
-		if (client.player == null || client.screen != null
-				|| client.player.isDeadOrDying()
-				|| !LifepathConfig.isLoaded(LifepathConfig.CLIENT)
+		if (!LifepathConfig.isLoaded(LifepathConfig.CLIENT)
 				|| !LifepathConfig.getBoolean(LifepathConfig.CLIENT, "onboarding_auto_open")) {
 			return;
 		}
@@ -63,7 +71,27 @@ public final class ClientSelectionState {
 		boolean anyAvailable = catalog.species().stream()
 				.anyMatch(e -> e.availability() == Entry.AVAILABLE);
 		if (anyAvailable) {
-			client.setScreen(new SelectionScreen(SelectionScreen.Step.SPECIES));
+			autoOpenTicks = AUTO_OPEN_WINDOW_TICKS;
 		}
+	}
+
+	/**
+	 * Polls the deferred auto-open from the end-client-tick hook. Waits for
+	 * a free screen (the catalog arrives under the terrain-download screen),
+	 * gives up on disconnect or after {@link #AUTO_OPEN_WINDOW_TICKS}.
+	 */
+	public static void tickAutoOpen(Minecraft client) {
+		if (autoOpenTicks < 0) {
+			return;
+		}
+		if (client.player == null || --autoOpenTicks < 0) {
+			autoOpenTicks = -1;
+			return;
+		}
+		if (client.screen != null || client.player.isDeadOrDying()) {
+			return;
+		}
+		autoOpenTicks = -1;
+		client.setScreen(new SelectionScreen(SelectionScreen.Step.SPECIES));
 	}
 }
