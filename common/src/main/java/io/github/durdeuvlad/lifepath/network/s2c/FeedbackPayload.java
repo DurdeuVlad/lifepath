@@ -4,6 +4,8 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -22,14 +24,15 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
  * {@code ability_denied} [abilityName, reasonKey, secondsLeft],
  * {@code ability_ready} is client-generated (see {@code ClientFeedback}).
  */
-public record FeedbackPayload(String kind, List<String> args) implements CustomPacketPayload {
+public record FeedbackPayload(String kind, List<Component> args) implements CustomPacketPayload {
 	public static final CustomPacketPayload.Type<FeedbackPayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("feedback"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, FeedbackPayload> PACKET_CODEC =
 			StreamCodec.composite(
 					ByteBufCodecs.STRING_UTF8, FeedbackPayload::kind,
-					ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
+					ComponentSerialization.TRUSTED_STREAM_CODEC
+							.apply(ByteBufCodecs.list()),
 							FeedbackPayload::args,
 					FeedbackPayload::new);
 

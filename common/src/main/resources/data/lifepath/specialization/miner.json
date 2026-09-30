@@ -19,5 +19,10 @@
 	},
 	"signature": [
 		"lifepath:deepvein_sense_i"
-	]
+	],
+	"strengths": [
+		"Learns mining 35% faster",
+		"Mining can't decay below Lv30"
+	],
+	"weaknesses": []
 }

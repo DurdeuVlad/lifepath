@@ -21,5 +21,13 @@
 	},
 	"protected_floors": {
 		"lifepath:cooking": 30
-	}
+	},
+	"strengths": [
+		"Learns cooking 35% faster",
+		"Cooking can't decay below Lv30",
+		"Also trains farming and fishing"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
 }

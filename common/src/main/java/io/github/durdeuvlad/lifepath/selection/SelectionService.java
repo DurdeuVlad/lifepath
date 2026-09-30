@@ -110,15 +110,21 @@ public final class SelectionService {
 					&& !UnlockService.isUnlocked(data, def.id())) {
 				continue;
 			}
-			species.add(new Entry(def.id().toString(), def.displayName(),
-					def.description().orElse(""),
+			species.add(new Entry(def.id().toString(),
+					IdentitySummary.keyedText(def.id(), "species", "name",
+							def.displayName()),
+					IdentitySummary.keyedText(def.id(), "species", "description",
+							def.description().orElse("")),
 					def.icon().map(ResourceLocation::toString).orElse(""),
 					speciesDetails(def), availability(data, def)));
 		}
 		List<Entry> specs = new ArrayList<>();
 		boolean hasSpec = data.specializationId() != null;
 		for (SpecializationDefinition def : LifepathContent.specializations().all().values()) {
-			specs.add(new Entry(def.id().toString(), def.displayName(), "",
+			specs.add(new Entry(def.id().toString(),
+					IdentitySummary.keyedText(def.id(), "specialization", "name",
+							def.displayName()),
+					Component.empty(),
 					def.icon().map(ResourceLocation::toString).orElse(""),
 					specDetails(def),
 					hasSpec ? Entry.ALREADY_CHOSEN : Entry.AVAILABLE));
@@ -163,11 +169,11 @@ public final class SelectionService {
 		}
 		SpeciesDefinition def = LifepathContent.species().get(speciesId);
 		if (def == null) {
-			deny(player, speciesId.toString(), "unknown");
+			deny(player, speciesId, "unknown");
 			return;
 		}
 		if (!chooseAllowed(data, def)) {
-			deny(player, def.displayName(), switch (availability(data, def)) {
+			deny(player, speciesId, switch (availability(data, def)) {
 				case Entry.NEEDS_UNLOCK -> "locked";
 				case Entry.ADMIN_ONLY -> "admin_only";
 				default -> "unavailable";
@@ -188,11 +194,11 @@ public final class SelectionService {
 		}
 		SpecializationDefinition def = LifepathContent.specializations().get(specId);
 		if (def == null) {
-			deny(player, specId.toString(), "unknown");
+			deny(player, specId, "unknown");
 			return;
 		}
 		if (!canSelectSpecialization(data, specId)) {
-			deny(player, def.displayName(), "already_chosen");
+			deny(player, specId, "already_chosen");
 			return;
 		}
 		SpecializationService.apply(data, specId);
@@ -200,9 +206,13 @@ public final class SelectionService {
 		pushCatalog(player);
 	}
 
-	private static void deny(ServerPlayer player, String name, String reasonKey) {
-		LifepathNetworking.sendTo(player,
-				new FeedbackPayload("selection_denied", List.of(name, reasonKey)));
+	private static void deny(ServerPlayer player, ResourceLocation id,
+			String reasonKey) {
+		// The name rides as a translatable-with-fallback so the denial
+		// message renders in the client's locale, not the server's.
+		LifepathNetworking.sendTo(player, new FeedbackPayload("selection_denied",
+				List.of(IdentitySummary.displayNameComponent(id),
+						Component.literal(reasonKey))));
 	}
 
 	/** Card footer lines: colored "+"/"-" strength/weakness lines first —
@@ -212,13 +222,13 @@ public final class SelectionService {
 	 *  resolved ability name crosses the wire. */
 	private static List<Component> speciesDetails(SpeciesDefinition def) {
 		List<Component> lines = new ArrayList<>();
-		addProsCons(lines, def.strengths(), def.weaknesses());
+		addProsCons(lines, def.id(), "species", def.strengths(), def.weaknesses());
 		for (ResourceLocation id : def.activeAbilities()) {
 			lines.add(Component.translatable("text.lifepath.detail.active",
-					IdentitySummary.displayName(id)));
+					IdentitySummary.displayNameComponent(id)));
 		}
 		for (ResourceLocation id : def.passiveAbilities()) {
-			lines.add(Component.literal(IdentitySummary.displayName(id)));
+			lines.add(IdentitySummary.displayNameComponent(id));
 		}
 		return cap(lines);
 	}
@@ -227,33 +237,42 @@ public final class SelectionService {
 	 *  aptitude, then signatures. */
 	private static List<Component> specDetails(SpecializationDefinition def) {
 		List<Component> lines = new ArrayList<>();
-		addProsCons(lines, def.strengths(), def.weaknesses());
+		addProsCons(lines, def.id(), "specialization", def.strengths(),
+				def.weaknesses());
 		def.startingSkills().forEach((skill, level) -> {
 			Aptitude aptitude = def.aptitudes().get(skill);
 			lines.add(aptitude == null
 					? Component.translatable("text.lifepath.detail.skill_start",
-							IdentitySummary.displayName(skill), level)
+							IdentitySummary.displayNameComponent(skill), level)
 					: Component.translatable("text.lifepath.detail.skill_start_apt",
-							IdentitySummary.displayName(skill), level,
+							IdentitySummary.displayNameComponent(skill), level,
 							aptitude.name()));
 		});
 		for (ResourceLocation ref : def.signatureRefs()) {
 			lines.add(Component.translatable("text.lifepath.detail.signature",
-					IdentitySummary.displayName(ref)));
+					IdentitySummary.displayNameComponent(ref)));
 		}
 		return cap(lines);
 	}
 
 	/** Datapack-authored "+"/"-" lines — green for strengths, red for
-	 *  weaknesses. Literal text: datapack prose is server content, same
-	 *  class as {@code description}. */
-	private static void addProsCons(List<Component> lines, List<String> strengths,
-			List<String> weaknesses) {
-		for (String s : strengths) {
-			lines.add(Component.literal("+ " + s).withStyle(ChatFormatting.GREEN));
+	 *  weaknesses. Each literal rides as the fallback of a
+	 *  {@code translatableWithFallback} keyed {@code .strength.N} /
+	 *  {@code .weakness.N}, so shipped content translates per-client while
+	 *  custom datapack prose still renders as-is. */
+	private static void addProsCons(List<Component> lines, ResourceLocation id,
+			String domain, List<String> strengths, List<String> weaknesses) {
+		for (int i = 0; i < strengths.size(); i++) {
+			lines.add(Component.literal("+ ")
+					.append(IdentitySummary.keyedText(id, domain,
+							"strength." + i, strengths.get(i)))
+					.withStyle(ChatFormatting.GREEN));
 		}
-		for (String w : weaknesses) {
-			lines.add(Component.literal("- " + w).withStyle(ChatFormatting.RED));
+		for (int i = 0; i < weaknesses.size(); i++) {
+			lines.add(Component.literal("- ")
+					.append(IdentitySummary.keyedText(id, domain,
+							"weakness." + i, weaknesses.get(i)))
+					.withStyle(ChatFormatting.RED));
 		}
 	}
 

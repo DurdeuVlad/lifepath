@@ -163,17 +163,31 @@ public class SelectionScreen extends Screen {
 					x + 24, y + 8, available ? TEXT : DIM);
 			// Word-wrap (never mid-word) then cap at 3 rows; a clipped tail
 			// gets "…" and the full text stays readable on hover.
-			List<String> desc = wrapPlain(e.description(), CARD_W - 10);
+			String descText = e.description().getString();
+			List<String> desc = wrapPlain(descText, CARD_W - 10);
 			int dy = y + 22;
-			for (int i2 = 0; i2 < Math.min(3, desc.size()); i2++) {
-				String row = desc.get(i2);
-				if (i2 == 2 && desc.size() > 3) {
-					row = font.plainSubstrByWidth(row,
-							CARD_W - 10 - font.width("…")) + "…";
+			if (descText.isEmpty()) {
+				// No description (specializations) — the colored "+/-"
+				// pros/cons ARE the card body, so the trade-off is visible
+				// before the card is even selected.
+				for (int i2 = 0; i2 < Math.min(3, e.details().size()); i2++) {
+					context.drawString(font,
+							GuiText.fit(font, e.details().get(i2),
+									CARD_W - 10),
+							x + 5, dy, available ? DIM : 0xFF606068);
+					dy += 10;
 				}
-				context.drawString(font, row, x + 5, dy,
-						available ? DIM : 0xFF606068);
-				dy += 10;
+			} else {
+				for (int i2 = 0; i2 < Math.min(3, desc.size()); i2++) {
+					String row = desc.get(i2);
+					if (i2 == 2 && desc.size() > 3) {
+						row = font.plainSubstrByWidth(row,
+								CARD_W - 10 - font.width("…")) + "…";
+					}
+					context.drawString(font, row, x + 5, dy,
+							available ? DIM : 0xFF606068);
+					dy += 10;
+				}
 			}
 			if (!available) {
 				context.drawString(font,
@@ -181,9 +195,9 @@ public class SelectionScreen extends Screen {
 								CARD_W - 10),
 						x + 5, y + CARD_H - 11, WARN);
 			}
-			if (hovered && !e.description().isEmpty()) {
+			if (hovered && !descText.isEmpty()) {
 				context.renderTooltip(font,
-						font.split(Component.literal(e.description()), 240),
+						font.split(e.description(), 240),
 						mouseX, mouseY);
 			}
 		}

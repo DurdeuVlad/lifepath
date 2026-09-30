@@ -18,5 +18,10 @@
 	},
 	"signature": [
 		"lifepath:bountiful_harvest_i"
-	]
+	],
+	"strengths": [
+		"Learns farming 35% faster",
+		"Farming can't decay below Lv30"
+	],
+	"weaknesses": []
 }

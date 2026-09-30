@@ -139,8 +139,11 @@ validated against `resource`/`ability`. `capacity_multiplier` scales
 encumbrance capacity (default `1.0`).
 `strengths`/`weaknesses` are free-text lists the selection picker shows as
 green `+` / red `-` lines — the player's "what's good / what's bad" summary
-before committing (diet, environment, fragility). Keep each line short;
-they are server-authored prose like `description`, not translation keys.
+before committing (diet, environment, fragility). Keep each line short.
+They travel as translatable components: bundled content is localized under
+`lifepath.species.<id>.strength.<n>` / `.weakness.<n>` (see TRANSLATIONS.md),
+while custom prose rides as the literal fallback — a datapack needs no lang
+file for its text to render.
 
 ## `specialization/` — specialization preset
 

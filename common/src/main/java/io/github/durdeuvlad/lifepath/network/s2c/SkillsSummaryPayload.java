@@ -4,6 +4,8 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -27,15 +29,19 @@ public record SkillsSummaryPayload(List<SkillCard> skills)
 			Details details) {
 		/** {@code icon} is the normalized texture id from the def's
 		 * {@code icon} field, or "" when none (M12-1). */
-		public record Display(String name, String description, String rankKey,
-				String aptitude, String improveHint, String icon) {
+		public record Display(Component name, Component description,
+				String rankKey, String aptitude, Component improveHint,
+				String icon) {
 			static final StreamCodec<RegistryFriendlyByteBuf, Display> CODEC =
 					StreamCodec.composite(
-							ByteBufCodecs.STRING_UTF8, Display::name,
-							ByteBufCodecs.STRING_UTF8, Display::description,
+							ComponentSerialization.TRUSTED_STREAM_CODEC,
+									Display::name,
+							ComponentSerialization.TRUSTED_STREAM_CODEC,
+									Display::description,
 							ByteBufCodecs.STRING_UTF8, Display::rankKey,
 							ByteBufCodecs.STRING_UTF8, Display::aptitude,
-							ByteBufCodecs.STRING_UTF8, Display::improveHint,
+							ComponentSerialization.TRUSTED_STREAM_CODEC,
+									Display::improveHint,
 							ByteBufCodecs.STRING_UTF8, Display::icon,
 							Display::new);
 		}

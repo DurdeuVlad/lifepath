@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.network.chat.Component;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import io.github.durdeuvlad.lifepath.platform.Platform;
 
@@ -111,23 +112,20 @@ public final class FeedbackService {
 		SyncDiff d = diff(PREVIOUS.get(player.getUUID()), data);
 		if (!d.isEmpty()) {
 			if (d.speciesAssigned() != null) {
-				var def = LifepathContent.species().get(d.speciesAssigned());
 				send(player, "species_assigned",
-						def != null ? def.displayName()
-								: d.speciesAssigned().getPath());
+						IdentitySummary.displayNameComponent(d.speciesAssigned()));
 			}
 			if (d.specAssigned() != null) {
-				var def = LifepathContent.specializations()
-						.get(d.specAssigned());
 				send(player, "spec_assigned",
-						def != null ? def.displayName()
-								: d.specAssigned().getPath());
+						IdentitySummary.displayNameComponent(d.specAssigned()));
 			}
 			for (ResourceLocation c : d.conditionsGained()) {
-				send(player, "condition_gained", IdentitySummary.displayName(c));
+				send(player, "condition_gained",
+						IdentitySummary.displayNameComponent(c));
 			}
 			for (ResourceLocation c : d.conditionsLost()) {
-				send(player, "condition_lost", IdentitySummary.displayName(c));
+				send(player, "condition_lost",
+						IdentitySummary.displayNameComponent(c));
 			}
 		}
 		PREVIOUS.put(player.getUUID(), Prev.of(data));
@@ -137,14 +135,15 @@ public final class FeedbackService {
 	private static void onLevelUp(ServerPlayer player, ResourceLocation skillId,
 			int oldLevel, int newLevel,
 			io.github.durdeuvlad.lifepath.event.ActivityEvent source) {
-		String skillName = IdentitySummary.displayName(skillId);
-		send(player, "level_up", skillName, String.valueOf(newLevel));
+		Component skillName = IdentitySummary.displayNameComponent(skillId);
+		send(player, "level_up", skillName, Component.literal(String.valueOf(newLevel)));
 		SkillDefinition def = LifepathContent.skills().get(skillId);
 		if (def != null) {
 			for (SkillDefinition.Milestone m : def.milestones()) {
 				if (m.level() > oldLevel && m.level() <= newLevel) {
 					send(player, "milestone", skillName,
-							String.valueOf(m.level()), m.descriptionKey());
+							Component.literal(String.valueOf(m.level())),
+							Component.literal(m.descriptionKey()));
 				}
 			}
 		}
@@ -154,8 +153,8 @@ public final class FeedbackService {
 	public static void decayed(ServerPlayer player, ResourceLocation skillId,
 			int levelsLost) {
 		if (levelsLost > 0) {
-			send(player, "decay", IdentitySummary.displayName(skillId),
-					String.valueOf(levelsLost));
+			send(player, "decay", IdentitySummary.displayNameComponent(skillId),
+					Component.literal(String.valueOf(levelsLost)));
 		}
 	}
 
@@ -178,10 +177,12 @@ public final class FeedbackService {
 						abilityId, System.currentTimeMillis()) / 1000L;
 		// The AUTO sentinel reaches here only when nothing ACTIVE was owned —
 		// show a plain label instead of leaking the wire id to the player.
-		String name = io.github.durdeuvlad.lifepath.network.c2s
+		Component name = io.github.durdeuvlad.lifepath.network.c2s
 				.ActivateAbilityPayload.AUTO.equals(abilityId)
-				? "Ability" : IdentitySummary.displayName(abilityId);
-		send(player, "ability_denied", name, reason, String.valueOf(secs));
+				? Component.literal("Ability")
+				: IdentitySummary.displayNameComponent(abilityId);
+		send(player, "ability_denied", name, Component.literal(reason),
+				Component.literal(String.valueOf(secs)));
 	}
 
 	/**
@@ -211,9 +212,10 @@ public final class FeedbackService {
 		return changed;
 	}
 
-	/** Sends one feedback packet; no-ops for null/offline players. */
+	/** Sends one feedback packet; no-ops for null/offline players. Args are
+	 *  components so translatable-with-fallback names resolve per-client. */
 	public static void send(@Nullable ServerPlayer player, String kind,
-			String... args) {
+			Component... args) {
 		if (player == null) {
 			return;
 		}

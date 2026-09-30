@@ -33,7 +33,7 @@ public final class SkillSummary {
 		for (var entry : LifepathContent.skills().all().entrySet()) {
 			cards.add(card(entry.getKey(), entry.getValue(), data));
 		}
-		cards.sort(Comparator.comparing(c -> c.display().name()));
+		cards.sort(Comparator.comparing(c -> c.display().name().getString()));
 		return new SkillsSummaryPayload(cards);
 	}
 
@@ -71,8 +71,14 @@ public final class SkillSummary {
 		}
 
 		return new SkillCard(id.toString(),
-				new SkillCard.Display(def.displayName(), def.description(),
-						RankBands.bandFor(level).key(), apt.name(), def.improveHint(),
+				new SkillCard.Display(
+						IdentitySummary.keyedText(id, "skill", "name",
+								def.displayName()),
+						IdentitySummary.keyedText(id, "skill", "description",
+								def.description()),
+						RankBands.bandFor(level).key(), apt.name(),
+						IdentitySummary.keyedText(id, "skill", "improve_hint",
+								def.improveHint()),
 						def.icon().map(ResourceLocation::toString).orElse("")),
 				new SkillCard.Progress(level, xpIn, xpNeed, floor, graceEnd),
 				new SkillCard.Details(nextLevel, nextText, List.copyOf(bonuses)));

@@ -9,6 +9,10 @@ import java.util.Map;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.junit.jupiter.api.Test;
+import net.minecraft.network.chat.Component;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
+import org.junit.jupiter.api.BeforeAll;
 
 /**
  * M12-2: the payload's hand-written {@code IdentityCore} codec (past
@@ -18,36 +22,45 @@ import org.junit.jupiter.api.Test;
  */
 class IdentitySummaryPayloadTest {
 
+	@BeforeAll
+	static void bootMinecraft() {
+		// ComponentSerialization's codec builds on vanilla registries —
+		// the headless suite never boots Minecraft otherwise.
+		SharedConstants.tryDetectVersion();
+		Bootstrap.bootStrap();
+	}
+
 	@Test
 	void packetCodecRoundTripsFullPayload() {
 		IdentitySummaryPayload p = new IdentitySummaryPayload(
 				new IdentitySummaryPayload.IdentityCore(
-						"lifepath:sylvian", "Sylvian", "Desc here",
+						"lifepath:sylvian", Component.literal("Sylvian"),
+						Component.literal("Desc here"),
 						"lifepath:textures/gui/species/sylvian.png",
-						"lifepath:miner", "Miner",
+						"lifepath:miner", Component.literal("Miner"),
 						"lifepath:textures/gui/spec/miner.png"),
-				List.of(new Entry("lifepath:mining", "Mining",
+				List.of(new Entry("lifepath:mining", Component.literal("Mining"),
 						"lifepath:textures/gui/skill/mining.png")),
 				Map.of("conditions", List.of(
-						new Entry("lifepath:chilled", "Chilled",
+						new Entry("lifepath:chilled", Component.literal("Chilled"),
 								"lifepath:textures/gui/condition/chilled.png")),
 						"traits", List.of(
-								new Entry("lifepath:night_eyes", "Night Eyes", ""))),
+								new Entry("lifepath:night_eyes", Component.literal("Night Eyes"), ""))),
 				// Two entries so iteration order is observable — the decode
 				// must preserve the sender's order (LinkedHashMap), since the
 				// character screen iterates the values directly.
 				Map.of("lifepath:frost_nova",
 						new IdentitySummaryPayload.AbilityEntry(
-								"lifepath:frost_nova", "Frost Nova",
+								"lifepath:frost_nova", Component.literal("Frost Nova"),
 								"lifepath:textures/gui/ability/frost.png",
 								true),
 						"lifepath:zz_passive",
 						new IdentitySummaryPayload.AbilityEntry(
-								"lifepath:zz_passive", "Passive",
+								"lifepath:zz_passive", Component.literal("Passive"),
 								"", false)),
 				List.of(new IdentitySummaryPayload.ResourceDisplay(
-						"lifepath:temperature", "Temperature", 50, 1,
-						List.of("Cold", "Hot"),
+						"lifepath:temperature", Component.literal("Temperature"), 50, 1,
+						List.of(Component.literal("Cold"), Component.literal("Hot")),
 						"lifepath:textures/gui/resource/temp.png")));
 
 		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
@@ -63,6 +76,62 @@ class IdentitySummaryPayloadTest {
 		assertEquals(List.copyOf(p.abilities().keySet()),
 				List.copyOf(d.abilities().keySet()));
 		assertEquals(p.resourceDisplays(), d.resourceDisplays());
+	}
+
+	@Test
+	void packetCodecRoundTripsTranslatableWithFallback() {
+		// The real wire shape: translatableWithFallback names plus
+		// translatable detail args mixing components and primitives.
+		IdentitySummaryPayload p = new IdentitySummaryPayload(
+				new IdentitySummaryPayload.IdentityCore(
+						"lifepath:automaton",
+						Component.translatableWithFallback(
+								"lifepath.species.automaton.name", "Automaton"),
+						Component.translatableWithFallback(
+								"lifepath.species.automaton.description", "Desc"),
+						"",
+						"lifepath:miner",
+						Component.translatableWithFallback(
+								"lifepath.specialization.miner.name", "Miner"),
+						""),
+				List.of(new Entry("lifepath:smithing",
+						Component.translatableWithFallback(
+								"lifepath.skill.smithing.name", "Smithing"),
+						"")),
+				Map.of("traits", List.of(new Entry("lifepath:x",
+						Component.translatable("text.lifepath.detail.skill_start_apt",
+								Component.translatableWithFallback(
+										"lifepath.skill.smithing.name", "Smithing"),
+								20, "A"),
+						""))),
+				Map.of(), List.of());
+		var buf = new net.minecraft.network.RegistryFriendlyByteBuf(
+				io.netty.buffer.Unpooled.buffer(),
+				net.minecraft.core.RegistryAccess.fromRegistryOfRegistries(
+						net.minecraft.core.registries.BuiltInRegistries.REGISTRY));
+		IdentitySummaryPayload.PACKET_CODEC.encode(buf, p);
+		IdentitySummaryPayload d = IdentitySummaryPayload.PACKET_CODEC.decode(buf);
+		assertEquals(p, d);
+	}
+
+	@Test
+	void builtPayloadRoundTrips() throws Exception {
+		// Round-trips the REAL build() output — keyedText components with
+		// fallbacks, populated sections, ability map, resource displays.
+		var data = io.github.durdeuvlad.lifepath.character.PlayerCharacterData
+				.createDefault();
+		data.setSpeciesId(io.github.durdeuvlad.lifepath.LifepathMod.id("automaton"));
+		data.setSpecializationId(io.github.durdeuvlad.lifepath.LifepathMod.id("miner"));
+		IdentitySummaryPayload p = io.github.durdeuvlad.lifepath.character.IdentitySummary.build(data);
+		var buf = new net.minecraft.network.RegistryFriendlyByteBuf(
+				io.netty.buffer.Unpooled.buffer(),
+				net.minecraft.core.RegistryAccess.fromRegistryOfRegistries(
+						net.minecraft.core.registries.BuiltInRegistries.REGISTRY));
+		IdentitySummaryPayload.PACKET_CODEC.encode(buf, p);
+		IdentitySummaryPayload d = IdentitySummaryPayload.PACKET_CODEC.decode(buf);
+		assertEquals(p.identity(), d.identity());
+		assertEquals(p.specFocus(), d.specFocus());
+		assertEquals(p.sections(), d.sections());
 	}
 
 	@Test

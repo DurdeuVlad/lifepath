@@ -89,10 +89,10 @@ public class CharacterScreen extends Screen {
 	private SelectionScreen.Step selectionStep() {
 		IdentitySummaryPayload.IdentityCore core =
 				ClientCharacterState.identity().identity();
-		if (core.speciesName().isEmpty()) {
+		if (core.speciesName().getString().isEmpty()) {
 			return SelectionScreen.Step.SPECIES;
 		}
-		return core.specName().isEmpty()
+		return core.specName().getString().isEmpty()
 				? SelectionScreen.Step.SPECIALIZATION
 				: SelectionScreen.Step.SPECIES;
 	}
@@ -114,9 +114,9 @@ public class CharacterScreen extends Screen {
 		if (selectionButton != null) {
 			selectionButton.setY(top + panelH + 6);
 			selectionButton.setMessage(Component.translatable(
-					core.speciesName().isEmpty()
+					core.speciesName().getString().isEmpty()
 							? "screen.lifepath.character.choose_species"
-							: core.specName().isEmpty()
+							: core.specName().getString().isEmpty()
 									? "screen.lifepath.character.choose_focus"
 									: "screen.lifepath.character.change_species"));
 		}
@@ -132,7 +132,7 @@ public class CharacterScreen extends Screen {
 		// --- Species (the identity hero line) ---
 		y = section(context, left, y,
 				Component.translatable("screen.lifepath.character.species"));
-		if (core.speciesName().isEmpty()) {
+		if (core.speciesName().getString().isEmpty()) {
 			y = line(context, left, y,
 					Component.translatable("screen.lifepath.character.no_species"), DIM);
 		} else {
@@ -146,12 +146,12 @@ public class CharacterScreen extends Screen {
 			y = rowTop + 18;
 			// M12-2: the description is displaced from the default view —
 			// hover the hero row to read it (name stays always-on).
-			if (!core.speciesDescription().isEmpty() && mouseX >= left
+			if (!core.speciesDescription().getString().isEmpty() && mouseX >= left
 					&& mouseX <= left + panelW && mouseY >= rowTop - 2
 					&& mouseY <= rowTop + 16) {
 				context.renderTooltip(font,
 						font.split(
-								Component.literal(core.speciesDescription()), panelW - 8),
+								core.speciesDescription(), panelW - 8),
 						mouseX, mouseY);
 			}
 		}
@@ -159,7 +159,7 @@ public class CharacterScreen extends Screen {
 		// --- Specialization + starting focus ---
 		y = section(context, left, y + 4,
 				Component.translatable("screen.lifepath.character.specialization"));
-		if (core.specName().isEmpty()) {
+		if (core.specName().getString().isEmpty()) {
 			y = line(context, left, y,
 					Component.translatable("screen.lifepath.character.no_specialization"), DIM);
 		} else {
@@ -172,8 +172,9 @@ public class CharacterScreen extends Screen {
 					left + 26, y + 4, TEXT);
 			y += 18;
 			if (!id.specFocus().isEmpty()) {
-				String focusNames = String.join(", ", id.specFocus().stream()
-						.map(IdentitySummaryPayload.Entry::name).toList());
+				String focusNames = id.specFocus().stream()
+						.map(e -> e.name().getString())
+						.collect(java.util.stream.Collectors.joining(", "));
 				y = line(context, left, y, Component.translatable(
 						"screen.lifepath.character.focus", focusNames), DIM);
 			}
@@ -232,7 +233,8 @@ public class CharacterScreen extends Screen {
 						.ifPresent(tex -> context.blit(tex, left + 6,
 								rowY, 10, 10, 0, 0, 16, 16, 16, 16));
 				Component label = e.active()
-						? Component.literal((sel ? "> " : "") + e.name())
+						? (sel ? Component.literal("> ").append(e.name())
+								: e.name())
 						: Component.translatable(
 								"screen.lifepath.character.ability_passive",
 								e.name());
@@ -307,9 +309,9 @@ public class CharacterScreen extends Screen {
 	private int panelHeight(IdentitySummaryPayload id) {
 		IdentitySummaryPayload.IdentityCore core = id.identity();
 		int h = 22;                              // title gap
-		h += 11 + (core.speciesName().isEmpty() ? 11 : 18);
-		h += 4 + 11 + (core.specName().isEmpty() ? 11 : 18);
-		if (!core.specName().isEmpty() && !id.specFocus().isEmpty()) {
+		h += 11 + (core.speciesName().getString().isEmpty() ? 11 : 18);
+		h += 4 + 11 + (core.specName().getString().isEmpty() ? 11 : 18);
+		if (!core.specName().getString().isEmpty() && !id.specFocus().isEmpty()) {
 			h += 11;
 		}
 		h += 10 * font.split(Component.translatable(

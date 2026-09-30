@@ -33,8 +33,8 @@ public record SelectionCatalogPayload(List<Entry> species,
 	 *  are {@link Component}s (mostly {@code text.lifepath.detail.*}
 	 *  translatables) so every client renders them in its own locale —
 	 *  the wire carries keys + resolved names, never formatted English. */
-	public record Entry(String id, String name, String description, String icon,
-			List<Component> details, int availability) {
+	public record Entry(String id, Component name, Component description,
+			String icon, List<Component> details, int availability) {
 		/** Player may pick this right now. */
 		public static final int AVAILABLE = 0;
 		/** {@code selection:"unlocked"} species whose unlock id the player lacks. */
@@ -47,8 +47,9 @@ public record SelectionCatalogPayload(List<Entry> species,
 		static final StreamCodec<RegistryFriendlyByteBuf, Entry> CODEC =
 				StreamCodec.composite(
 						ByteBufCodecs.STRING_UTF8, Entry::id,
-						ByteBufCodecs.STRING_UTF8, Entry::name,
-						ByteBufCodecs.STRING_UTF8, Entry::description,
+						ComponentSerialization.TRUSTED_STREAM_CODEC, Entry::name,
+						ComponentSerialization.TRUSTED_STREAM_CODEC,
+								Entry::description,
 						ByteBufCodecs.STRING_UTF8, Entry::icon,
 						ComponentSerialization.TRUSTED_STREAM_CODEC
 								.apply(ByteBufCodecs.list()),

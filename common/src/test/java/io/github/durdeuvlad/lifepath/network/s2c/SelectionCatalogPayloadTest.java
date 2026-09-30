@@ -31,15 +31,18 @@ class SelectionCatalogPayloadTest {
 	void packetCodecRoundTripsFullPayload() {
 		SelectionCatalogPayload p = new SelectionCatalogPayload(
 				List.of(
-						new Entry("lifepath:human", "Human", "Adaptable.",
+						new Entry("lifepath:human", Component.literal("Human"),
+								Component.literal("Adaptable."),
 								"lifepath:textures/gui/species/human.png",
 								List.of(Component.translatable(
 												"text.lifepath.detail.active", "Adrenaline"),
 										Component.literal("Versatile")),
 								Entry.AVAILABLE),
-						new Entry("lifepath:phantom", "Phantom", "Half-ghost.",
+						new Entry("lifepath:phantom", Component.literal("Phantom"),
+								Component.literal("Half-ghost."),
 								"", List.of(), Entry.NEEDS_UNLOCK)),
-				List.of(new Entry("lifepath:smith", "Smith", "",
+				List.of(new Entry("lifepath:smith", Component.literal("Smith"),
+								Component.empty(),
 						"lifepath:textures/gui/specialization/smith.png",
 						List.of(Component.translatable(
 								"text.lifepath.detail.skill_start_apt",

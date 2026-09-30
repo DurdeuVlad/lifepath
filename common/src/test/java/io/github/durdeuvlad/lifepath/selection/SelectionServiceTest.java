@@ -111,7 +111,10 @@ class SelectionServiceTest {
 		var contents = (net.minecraft.network.chat.contents.TranslatableContents)
 				detail.getContents();
 		assertEquals("text.lifepath.detail.skill_start_apt", contents.getKey());
-		assertEquals(List.of("smithing", 20, "A"), List.of(contents.getArgs()));
+		assertEquals("smithing", ((net.minecraft.network.chat.Component)
+						contents.getArgs()[0]).getString());
+		assertEquals(List.of(20, "A"),
+				List.of(contents.getArgs()[1], contents.getArgs()[2]));
 
 		data.setSpecializationId(LifepathMod.id("smith"));
 		catalog = SelectionService.buildCatalog(data);

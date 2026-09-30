@@ -19,5 +19,13 @@
 	},
 	"protected_floors": {
 		"lifepath:foraging": 30
-	}
+	},
+	"strengths": [
+		"Learns foraging 30% faster",
+		"Foraging can't decay below Lv30",
+		"Also trains farming"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
 }

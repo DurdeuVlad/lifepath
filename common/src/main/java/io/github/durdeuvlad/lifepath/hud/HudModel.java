@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -28,15 +29,16 @@ public final class HudModel {
 	 * One visible resource row. {@code bandName} may be empty (unnamed band);
 	 * {@code icon} is the def's icon ref ("" = none) for the row's badge.
 	 */
-	public record ResourceRow(String id, String label, double value, double min,
-			double max, double fraction, String bandName, String icon) {
+	public record ResourceRow(String id, Component label, double value,
+			double min,
+			double max, double fraction, Component bandName, String icon) {
 	}
 
 	/**
 	 * One visible cooldown row; {@code secondsLeft} is rounded up for display;
 	 * {@code icon} is the ability's icon ref ("" = none).
 	 */
-	public record CooldownRow(String abilityId, String label,
+	public record CooldownRow(String abilityId, Component label,
 			double secondsLeft, String icon) {
 	}
 
@@ -98,9 +100,10 @@ public final class HudModel {
 			double span = st.max() - st.min();
 			double fraction = span > 0
 					? clamp((st.current() - st.min()) / span) : 0;
-			String bandName = band >= 0 && band < rd.bandNames().size()
-					? rd.bandNames().get(band) : "";
-			String label = rd.name().isEmpty() ? id.getPath() : rd.name();
+			Component bandName = band >= 0 && band < rd.bandNames().size()
+					? rd.bandNames().get(band) : Component.empty();
+			Component label = rd.name().getString().isEmpty()
+					? Component.literal(id.getPath()) : rd.name();
 			rows.add(new ResourceRow(rd.id(), label, st.current(), st.min(),
 					st.max(), fraction, bandName, rd.icon()));
 		}
@@ -118,7 +121,8 @@ public final class HudModel {
 			String idStr = e.getKey().toString();
 			IdentitySummaryPayload.AbilityEntry ability =
 					identity.abilities().get(idStr);
-			String label = ability != null ? ability.name() : e.getKey().getPath();
+			Component label = ability != null ? ability.name()
+					: Component.literal(e.getKey().getPath());
 			rows.add(new CooldownRow(idStr, label, left,
 					ability != null ? ability.icon() : ""));
 		}

@@ -19,5 +19,13 @@
 	},
 	"protected_floors": {
 		"lifepath:athletics": 25
-	}
+	},
+	"strengths": [
+		"Learns athletics and foraging 25% faster",
+		"Athletics can't decay below Lv25"
+	],
+	"weaknesses": [
+		"No A-grade aptitude",
+		"No signature ability"
+	]
 }

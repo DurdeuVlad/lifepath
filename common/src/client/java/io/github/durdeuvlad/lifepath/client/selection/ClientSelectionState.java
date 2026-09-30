@@ -65,7 +65,8 @@ public final class ClientSelectionState {
 				|| !LifepathConfig.getBoolean(LifepathConfig.CLIENT, "onboarding_auto_open")) {
 			return;
 		}
-		if (!ClientCharacterState.identity().identity().speciesName().isEmpty()) {
+		if (!ClientCharacterState.identity().identity().speciesName()
+				.getString().isEmpty()) {
 			return;
 		}
 		boolean anyAvailable = catalog.species().stream()

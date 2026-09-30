@@ -122,10 +122,11 @@ public final class LifepathHud {
 		context.fill(ICON_W, y,
 				ICON_W + Math.round(BAR_W * (float) row.fraction()), y + BAR_H,
 				COL_BAR_FILL);
-		String band = row.bandName().isEmpty() ? ""
-				: " " + row.bandName();
-		String text = row.label() + band + " "
-				+ String.format("%.0f", row.value());
+		var text = Component.empty().append(row.label());
+		if (!row.bandName().getString().isEmpty()) {
+			text.append(" ").append(row.bandName());
+		}
+		text.append(" ").append(String.format("%.0f", row.value()));
 		context.drawString(client.font, text,
 				ICON_W + BAR_W + 4, y, COL_TEXT);
 	}
@@ -134,11 +135,12 @@ public final class LifepathHud {
 		int w = ICON_W + BAR_W + 4;
 		for (ResourceRow row : view.resources()) {
 			w = Math.max(w, ICON_W + BAR_W + 4 + client.font
-					.width(row.label() + " " + row.bandName() + " 000"));
+					.width(Component.empty().append(row.label()).append(" ")
+							.append(row.bandName()).append(" 000")));
 		}
 		for (CooldownRow row : view.cooldowns()) {
 			w = Math.max(w, ICON_W + client.font
-					.width(row.label() + " 000"));
+					.width(Component.empty().append(row.label()).append(" 000")));
 		}
 		for (IdentitySummaryPayload.Entry state : view.states()) {
 			w = Math.max(w, ICON_W + client.font

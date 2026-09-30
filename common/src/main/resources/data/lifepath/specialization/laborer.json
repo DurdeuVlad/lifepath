@@ -22,7 +22,11 @@
 	},
 	"capacity_multiplier": 1.4,
 	"strengths": [
-		"Carry 40% more before encumbrance"
+		"Carry 40% more before encumbrance",
+		"Learns athletics and mining 25% faster",
+		"Athletics can't decay below Lv25"
 	],
-	"weaknesses": []
+	"weaknesses": [
+		"No signature ability"
+	]
 }

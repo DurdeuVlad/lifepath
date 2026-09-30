@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Resolves a player's identity state into display strings for
@@ -26,29 +28,83 @@ public final class IdentitySummary {
 	public static final String SECTION_ATTUNEMENTS = "attunements";
 	public static final String SECTION_TRAITS = "traits";
 
+	/**
+	 * Display text as translatable-with-fallback: bundled content carries
+	 * lang keys ({@code <namespace>.<domain>.<path>.<suffix>}) so every
+	 * client renders its own locale; the datapack-authored literal rides
+	 * as the fallback, so custom content still works without a
+	 * resourcepack. This is the same convention Origins-style mods use —
+	 * key indirection — except the fallback keeps unknown content legible
+	 * instead of showing a raw key.
+	 */
+	public static Component keyedText(ResourceLocation id, String domain,
+			String suffix, String fallback) {
+		return Component.translatableWithFallback(
+				id.getNamespace() + "." + domain + "." + id.getPath() + "." + suffix,
+				fallback);
+	}
+
+	/** Localizable display name for any content id — the {@code .name}
+	 *  suffix under the id's registry domain; raw literal when the id is
+	 *  unknown to every registry. */
+	public static Component displayNameComponent(ResourceLocation id) {
+		String domain = domainOf(id);
+		return domain == null
+				? Component.literal(displayName(id))
+				: keyedText(id, domain, "name", displayName(id));
+	}
+
+	private static @Nullable String domainOf(ResourceLocation id) {
+		if (LifepathContent.abilities().get(id) != null) {
+			return "ability";
+		}
+		if (LifepathContent.skills().get(id) != null) {
+			return "skill";
+		}
+		if (LifepathContent.conditions().get(id) != null) {
+			return "condition";
+		}
+		if (LifepathContent.attunements().get(id) != null) {
+			return "attunement";
+		}
+		if (LifepathContent.species().get(id) != null) {
+			return "species";
+		}
+		if (LifepathContent.specializations().get(id) != null) {
+			return "specialization";
+		}
+		if (LifepathContent.resources().get(id) != null) {
+			return "resource";
+		}
+		return null;
+	}
+
 	/** Builds the display summary for {@code data}; never null. */
 	public static IdentitySummaryPayload build(PlayerCharacterData data) {
-		String speciesId = "", speciesName = "", speciesDesc = "", speciesIcon = "";
+		String speciesId = "", speciesIcon = "";
+		Component speciesName = Component.empty(), speciesDesc = Component.empty();
 		SpeciesDefinition species = null;
 		if (data.speciesId() != null) {
 			speciesId = data.speciesId().toString();
 			species = LifepathContent.species().get(data.speciesId());
-			speciesName = species != null
-					? species.displayName() : data.speciesId().getPath();
+			speciesName = keyedText(data.speciesId(), "species", "name",
+					species != null ? species.displayName() : data.speciesId().getPath());
 			if (species != null) {
-				speciesDesc = species.description().orElse("");
+				speciesDesc = keyedText(data.speciesId(), "species", "description",
+						species.description().orElse(""));
 				speciesIcon = species.icon().map(ResourceLocation::toString).orElse("");
 			}
 		}
 
-		String specId = "", specName = "", specIcon = "";
+		String specId = "", specIcon = "";
+		Component specName = Component.empty();
 		List<IdentitySummaryPayload.Entry> focus = List.of();
 		if (data.specializationId() != null) {
 			specId = data.specializationId().toString();
 			SpecializationDefinition spec =
 					LifepathContent.specializations().get(data.specializationId());
-			specName = spec != null
-					? spec.displayName() : data.specializationId().getPath();
+			specName = keyedText(data.specializationId(), "specialization", "name",
+					spec != null ? spec.displayName() : data.specializationId().getPath());
 			if (spec != null) {
 				specIcon = spec.icon().map(ResourceLocation::toString).orElse("");
 				focus = spec.startingSkills().keySet().stream()
@@ -73,7 +129,7 @@ public final class IdentitySummary {
 					== io.github.durdeuvlad.lifepath.content.AbilityDefinition
 							.Kind.ACTIVE;
 			abilities.put(id.toString(), new IdentitySummaryPayload.AbilityEntry(
-					id.toString(), displayName(id), iconRef(id), active));
+					id.toString(), displayNameComponent(id), iconRef(id), active));
 		}
 		List<IdentitySummaryPayload.ResourceDisplay> resourceDisplays =
 				new ArrayList<>();
@@ -87,9 +143,11 @@ public final class IdentitySummary {
 			if (rdef == null) {
 				continue;
 			}
-			List<String> bandNames = rdef.bands().stream()
-					.map(io.github.durdeuvlad.lifepath.content.ResourceDefinition
-							.Band::name).toList();
+			List<Component> bandNames = new ArrayList<>();
+			for (int i = 0; i < rdef.bands().size(); i++) {
+				bandNames.add(keyedText(rid, "resource", "band." + i,
+						rdef.bands().get(i).name()));
+			}
 			int restBand = -1;
 			for (int i = 0; i < rdef.bands().size(); i++) {
 				var b = rdef.bands().get(i);
@@ -99,7 +157,8 @@ public final class IdentitySummary {
 				}
 			}
 			resourceDisplays.add(new IdentitySummaryPayload.ResourceDisplay(
-					rid.toString(), rdef.displayName(), rdef.defaultValue(),
+					rid.toString(), keyedText(rid, "resource", "name", rdef.displayName()),
+					rdef.defaultValue(),
 					restBand, bandNames,
 					rdef.icon().map(ResourceLocation::toString).orElse("")));
 		}
@@ -172,10 +231,10 @@ public final class IdentitySummary {
 		return "";
 	}
 
-	/** One displayable reference: id + resolved name + icon ref ("" none). */
+	/** One displayable reference: id + localizable name + icon ref ("" none). */
 	public static IdentitySummaryPayload.Entry entry(ResourceLocation id) {
-		return new IdentitySummaryPayload.Entry(id.toString(), displayName(id),
-				iconRef(id));
+		return new IdentitySummaryPayload.Entry(id.toString(),
+				displayNameComponent(id), iconRef(id));
 	}
 
 	private static List<IdentitySummaryPayload.Entry> entriesOf(List<ResourceLocation> ids) {
