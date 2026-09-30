@@ -12,4 +12,13 @@
 	"active_abilities": [
 		"lifepath:celestial_smite"
 	]
+,
+	"strengths": [
+		"Sunlight restores you",
+		"Falls mean nothing",
+		"Can smite the undead"
+	],
+	"weaknesses": [
+		"The Nether is an exile far from the heavens"
+	]
 }

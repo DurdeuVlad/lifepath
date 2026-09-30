@@ -13,4 +13,12 @@
 		"lifepath:phoenix_rise",
 		"lifepath:phoenix_flare"
 	]
+,
+	"strengths": [
+		"Fire does not touch you and flame mends you",
+		"Immolate and rise again"
+	],
+	"weaknesses": [
+		"Water quenches your inner fire"
+	]
 }

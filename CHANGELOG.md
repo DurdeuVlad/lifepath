@@ -18,7 +18,10 @@ milestone M10 — every roadmap system below is shipped and exercised.
   screen's Choose button; `client.toml onboarding_auto_open` toggles the
   auto-open). Shows name, description, what you get, and locked reasons;
   choices apply through server-validated requests — `/lifepath` is now an
-  admin-only surface.
+  admin-only surface. The card list has a draggable scrollbar; the
+  "What you get" strip only exists while a card is selected; each option's
+  `strengths`/`weaknesses` datapack fields render as green `+` / red `-`
+  lines so benefits and costs are legible at a glance.
 - **YAML translations** — all UI text lives in `common/src/main/lang/*.yaml`;
   the build generates Minecraft `lang/*.json`. Romanian (`ro_ro`) ships as the
   first translation; picker detail lines localize per-client via translatable

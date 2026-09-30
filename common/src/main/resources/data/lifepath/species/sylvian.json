@@ -15,4 +15,14 @@
 	"active_abilities": [
 		"lifepath:sylvian_verdant_bloom"
 	]
+,
+	"strengths": [
+		"Forests make you quicker and hardier",
+		"Vegetation carries your stride",
+		"Flowers cleanse you"
+	],
+	"weaknesses": [
+		"Arid lands weaken you",
+		"The undead cut deeper"
+	]
 }

@@ -122,7 +122,9 @@ Nested path: `data/<ns>/skill/curve/<name>.json` — referenced by `skill`'s
   "resources": ["lifepath:rebirth"],
   "passive_abilities": ["lifepath:phoenix_passive"],
   "active_abilities": ["lifepath:phoenix_flare"],
-  "capacity_multiplier": 1.0
+  "capacity_multiplier": 1.0,
+  "strengths": ["Fire heals you", "Rise again when felled"],
+  "weaknesses": ["Water quenches your inner fire"]
 }
 ```
 
@@ -135,6 +137,10 @@ unlock — then it surfaces as a normal card).
 domains. `resources`/`passive_abilities`/`active_abilities` are id lists
 validated against `resource`/`ability`. `capacity_multiplier` scales
 encumbrance capacity (default `1.0`).
+`strengths`/`weaknesses` are free-text lists the selection picker shows as
+green `+` / red `-` lines — the player's "what's good / what's bad" summary
+before committing (diet, environment, fragility). Keep each line short;
+they are server-authored prose like `description`, not translation keys.
 
 ## `specialization/` — specialization preset
 
@@ -148,7 +154,9 @@ encumbrance capacity (default `1.0`).
   "decay_modifiers": {},
   "protected_floors": {},
   "signature": ["lifepath:miner_signature"],
-  "capacity_multiplier": 1.0
+  "capacity_multiplier": 1.0,
+  "strengths": [],
+  "weaknesses": []
 }
 ```
 

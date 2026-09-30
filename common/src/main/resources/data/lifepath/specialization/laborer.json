@@ -20,5 +20,9 @@
 	"protected_floors": {
 		"lifepath:athletics": 25
 	},
-	"capacity_multiplier": 1.4
+	"capacity_multiplier": 1.4,
+	"strengths": [
+		"Carry 40% more before encumbrance"
+	],
+	"weaknesses": []
 }

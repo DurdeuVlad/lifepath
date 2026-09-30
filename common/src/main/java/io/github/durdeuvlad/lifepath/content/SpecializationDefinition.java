@@ -23,7 +23,24 @@ public record SpecializationDefinition(
 		Map<ResourceLocation, Integer> protectedFloors,
 		List<ResourceLocation> signatureRefs,
 		double capacityMultiplier,
-		Optional<ResourceLocation> icon) {
+		Optional<ResourceLocation> icon,
+		List<String> strengths,
+		List<String> weaknesses) {
+
+	/** Back-compatible constructor for call sites predating {@code strengths}/{@code weaknesses}. */
+	public SpecializationDefinition(ResourceLocation id, String displayName,
+			Map<ResourceLocation, Integer> startingSkills,
+			Map<ResourceLocation, Aptitude> aptitudes,
+			Map<ResourceLocation, Double> xpModifiers,
+			Map<ResourceLocation, Double> decayModifiers,
+			Map<ResourceLocation, Integer> protectedFloors,
+			List<ResourceLocation> signatureRefs,
+			double capacityMultiplier,
+			Optional<ResourceLocation> icon) {
+		this(id, displayName, startingSkills, aptitudes, xpModifiers,
+				decayModifiers, protectedFloors, signatureRefs, capacityMultiplier,
+				icon, List.of(), List.of());
+	}
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
 	public SpecializationDefinition(ResourceLocation id, String displayName,
@@ -36,7 +53,7 @@ public record SpecializationDefinition(
 			double capacityMultiplier) {
 		this(id, displayName, startingSkills, aptitudes, xpModifiers,
 				decayModifiers, protectedFloors, signatureRefs, capacityMultiplier,
-				Optional.empty());
+				Optional.empty(), List.of(), List.of());
 	}
 
 	/** Convenience for call sites predating {@code capacityMultiplier} (M9-3). */
@@ -55,7 +72,8 @@ public record SpecializationDefinition(
 		return new SpecializationDefinition(id, file.displayName(), file.startingSkills(),
 				file.aptitudes(), file.xpModifiers(), file.decayModifiers(), file.protectedFloors(),
 				file.signatureRefs(), file.capacityMultiplier(),
-				file.icon().map(raw -> IconRef.resolve("specialization", id, raw)));
+				file.icon().map(raw -> IconRef.resolve("specialization", id, raw)),
+				file.strengths(), file.weaknesses());
 	}
 
 	/** JSON shape of {@code data/<ns>/specialization/<name>.json} (id excluded). */
@@ -68,7 +86,9 @@ public record SpecializationDefinition(
 			Map<ResourceLocation, Integer> protectedFloors,
 			List<ResourceLocation> signatureRefs,
 			double capacityMultiplier,
-			Optional<String> icon) {
+			Optional<String> icon,
+			List<String> strengths,
+			List<String> weaknesses) {
 
 		public static final Codec<SpecializationDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SpecializationDefinitionFile::displayName),
@@ -79,7 +99,9 @@ public record SpecializationDefinition(
 				Codec.unboundedMap(ResourceLocation.CODEC, Codec.intRange(0, 10000)).optionalFieldOf("protected_floors", Map.of()).forGetter(SpecializationDefinitionFile::protectedFloors),
 				ResourceLocation.CODEC.listOf().optionalFieldOf("signature", List.of()).forGetter(SpecializationDefinitionFile::signatureRefs),
 			Codec.doubleRange(0.0, 100.0).optionalFieldOf("capacity_multiplier", 1.0).forGetter(SpecializationDefinitionFile::capacityMultiplier),
-			Codec.STRING.optionalFieldOf("icon").forGetter(SpecializationDefinitionFile::icon)
+			Codec.STRING.optionalFieldOf("icon").forGetter(SpecializationDefinitionFile::icon),
+			Codec.STRING.listOf().optionalFieldOf("strengths", List.of()).forGetter(SpecializationDefinitionFile::strengths),
+			Codec.STRING.listOf().optionalFieldOf("weaknesses", List.of()).forGetter(SpecializationDefinitionFile::weaknesses)
 		).apply(instance, SpecializationDefinitionFile::new));
 	}
 }

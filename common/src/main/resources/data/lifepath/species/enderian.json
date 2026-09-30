@@ -12,4 +12,13 @@
 	"active_abilities": [
 		"lifepath:enderian_blink"
 	]
+,
+	"strengths": [
+		"Ender pearls barely sting",
+		"The End itself sharpens you",
+		"Blink through space"
+	],
+	"weaknesses": [
+		"Water burns like acid"
+	]
 }

@@ -28,7 +28,22 @@ public record SpeciesDefinition(
 		Optional<ResourceLocation> dietRules,
 		Optional<ResourceLocation> mobDispositions,
 		double capacityMultiplier,
-		Optional<ResourceLocation> icon) {
+		Optional<ResourceLocation> icon,
+		List<String> strengths,
+		List<String> weaknesses) {
+
+	/** Back-compatible constructor for call sites predating {@code strengths}/{@code weaknesses}. */
+	public SpeciesDefinition(ResourceLocation id, String displayName,
+			Optional<String> description, Visibility visibility,
+			Selection selection, List<ResourceLocation> passiveAbilities,
+			List<ResourceLocation> activeAbilities, Map<ResourceLocation, Aptitude> minAptitudes,
+			List<ResourceLocation> resources, Optional<ResourceLocation> dietRules,
+			Optional<ResourceLocation> mobDispositions, double capacityMultiplier,
+			Optional<ResourceLocation> icon) {
+		this(id, displayName, description, visibility, selection,
+				passiveAbilities, activeAbilities, minAptitudes, resources,
+				dietRules, mobDispositions, capacityMultiplier, icon, List.of(), List.of());
+	}
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
 	public SpeciesDefinition(ResourceLocation id, String displayName,
@@ -39,7 +54,8 @@ public record SpeciesDefinition(
 			Optional<ResourceLocation> mobDispositions, double capacityMultiplier) {
 		this(id, displayName, description, visibility, selection,
 				passiveAbilities, activeAbilities, minAptitudes, resources,
-				dietRules, mobDispositions, capacityMultiplier, Optional.empty());
+				dietRules, mobDispositions, capacityMultiplier, Optional.empty(),
+				List.of(), List.of());
 	}
 
 	/** Convenience for call sites predating {@code description} (M5-1). */
@@ -82,7 +98,8 @@ public record SpeciesDefinition(
 				file.passiveAbilities(), file.activeAbilities(), file.minAptitudes(),
 				file.resources(), file.dietRules(), file.mobDispositions(),
 				file.capacityMultiplier(),
-				file.icon().map(raw -> IconRef.resolve("species", id, raw)));
+				file.icon().map(raw -> IconRef.resolve("species", id, raw)),
+				file.strengths(), file.weaknesses());
 	}
 
 	/**
@@ -101,7 +118,9 @@ public record SpeciesDefinition(
 			Optional<ResourceLocation> dietRules,
 			Optional<ResourceLocation> mobDispositions,
 			double capacityMultiplier,
-			Optional<String> icon) {
+			Optional<String> icon,
+			List<String> strengths,
+			List<String> weaknesses) {
 
 		public static final Codec<SpeciesDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SpeciesDefinitionFile::displayName),
@@ -115,7 +134,9 @@ public record SpeciesDefinition(
 				ResourceLocation.CODEC.optionalFieldOf("diet_rules").forGetter(SpeciesDefinitionFile::dietRules),
 				ResourceLocation.CODEC.optionalFieldOf("mob_dispositions").forGetter(SpeciesDefinitionFile::mobDispositions),
 			Codec.doubleRange(0.0, 100.0).optionalFieldOf("capacity_multiplier", 1.0).forGetter(SpeciesDefinitionFile::capacityMultiplier),
-			Codec.STRING.optionalFieldOf("icon").forGetter(SpeciesDefinitionFile::icon)
+			Codec.STRING.optionalFieldOf("icon").forGetter(SpeciesDefinitionFile::icon),
+			Codec.STRING.listOf().optionalFieldOf("strengths", List.of()).forGetter(SpeciesDefinitionFile::strengths),
+			Codec.STRING.listOf().optionalFieldOf("weaknesses", List.of()).forGetter(SpeciesDefinitionFile::weaknesses)
 		).apply(instance, SpeciesDefinitionFile::new));
 	}
 }

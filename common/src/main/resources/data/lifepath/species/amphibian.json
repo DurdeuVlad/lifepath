@@ -12,4 +12,12 @@
 	"active_abilities": [
 		"lifepath:amphibian_tidal_mend"
 	]
+,
+	"strengths": [
+		"Breathe, see and swim freely underwater",
+		"Knit wounds with river-magic"
+	],
+	"weaknesses": [
+		"Dry land cracks your skin to a crawling weakness"
+	]
 }
