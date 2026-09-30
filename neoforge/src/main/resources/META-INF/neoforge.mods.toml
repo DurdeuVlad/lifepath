@@ -17,6 +17,10 @@ issueTrackerURL="https://github.com/DurdeuVlad/lifepath/issues"
 	config="lifepath.mixins.json"
 [[mixins]]
 	config="lifepath.client.mixins.json"
+# Optional-mod compat: only applied when the foreign mod is present
+[[mixins]]
+	config="lifepath.compat.mixins.json"
+	requiredMods=["overgeared"]
 
 [[dependencies.lifepath]]
 	modId="neoforge"

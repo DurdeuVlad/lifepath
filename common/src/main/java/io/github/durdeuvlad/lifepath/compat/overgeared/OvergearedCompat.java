@@ -19,14 +19,17 @@ import org.jetbrains.annotations.Nullable;
  * events), no foreign classes are ever loaded:
  *
  * <ul>
- *   <li>Overgeared forging results surface through the generic crafting/
- *       forge-output producers when its stations reuse vanilla slots; this
- *       adapter watches normalized {@code lifepath:crafting} events whose
+ *   <li>Smithing-anvil forging is covered by {@code mixin.OvergearedAnvilMixin}
+ *       (NeoForge-only, {@code requiredMods}-gated): its block entity drops the
+ *       result via {@code Containers.dropItemStack}, bypassing every vanilla
+ *       slot/event path, so the mixin reads the owner + recipe result
+ *       reflectively at completion and publishes canonical smithing activity.</li>
+ *   <li>This adapter watches normalized {@code lifepath:crafting} events whose
  *       result id is {@code overgeared:*} (or carries the datapack-extensible
  *       {@code #lifepath:forged_outputs} tag) and republishes them as
- *       canonical {@code lifepath:smithing} activity — the same shape the
- *       vanilla forge-output producer emits, so existing xp_source data
- *       routes it to Smithing XP with zero extra wiring.</li>
+ *       canonical {@code lifepath:smithing} activity — covering any Overgeared
+ *       craft paths (casting, alloy furnace outputs taken from menus) that do
+ *       reuse vanilla result slots.</li>
  *   <li>Overgeared workstations/hammers are recognized through
  *       {@code #lifepath:smithing_workstations}/{@code #lifepath:smithing_tools}
  *       tag entries (data, not code).</li>
