@@ -33,7 +33,8 @@ public record AbilityDefinition(
 		Optional<Cost> cost,
 		Optional<Cooldown> cooldown,
 		List<ResourceInteraction> resourceInteractions,
-		Optional<ResourceLocation> icon) {
+		Optional<ResourceLocation> icon,
+		Optional<String> description) {
 
 	/** Back-compatible constructor for call sites predating {@code icon} (M12-1). */
 	public AbilityDefinition(ResourceLocation id, String displayName, boolean enabled,
@@ -41,14 +42,16 @@ public record AbilityDefinition(
 			List<SpecNode> actions, Optional<Cost> cost,
 			Optional<Cooldown> cooldown, List<ResourceInteraction> resourceInteractions) {
 		this(id, displayName, enabled, trigger, conditions, target, actions,
-				cost, cooldown, resourceInteractions, Optional.empty());
+				cost, cooldown, resourceInteractions, Optional.empty(),
+				Optional.empty());
 	}
 
 	public static AbilityDefinition fromFile(ResourceLocation id, AbilityFile file) {
 		return new AbilityDefinition(id, file.displayName(), file.enabled(),
 				file.trigger(), file.conditions(), file.target(), file.actions(),
 				file.cost(), file.cooldown(), file.resourceInteractions(),
-				file.icon().map(raw -> IconRef.resolve("ability", id, raw)));
+				file.icon().map(raw -> IconRef.resolve("ability", id, raw)),
+				file.description());
 	}
 
 	/** Trigger kinds — all four are load-bearing, see {@link Kind}. */
@@ -175,7 +178,8 @@ public record AbilityDefinition(
 			Optional<Cost> cost,
 			Optional<Cooldown> cooldown,
 			List<ResourceInteraction> resourceInteractions,
-			Optional<String> icon) {
+			Optional<String> icon,
+			Optional<String> description) {
 
 		public static final Codec<AbilityFile> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("display_name").forGetter(AbilityFile::displayName),
@@ -191,7 +195,9 @@ public record AbilityDefinition(
 				ResourceInteraction.CODEC.listOf()
 						.optionalFieldOf("resource_interactions", List.of())
 						.forGetter(AbilityFile::resourceInteractions),
-				Codec.STRING.optionalFieldOf("icon").forGetter(AbilityFile::icon)
+				Codec.STRING.optionalFieldOf("icon").forGetter(AbilityFile::icon),
+				Codec.STRING.optionalFieldOf("description")
+						.forGetter(AbilityFile::description)
 		).apply(i, AbilityFile::new));
 	}
 }

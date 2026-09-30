@@ -1,5 +1,6 @@
 {
 	"display_name": "Amphibian Gills",
+	"description": "Fully at home underwater: you breathe where others drown.",
 	"icon": "ability/amphibian_gills",
 	"trigger": {
 		"type": "passive",

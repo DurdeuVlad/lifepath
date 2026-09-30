@@ -1,5 +1,6 @@
 {
 	"display_name": "Kindled Warmth",
+	"description": "While you burn you mend — fire is rest for you.",
 	"icon": "ability/phoenix_warmth",
 	"trigger": {
 		"type": "passive",

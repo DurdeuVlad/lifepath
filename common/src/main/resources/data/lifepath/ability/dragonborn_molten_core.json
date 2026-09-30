@@ -1,5 +1,6 @@
 {
 	"display_name": "Molten Core",
+	"description": "While you burn you grow stronger, not weaker.",
 	"icon": "ability/dragonborn_molten_core",
 	"trigger": {
 		"type": "passive",

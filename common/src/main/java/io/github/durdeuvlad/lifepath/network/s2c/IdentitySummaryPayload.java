@@ -58,7 +58,7 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	 * click-to-bind affordance only on rows the key can actually fire.
 	 */
 	public record AbilityEntry(String id, Component name, String icon,
-			boolean active) {
+			boolean active, Component description) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, AbilityEntry> CODEC =
 				StreamCodec.composite(
 						ByteBufCodecs.STRING_UTF8, AbilityEntry::id,
@@ -66,6 +66,8 @@ public record IdentitySummaryPayload(IdentityCore identity,
 								AbilityEntry::name,
 						ByteBufCodecs.STRING_UTF8, AbilityEntry::icon,
 						ByteBufCodecs.BOOL, AbilityEntry::active,
+						ComponentSerialization.TRUSTED_STREAM_CODEC,
+								AbilityEntry::description,
 						AbilityEntry::new);
 	}
 

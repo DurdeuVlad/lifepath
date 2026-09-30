@@ -1,5 +1,6 @@
 {
 	"display_name": "Drain",
+	"description": "Every blow you land feeds you a little of their blood.",
 	"icon": "ability/vampirism_drain",
 	"trigger": {
 		"type": "event",

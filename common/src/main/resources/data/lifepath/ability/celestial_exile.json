@@ -1,5 +1,6 @@
 {
 	"display_name": "Exile from the Sky",
+	"description": "The sky rejects what was cast out — the End dims your light.",
 	"icon": "ability/celestial_exile",
 	"trigger": {
 		"type": "passive",

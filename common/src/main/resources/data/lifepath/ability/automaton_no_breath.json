@@ -1,5 +1,6 @@
 {
 	"display_name": "Hollow Hull",
+	"description": "No lungs to fill — drowning does not apply to you.",
 	"icon": "ability/automaton_no_breath",
 	"trigger": {
 		"type": "damage_taken",

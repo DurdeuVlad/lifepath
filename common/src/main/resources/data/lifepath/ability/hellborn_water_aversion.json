@@ -1,5 +1,6 @@
 {
 	"display_name": "Water Aversion",
+	"description": "Rain and rivers sap you — you were never made for wet places.",
 	"icon": "ability/hellborn_water_aversion",
 	"trigger": {
 		"type": "passive",

@@ -53,11 +53,11 @@ class IdentitySummaryPayloadTest {
 						new IdentitySummaryPayload.AbilityEntry(
 								"lifepath:frost_nova", Component.literal("Frost Nova"),
 								"lifepath:textures/gui/ability/frost.png",
-								true),
+								true, Component.empty()),
 						"lifepath:zz_passive",
 						new IdentitySummaryPayload.AbilityEntry(
 								"lifepath:zz_passive", Component.literal("Passive"),
-								"", false)),
+								"", false, Component.empty())),
 				List.of(new IdentitySummaryPayload.ResourceDisplay(
 						"lifepath:temperature", Component.literal("Temperature"), 50, 1,
 						List.of(Component.literal("Cold"), Component.literal("Hot")),

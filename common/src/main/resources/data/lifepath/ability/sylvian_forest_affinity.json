@@ -1,5 +1,6 @@
 {
 	"display_name": "Forest Affinity",
+	"description": "Among trees you are faster and surer.",
 	"icon": "ability/sylvian_forest_affinity",
 	"trigger": {
 		"type": "passive",

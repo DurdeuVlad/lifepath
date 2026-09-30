@@ -1,5 +1,6 @@
 {
 	"display_name": "Deepvein Sense I",
+	"description": "Near ore veins you can feel the stone hum — a soft glow of direction.",
 	"icon": "ability/deepvein_sense_i",
 	"trigger": {
 		"type": "passive",

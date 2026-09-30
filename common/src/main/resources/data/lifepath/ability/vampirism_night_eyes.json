@@ -1,5 +1,6 @@
 {
 	"display_name": "Night Eyes",
+	"description": "The dark is yours — night is as clear as day.",
 	"icon": "ability/vampirism_night_eyes",
 	"trigger": {
 		"type": "passive",

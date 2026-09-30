@@ -1,5 +1,6 @@
 {
 	"display_name": "Stoneform",
+	"description": "Become stone: harder to hurt, harder to move. (240s cooldown)",
 	"icon": "ability/dwarf_stoneform",
 	"trigger": {
 		"type": "active"

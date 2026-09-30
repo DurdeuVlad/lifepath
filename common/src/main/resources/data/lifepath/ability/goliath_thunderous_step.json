@@ -1,5 +1,6 @@
 {
 	"display_name": "Thunderous Step",
+	"description": "Every landing lands heavier — and so do you, on others.",
 	"icon": "ability/goliath_thunderous_step",
 	"trigger": {
 		"type": "damage_taken",

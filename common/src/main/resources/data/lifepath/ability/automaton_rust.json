@@ -1,5 +1,6 @@
 {
 	"display_name": "Rust",
+	"description": "Water gums your joints — submerged, you stiffen and slow.",
 	"icon": "ability/automaton_rust",
 	"trigger": {
 		"type": "passive",

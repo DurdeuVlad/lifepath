@@ -1,5 +1,6 @@
 {
 	"display_name": "Overheat",
+	"description": "Past the red line you burn — your own heat hurts you.",
 	"icon": "ability/iceborn_overheat",
 	"trigger": {
 		"type": "passive",

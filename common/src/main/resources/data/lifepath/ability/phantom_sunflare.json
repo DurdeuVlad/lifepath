@@ -1,5 +1,6 @@
 {
 	"display_name": "Sunflare",
+	"description": "Sunlight sears the veil — in daylight your form burns.",
 	"icon": "ability/phantom_sunflare",
 	"trigger": {
 		"type": "passive",

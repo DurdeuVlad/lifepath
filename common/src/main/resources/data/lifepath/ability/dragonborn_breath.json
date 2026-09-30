@@ -1,5 +1,6 @@
 {
 	"display_name": "Dragon Breath",
+	"description": "Exhale fire over everything in front of you. (90s cooldown)",
 	"icon": "ability/dragonborn_breath",
 	"trigger": {
 		"type": "active"

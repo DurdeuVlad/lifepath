@@ -1,5 +1,6 @@
 {
 	"display_name": "Apex Regeneration",
+	"description": "At night you heal like something that refuses to die.",
 	"icon": "ability/vampirism_apex_regen",
 	"trigger": {
 		"type": "passive",

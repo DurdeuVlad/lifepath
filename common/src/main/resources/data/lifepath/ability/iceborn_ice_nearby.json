@@ -1,5 +1,6 @@
 {
 	"display_name": "Ice Resonance",
+	"description": "Ice and snow nearby keep your temperature steady.",
 	"icon": "ability/iceborn_ice_nearby",
 	"trigger": {
 		"type": "passive",

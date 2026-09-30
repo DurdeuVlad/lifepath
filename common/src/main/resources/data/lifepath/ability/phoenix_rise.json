@@ -1,5 +1,6 @@
 {
 	"display_name": "Rise",
+	"description": "From the ashes — a full rebirth of flame and healing. (300s cooldown)",
 	"icon": "ability/phoenix_rise",
 	"trigger": {
 		"type": "active"

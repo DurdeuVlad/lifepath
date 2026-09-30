@@ -1,5 +1,6 @@
 {
 	"display_name": "Void Step",
+	"description": "Tear a short fold in space and step through. (30s cooldown)",
 	"icon": "ability/enderian_blink",
 	"trigger": {
 		"type": "active"

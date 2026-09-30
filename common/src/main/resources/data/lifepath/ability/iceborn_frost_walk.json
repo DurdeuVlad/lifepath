@@ -1,5 +1,6 @@
 {
 	"display_name": "Frost Walk",
+	"description": "Freeze the water beneath your feet into a path. (120s cooldown)",
 	"icon": "ability/iceborn_frost_walk",
 	"trigger": {
 		"type": "active"

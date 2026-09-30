@@ -1,5 +1,6 @@
 {
 	"display_name": "Bountiful Harvest I",
+	"description": "Your touch ripens: crops around you grow faster.",
 	"icon": "ability/bountiful_harvest_i",
 	"trigger": {
 		"type": "passive",

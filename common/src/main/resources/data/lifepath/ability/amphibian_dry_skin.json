@@ -1,5 +1,6 @@
 {
 	"display_name": "Dry Skin",
+	"description": "Away from wet biomes your skin dries out; the air itself itches.",
 	"icon": "ability/amphibian_dry_skin",
 	"trigger": {
 		"type": "passive",

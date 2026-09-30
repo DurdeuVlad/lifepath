@@ -1,5 +1,6 @@
 {
 	"display_name": "Storm Charge",
+	"description": "In a storm the air itself charges you.",
 	"icon": "ability/lightning_storm_charge",
 	"trigger": {
 		"type": "passive",

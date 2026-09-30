@@ -1,5 +1,6 @@
 {
 	"display_name": "Anchor",
+	"description": "Rooted to the ground — knockback barely moves you.",
 	"icon": "ability/earth_anchor",
 	"trigger": {
 		"type": "passive",

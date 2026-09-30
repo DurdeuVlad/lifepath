@@ -1,5 +1,6 @@
 {
 	"display_name": "Starfall",
+	"description": "Falling star: fall damage cannot touch you.",
 	"icon": "ability/celestial_starfall",
 	"trigger": {
 		"type": "damage_taken",

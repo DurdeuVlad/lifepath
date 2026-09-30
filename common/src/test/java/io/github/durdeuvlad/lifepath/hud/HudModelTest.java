@@ -121,7 +121,8 @@ class HudModelTest {
 		IdentitySummaryPayload id = identity(List.of(), Map.of(
 				"lifepath:frost_nova", new IdentitySummaryPayload.AbilityEntry(
 						"lifepath:frost_nova", Component.literal("Frost Nova"),
-						"lifepath:textures/gui/ability/frost.png", true)));
+						"lifepath:textures/gui/ability/frost.png", true,
+						Component.empty())));
 		HudModel.View v = HudModel.compute(id, data, Map.of(), 1_000L);
 		assertEquals(2, v.cooldowns().size());
 		assertEquals("Frost Nova", v.cooldowns().get(0).label().getString()); // 4s left first

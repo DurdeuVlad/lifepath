@@ -1,5 +1,6 @@
 package io.github.durdeuvlad.lifepath.client.screen;
 
+import io.github.durdeuvlad.lifepath.client.character.ClientCharacterState;
 import io.github.durdeuvlad.lifepath.client.icon.ClientIcons;
 import io.github.durdeuvlad.lifepath.client.platform.ClientPlatform;
 import io.github.durdeuvlad.lifepath.client.selection.ClientSelectionState;
@@ -67,10 +68,18 @@ public class SelectionScreen extends Screen {
 	 *  a refresh (unlock landed, reload) can re-lock or drop a stale pick. */
 	private @Nullable String selectedId;
 	private Button confirmButton;
-	private Button laterButton;
 	/** Description of the card under the cursor this frame — consumed by the
 	 *  post-loop tooltip render so the box always lands above the grid. */
 	private @Nullable Component hoveredDesc;
+	/** True once Confirm fired for the final outstanding step — lets
+	 *  {@link #onClose} pass while the server round-trip lands. A catalog
+	 *  refresh (accepted or denied) resets it. */
+	private boolean confirmPending;
+	/** Last observed catalog instance — a new one means the server answered. */
+	private @Nullable SelectionCatalogPayload lastCatalog;
+	/** Frames left to flash the hint — set when Esc is blocked by a
+	 *  mandatory pick. */
+	private int blockedHintTicks;
 
 	public SelectionScreen(Step step) {
 		super(Component.translatable(step == Step.SPECIES
@@ -90,12 +99,7 @@ public class SelectionScreen extends Screen {
 		confirmButton = addRenderableWidget(Button.builder(
 				Component.translatable("screen.lifepath.selection.confirm"),
 				b -> confirm())
-				.bounds(width / 2 - 104, buttonY, 100, 18)
-				.build());
-		laterButton = addRenderableWidget(Button.builder(
-				Component.translatable("screen.lifepath.selection.later"),
-				b -> onClose())
-				.bounds(width / 2 + 4, buttonY, 100, 18)
+				.bounds(width / 2 - 50, buttonY, 100, 18)
 				.build());
 		confirmButton.active = false;
 	}
@@ -103,6 +107,17 @@ public class SelectionScreen extends Screen {
 	@Override
 	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		renderBackground(context, mouseX, mouseY, delta);
+		// A fresh catalog means the server answered the last request — a
+		// denial re-arms the close gate, an accepted pick clears it via the
+		// outstanding check itself.
+		SelectionCatalogPayload catalog = ClientSelectionState.catalog();
+		if (catalog != lastCatalog) {
+			lastCatalog = catalog;
+			confirmPending = false;
+		}
+		if (blockedHintTicks > 0) {
+			blockedHintTicks--;
+		}
 		int left = width / 2 - PANEL_W / 2;
 		int top = panelTop();
 		int panelH = panelHeight();
@@ -113,7 +128,7 @@ public class SelectionScreen extends Screen {
 		context.drawCenteredString(font,
 				GuiText.fit(font, Component.translatable(
 						"screen.lifepath.selection.pick_hint"), PANEL_W - 20),
-				width / 2, top + 17, DIM);
+				width / 2, top + 17, blockedHintTicks > 0 ? WARN : DIM);
 
 		List<Entry> entries = entries();
 		int gridTop = top + HEADER_H;
@@ -133,13 +148,11 @@ public class SelectionScreen extends Screen {
 		// leaves them floating over empty space.
 		int buttonY = top + panelH - 22;
 		confirmButton.setY(buttonY);
-		laterButton.setY(buttonY);
-		// Widgets draw last — Confirm/Later must sit above the panel/footer.
+		// Widgets draw last — Confirm must sit above the panel/footer.
 		// Rendered explicitly rather than via super.render: Screen.render
 		// calls renderBackground again, and the framebuffer blur pass would
 		// smear everything drawn so far (cards, title, footer) under it.
 		confirmButton.render(context, mouseX, mouseY, delta);
-		laterButton.render(context, mouseX, mouseY, delta);
 	}
 
 	/** Card grid: scrollable, scissored; locked entries dim with a reason line. */
@@ -411,11 +424,33 @@ public class SelectionScreen extends Screen {
 		} else {
 			ClientPlatform.get().sendToServer(new SelectSpecializationPayload(id));
 		}
+		// Confirm counts as picking — let the closing pass while the server
+		// round-trip resolves. A denial pushes a fresh catalog, which
+		// re-arms the gate via the catalog watch in render().
+		confirmPending = true;
 		onClose();
+	}
+
+	/** The pick for the current step is still owed and the catalog actually
+	 *  offers a pickable card — otherwise closing is allowed (nothing to
+	 *  pick, or already picked). */
+	private boolean pickOutstanding() {
+		var core = ClientCharacterState.identity().identity();
+		boolean unset = step == Step.SPECIES
+				? core.speciesId().isEmpty()
+				: core.specId().isEmpty();
+		return unset && entries().stream()
+				.anyMatch(e -> e.availability() == Entry.AVAILABLE);
 	}
 
 	@Override
 	public void onClose() {
+		// Mandatory onboarding: no "decide later" — while a pick is owed the
+		// screen stays up; Esc flashes the hint instead of closing.
+		if (pickOutstanding() && !confirmPending) {
+			blockedHintTicks = 40;
+			return;
+		}
 		minecraft.setScreen(null);
 	}
 

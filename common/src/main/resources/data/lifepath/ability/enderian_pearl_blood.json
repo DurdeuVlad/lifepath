@@ -1,5 +1,6 @@
 {
 	"display_name": "Pearl Blood",
+	"description": "Your body is mostly void — most harm passes through at a quarter.",
 	"icon": "ability/enderian_pearl_blood",
 	"trigger": {
 		"type": "damage_taken",

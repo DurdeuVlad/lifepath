@@ -1,5 +1,6 @@
 {
 	"display_name": "Pack Heart",
+	"description": "Near your own kind you fight harder and steadier.",
 	"icon": "ability/anima_pack_heart",
 	"trigger": {
 		"type": "passive",

@@ -1,5 +1,6 @@
 {
 	"display_name": "Nature Purification",
+	"description": "Nature cleanses you — curses and venoms wash away near green things.",
 	"icon": "ability/sylvian_nature_purification",
 	"trigger": {
 		"type": "passive",

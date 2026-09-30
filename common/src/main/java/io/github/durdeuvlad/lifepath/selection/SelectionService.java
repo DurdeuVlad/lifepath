@@ -92,7 +92,19 @@ public final class SelectionService {
 		if (data == null) {
 			return;
 		}
-		LifepathNetworking.sendTo(player, buildCatalog(data));
+		LifepathNetworking.sendTo(player, buildCatalog(data, freeRespec(player)));
+	}
+
+	/**
+	 * Who may re-pick a species after choosing one: singleplayer players
+	 * (testing convenience) and permission-level-2 operators. On a dedicated
+	 * server a first-pick is permanent for normal players — later changes are
+	 * admin territory ({@code /lifepath species set}).
+	 */
+	private static boolean freeRespec(ServerPlayer player) {
+		var server = player.getServer();
+		return (server != null && server.isSingleplayer())
+				|| player.hasPermissions(2);
 	}
 
 	/**
@@ -103,8 +115,10 @@ public final class SelectionService {
 	 * have no visibility/selection policy of their own; the one gate is the
 	 * first-pick rule (already specialized → {@link Entry#ALREADY_CHOSEN}).
 	 */
-	public static SelectionCatalogPayload buildCatalog(PlayerCharacterData data) {
+	public static SelectionCatalogPayload buildCatalog(PlayerCharacterData data,
+			boolean freeRespec) {
 		List<Entry> species = new ArrayList<>();
+		boolean speciesLocked = !freeRespec && data.speciesId() != null;
 		for (SpeciesDefinition def : LifepathContent.species().all().values()) {
 			if (def.visibility() == SpeciesDefinition.Visibility.HIDDEN
 					&& !UnlockService.isUnlocked(data, def.id())) {
@@ -116,7 +130,9 @@ public final class SelectionService {
 					IdentitySummary.keyedText(def.id(), "species", "description",
 							def.description().orElse("")),
 					def.icon().map(ResourceLocation::toString).orElse(""),
-					speciesDetails(def), availability(data, def)));
+					speciesDetails(def),
+					speciesLocked ? Entry.ALREADY_CHOSEN
+							: availability(data, def)));
 		}
 		List<Entry> specs = new ArrayList<>();
 		boolean hasSpec = data.specializationId() != null;
@@ -172,6 +188,13 @@ public final class SelectionService {
 			deny(player, speciesId, "unknown");
 			return;
 		}
+		// Picked once, picked forever — on multiplayer a species change after
+		// the fact is admin territory; singleplayer (and ops) may re-pick for
+		// testing.
+		if (data.speciesId() != null && !freeRespec(player)) {
+			deny(player, speciesId, "already_chosen");
+			return;
+		}
 		if (!chooseAllowed(data, def)) {
 			deny(player, speciesId, switch (availability(data, def)) {
 				case Entry.NEEDS_UNLOCK -> "locked";
@@ -213,6 +236,9 @@ public final class SelectionService {
 		LifepathNetworking.sendTo(player, new FeedbackPayload("selection_denied",
 				List.of(IdentitySummary.displayNameComponent(id),
 						Component.literal(reasonKey))));
+		// Refresh authoritative picker state — a denied card can't linger as
+		// selected, and the client's close gate re-arms on the new catalog.
+		pushCatalog(player);
 	}
 
 	/** Card footer lines: colored "+"/"-" strength/weakness lines first —

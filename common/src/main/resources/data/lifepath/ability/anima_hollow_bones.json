@@ -1,5 +1,6 @@
 {
 	"display_name": "Hollow Bones",
+	"description": "Light bones fly far — and break fast. Incoming damage is worse.",
 	"icon": "ability/anima_hollow_bones",
 	"trigger": {
 		"type": "damage_taken",

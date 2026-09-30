@@ -1,5 +1,6 @@
 {
 	"display_name": "Phase",
+	"description": "Slip between solid and ghost. (10s cooldown)",
 	"icon": "ability/phantom_phase",
 	"trigger": {
 		"type": "active"

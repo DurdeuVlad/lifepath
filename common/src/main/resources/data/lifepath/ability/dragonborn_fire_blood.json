@@ -1,5 +1,6 @@
 {
 	"display_name": "Fire Blood",
+	"description": "Fire runs in your blood — flames cannot hurt you.",
 	"icon": "ability/dragonborn_fire_blood",
 	"trigger": {
 		"type": "damage_taken",

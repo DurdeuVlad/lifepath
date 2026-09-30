@@ -1,5 +1,6 @@
 {
 	"display_name": "Sun Sickness",
+	"description": "Sunlight sickens you — day is a slow poison.",
 	"icon": "ability/vampirism_sun_sickness",
 	"trigger": {
 		"type": "passive",

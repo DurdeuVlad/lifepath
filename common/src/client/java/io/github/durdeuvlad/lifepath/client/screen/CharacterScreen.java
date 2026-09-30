@@ -8,10 +8,12 @@ import io.github.durdeuvlad.lifepath.network.s2c.IdentitySummaryPayload;
 import java.util.ArrayList;
 import java.util.List;
 import io.github.durdeuvlad.lifepath.platform.ClientOnly;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * M6-1 character screen — the identity hub ("what am I?"). Pure read model:
@@ -46,6 +48,9 @@ public class CharacterScreen extends Screen {
 
 	/** Clickable active-ability rows, rebuilt every render pass. */
 	private final List<AbilityRow> abilityRows = new ArrayList<>();
+	/** Ability row under the cursor this frame — its tooltip renders after
+	 *  all content so the box always lands on top. */
+	private @Nullable IdentitySummaryPayload.AbilityEntry hoveredAbility;
 
 	/** The skills entry point — re-anchored under the panel each render so
 	 *  growing/shrinking content never leaves it stranded or overlapped. */
@@ -199,6 +204,7 @@ public class CharacterScreen extends Screen {
 
 		// --- Abilities: click an ACTIVE row to bind the ability key ---
 		abilityRows.clear();
+		hoveredAbility = null;
 		if (!id.abilities().isEmpty()) {
 			// A respec/species change can drop the bound ability — clear a
 			// stale pick so the key falls back to AUTO rather than failing
@@ -241,7 +247,11 @@ public class CharacterScreen extends Screen {
 				context.drawString(font, GuiText.fit(font, label, panelW - 25),
 						left + 19, y + 1, sel ? ACCENT : (e.active() ? TEXT : DIM));
 				if (e.active()) {
-					abilityRows.add(new AbilityRow(e.id(), left, y, panelW, 11));
+					abilityRows.add(new AbilityRow(e.id(), left, rowY, panelW, 11));
+				}
+				if (mouseX >= left && mouseX < left + panelW
+						&& mouseY >= rowY && mouseY < rowY + 11) {
+					hoveredAbility = e;
 				}
 				y += 11;
 			}
@@ -277,6 +287,27 @@ public class CharacterScreen extends Screen {
 		// smear everything drawn so far under it.
 		skillsButton.render(context, mouseX, mouseY, delta);
 		selectionButton.render(context, mouseX, mouseY, delta);
+		// Ability tooltip last of all — it must float above widgets too.
+		if (hoveredAbility != null) {
+			renderAbilityTooltip(context, hoveredAbility, mouseX, mouseY);
+		}
+	}
+
+	/** Hover card for an owned ability: bold name, kind tag, wrapped
+	 *  description (empty for content that doesn't author one). */
+	private void renderAbilityTooltip(GuiGraphics context,
+			IdentitySummaryPayload.AbilityEntry e, int mouseX, int mouseY) {
+		List<net.minecraft.util.FormattedCharSequence> lines = new ArrayList<>();
+		lines.add(e.name().copy().withStyle(ChatFormatting.BOLD)
+				.getVisualOrderText());
+		lines.add(Component.translatable(e.active()
+						? "screen.lifepath.character.ability_kind.active"
+						: "screen.lifepath.character.ability_kind.passive")
+				.withStyle(ChatFormatting.GRAY).getVisualOrderText());
+		if (!e.description().getString().isEmpty()) {
+			lines.addAll(font.split(e.description(), 220));
+		}
+		context.renderTooltip(font, lines, mouseX, mouseY);
 	}
 
 	@Override

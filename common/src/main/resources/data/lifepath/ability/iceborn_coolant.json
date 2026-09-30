@@ -1,5 +1,6 @@
 {
 	"display_name": "Coolant Buffer",
+	"description": "Carrying snow or ice keeps your temperature down.",
 	"icon": "ability/iceborn_coolant",
 	"trigger": {
 		"type": "passive",

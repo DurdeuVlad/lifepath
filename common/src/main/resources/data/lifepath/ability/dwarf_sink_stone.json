@@ -1,5 +1,6 @@
 {
 	"display_name": "Sink Like Stone",
+	"description": "Dense as masonry — underwater you sink like a rock.",
 	"icon": "ability/dwarf_sink_stone",
 	"trigger": {
 		"type": "passive",
