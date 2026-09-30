@@ -1,0 +1,19 @@
+{
+	"display_name": "Wild Shape",
+	"description": "Take the shape of your chosen animal — its hide, its bite. (30s cooldown)",
+	"icon": "ability/anima_morph",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:morph_toggle"
+		}
+	],
+	"cooldown": {
+		"seconds": 30
+	}
+}

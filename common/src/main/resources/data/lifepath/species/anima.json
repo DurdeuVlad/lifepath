@@ -11,9 +11,9 @@
 		"lifepath:anima_hollow_bones"
 	],
 	"active_abilities": [
-		"lifepath:anima_beast_soothe"
-	]
-,
+		"lifepath:anima_beast_soothe",
+		"lifepath:anima_morph"
+	],
 	"strengths": [
 		"Animals never hunt you",
 		"Your touch mends the pack"

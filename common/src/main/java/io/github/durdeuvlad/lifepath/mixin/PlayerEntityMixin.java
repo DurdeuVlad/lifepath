@@ -22,6 +22,21 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin {
 
+	/**
+	 * M-3 (morph) lethal-damage seam: {@code Player.actuallyHurt} overrides
+	 * {@code LivingEntity}'s, so the interception must live on THIS override —
+	 * the {@code setHealth} write it makes is post-armor/post-absorption, i.e.
+	 * the true lethal quantity. A write that would kill a morphed player is
+	 * rewritten to the carried remainder after force-demorph.
+	 */
+	@WrapOperation(method = "actuallyHurt", at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/world/entity/player/Player;setHealth(F)V"))
+	private void lifepath$morphLethalWrite(Player self, float health,
+			Operation<Void> original) {
+		original.call(self, io.github.durdeuvlad.lifepath.morph.MorphService
+				.onLethalHealthWrite(self, health));
+	}
+
 	@WrapOperation(method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/world/food/FoodData;eat(Lnet/minecraft/world/food/FoodProperties;)V"))
 	private void lifepath$dietGate(net.minecraft.world.food.FoodData manager,

@@ -361,6 +361,15 @@ final class BuiltinActions {
 					SoundSource.PLAYERS, volume, pitch);
 		});
 
+		// M-3 (morph): the anima_morph ability's toggle. Entity path only —
+		// a data-path eval has no attributes to morph.
+		register("morph_toggle", (target, ctx, params) -> {
+			if (target.entity() instanceof ServerPlayer sp && target.data() != null) {
+				io.github.durdeuvlad.lifepath.morph.MorphService
+						.toggle(sp, target.data(), ctx.abilityId(), ctx.now());
+			}
+		});
+
 		register("spawn_particle", (target, ctx, params) -> {
 			ResourceLocation particle = id(params, "particle");
 			BlockPos pos = target.pos();

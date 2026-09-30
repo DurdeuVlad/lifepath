@@ -266,6 +266,9 @@ public final class LifepathMod {
 				io.github.durdeuvlad.lifepath.network.c2s.ActivateAbilityPayload.ID,
 				io.github.durdeuvlad.lifepath.network.c2s.ActivateAbilityPayload.PACKET_CODEC);
 		io.github.durdeuvlad.lifepath.ability.AbilityEngine.init();
+		// M-3 (morph): join/respawn re-apply of the active form's stat profile —
+		// registered after CharacterManager so the character cache is warm.
+		io.github.durdeuvlad.lifepath.morph.MorphService.init();
 		io.github.durdeuvlad.lifepath.resource.ResourceService.init();
 		io.github.durdeuvlad.lifepath.feedback.FeedbackService.init();
 		// M14: GUI-first identity onboarding — per-player selection catalog +
