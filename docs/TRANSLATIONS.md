@@ -28,11 +28,25 @@ localization system loads. Translators never touch Java or JSON.
 - Missing keys → warning only; vanilla falls back to `en_us` at runtime.
 - Placeholder set mismatch vs `en_us` → build error.
 
-## Server-authored text
+## Content text (species, abilities, skills, ...)
 
-Species and specialization names/descriptions come from datapack content and
-are not localized (like vanilla advancements, they follow the server's data).
-The picker chrome around them — "Active:", "starts at Lv", "Signature:",
-"+N more" — is translated per-client: `SelectionService` sends
-`Component.translatable` detail lines (`text.lifepath.detail.*` keys), so the
-wire carries keys + resolved names, never formatted English.
+Every bundled species, specialization, ability, skill, resource band,
+condition and attunement carries lang keys of the form:
+
+```
+lifepath.<domain>.<id>.<suffix>
+```
+
+Domains: `species`, `specialization`, `ability`, `skill`, `resource`,
+`condition`, `attunement`. Suffixes: `name`, `description`, `improve_hint`,
+`strength.<n>` / `weakness.<n>` (indexed picker pros/cons), `band.<n>`
+(resource meter labels).
+
+The wire sends `Component.translatableWithFallback` — the datapack's literal
+text rides as the fallback — so each client renders its own language for
+bundled content, while a custom datapack with no lang file still shows its
+own prose. To translate a piece of content, add its keys to your locale YAML;
+you never need the datapack author's permission or files.
+
+The picker chrome ("Active:", "starts at Lv", "Signature:", "+N more") uses
+`text.lifepath.detail.*` keys the same way.

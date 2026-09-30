@@ -17,5 +17,12 @@
 	},
 	"protected_floors": {
 		"lifepath:woodcutting": 30
-	}
+	},
+	"strengths": [
+		"Learns woodcutting 35% faster",
+		"Woodcutting can't decay below Lv30"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
 }

@@ -22,10 +22,16 @@ milestone M10 — every roadmap system below is shipped and exercised.
   "What you get" strip only exists while a card is selected; each option's
   `strengths`/`weaknesses` datapack fields render as green `+` / red `-`
   lines so benefits and costs are legible at a glance.
-- **YAML translations** — all UI text lives in `common/src/main/lang/*.yaml`;
-  the build generates Minecraft `lang/*.json`. Romanian (`ro_ro`) ships as the
-  first translation; picker detail lines localize per-client via translatable
-  components on the wire. See `docs/TRANSLATIONS.md`.
+- **YAML translations** — all player-facing text lives in
+  `common/src/main/lang/*.yaml`; the build generates Minecraft `lang/*.json`.
+  Romanian (`ro_ro`) ships complete: UI chrome plus every bundled species,
+  specialization, ability, skill, resource band, condition and attunement.
+  Content text travels as `translatableWithFallback` — each client renders
+  its own locale for bundled content while custom datapack prose renders
+  as-is. See `docs/TRANSLATIONS.md`.
+- **Specialization pros/cons** — specialization cards show green `+` / red
+  `-` lines like species cards (XP rates, decay floors, carry bonuses,
+  honest trade-offs), both on the card and in the details strip.
 - **13 specializations** — aptitude grades, XP/decay modifiers, signature
   abilities, protected floors, encumbrance capacity multipliers.
 - **13 skills** — gathering/crafting/combat/physical/knowledge categories,

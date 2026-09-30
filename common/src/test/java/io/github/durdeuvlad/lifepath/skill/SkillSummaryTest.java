@@ -64,11 +64,11 @@ class SkillSummaryTest {
 		SkillsSummaryPayload p = SkillSummary.build(data, System.currentTimeMillis());
 		assertEquals(1, p.skills().size());
 		SkillCard c = p.skills().get(0);
-		assertEquals("Mining", c.display().name());
+		assertEquals("Mining", c.display().name().getString());
 		assertEquals("untrained", c.display().rankKey());
 		assertEquals(0, c.progress().level());
 		assertEquals(SkillSummary.NEVER_PRACTICED, c.progress().graceEndsEpochMs());
-		assertTrue(c.display().improveHint().contains("Mine"),
+		assertTrue(c.display().improveHint().getString().contains("Mine"),
 				"shipped hint reaches the card");
 		// First milestone is next (level 0 < 20).
 		assertEquals(20, c.details().nextMilestoneLevel());

@@ -10,6 +10,7 @@ import io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
+import net.minecraft.network.chat.Component;
 
 /**
  * M6-4 feedback diff contract: the sync-funnel diff decides which identity/
@@ -76,8 +77,9 @@ class FeedbackServiceTest {
 	void payloadCodecRoundTrips() {
 		// Payload contract: kind + string args survive the codec untouched.
 		FeedbackPayload p = new FeedbackPayload("level_up",
-				List.of("Mining", "30"));
+				List.of(Component.literal("Mining"), Component.literal("30")));
 		assertEquals("level_up", p.kind());
-		assertEquals(List.of("Mining", "30"), p.args());
+		assertEquals(List.of(Component.literal("Mining"), Component.literal("30")),
+				p.args());
 	}
 }

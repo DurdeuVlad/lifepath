@@ -17,5 +17,12 @@
 	},
 	"protected_floors": {
 		"lifepath:scholarship": 30
-	}
+	},
+	"strengths": [
+		"Learns scholarship 35% faster",
+		"Scholarship can't decay below Lv30"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
 }

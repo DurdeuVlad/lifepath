@@ -27,7 +27,7 @@ public class SkillDetailScreen extends Screen {
 	private final Screen parent;
 
 	public SkillDetailScreen(SkillCard card, Screen parent) {
-		super(Component.literal(card.display().name()));
+		super(card.display().name());
 		this.card = card;
 		this.parent = parent;
 	}
@@ -94,7 +94,9 @@ public class SkillDetailScreen extends Screen {
 							left + 17, y + 1, TEXT);
 				} else {
 					context.drawString(font,
-							GuiText.fit(font, "· " + b.name(), panelW - 12),
+							GuiText.fit(font,
+									Component.literal("· ").append(b.name()),
+									panelW - 12),
 							left + 6, y + 1, TEXT);
 				}
 				y += 10;
@@ -123,11 +125,11 @@ public class SkillDetailScreen extends Screen {
 		// HOW TO IMPROVE — the load-bearing plain-language statement.
 		y = section(context, left, y + 4,
 				Component.translatable("screen.lifepath.skill.how_to_improve"));
-		String hint = card.display().improveHint();
+		Component hint = card.display().improveHint();
 		for (var wrapped : font.split(
-				hint.isEmpty()
+				hint.getString().isEmpty()
 						? Component.translatable("screen.lifepath.skill.no_hint")
-						: Component.literal(hint),
+						: hint,
 				panelW - 12)) {
 			context.drawString(font, wrapped, left + 6, y, TEXT);
 			y += 10;

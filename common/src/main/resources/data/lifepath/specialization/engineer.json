@@ -19,5 +19,12 @@
 	},
 	"protected_floors": {
 		"lifepath:engineering": 30
-	}
+	},
+	"strengths": [
+		"Learns engineering 35% faster",
+		"Engineering can't decay below Lv30"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
 }

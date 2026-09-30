@@ -2,5 +2,11 @@
 	"display_name": "Wanderer",
 	"icon": "specialization/wanderer",
 	"starting_skills": {},
-	"aptitudes": {}
+	"aptitudes": {},
+	"strengths": [
+		"No fixed path: train every skill freely"
+	],
+	"weaknesses": [
+		"No head start, no aptitude boost, no protected floor"
+	]
 }

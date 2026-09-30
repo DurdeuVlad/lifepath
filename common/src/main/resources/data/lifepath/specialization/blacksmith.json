@@ -26,5 +26,11 @@
 	},
 	"signature": [
 		"lifepath:forge_mastery_i"
-	]
+	],
+	"strengths": [
+		"Learns smithing 35% faster",
+		"Smithing can't decay below Lv30",
+		"Also trains mining and engineering"
+	],
+	"weaknesses": []
 }

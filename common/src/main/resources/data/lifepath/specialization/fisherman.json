@@ -18,5 +18,10 @@
 	},
 	"signature": [
 		"lifepath:patient_waters_i"
-	]
+	],
+	"strengths": [
+		"Learns fishing 35% faster",
+		"Fishing can't decay below Lv30"
+	],
+	"weaknesses": []
 }

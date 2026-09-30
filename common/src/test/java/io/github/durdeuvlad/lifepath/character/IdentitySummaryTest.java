@@ -64,8 +64,8 @@ class IdentitySummaryTest {
 	@Test
 	void emptyCharacterGivesEmptyIdentity() {
 		IdentitySummaryPayload p = IdentitySummary.build(data);
-		assertEquals("", p.identity().speciesName());
-		assertEquals("", p.identity().specName());
+		assertEquals("", p.identity().speciesName().getString());
+		assertEquals("", p.identity().specName().getString());
 		assertTrue(p.specFocus().isEmpty());
 		assertTrue(p.sections().get(IdentitySummary.SECTION_TRAITS).isEmpty());
 	}
@@ -94,13 +94,13 @@ class IdentitySummaryTest {
 		data.setSpecializationId(LifepathMod.id("miner"));
 		IdentitySummaryPayload p = IdentitySummary.build(data);
 
-		assertEquals("Sylvian", p.identity().speciesName());
-		assertTrue(p.identity().speciesDescription().contains("Sylvian")
-						|| !p.identity().speciesDescription().isEmpty(),
+		assertEquals("Sylvian", p.identity().speciesName().getString());
+		assertTrue(p.identity().speciesDescription().getString().contains("Sylvian")
+						|| !p.identity().speciesDescription().getString().isEmpty(),
 				"identity text flows to the client");
-		assertEquals("Miner", p.identity().specName());
+		assertEquals("Miner", p.identity().specName().getString());
 		// startingSkills resolves through the skill registry → display names.
-		assertTrue(p.specFocus().stream().anyMatch(e -> e.name().equals("Mining")),
+		assertTrue(p.specFocus().stream().anyMatch(e -> e.name().getString().equals("Mining")),
 				"focus resolves skill display names: " + p.specFocus());
 	}
 
@@ -110,8 +110,8 @@ class IdentitySummaryTest {
 		data.setSpeciesId(LifepathMod.id("phantom"));
 		data.setSpecializationId(LifepathMod.id("archmage"));
 		IdentitySummaryPayload p = IdentitySummary.build(data);
-		assertEquals("phantom", p.identity().speciesName());
-		assertEquals("archmage", p.identity().specName());
+		assertEquals("phantom", p.identity().speciesName().getString());
+		assertEquals("archmage", p.identity().specName().getString());
 		assertTrue(p.specFocus().isEmpty());
 	}
 
@@ -132,9 +132,9 @@ class IdentitySummaryTest {
 
 		IdentitySummaryPayload p = IdentitySummary.build(data);
 		var traits = p.sections().get(IdentitySummary.SECTION_TRAITS);
-		assertEquals("Death Sight", traits.get(0).name());
+		assertEquals("Death Sight", traits.get(0).name().getString());
 		assertEquals("lifepath:undead_death_sight", traits.get(0).id());
-		assertEquals("missing_trait", traits.get(1).name());
+		assertEquals("missing_trait", traits.get(1).name().getString());
 	}
 
 	@Test
@@ -169,12 +169,13 @@ class IdentitySummaryTest {
 		IdentitySummaryPayload p = IdentitySummary.build(data);
 		assertEquals(1, p.resourceDisplays().size());
 		var rd = p.resourceDisplays().get(0);
-		assertEquals("Temperature", rd.name());
+		assertEquals("Temperature", rd.name().getString());
 		assertEquals(50, rd.defaultValue(), 0.001);
-		assertEquals(java.util.List.of("Cold", "Temperate"), rd.bandNames());
+		assertEquals(java.util.List.of("Cold", "Temperate"),
+				rd.bandNames().stream().map(c -> c.getString()).toList());
 		assertEquals(1, rd.restBandIndex()); // default 50 sits in [26,100]
 		assertEquals("Death Sight",
-				p.abilities().get("lifepath:undead_death_sight").name());
+				p.abilities().get("lifepath:undead_death_sight").name().getString());
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
+import net.minecraft.network.chat.Component;
 
 /**
  * M6-3 relevance-gating contract: idle resources and expired cooldowns produce
@@ -25,18 +26,20 @@ class HudModelTest {
 			Map<String, IdentitySummaryPayload.AbilityEntry> abilities) {
 		return new IdentitySummaryPayload(
 				new IdentitySummaryPayload.IdentityCore("lifepath:iceborn",
-						"Iceborn", "", "", "", "", ""),
+						Component.literal("Iceborn"), Component.empty(), "", "",
+						Component.empty(), ""),
 				List.of(),
 				Map.of("conditions",
 						List.of(new IdentitySummaryPayload.Entry(
-								"lifepath:chilled", "Chilled", ""))),
+								"lifepath:chilled", Component.literal("Chilled"), ""))),
 				abilities, res);
 	}
 
 	private static ResourceDisplay tempDisplay(double def, int restBand,
 			List<String> bandNames) {
-		return new ResourceDisplay("lifepath:temperature", "Temperature", def,
-				restBand, bandNames, "lifepath:textures/gui/resource/temp.png");
+		return new ResourceDisplay("lifepath:temperature",
+				Component.literal("Temperature"), def,
+				restBand, bandNames.stream().<Component>map(Component::literal).toList(), "lifepath:textures/gui/resource/temp.png");
 	}
 
 	@Test
@@ -58,7 +61,7 @@ class HudModelTest {
 		assertTrue(v.cooldowns().isEmpty());
 		// conditions still surface as state rows (name + icon)
 		assertEquals(1, v.states().size());
-		assertEquals("Chilled", v.states().get(0).name());
+		assertEquals("Chilled", v.states().get(0).name().getString());
 	}
 
 	@Test
@@ -71,8 +74,8 @@ class HudModelTest {
 		HudModel.View v = HudModel.compute(id, data, Map.of(TEMP, 2), 0);
 		assertEquals(1, v.resources().size());
 		HudModel.ResourceRow row = v.resources().get(0);
-		assertEquals("Temperature", row.label());
-		assertEquals("Hot", row.bandName());
+		assertEquals("Temperature", row.label().getString());
+		assertEquals("Hot", row.bandName().getString());
 		assertEquals(0.8, row.fraction(), 0.001);
 		assertEquals("lifepath:textures/gui/resource/temp.png", row.icon());
 	}
@@ -86,7 +89,7 @@ class HudModelTest {
 				tempDisplay(50, -1, List.of("Cold", "Hot"))), Map.of());
 		HudModel.View v = HudModel.compute(id, data, Map.of(TEMP, 0), 0);
 		assertEquals(1, v.resources().size());
-		assertEquals("Cold", v.resources().get(0).bandName());
+		assertEquals("Cold", v.resources().get(0).bandName().getString());
 	}
 
 	@Test
@@ -102,7 +105,8 @@ class HudModelTest {
 	void malformedResourceIdSkipped() {
 		PlayerCharacterData data = new PlayerCharacterData();
 		IdentitySummaryPayload id = identity(List.of(
-				new ResourceDisplay("not a valid id!!", "Bad", 0, 0, List.of(),
+				new ResourceDisplay("not a valid id!!", Component.literal("Bad"), 0, 0,
+						List.of(),
 						"")),
 				Map.of());
 		assertTrue(HudModel.compute(id, data, Map.of(), 0)
@@ -116,17 +120,17 @@ class HudModelTest {
 		data.setCooldown(ResourceLocation.parse("lifepath:verdant_bloom"), 9_000L);
 		IdentitySummaryPayload id = identity(List.of(), Map.of(
 				"lifepath:frost_nova", new IdentitySummaryPayload.AbilityEntry(
-						"lifepath:frost_nova", "Frost Nova",
+						"lifepath:frost_nova", Component.literal("Frost Nova"),
 						"lifepath:textures/gui/ability/frost.png", true)));
 		HudModel.View v = HudModel.compute(id, data, Map.of(), 1_000L);
 		assertEquals(2, v.cooldowns().size());
-		assertEquals("Frost Nova", v.cooldowns().get(0).label()); // 4s left first
+		assertEquals("Frost Nova", v.cooldowns().get(0).label().getString()); // 4s left first
 		assertEquals(4.0, v.cooldowns().get(0).secondsLeft(), 0.001);
 		// M12-3: the row carries the ability's icon ref for the badge.
 		assertEquals("lifepath:textures/gui/ability/frost.png",
 				v.cooldowns().get(0).icon());
 		// unnamed ability falls back to its path, icon empty
-		assertEquals("verdant_bloom", v.cooldowns().get(1).label());
+		assertEquals("verdant_bloom", v.cooldowns().get(1).label().getString());
 		assertEquals("", v.cooldowns().get(1).icon());
 	}
 
@@ -146,7 +150,7 @@ class HudModelTest {
 		IdentitySummaryPayload empty = IdentitySummaryPayload.empty();
 		HudModel.View v = HudModel.compute(empty, data, Map.of(), 0);
 		assertEquals(1, v.cooldowns().size());
-		assertEquals("frost_nova", v.cooldowns().get(0).label()); // id path
+		assertEquals("frost_nova", v.cooldowns().get(0).label().getString()); // id path
 		assertTrue(v.resources().isEmpty());
 		assertTrue(v.states().isEmpty());
 	}

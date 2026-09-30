@@ -20,12 +20,13 @@ class ClientFeedbackTest {
 	@Test
 	void cooldownDenialFeedsSecondsToTheReason() {
 		Component msg = ClientFeedback.messageFor(new FeedbackPayload(
-				"ability_denied", List.of("Frost Nova", "cooldown", "42")));
+				"ability_denied", List.of(Component.literal("Frost Nova"),
+						Component.literal("cooldown"), Component.literal("42"))));
 		TranslatableContents outer =
 				(TranslatableContents) msg.getContents();
 		assertEquals("feedback.lifepath.ability_denied", outer.getKey());
 		assertEquals(2, outer.getArgs().length);
-		assertEquals("Frost Nova", outer.getArgs()[0]);
+		assertEquals("Frost Nova", ((Component) outer.getArgs()[0]).getString());
 		TranslatableContents reason =
 				(TranslatableContents) ((Component) outer.getArgs()[1])
 						.getContents();
@@ -37,7 +38,8 @@ class ClientFeedbackTest {
 	@Test
 	void nonCooldownReasonStillTranslates() {
 		Component msg = ClientFeedback.messageFor(new FeedbackPayload(
-				"ability_denied", List.of("Frost Nova", "unavailable", "0")));
+				"ability_denied", List.of(Component.literal("Frost Nova"),
+						Component.literal("unavailable"), Component.literal("0"))));
 		TranslatableContents outer =
 				(TranslatableContents) msg.getContents();
 		TranslatableContents reason =

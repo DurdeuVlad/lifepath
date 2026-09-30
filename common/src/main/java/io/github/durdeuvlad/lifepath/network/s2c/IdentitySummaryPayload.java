@@ -5,6 +5,8 @@ import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -41,11 +43,11 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	 * One displayable content reference (M12-1): the content id, its
 	 * server-resolved display name, and its icon texture id ("" when none).
 	 */
-	public record Entry(String id, String name, String icon) {
+	public record Entry(String id, Component name, String icon) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, Entry> CODEC =
 				StreamCodec.composite(
 						ByteBufCodecs.STRING_UTF8, Entry::id,
-						ByteBufCodecs.STRING_UTF8, Entry::name,
+						ComponentSerialization.TRUSTED_STREAM_CODEC, Entry::name,
 						ByteBufCodecs.STRING_UTF8, Entry::icon,
 						Entry::new);
 	}
@@ -55,55 +57,63 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	 * trigger kind is ACTIVE — the character screen needs this to offer the
 	 * click-to-bind affordance only on rows the key can actually fire.
 	 */
-	public record AbilityEntry(String id, String name, String icon,
+	public record AbilityEntry(String id, Component name, String icon,
 			boolean active) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, AbilityEntry> CODEC =
 				StreamCodec.composite(
 						ByteBufCodecs.STRING_UTF8, AbilityEntry::id,
-						ByteBufCodecs.STRING_UTF8, AbilityEntry::name,
+						ComponentSerialization.TRUSTED_STREAM_CODEC,
+								AbilityEntry::name,
 						ByteBufCodecs.STRING_UTF8, AbilityEntry::icon,
 						ByteBufCodecs.BOOL, AbilityEntry::active,
 						AbilityEntry::new);
 	}
 
 	/** Static display info for one resource def (M6-3 HUD; icon added M12-3). */
-	public record ResourceDisplay(String id, String name, double defaultValue,
-			int restBandIndex, List<String> bandNames, String icon) {
+	public record ResourceDisplay(String id, Component name, double defaultValue,
+			int restBandIndex, List<Component> bandNames, String icon) {
 		static final StreamCodec<RegistryFriendlyByteBuf, ResourceDisplay> CODEC =
 				StreamCodec.composite(
 						ByteBufCodecs.STRING_UTF8, ResourceDisplay::id,
-						ByteBufCodecs.STRING_UTF8, ResourceDisplay::name,
+						ComponentSerialization.TRUSTED_STREAM_CODEC,
+								ResourceDisplay::name,
 						ByteBufCodecs.DOUBLE, ResourceDisplay::defaultValue,
 						ByteBufCodecs.INT, ResourceDisplay::restBandIndex,
-						ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
+						ComponentSerialization.TRUSTED_STREAM_CODEC
+								.apply(ByteBufCodecs.list()),
 								ResourceDisplay::bandNames,
 						ByteBufCodecs.STRING_UTF8, ResourceDisplay::icon,
 						ResourceDisplay::new);
 	}
 
-	/** Species/specialization identity strings ("" = unset; icons = "" none). */
-	public record IdentityCore(String speciesId, String speciesName,
-			String speciesDescription, String speciesIcon,
-			String specId, String specName, String specIcon) {
-		// Seven strings — past PacketCodec.tuple's arity, so write it out.
+	/** Species/specialization identity ("" = unset ids/icons; empty name
+	 *  components = unset). Names/descriptions are components so
+	 *  translatable-with-fallback keys localize per-client. */
+	public record IdentityCore(String speciesId, Component speciesName,
+			Component speciesDescription, String speciesIcon,
+			String specId, Component specName, String specIcon) {
+		// Mixed arity — past PacketCodec.tuple's arity, so write it out.
 		private static final StreamCodec<RegistryFriendlyByteBuf, IdentityCore> CORE_CODEC =
 				StreamCodec.of(
 						(buf, c) -> {
 							ByteBufCodecs.STRING_UTF8.encode(buf, c.speciesId());
-							ByteBufCodecs.STRING_UTF8.encode(buf, c.speciesName());
-							ByteBufCodecs.STRING_UTF8.encode(buf, c.speciesDescription());
+							ComponentSerialization.TRUSTED_STREAM_CODEC
+									.encode(buf, c.speciesName());
+							ComponentSerialization.TRUSTED_STREAM_CODEC
+									.encode(buf, c.speciesDescription());
 							ByteBufCodecs.STRING_UTF8.encode(buf, c.speciesIcon());
 							ByteBufCodecs.STRING_UTF8.encode(buf, c.specId());
-							ByteBufCodecs.STRING_UTF8.encode(buf, c.specName());
+							ComponentSerialization.TRUSTED_STREAM_CODEC
+									.encode(buf, c.specName());
 							ByteBufCodecs.STRING_UTF8.encode(buf, c.specIcon());
 						},
 						buf -> new IdentityCore(
 								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf),
+								ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf),
 								ByteBufCodecs.STRING_UTF8.decode(buf),
 								ByteBufCodecs.STRING_UTF8.decode(buf),
-								ByteBufCodecs.STRING_UTF8.decode(buf),
-								ByteBufCodecs.STRING_UTF8.decode(buf),
-								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf),
 								ByteBufCodecs.STRING_UTF8.decode(buf)));
 	}
 
@@ -129,8 +139,9 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	/** Empty payload — used when the character has no identity content yet. */
 	public static IdentitySummaryPayload empty() {
 		return new IdentitySummaryPayload(
-				new IdentityCore("", "", "", "", "", "", ""), List.of(), Map.of(),
-				Map.of(), List.of());
+				new IdentityCore("", Component.empty(), Component.empty(), "",
+						"", Component.empty(), ""),
+				List.of(), Map.of(), Map.of(), List.of());
 	}
 
 	@Override
