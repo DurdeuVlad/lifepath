@@ -1,5 +1,6 @@
 {
 	"display_name": "Warcry",
+	"description": "A roar that turns a tide: nearby foes waver. (180s cooldown)",
 	"icon": "ability/goliath_warcry",
 	"trigger": {
 		"type": "active"

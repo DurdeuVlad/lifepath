@@ -1,5 +1,6 @@
 {
 	"display_name": "Large Frame",
+	"description": "A giant's stature: more room to carry, more reach to swing.",
 	"icon": "ability/goliath_large_frame",
 	"trigger": {
 		"type": "passive",

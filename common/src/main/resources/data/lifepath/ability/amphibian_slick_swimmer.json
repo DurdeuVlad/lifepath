@@ -1,5 +1,6 @@
 {
 	"display_name": "Slick Swimmer",
+	"description": "Water carries you fast and steady.",
 	"icon": "ability/amphibian_slick_swimmer",
 	"trigger": {
 		"type": "passive",

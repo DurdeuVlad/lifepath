@@ -1,5 +1,6 @@
 {
 	"display_name": "Death Sight",
+	"description": "See what hides in the dark — nearby creatures are revealed at night. (60s cooldown)",
 	"icon": "ability/undead_death_sight",
 	"trigger": {
 		"type": "active"

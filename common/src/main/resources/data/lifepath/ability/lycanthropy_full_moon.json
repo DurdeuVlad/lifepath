@@ -1,5 +1,6 @@
 {
 	"display_name": "Full Moon",
+	"description": "Under the moon the beast is fully awake.",
 	"icon": "ability/lycanthropy_full_moon",
 	"trigger": {
 		"type": "passive",

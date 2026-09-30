@@ -1,5 +1,6 @@
 {
 	"display_name": "Arid Nausea",
+	"description": "Dry lands turn your stomach.",
 	"icon": "ability/sylvian_arid_nausea",
 	"trigger": {
 		"type": "passive",

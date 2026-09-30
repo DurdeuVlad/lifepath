@@ -1,5 +1,6 @@
 {
 	"display_name": "Subterranean",
+	"description": "Buried in stone you steady: darkness underground is an ally.",
 	"icon": "ability/dwarf_subterranean",
 	"trigger": {
 		"type": "passive",

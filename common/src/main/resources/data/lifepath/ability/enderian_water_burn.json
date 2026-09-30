@@ -1,5 +1,6 @@
 {
 	"display_name": "Hydrophobia",
+	"description": "Water is acid to you — every drop burns.",
 	"icon": "ability/enderian_water_burn",
 	"trigger": {
 		"type": "passive",

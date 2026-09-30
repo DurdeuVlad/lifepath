@@ -1,5 +1,6 @@
 {
 	"display_name": "Blood Frenzy",
+	"description": "When blood runs low the hunger sharpens every strike.",
 	"icon": "ability/vampirism_blood_frenzy",
 	"trigger": {
 		"type": "passive",

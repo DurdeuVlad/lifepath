@@ -86,13 +86,13 @@ class SelectionServiceTest {
 				species("secret_sp", SpeciesDefinition.Visibility.HIDDEN,
 						SpeciesDefinition.Selection.UNLOCKED));
 
-		SelectionCatalogPayload catalog = SelectionService.buildCatalog(data);
+		SelectionCatalogPayload catalog = SelectionService.buildCatalog(data, false);
 		assertEquals(1, catalog.species().size());
 		assertEquals("lifepath:open_sp", catalog.species().get(0).id());
 
 		// Once unlocked, the hidden species surfaces as a normal card.
 		UnlockService.grant(data, null, LifepathMod.id("secret_sp"));
-		catalog = SelectionService.buildCatalog(data);
+		catalog = SelectionService.buildCatalog(data, false);
 		assertEquals(2, catalog.species().size());
 		Entry secret = catalog.species().stream()
 				.filter(e -> e.id().equals("lifepath:secret_sp")).findFirst().orElseThrow();
@@ -103,7 +103,7 @@ class SelectionServiceTest {
 	void specializationEntriesAreAlreadyChosenOnceSet() {
 		LifepathContent.specializations().register(LifepathMod.id("smith"), spec("smith"));
 
-		SelectionCatalogPayload catalog = SelectionService.buildCatalog(data);
+		SelectionCatalogPayload catalog = SelectionService.buildCatalog(data, false);
 		assertEquals(Entry.AVAILABLE, catalog.specializations().get(0).availability());
 		// Footer line carries the translation key + resolved args — the
 		// client renders it in its own locale.
@@ -117,8 +117,28 @@ class SelectionServiceTest {
 				List.of(contents.getArgs()[1], contents.getArgs()[2]));
 
 		data.setSpecializationId(LifepathMod.id("smith"));
-		catalog = SelectionService.buildCatalog(data);
+		catalog = SelectionService.buildCatalog(data, false);
 		assertEquals(Entry.ALREADY_CHOSEN, catalog.specializations().get(0).availability());
+	}
+
+	@Test
+	void speciesEntriesLockOnceChosenUnlessFreeRespec() {
+		// On servers the first pick is permanent — every card reports
+		// ALREADY_CHOSEN once a species is set. Singleplayer and ops keep
+		// re-picking freely (freeRespec).
+		LifepathContent.species().register(LifepathMod.id("open_sp"),
+				species("open_sp", SpeciesDefinition.Visibility.NORMAL,
+						SpeciesDefinition.Selection.OPEN));
+
+		SelectionCatalogPayload catalog = SelectionService.buildCatalog(data, false);
+		assertEquals(Entry.AVAILABLE, catalog.species().get(0).availability());
+
+		data.setSpeciesId(LifepathMod.id("open_sp"));
+		catalog = SelectionService.buildCatalog(data, false);
+		assertEquals(Entry.ALREADY_CHOSEN, catalog.species().get(0).availability());
+
+		catalog = SelectionService.buildCatalog(data, true);
+		assertEquals(Entry.AVAILABLE, catalog.species().get(0).availability());
 	}
 
 	@Test
@@ -133,7 +153,7 @@ class SelectionServiceTest {
 						Optional.empty(), Optional.empty(), 1.0, Optional.empty(),
 						List.of("Breathes underwater"), List.of("Dries out")));
 
-		Entry e = SelectionService.buildCatalog(data).species().get(0);
+		Entry e = SelectionService.buildCatalog(data, false).species().get(0);
 		assertEquals(2, e.details().size());
 		assertEquals("+ Breathes underwater", e.details().get(0).getString());
 		assertEquals(net.minecraft.network.chat.TextColor

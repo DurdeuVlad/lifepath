@@ -1,5 +1,6 @@
 {
 	"display_name": "Cold Acclimation",
+	"description": "In cold biomes your temperature steadies.",
 	"icon": "ability/iceborn_cold_biome",
 	"trigger": {
 		"type": "passive",

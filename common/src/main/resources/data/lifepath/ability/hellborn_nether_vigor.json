@@ -1,5 +1,6 @@
 {
 	"display_name": "Nether Vigor",
+	"description": "In the Nether you are at your strongest.",
 	"icon": "ability/hellborn_nether_vigor",
 	"trigger": {
 		"type": "passive",

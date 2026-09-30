@@ -1,5 +1,6 @@
 {
 	"display_name": "Lava Scald",
+	"description": "Lava nearby cooks you slowly.",
 	"icon": "ability/iceborn_lava_nearby",
 	"trigger": {
 		"type": "passive",

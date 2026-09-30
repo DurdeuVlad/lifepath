@@ -1,5 +1,6 @@
 {
 	"display_name": "Immolate",
+	"description": "Set the air around you alight. (120s cooldown)",
 	"icon": "ability/hellborn_immolate",
 	"trigger": {
 		"type": "active"

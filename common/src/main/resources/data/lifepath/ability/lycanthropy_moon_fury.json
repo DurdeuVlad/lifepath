@@ -1,5 +1,6 @@
 {
 	"display_name": "Moon Fury",
+	"description": "Night feeds the beast's rage.",
 	"icon": "ability/lycanthropy_moon_fury",
 	"trigger": {
 		"type": "passive",

@@ -1,5 +1,6 @@
 {
 	"display_name": "Grass Walker",
+	"description": "Grass and leaf carry you lightly.",
 	"icon": "ability/sylvian_grass_walker",
 	"trigger": {
 		"type": "passive",

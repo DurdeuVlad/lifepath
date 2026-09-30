@@ -1,5 +1,6 @@
 {
 	"display_name": "Feral Senses",
+	"description": "At night your senses sharpen to a predator's edge.",
 	"icon": "ability/lycanthropy_feral_senses",
 	"trigger": {
 		"type": "passive",

@@ -1,5 +1,6 @@
 {
 	"display_name": "Verdant Bloom",
+	"description": "Coax the earth — plants around you surge with growth. (240s cooldown)",
 	"icon": "ability/sylvian_verdant_bloom",
 	"trigger": {
 		"type": "active"

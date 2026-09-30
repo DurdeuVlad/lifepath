@@ -1,5 +1,6 @@
 {
 	"display_name": "Smite",
+	"description": "Call down judgment on everything around you. (60s cooldown)",
 	"icon": "ability/celestial_smite",
 	"trigger": {
 		"type": "active"

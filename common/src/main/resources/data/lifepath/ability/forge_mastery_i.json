@@ -1,5 +1,6 @@
 {
 	"display_name": "Forge Mastery I",
+	"description": "Next to an anvil your hands remember: smithing comes easier.",
 	"icon": "ability/forge_mastery_i",
 	"trigger": {
 		"type": "passive",

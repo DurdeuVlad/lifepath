@@ -1,5 +1,6 @@
 {
 	"display_name": "Iron Frame",
+	"description": "Iron hull: heavier, but it turns blows aside.",
 	"icon": "ability/automaton_iron_frame",
 	"trigger": {
 		"type": "passive",

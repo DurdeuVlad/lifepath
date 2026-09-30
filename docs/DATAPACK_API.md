@@ -174,6 +174,7 @@ ability ids granted while specialized. `starting_skills` maps skill id → start
 ```json
 {
   "display_name": "Night Eyes",
+  "description": "Dark-adapted eyes read the night.",
   "enabled": true,
   "trigger": { "type": "passive", "interval_ticks": 40 },
   "conditions": { "all": [ { "type": "lifepath:night" } ] },
@@ -187,8 +188,10 @@ ability ids granted while specialized. `starting_skills` maps skill id → start
 }
 ```
 
-Top level: `display_name`, `enabled` (default `true`), `trigger`,
-`conditions`, `target`, `cost`, `cooldown`, `actions`,
+Top level: `display_name`, `description` (optional; shown in the
+Character screen ability tooltip — localize via
+`lifepath.ability.<id>.description`), `enabled` (default `true`),
+`trigger`, `conditions`, `target`, `cost`, `cooldown`, `actions`,
 `resource_interactions`. `trigger.type` is `passive` (repeat sweep,
 `interval_ticks`), `active` (player-activated via
 `lifepath:ability/activate`), `event` (fires on `events[]` activity ids),

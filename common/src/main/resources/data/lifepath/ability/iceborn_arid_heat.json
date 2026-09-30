@@ -1,5 +1,6 @@
 {
 	"display_name": "Arid Heat",
+	"description": "Hot biomes thin your cold blood.",
 	"icon": "ability/iceborn_arid_heat",
 	"trigger": {
 		"type": "passive",

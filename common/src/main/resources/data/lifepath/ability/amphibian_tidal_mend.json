@@ -1,5 +1,6 @@
 {
 	"display_name": "Tidal Mend",
+	"description": "Channel the water you stand in to close your wounds. (180s cooldown)",
 	"icon": "ability/amphibian_tidal_mend",
 	"trigger": {
 		"type": "active"

@@ -1,5 +1,6 @@
 {
 	"display_name": "Featherweight",
+	"description": "Feathers, not feet. Fall damage lands at 30%.",
 	"icon": "ability/air_featherweight",
 	"trigger": {
 		"type": "damage_taken",

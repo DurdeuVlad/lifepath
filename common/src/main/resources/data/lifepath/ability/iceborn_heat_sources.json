@@ -1,5 +1,6 @@
 {
 	"display_name": "Heat Exposure",
+	"description": "Standing near torches, lava and fires warms you past safe.",
 	"icon": "ability/iceborn_heat_sources",
 	"trigger": {
 		"type": "passive",

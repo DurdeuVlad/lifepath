@@ -129,7 +129,9 @@ public final class IdentitySummary {
 					== io.github.durdeuvlad.lifepath.content.AbilityDefinition
 							.Kind.ACTIVE;
 			abilities.put(id.toString(), new IdentitySummaryPayload.AbilityEntry(
-					id.toString(), displayNameComponent(id), iconRef(id), active));
+					id.toString(), displayNameComponent(id), iconRef(id), active,
+					keyedText(id, "ability", "description",
+							def != null ? def.description().orElse("") : "")));
 		}
 		List<IdentitySummaryPayload.ResourceDisplay> resourceDisplays =
 				new ArrayList<>();

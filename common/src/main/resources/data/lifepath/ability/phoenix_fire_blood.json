@@ -1,5 +1,6 @@
 {
 	"display_name": "Fire Blood",
+	"description": "Fire is your element — it cannot hurt you.",
 	"icon": "ability/phoenix_fire_blood",
 	"trigger": {
 		"type": "damage_taken",

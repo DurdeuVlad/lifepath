@@ -1,5 +1,6 @@
 {
 	"display_name": "Discharge",
+	"description": "Let the charge out — everything nearby takes the hit. (45s cooldown)",
 	"icon": "ability/lightning_discharge",
 	"trigger": {
 		"type": "active"

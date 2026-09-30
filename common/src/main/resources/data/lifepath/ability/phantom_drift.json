@@ -1,5 +1,6 @@
 {
 	"display_name": "Drifting Form",
+	"description": "In phantom state you drift — light, untouchable, but hollow.",
 	"icon": "ability/phantom_drift",
 	"trigger": {
 		"type": "passive",

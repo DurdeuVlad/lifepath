@@ -1,5 +1,6 @@
 {
 	"display_name": "Void Attunement",
+	"description": "In the End your void nature sharpens.",
 	"icon": "ability/enderian_void_attunement",
 	"trigger": {
 		"type": "passive",

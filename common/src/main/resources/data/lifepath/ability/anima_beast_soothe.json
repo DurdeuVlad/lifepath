@@ -1,5 +1,6 @@
 {
 	"display_name": "Beast Soothe",
+	"description": "A calming word — nearby creatures are mended. (60s cooldown)",
 	"icon": "ability/anima_beast_soothe",
 	"trigger": {
 		"type": "active"

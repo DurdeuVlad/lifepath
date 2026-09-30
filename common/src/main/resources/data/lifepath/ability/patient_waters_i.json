@@ -1,5 +1,6 @@
 {
 	"display_name": "Patient Waters I",
+	"description": "With rod in hand, patience pays: fishing steadies you.",
 	"icon": "ability/patient_waters_i",
 	"trigger": {
 		"type": "passive",

@@ -1,5 +1,6 @@
 {
 	"display_name": "Infernal Heat",
+	"description": "Born in flame — heat barely warms you.",
 	"icon": "ability/hellborn_infernal_heat",
 	"trigger": {
 		"type": "damage_taken",

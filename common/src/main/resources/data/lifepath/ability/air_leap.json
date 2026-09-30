@@ -1,5 +1,6 @@
 {
 	"display_name": "Leap",
+	"description": "Your jumps keep a gentle hop in your step.",
 	"icon": "ability/air_leap",
 	"trigger": {
 		"type": "passive",

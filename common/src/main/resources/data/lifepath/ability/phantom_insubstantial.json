@@ -1,5 +1,6 @@
 {
 	"display_name": "Insubstantial",
+	"description": "While phased, most harm passes through you entirely.",
 	"icon": "ability/phantom_insubstantial",
 	"trigger": {
 		"type": "damage_taken",

@@ -1,5 +1,6 @@
 {
 	"display_name": "Flare",
+	"description": "Burst outward in flame — everything nearby burns. (45s cooldown)",
 	"icon": "ability/phoenix_flare",
 	"trigger": {
 		"type": "active"

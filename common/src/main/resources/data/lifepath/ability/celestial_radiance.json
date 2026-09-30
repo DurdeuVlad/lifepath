@@ -1,5 +1,6 @@
 {
 	"display_name": "Radiance",
+	"description": "Daylight feeds your strength.",
 	"icon": "ability/celestial_radiance",
 	"trigger": {
 		"type": "passive",
