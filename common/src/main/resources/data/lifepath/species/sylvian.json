@@ -1,7 +1,7 @@
 {
 	"display_name": "Sylvian",
 	"icon": "species/sylvian",
-	"description": "Nature-aligned. Forests make them quicker and hardier, vegetation carries their stride, flowers cleanse them — but arid lands weaken them and the undead cut deeper.",
+	"description": "Nature-aligned. Forests make them quicker and hardier, vegetation carries their stride, flowers cleanse them; but arid lands weaken them and the undead cut deeper.",
 	"visibility": "normal",
 	"selection": "open",
 	"passive_abilities": [

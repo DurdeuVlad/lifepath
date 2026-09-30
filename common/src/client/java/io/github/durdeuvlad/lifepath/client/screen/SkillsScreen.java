@@ -49,7 +49,8 @@ public class SkillsScreen extends Screen {
 		List<SkillCard> skills = ClientCharacterState.skills();
 		if (skills.isEmpty()) {
 			context.drawCenteredString(font,
-					Component.translatable("screen.lifepath.skills.empty"),
+					GuiText.fit(font, Component.translatable(
+							"screen.lifepath.skills.empty"), panelW - 16),
 					width / 2, top + panelH / 2, DIM);
 			return;
 		}
@@ -73,13 +74,17 @@ public class SkillsScreen extends Screen {
 				ClientIcons.resolve("skill", c.display().icon())
 						.ifPresent(tex -> context.blit(tex,
 								left + 6, iconRowY + 1, 0, 0, 16, 16, 16, 16));
+				// Name/rank clip at the XP bar's left edge, not the panel's —
+				// long translations must never draw under the bar.
+				int textW = panelW - 86 - 32;
 				context.drawString(font,
-						Component.literal(c.display().name()), left + 26, y, TEXT);
+						GuiText.fit(font, c.display().name(), textW),
+						left + 26, y, TEXT);
 				String levelText = Component.translatable(
 						"screen.lifepath.skills.level", c.progress().level())
 						.getString() + " · " + Component.translatable(
 								"lifepath.rank." + c.display().rankKey()).getString();
-				context.drawString(font, levelText,
+				context.drawString(font, GuiText.fit(font, levelText, textW),
 						left + 26, y + 9, DIM);
 
 				// Progress bar: xpIn/xpNeed (0-need = max level → full bar).

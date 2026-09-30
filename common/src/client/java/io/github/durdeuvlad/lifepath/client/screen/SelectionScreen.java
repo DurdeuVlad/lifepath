@@ -52,7 +52,7 @@ public class SelectionScreen extends Screen {
 	private static final int COLS = 2;
 	private static final int PANEL_W = COLS * CARD_W + CARD_GAP + 16;
 	private static final int HEADER_H = 30;
-	private static final int FOOTER_H = 92;
+	private static final int FOOTER_H = 104;
 
 	private Step step;
 	private int scroll;
@@ -144,19 +144,32 @@ public class SelectionScreen extends Screen {
 					.ifPresent(tex -> context.blit(tex, x + 4, y + 4,
 							0, 0, 16, 16, 16, 16));
 			context.drawString(font,
-					font.plainSubstrByWidth(e.name(), CARD_W - 28),
+					GuiText.fit(font, e.name(), CARD_W - 28),
 					x + 24, y + 8, available ? TEXT : DIM);
-			List<net.minecraft.util.FormattedCharSequence> desc =
-					font.split(Component.literal(e.description()), CARD_W - 10);
+			// Word-wrap (never mid-word) then cap at 3 rows; a clipped tail
+			// gets "…" and the full text stays readable on hover.
+			List<String> desc = wrapPlain(e.description(), CARD_W - 10);
 			int dy = y + 22;
 			for (int i2 = 0; i2 < Math.min(3, desc.size()); i2++) {
-				context.drawString(font, desc.get(i2), x + 5, dy,
+				String row = desc.get(i2);
+				if (i2 == 2 && desc.size() > 3) {
+					row = font.plainSubstrByWidth(row,
+							CARD_W - 10 - font.width("…")) + "…";
+				}
+				context.drawString(font, row, x + 5, dy,
 						available ? DIM : 0xFF606068);
 				dy += 10;
 			}
 			if (!available) {
-				context.drawString(font, Component.translatable(statusKey(e)),
+				context.drawString(font,
+						GuiText.fit(font, Component.translatable(statusKey(e)),
+								CARD_W - 10),
 						x + 5, y + CARD_H - 11, WARN);
+			}
+			if (hovered && !e.description().isEmpty()) {
+				context.renderTooltip(font,
+						font.split(Component.literal(e.description()), 240),
+						mouseX, mouseY);
 			}
 		}
 		context.disableScissor();
@@ -179,17 +192,21 @@ public class SelectionScreen extends Screen {
 			int dy = footerTop + 14;
 			for (int i = 0; i < Math.min(4, shown.details().size()); i++) {
 				context.drawString(font,
-						font.plainSubstrByWidth(shown.details().get(i), PANEL_W - 16),
+						GuiText.fit(font, shown.details().get(i), PANEL_W - 16),
 						left + 8, dy, DIM);
 				dy += 10;
 			}
 		}
 		if (step == Step.SPECIALIZATION) {
 			// Between the details strip and the buttons — the last thing
-			// read before committing a one-time pick.
-			context.drawCenteredString(font, Component.translatable(
-					"screen.lifepath.selection.spec_warning"),
-					width / 2, footerTop + 56, WARN);
+			// read before committing a one-time pick. Wrapped so longer
+			// translations stay inside the panel instead of bleeding out.
+			int wy = footerTop + 52;
+			for (var line : font.split(Component.translatable(
+					"screen.lifepath.selection.spec_warning"), PANEL_W - 16)) {
+				context.drawCenteredString(font, line, width / 2, wy, WARN);
+				wy += 10;
+			}
 		}
 		Entry sel = selected(entries);
 		confirmButton.active = sel != null && sel.availability() == Entry.AVAILABLE;
@@ -314,6 +331,41 @@ public class SelectionScreen extends Screen {
 		return Component.translatable(step == Step.SPECIES
 				? "screen.lifepath.selection.species_title"
 				: "screen.lifepath.selection.spec_title");
+	}
+
+	/** Greedy word wrap on plain text. font.split can't be used here: it
+	 *  returns FormattedCharSequence rows which can't be re-measured as
+	 *  strings to mark a capped tail with "…". */
+	private List<String> wrapPlain(String text, int width) {
+		List<String> out = new java.util.ArrayList<>();
+		for (String para : text.split("\n")) {
+			String rest = para.strip();
+			while (!rest.isEmpty()) {
+				int idx = font.getSplitter().plainIndexAtWidth(rest, width,
+						net.minecraft.network.chat.Style.EMPTY);
+				String head;
+				if (idx <= 0) {
+					head = font.plainSubstrByWidth(rest, width);
+				} else {
+					head = rest.substring(0, idx);
+					// plainIndexAtWidth is char-precise, not word-aware —
+					// back off to the last space so a word never splits.
+					if (idx < rest.length() && !Character.isWhitespace(
+							rest.charAt(idx))) {
+						int space = head.lastIndexOf(' ');
+						if (space > 0) {
+							head = head.substring(0, space);
+						}
+					}
+				}
+				if (head.isEmpty()) {
+					break;
+				}
+				out.add(head.strip());
+				rest = rest.substring(head.length()).strip();
+			}
+		}
+		return out;
 	}
 
 	private String statusKey(Entry e) {

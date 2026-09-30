@@ -1,6 +1,19 @@
 // M13-3: root project is a container only — Minecraft/loom live in the
 // common and fabric subprojects; see docs/M13-ADR.md.
 
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		// SnakeYAML for the common/ lang pipeline: src/main/lang/*.yaml →
+		// generated assets/lifepath/lang/*.json. Must live on the ROOT
+		// buildscript classpath — a subproject buildscript block isolates
+		// the classloader and breaks fabric-loom's extension cast.
+		classpath 'org.yaml:snakeyaml:2.2'
+	}
+}
+
 subprojects {
 	tasks.withType(JavaCompile).configureEach {
 		it.options.release = 21

@@ -5,8 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.github.durdeuvlad.lifepath.network.s2c.SelectionCatalogPayload.Entry;
 import io.netty.buffer.Unpooled;
 import java.util.List;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.Bootstrap;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -15,19 +19,31 @@ import org.junit.jupiter.api.Test;
  */
 class SelectionCatalogPayloadTest {
 
+	@BeforeAll
+	static void bootMinecraft() {
+		// ComponentSerialization's codec builds on vanilla registries —
+		// the headless suite never boots Minecraft otherwise.
+		SharedConstants.tryDetectVersion();
+		Bootstrap.bootStrap();
+	}
+
 	@Test
 	void packetCodecRoundTripsFullPayload() {
 		SelectionCatalogPayload p = new SelectionCatalogPayload(
 				List.of(
 						new Entry("lifepath:human", "Human", "Adaptable.",
 								"lifepath:textures/gui/species/human.png",
-								List.of("Active: Adrenaline", "Versatile"),
+								List.of(Component.translatable(
+												"text.lifepath.detail.active", "Adrenaline"),
+										Component.literal("Versatile")),
 								Entry.AVAILABLE),
 						new Entry("lifepath:phantom", "Phantom", "Half-ghost.",
 								"", List.of(), Entry.NEEDS_UNLOCK)),
 				List.of(new Entry("lifepath:smith", "Smith", "",
 						"lifepath:textures/gui/specialization/smith.png",
-						List.of("smithing starts at Lv20 · Apt A"),
+						List.of(Component.translatable(
+								"text.lifepath.detail.skill_start_apt",
+								"smithing", 20, "A")),
 						Entry.AVAILABLE)));
 
 		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(

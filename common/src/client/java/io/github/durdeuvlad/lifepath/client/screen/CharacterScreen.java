@@ -140,7 +140,8 @@ public class CharacterScreen extends Screen {
 			ClientIcons.resolve("species", core.speciesIcon())
 					.ifPresent(tex -> context.blit(tex, left + 6, rowTop - 1,
 							0, 0, 16, 16, 16, 16));
-			context.drawString(font, Component.literal(core.speciesName()),
+			context.drawString(font,
+					GuiText.fit(font, core.speciesName(), panelW - 32),
 					left + 26, rowTop + 4, TEXT);
 			y = rowTop + 18;
 			// M12-2: the description is displaced from the default view —
@@ -166,7 +167,8 @@ public class CharacterScreen extends Screen {
 			ClientIcons.resolve("specialization", core.specIcon())
 					.ifPresent(tex -> context.blit(tex, left + 6,
 							specRowY - 1, 0, 0, 16, 16, 16, 16));
-			context.drawString(font, Component.literal(core.specName()),
+			context.drawString(font,
+					GuiText.fit(font, core.specName(), panelW - 32),
 					left + 26, y + 4, TEXT);
 			y += 18;
 			if (!id.specFocus().isEmpty()) {
@@ -234,8 +236,8 @@ public class CharacterScreen extends Screen {
 						: Component.translatable(
 								"screen.lifepath.character.ability_passive",
 								e.name());
-				context.drawString(font, label, left + 19,
-						y + 1, sel ? ACCENT : (e.active() ? TEXT : DIM));
+				context.drawString(font, GuiText.fit(font, label, panelW - 25),
+						left + 19, y + 1, sel ? ACCENT : (e.active() ? TEXT : DIM));
 				if (e.active()) {
 					abilityRows.add(new AbilityRow(e.id(), left, y, panelW, 11));
 				}
@@ -244,10 +246,15 @@ public class CharacterScreen extends Screen {
 			if (selected == null
 					&& io.github.durdeuvlad.lifepath.client.LifepathClient
 							.abilityKey != null) {
-				y = line(context, left, y + 2, Component.translatable(
+				// Wrapped, not clipped — a truncated hint teaches nothing.
+				for (var wrapped : font.split(Component.translatable(
 						"screen.lifepath.character.abilities_hint",
 						io.github.durdeuvlad.lifepath.client.LifepathClient
-								.abilityKey.getTranslatedKeyMessage()), DIM);
+								.abilityKey.getTranslatedKeyMessage()),
+						panelW - 8)) {
+					context.drawString(font, wrapped, left + 6, y + 2, DIM);
+					y += 10;
+				}
 			}
 		}
 
@@ -255,9 +262,11 @@ public class CharacterScreen extends Screen {
 		// otherwise. Shows the ACTUAL bound key, not a hardcoded letter.
 		if (io.github.durdeuvlad.lifepath.client.LifepathClient.abilityKey != null) {
 			context.drawCenteredString(font,
-					Component.translatable("screen.lifepath.character.key_hint",
+					GuiText.fit(font, Component.translatable(
+							"screen.lifepath.character.key_hint",
 							io.github.durdeuvlad.lifepath.client.LifepathClient
 									.abilityKey.getTranslatedKeyMessage()),
+							panelW - 8),
 					width / 2, top + panelH - 14, DIM);
 		}
 		// Widgets draw last — Skills/Choose must sit above the panel.
@@ -318,7 +327,13 @@ public class CharacterScreen extends Screen {
 			if (ClientAbilityState.selected() == null
 					&& io.github.durdeuvlad.lifepath.client.LifepathClient
 							.abilityKey != null) {
-				h += 13;                     // "click to bind" hint line
+				// Mirrors the wrapped hint above — the panel must grow
+				// with it or the key hint lands on the last rows.
+				h += 10 * font.split(Component.translatable(
+						"screen.lifepath.character.abilities_hint",
+						io.github.durdeuvlad.lifepath.client.LifepathClient
+								.abilityKey.getTranslatedKeyMessage()),
+						PANEL_W - 8).size();
 			}
 		}
 		return h + 24;                           // key hint + bottom pad
@@ -334,7 +349,8 @@ public class CharacterScreen extends Screen {
 	}
 
 	private int line(GuiGraphics context, int x, int y, Component text, int color) {
-		context.drawString(font, text, x + 6, y, color);
+		context.drawString(font, GuiText.fit(font, text, PANEL_W - 8),
+				x + 6, y, color);
 		return y + 11;
 	}
 
@@ -352,7 +368,7 @@ public class CharacterScreen extends Screen {
 			ClientIcons.resolve(domain, e.icon())
 					.ifPresent(tex -> context.blit(tex, x + 6, rowY,
 							10, 10, 0, 0, 16, 16, 16, 16));
-			context.drawString(font, Component.literal(e.name()),
+			context.drawString(font, GuiText.fit(font, e.name(), PANEL_W - 25),
 					x + 19, y + 1, TEXT);
 			y += 11;
 		}

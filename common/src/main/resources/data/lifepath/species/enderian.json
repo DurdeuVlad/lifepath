@@ -1,7 +1,7 @@
 {
 	"display_name": "Enderian",
 	"icon": "species/enderian",
-	"description": "Void-touched wanderers. Ender pearls barely sting them, the End itself sharpens them, and they can blink through space — but water burns like acid.",
+	"description": "Void-touched wanderers. Ender pearls barely sting them, the End itself sharpens them, and they can blink through space; but water burns like acid.",
 	"visibility": "normal",
 	"selection": "open",
 	"passive_abilities": [

@@ -1,7 +1,7 @@
 {
 	"display_name": "Lightning",
 	"icon": "attunement/lightning",
-	"description": "Struck by the storm and changed by it. Lightning no longer harms you — and in a thunderstorm, it answers.",
+	"description": "Struck by the storm and changed by it. Lightning no longer harms you. In a thunderstorm, it answers.",
 	"abilities": [
 		"lifepath:lightning_grounded",
 		"lifepath:lightning_storm_charge",

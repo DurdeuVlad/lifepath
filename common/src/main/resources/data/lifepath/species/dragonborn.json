@@ -1,7 +1,7 @@
 {
 	"display_name": "Dragonborn",
 	"icon": "species/dragonborn",
-	"description": "Fire runs in their blood. Flames cannot hurt them and only feed the molten core — but the deep cold bites twice as deep. Their breath is a furnace unleashed.",
+	"description": "Fire runs in their blood. Flames cannot hurt them and only feed the molten core; but the deep cold bites twice as deep. Their breath is a furnace unleashed.",
 	"visibility": "normal",
 	"selection": "open",
 	"passive_abilities": [

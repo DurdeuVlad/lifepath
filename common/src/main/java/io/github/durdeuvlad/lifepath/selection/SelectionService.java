@@ -20,6 +20,7 @@ import io.github.durdeuvlad.lifepath.unlock.UnlockService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -203,41 +204,47 @@ public final class SelectionService {
 				new FeedbackPayload("selection_denied", List.of(name, reasonKey)));
 	}
 
-	/** Card footer lines: actives lead (the headline), then passive names. */
-	private static List<String> speciesDetails(SpeciesDefinition def) {
-		List<String> lines = new ArrayList<>();
+	/** Card footer lines: actives lead (the headline), then passive names.
+	 *  Sent as translatable components — the "Active:" chrome is the
+	 *  client's language, only the resolved ability name crosses the wire. */
+	private static List<Component> speciesDetails(SpeciesDefinition def) {
+		List<Component> lines = new ArrayList<>();
 		for (ResourceLocation id : def.activeAbilities()) {
-			lines.add("Active: " + IdentitySummary.displayName(id));
+			lines.add(Component.translatable("text.lifepath.detail.active",
+					IdentitySummary.displayName(id)));
 		}
 		for (ResourceLocation id : def.passiveAbilities()) {
-			lines.add(IdentitySummary.displayName(id));
+			lines.add(Component.literal(IdentitySummary.displayName(id)));
 		}
 		return cap(lines);
 	}
 
 	/** Card footer lines: starting skills with aptitude, then signatures. */
-	private static List<String> specDetails(SpecializationDefinition def) {
-		List<String> lines = new ArrayList<>();
+	private static List<Component> specDetails(SpecializationDefinition def) {
+		List<Component> lines = new ArrayList<>();
 		def.startingSkills().forEach((skill, level) -> {
-			String line = IdentitySummary.displayName(skill) + " starts at Lv" + level;
 			Aptitude aptitude = def.aptitudes().get(skill);
-			if (aptitude != null) {
-				line += " · Apt " + aptitude.name();
-			}
-			lines.add(line);
+			lines.add(aptitude == null
+					? Component.translatable("text.lifepath.detail.skill_start",
+							IdentitySummary.displayName(skill), level)
+					: Component.translatable("text.lifepath.detail.skill_start_apt",
+							IdentitySummary.displayName(skill), level,
+							aptitude.name()));
 		});
 		for (ResourceLocation ref : def.signatureRefs()) {
-			lines.add("Signature: " + IdentitySummary.displayName(ref));
+			lines.add(Component.translatable("text.lifepath.detail.signature",
+					IdentitySummary.displayName(ref)));
 		}
 		return cap(lines);
 	}
 
-	private static List<String> cap(List<String> lines) {
+	private static List<Component> cap(List<Component> lines) {
 		if (lines.size() <= DETAIL_CAP) {
 			return List.copyOf(lines);
 		}
-		List<String> out = new ArrayList<>(lines.subList(0, DETAIL_CAP));
-		out.add("+" + (lines.size() - DETAIL_CAP) + " more");
+		List<Component> out = new ArrayList<>(lines.subList(0, DETAIL_CAP));
+		out.add(Component.translatable("text.lifepath.detail.more",
+				lines.size() - DETAIL_CAP));
 		return List.copyOf(out);
 	}
 

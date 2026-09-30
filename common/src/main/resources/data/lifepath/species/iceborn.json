@@ -1,7 +1,7 @@
 {
 	"display_name": "Iceborn",
 	"icon": "species/iceborn",
-	"description": "Children of the cold. Iceborn carry a temperature meter — frost and ice keep them sharp and quick to mend, while heat, fire, and lava drag them toward sluggish weakness and burning.",
+	"description": "Children of the cold. Iceborn carry a temperature meter: frost and ice keep them sharp and quick to mend, while heat, fire, and lava drag them toward sluggish weakness and burning.",
 	"visibility": "normal",
 	"selection": "open",
 	"resources": [

@@ -1,7 +1,7 @@
 {
 	"display_name": "Dwarf",
 	"icon": "species/dwarf",
-	"description": "Compact and subterranean — Mining aptitude can't fall below B. Cave-dark speeds their hands and steadies their falls, and stoneform can still a killing blow — but water drags at them like a millstone.",
+	"description": "Compact and subterranean. Mining aptitude can't fall below B. Cave-dark speeds their hands and steadies their falls, and stoneform can still a killing blow; but water drags at them like a millstone.",
 	"visibility": "normal",
 	"selection": "open",
 	"min_aptitudes": {

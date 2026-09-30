@@ -1,7 +1,7 @@
 {
 	"display_name": "Anima",
 	"icon": "species/anima",
-	"description": "Beasts know them as their own. Animals never hunt them, their presence steadies the heart and quickens the feet, and a touch mends the pack — but their hollow bones crack on falls, and flesh is no food to them.",
+	"description": "Beasts know them as their own. Animals never hunt them, their presence steadies the heart and quickens the feet, and a touch mends the pack; but their hollow bones crack on falls, and flesh is no food to them.",
 	"visibility": "normal",
 	"selection": "open",
 	"diet_rules": "lifepath:herbivore",
