@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.0.0-beta.7 — anima morph
+
+The anima species can now become an animal — picked once at species-select,
+locked like the species itself, and exercised end-to-end on a real
+production-mapped server.
+
+- **Anima morph.** A new `morph_form` content domain plus a second picker
+  step grants the anima species one handpicked form — fox, wolf, cat,
+  rabbit, goat, panda, polar bear, or sheep — toggled by the `anima_morph`
+  ability with a cooldown on both transitions.
+- **You are the animal, not a copy.** Hitbox and eye height swap to the
+  form's; HP carries proportionally both ways; stats mirror the mob's
+  vanilla profile (bite, speed, max HP). A lethal hit force-demorphs and
+  carries the overflow onto your human bar instead of killing you.
+- **Paws, not hands.** Morphed players can't mine, open stations, take
+  crafting/furnace/anvil/trade/loom output (shift-click and double-click
+  gather included), use items, or trade — melee bite stays.
+- **Disguise, not possession.** Clients render a posed look-alike entity in
+  place of the player; the synced flag travels in vanilla entity data, so
+  trackers see the morph with no extra packets.
+- **Production hardening sweep** (found testing the packaged jar, invisible
+  in dev): mixin refmaps are now declared and generated for every injector
+  type, a malformed morph form id falls back to vanilla dimensions instead
+  of fabricating a zero-size hitbox, the hitbox seam actually runs (it was
+  dead code on `LivingEntity`), armor-stand interact-at is denied, the
+  result-slot deny moved before the take (closing a dupe vector), and a
+  species swap retires a stranded active morph.
+- Admin surface: `/lifepath morph get|set|clear <player>` and `/lifepath
+  species set` keep morph state consistent.
+
 ## 1.0.0-beta.6 — Rustic Craft compatibility + skills payoff
 
 The "does it actually work in the pack" release — verified against the
