@@ -76,6 +76,7 @@ public final class LifepathClient {
 			ClientHighlights.clear();
 			io.github.durdeuvlad.lifepath.client.selection.ClientSelectionState.clear();
 			io.github.durdeuvlad.lifepath.client.feedback.ClientFeedback.clear();
+			io.github.durdeuvlad.lifepath.client.morph.MorphDisguiseClient.clear();
 		});
 		clientPlatform.onClientJoin(() -> {
 			ClientCharacterState.clear();

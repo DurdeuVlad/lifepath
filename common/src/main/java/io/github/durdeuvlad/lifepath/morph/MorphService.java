@@ -159,6 +159,7 @@ public final class MorphService {
 		}
 		float morphMax = player.getMaxHealth();
 		float ratio = morphMax > 0 ? player.getHealth() / morphMax : 1.0f;
+		MorphDisguise.clear(player);
 		removeMorphModifiers(player);
 		player.setHealth(ratio * player.getMaxHealth());
 		player.refreshDimensions();
@@ -210,6 +211,7 @@ public final class MorphService {
 		long now = System.currentTimeMillis();
 		float morphHealth = player.getHealth();
 		data.setMorph(new PlayerCharacterData.MorphState(morph.formId(), false, now));
+		MorphDisguise.clear(player);
 		removeMorphModifiers(player);
 		float post = forcedCarryHealth(morphHealth, newHealth, morphMax,
 				player.getMaxHealth());
@@ -226,6 +228,9 @@ public final class MorphService {
 			MorphFormDefinition form, long now) {
 		float humanMax = player.getMaxHealth();
 		float ratio = humanMax > 0 ? player.getHealth() / humanMax : 1.0f;
+		// Synced disguise flag before refreshDimensions so the dims seam
+		// already sees the form when the box is recomputed.
+		MorphDisguise.stamp(player, form);
 		applyStats(player, form);
 		data.setMorph(new PlayerCharacterData.MorphState(form.id(), true, now));
 		// Now at morph max — land the carried ratio. setHealth clamps high.
@@ -238,6 +243,7 @@ public final class MorphService {
 		float morphMax = player.getMaxHealth();
 		float ratio = morphMax > 0 ? player.getHealth() / morphMax : 1.0f;
 		data.setMorph(new PlayerCharacterData.MorphState(formId, false, now));
+		MorphDisguise.clear(player);
 		removeMorphModifiers(player);
 		player.setHealth(ratio * player.getMaxHealth());
 		player.refreshDimensions();
@@ -256,6 +262,8 @@ public final class MorphService {
 					+ " — leaving stats alone", morph.formId(), player.getUUID());
 			return;
 		}
+		// Fresh entity → fresh synced data and no modifiers — restamp both.
+		MorphDisguise.stamp(player, form);
 		applyStats(player, form);
 		// A fresh entity arrives at full human HP — clamp into the morph bar.
 		player.setHealth(Math.min(player.getHealth(), player.getMaxHealth()));

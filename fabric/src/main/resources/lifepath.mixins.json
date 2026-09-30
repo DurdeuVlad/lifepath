@@ -11,6 +11,9 @@
 		"SmithingScreenHandlerMixin",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
+		"PlayerMorphMixin",
+		"LivingEntityMorphMixin",
+		"EntityMorphMixin",
 		"TargetPredicateMixin",
 		"PlayerAdvancementTrackerMixin"
 	],
