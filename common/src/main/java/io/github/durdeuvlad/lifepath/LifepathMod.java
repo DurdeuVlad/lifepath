@@ -198,6 +198,10 @@ public final class LifepathMod {
 								+ "Load% = total weight / capacity * 100.")
 				.define("default_item_weight", 1.0, v -> v >= 0 && v <= 1.0e4,
 						"Weight per item for stacks with no item_weight entry.")
+				.define("container_contents_factor", 0.75, v -> v >= 0 && v <= 1.0,
+						"Fraction of contents weight a container still imposes "
+								+ "(sacks/bundles/shulkers). Per-item override: "
+								+ "'<id>@contents' entries in item_weight tables.")
 				.define("scan_interval_ticks", 40, v -> v >= 10 && v <= 1200,
 						"Inventory scan cadence — cheap-calculation rule: "
 								+ "bands react within this window, never per-tick.")
