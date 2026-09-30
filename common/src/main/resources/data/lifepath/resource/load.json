@@ -9,15 +9,15 @@
 		{
 			"range": [
 				0,
-				40
+				50
 			],
 			"name": "Normal",
 			"effects": []
 		},
 		{
 			"range": [
-				40.001,
-				70
+				50.001,
+				75
 			],
 			"name": "Burdened",
 			"effects": [
@@ -29,7 +29,7 @@
 		},
 		{
 			"range": [
-				70.001,
+				75.001,
 				90
 			],
 			"name": "Heavy",

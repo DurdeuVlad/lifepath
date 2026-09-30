@@ -976,13 +976,13 @@ A reusable encumbrance system creates deeper gameplay.
 Example load bands:
 
 ```text
-0-40%
+0-50%
 Normal
 
-40-70%
+50-75%
 Minor stamina / mobility pressure
 
-70-90%
+75-90%
 Movement penalty
 
 90-100%
