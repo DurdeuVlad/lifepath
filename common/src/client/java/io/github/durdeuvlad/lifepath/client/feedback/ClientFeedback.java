@@ -34,7 +34,7 @@ public final class ClientFeedback {
 		}
 		Component message = messageFor(payload);
 		boolean actionbar = switch (payload.kind()) {
-			case "ability_denied", "ability_ready" -> true;
+			case "ability_denied", "ability_ready", "morphed", "demorphed" -> true;
 			default -> false;
 		};
 		if (actionbar) {
