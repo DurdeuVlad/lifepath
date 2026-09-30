@@ -1,0 +1,11 @@
+{
+	"entity_type": "minecraft:panda",
+	"display_name": "Panda",
+	"description": "Half the speed, twice the mass, all the opinions.",
+	"icon": "morph/panda",
+	"stats": {
+		"minecraft:generic.max_health": 20.0,
+		"minecraft:generic.attack_damage": 6.0,
+		"minecraft:generic.movement_speed": 0.15
+	}
+}

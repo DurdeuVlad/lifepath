@@ -340,6 +340,33 @@ reusing the vanilla components) add their weight at a contents factor —
 nothing, `1.0` ⇒ full weight). Modded bags with custom storage need the
 platform capability hook — not currently wired.
 
+## `morph_form/` — animal morph whitelist
+
+```json
+{
+  "entity_type": "minecraft:fox",
+  "display_name": "Fox",
+  "description": "Small, quick, and suspiciously good at stealing chickens.",
+  "icon": "morph/fox",
+  "stats": {
+    "minecraft:generic.max_health": 10.0,
+    "minecraft:generic.attack_damage": 3.0,
+    "minecraft:generic.movement_speed": 0.3
+  }
+}
+```
+
+The handpicked animal roster anima players pick from at species-select
+(one form per character, locked like the species — M-2). Required:
+`entity_type` (a real entity type; non-animal categories warn and the file
+loads, aquatic/flying forms are out of scope by design), `display_name`.
+`description` and `icon` are optional; `stats` is an attribute-id →
+absolute-value map applied while morphed — `generic.max_health` must be
+positive when present (proportional HP carry divides by it). Names and
+descriptions translate via `lifepath.morph_form.<name>.name` / `.description`
+keys like every other domain. Deleting a form file demorphs and orphans
+characters that picked it — the load-time sanitize drops the reference.
+
 ## Shipped tags (extend these from your pack)
 
 Blocks: `lifepath:minable`, `forageable`, `harvestable`, `click_harvest`,

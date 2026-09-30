@@ -1,0 +1,11 @@
+{
+	"entity_type": "minecraft:rabbit",
+	"display_name": "Rabbit",
+	"description": "Fastest legs on the roster; thin as a rumor.",
+	"icon": "morph/rabbit",
+	"stats": {
+		"minecraft:generic.max_health": 3.0,
+		"minecraft:generic.attack_damage": 2.0,
+		"minecraft:generic.movement_speed": 0.35
+	}
+}

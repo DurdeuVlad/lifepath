@@ -114,6 +114,7 @@ reference and skipped by the content-ref scan.
 | `consume_item` | `item` (id or `#tag`), `count` |
 | `play_sound` | `sound`, `volume`?, `pitch`? |
 | `spawn_particle` | `particle`, `count`?, `dx`/`dy`/`dz`?, `speed`? |
+| `morph_toggle` | (none) — flips the character's picked `morph_form` disguise on/off; anima-only, needs a form chosen at species-select. Not composable — silently no-ops for characters without a form |
 
 ## Java extension contract
 
