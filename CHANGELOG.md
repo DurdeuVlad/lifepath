@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.0-beta.6 — Rustic Craft compatibility + skills payoff
+
+The "does it actually work in the pack" release — verified against the
+Rustic Craft 2 server files.
+
+- **Fake players no longer level skills.** A loader-neutral fake-player
+  check gates every player-attributed XP path — Create deployers and
+  other automation used to earn real XP.
+- **Overgeared forging awards Smithing XP.** Verified: anvil forging
+  completes inside the block entity and drops the result — no vanilla
+  event ever fired. A mod-gated mixin attributes the forge to its owner.
+- **Farmer's Delight cooking pot and skillet award Cooking XP** to
+  whoever takes the food (neither posts a craft event on NeoForge).
+- **Skills now pay off.** All 13 skills grant a tiered passive ability at
+  each milestone (levels 20/40/60/80/95) — mining digs faster, farming
+  and fishing gain contextual luck, defence hardens, engineering reaches
+  further, and so on. Grants survive decay once earned.
+- **Pack data sweep:** Naturalist and Hybrid Birds animals feed Hunting,
+  Farmer's Delight meals/snacks/sweets feed Cooking, Create machines get
+  engineering XP values and real encumbrance weights, steel is properly
+  heavy, and vampire/werewolf abilities defer to Vampirism's faction
+  system when that mod is installed.
+- **Encumbrance rebalance** (from beta.5 line): more leeway at low/mid
+  load, same wall at the top; sacks 60%, backpacks 50%.
+
 ## 1.0.0-beta.5 — picker tooltip fix
 
 Hotfix over beta.4: card description tooltips were rendered inside the
