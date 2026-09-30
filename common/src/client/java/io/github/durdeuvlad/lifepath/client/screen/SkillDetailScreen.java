@@ -21,6 +21,7 @@ public class SkillDetailScreen extends Screen {
 	private static final int PANEL_EDGE = 0xFF3A3A44;
 	private static final int BAR_BG = 0xFF2A2A33;
 	private static final int BAR_FG = 0xFF55AA55;
+	private static final int PANEL_W = 240;
 
 	private final SkillCard card;
 	private final Screen parent;
@@ -48,7 +49,8 @@ public class SkillDetailScreen extends Screen {
 				.ifPresent(tex -> context.blit(tex,
 						width / 2 - titleW / 2 - 20, top + 1,
 						0, 0, 16, 16, 16, 16));
-		context.drawCenteredString(font, card.display().name(),
+		context.drawCenteredString(font,
+				GuiText.fit(font, card.display().name(), panelW - 16),
 				width / 2, top + 4, ACCENT);
 		int y = top + 20;
 
@@ -88,10 +90,12 @@ public class SkillDetailScreen extends Screen {
 					context.blit(icon.get(), left + 6, y + 1,
 							8, 8, 0, 0, 16, 16, 16, 16);
 					context.drawString(font,
-							Component.literal(b.name()), left + 17, y + 1, TEXT);
+							GuiText.fit(font, b.name(), panelW - 23),
+							left + 17, y + 1, TEXT);
 				} else {
 					context.drawString(font,
-							Component.literal("· " + b.name()), left + 6, y + 1, TEXT);
+							GuiText.fit(font, "· " + b.name(), panelW - 12),
+							left + 6, y + 1, TEXT);
 				}
 				y += 10;
 			}
@@ -130,7 +134,8 @@ public class SkillDetailScreen extends Screen {
 		}
 
 		context.drawCenteredString(font,
-				Component.translatable("screen.lifepath.skill.back_hint"),
+				GuiText.fit(font, Component.translatable(
+						"screen.lifepath.skill.back_hint"), panelW - 16),
 				width / 2, top + panelH - 8, DIM);
 	}
 
@@ -167,7 +172,8 @@ public class SkillDetailScreen extends Screen {
 	}
 
 	private int line(GuiGraphics context, int x, int y, Component text, int color) {
-		context.drawString(font, text, x + 6, y, color);
+		context.drawString(font, GuiText.fit(font, text, PANEL_W - 8),
+				x + 6, y, color);
 		return y + 10;
 	}
 

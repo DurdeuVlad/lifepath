@@ -4,6 +4,8 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -27,9 +29,12 @@ public record SelectionCatalogPayload(List<Entry> species,
 	public static final CustomPacketPayload.Type<SelectionCatalogPayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("selection/catalog"));
 
-	/** One picker option: display fields resolved server-side. */
+	/** One picker option: display fields resolved server-side. {@code details}
+	 *  are {@link Component}s (mostly {@code text.lifepath.detail.*}
+	 *  translatables) so every client renders them in its own locale —
+	 *  the wire carries keys + resolved names, never formatted English. */
 	public record Entry(String id, String name, String description, String icon,
-			List<String> details, int availability) {
+			List<Component> details, int availability) {
 		/** Player may pick this right now. */
 		public static final int AVAILABLE = 0;
 		/** {@code selection:"unlocked"} species whose unlock id the player lacks. */
@@ -45,7 +50,8 @@ public record SelectionCatalogPayload(List<Entry> species,
 						ByteBufCodecs.STRING_UTF8, Entry::name,
 						ByteBufCodecs.STRING_UTF8, Entry::description,
 						ByteBufCodecs.STRING_UTF8, Entry::icon,
-						ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
+						ComponentSerialization.TRUSTED_STREAM_CODEC
+								.apply(ByteBufCodecs.list()),
 						Entry::details,
 						ByteBufCodecs.INT, Entry::availability,
 						Entry::new);

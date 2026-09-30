@@ -19,6 +19,10 @@ milestone M10 — every roadmap system below is shipped and exercised.
   auto-open). Shows name, description, what you get, and locked reasons;
   choices apply through server-validated requests — `/lifepath` is now an
   admin-only surface.
+- **YAML translations** — all UI text lives in `common/src/main/lang/*.yaml`;
+  the build generates Minecraft `lang/*.json`. Romanian (`ro_ro`) ships as the
+  first translation; picker detail lines localize per-client via translatable
+  components on the wire. See `docs/TRANSLATIONS.md`.
 - **13 specializations** — aptitude grades, XP/decay modifiers, signature
   abilities, protected floors, encumbrance capacity multipliers.
 - **13 skills** — gathering/crafting/combat/physical/knowledge categories,

@@ -177,6 +177,12 @@ registrations (their *ids* are public; their code is not), `perf/*`,
   `unlocked` so their grant path is data-declared.
 - **`content_validation` is a report**, not a gate: bad refs warn, never
   block. Downstream must not depend on it failing a load.
+- **UI text lives in `common/src/main/lang/<locale>.yaml`** (en_us base +
+  shipped `ro_ro`); the build generates Minecraft `lang/*.json` — add a
+  translation by copying the yaml, never by editing Java. See
+  `docs/TRANSLATIONS.md`. Pick cards' "what you get" lines arrive as
+  `text.lifepath.detail.*` translatable components, so they render in each
+  client's own language.
 - **Milestone lang keys** (`lifepath.skill.<id>.milestone.<n>`) are
   convention-only — skills without them ship fine.
 - `entity`/`block` params on AoE targets accept `#tag` — tag absence degrades

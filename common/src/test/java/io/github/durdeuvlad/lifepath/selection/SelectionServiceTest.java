@@ -105,9 +105,13 @@ class SelectionServiceTest {
 
 		SelectionCatalogPayload catalog = SelectionService.buildCatalog(data);
 		assertEquals(Entry.AVAILABLE, catalog.specializations().get(0).availability());
-		// Footer line resolves the starting skill + aptitude for the card.
-		assertEquals("smithing starts at Lv20 · Apt A",
-				catalog.specializations().get(0).details().get(0));
+		// Footer line carries the translation key + resolved args — the
+		// client renders it in its own locale.
+		var detail = catalog.specializations().get(0).details().get(0);
+		var contents = (net.minecraft.network.chat.contents.TranslatableContents)
+				detail.getContents();
+		assertEquals("text.lifepath.detail.skill_start_apt", contents.getKey());
+		assertEquals(List.of("smithing", 20, "A"), List.of(contents.getArgs()));
 
 		data.setSpecializationId(LifepathMod.id("smith"));
 		catalog = SelectionService.buildCatalog(data);

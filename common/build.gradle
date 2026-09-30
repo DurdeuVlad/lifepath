@@ -47,6 +47,101 @@ tasks.jar {
 	from rootProject.files("LICENSE", "LICENSE.GPL", "NOTICE")
 }
 
+// i18n pipeline: src/main/lang/<locale>.yaml files are the editable source of
+// truth — translators never touch Java or JSON. Minecraft's localization
+// system consumes assets/<mod>/lang/<locale>.json, so this task generates
+// them. en_us is the base locale every other file is validated against.
+def langSource = layout.projectDirectory.dir('src/main/lang')
+def langOut = layout.buildDirectory.dir('generated/lang')
+
+def escapeJson = { String s ->
+	def out = new StringBuilder()
+	for (char c : s.toCharArray()) {
+		if (c == '"' as char) out.append('\\"')
+		else if (c == '\\' as char) out.append('\\\\')
+		else if (c < ' ') out.append('\\u%04x'.formatted((int) c))
+		else out.append(c)
+	}
+	return out.toString()
+}
+
+def generateLangJson = tasks.register('generateLangJson') {
+	inputs.dir(langSource)
+	outputs.dir(langOut)
+	doLast {
+		def loaderOpts = new org.yaml.snakeyaml.LoaderOptions()
+		loaderOpts.setAllowDuplicateKeys(false)
+		def yaml = new org.yaml.snakeyaml.Yaml(loaderOpts)
+		File[] files = langSource.asFile.listFiles(
+				{ d, n -> n ==~ /[a-z]{2}_[a-z]{2}\.yaml/ } as FilenameFilter)
+		if (files == null || files.length == 0) {
+			throw new GradleException('src/main/lang has no <locale>.yaml files')
+		}
+		Map<String, String> baseKeys = null
+		// en_us first — other locales are checked against its key set.
+		files.sort { it.name }.sort { it.name == 'en_us.yaml' ? 0 : 1 }.each { f ->
+			Map data
+			try {
+				f.withInputStream { data = yaml.load(it) }
+			} catch (Exception e) {
+				throw new GradleException("Malformed YAML in ${f.name}: ${e.message}", e)
+			}
+			if (!(data instanceof Map)) {
+				throw new GradleException("${f.name}: expected a flat key: \"value\" map")
+			}
+			def entries = new LinkedHashMap<String, String>()
+			data.each { k, v ->
+				String key = String.valueOf(k)
+				if (!(key ==~ /^[a-z0-9_.]+$/)) {
+					throw new GradleException("${f.name}: bad key '${key}' "
+							+ '(allowed: a-z 0-9 _ .)')
+				}
+				if (!(v instanceof CharSequence || v instanceof Number || v instanceof Boolean)) {
+					throw new GradleException("${f.name}: '${key}' needs a plain string value")
+				}
+				entries.put(key, String.valueOf(v))
+			}
+			if (baseKeys == null) {
+				baseKeys = entries
+			} else {
+				def extra = entries.keySet() - baseKeys.keySet()
+				if (!extra.isEmpty()) {
+					throw new GradleException("${f.name} has keys missing from en_us.yaml: ${extra}")
+				}
+				def missing = baseKeys.keySet() - entries.keySet()
+				if (!missing.isEmpty()) {
+					println("warn: ${f.name} misses ${missing.size()} keys"
+							+ " (en_us fallback covers them): ${missing}")
+				}
+				entries.each { key, val ->
+					def want = (baseKeys[key] =~ /%(\d+\$)?[a-z]/).collect { it[0] }
+					def got = (val =~ /%(\d+\$)?[a-z]/).collect { it[0] }
+					if (want != got) {
+						throw new GradleException("${f.name}: '${key}' placeholders ${got} "
+								+ "!= en_us ${want}")
+					}
+				}
+			}
+			def json = new StringBuilder('{\n')
+			entries.eachWithIndex { k, v, i ->
+				json << '\t"' << escapeJson(k) << '": "' << escapeJson(v) << '"'
+				if (i < entries.size() - 1) json << ','
+				json << '\n'
+			}
+			json << '}'
+			def outFile = new File(langOut.get().asFile,
+					f.name - '.yaml' + '.json')
+			outFile.getParentFile().mkdirs()
+			outFile.setText(json.toString(), 'UTF-8')
+		}
+	}
+}
+
+processResources {
+	dependsOn generateLangJson
+	from(langOut) { into 'assets/lifepath/lang' }
+}
+
 java {
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21

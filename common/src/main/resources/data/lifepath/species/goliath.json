@@ -1,7 +1,7 @@
 {
 	"display_name": "Goliath",
 	"icon": "species/goliath",
-	"description": "Large of body and stronger for it — Athletics aptitude can't fall below B. Their frame towers and hits harder, and a warcry rattles foes — but arrows find them easier and falls land harder.",
+	"description": "Large of body and stronger for it. Athletics aptitude can't fall below B. Their frame towers and hits harder, and a warcry rattles foes; but arrows find them easier and falls land harder.",
 	"visibility": "normal",
 	"selection": "open",
 	"min_aptitudes": {

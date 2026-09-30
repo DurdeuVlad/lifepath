@@ -1,7 +1,7 @@
 {
 	"display_name": "Automaton",
 	"icon": "species/automaton",
-	"description": "Life inside a nonliving frame. They do not drown and their hull turns blows aside — but water gums their joints, and they can overclock their frame for short bursts.",
+	"description": "Life inside a nonliving frame. They do not drown and their hull turns blows aside; but water gums their joints, and they can overclock their frame for short bursts.",
 	"visibility": "normal",
 	"selection": "open",
 	"passive_abilities": [
