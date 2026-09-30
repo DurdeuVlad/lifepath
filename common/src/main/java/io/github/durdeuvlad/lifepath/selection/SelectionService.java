@@ -3,10 +3,13 @@ package io.github.durdeuvlad.lifepath.selection;
 import io.github.durdeuvlad.lifepath.character.CharacterManager;
 import io.github.durdeuvlad.lifepath.character.IdentitySummary;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
+import io.github.durdeuvlad.lifepath.content.MorphFormDefinition;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
 import io.github.durdeuvlad.lifepath.content.SpecializationDefinition;
+import io.github.durdeuvlad.lifepath.morph.MorphService;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
 import io.github.durdeuvlad.lifepath.network.c2s.RequestSelectionCatalogPayload;
+import io.github.durdeuvlad.lifepath.network.c2s.SelectMorphFormPayload;
 import io.github.durdeuvlad.lifepath.network.c2s.SelectSpecializationPayload;
 import io.github.durdeuvlad.lifepath.network.c2s.SelectSpeciesPayload;
 import io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload;
@@ -18,9 +21,12 @@ import io.github.durdeuvlad.lifepath.skill.Aptitude;
 import io.github.durdeuvlad.lifepath.specialization.SpecializationService;
 import io.github.durdeuvlad.lifepath.unlock.UnlockService;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -67,6 +73,9 @@ public final class SelectionService {
 		LifepathNetworking.onC2S(SelectSpecializationPayload.ID,
 				(payload, player) -> run(player,
 						p -> selectSpecialization(p, payload.specializationId())));
+		LifepathNetworking.onC2S(SelectMorphFormPayload.ID,
+				(payload, player) -> run(player,
+						p -> selectMorphForm(p, payload.formId())));
 	}
 
 	/**
@@ -145,7 +154,31 @@ public final class SelectionService {
 					specDetails(def),
 					hasSpec ? Entry.ALREADY_CHOSEN : Entry.AVAILABLE));
 		}
-		return new SelectionCatalogPayload(List.copyOf(species), List.copyOf(specs));
+		List<Entry> morphs = new ArrayList<>();
+		// Locked like species: one pick, permanent on multiplayer; the
+		// singleplayer/op re-pick seam mirrors freeRespec.
+		boolean morphLocked = !freeRespec && data.morph() != null;
+		for (MorphFormDefinition def : LifepathContent.morphForms().all().values()) {
+			morphs.add(new Entry(def.id().toString(),
+					IdentitySummary.keyedText(def.id(), "morph_form", "name",
+							def.displayName()),
+					IdentitySummary.keyedText(def.id(), "morph_form",
+							"description", def.description().orElse("")),
+					def.icon().map(ResourceLocation::toString).orElse(""),
+					morphDetails(def),
+					morphLocked ? Entry.ALREADY_CHOSEN : Entry.AVAILABLE));
+		}
+		// Morph-capable species, resolved data-side: any species whose
+		// active abilities carry a morph_toggle action. The screen consults
+		// this set to gate the form step rather than hardcoding anima.
+		Set<String> morphSpecies = new LinkedHashSet<>();
+		for (SpeciesDefinition def : LifepathContent.species().all().values()) {
+			if (MorphService.speciesHasMorphToggle(def)) {
+				morphSpecies.add(def.id().toString());
+			}
+		}
+		return new SelectionCatalogPayload(List.copyOf(species), List.copyOf(specs),
+				List.copyOf(morphs), Set.copyOf(morphSpecies));
 	}
 
 	/**
@@ -176,6 +209,23 @@ public final class SelectionService {
 			ResourceLocation specId) {
 		return data.specializationId() == null
 				&& LifepathContent.specializations().contains(specId);
+	}
+
+	/**
+	 * The player path's morph-form gate (M-2): the def must exist, the
+	 * character's species must actually carry a {@code morph_toggle}
+	 * ability, and the one-time pick must still be open (or the caller is
+	 * on the free-respec seam). Matches the catalog's availability math.
+	 */
+	public static boolean canSelectMorphForm(PlayerCharacterData data,
+			ResourceLocation formId, boolean freeRespec) {
+		if (!LifepathContent.morphForms().contains(formId)
+				|| (data.morph() != null && !freeRespec)) {
+			return false;
+		}
+		SpeciesDefinition species = data.speciesId() == null ? null
+				: LifepathContent.species().get(data.speciesId());
+		return species != null && MorphService.speciesHasMorphToggle(species);
 	}
 
 	private static void selectSpecies(ServerPlayer player, ResourceLocation speciesId) {
@@ -227,6 +277,74 @@ public final class SelectionService {
 		SpecializationService.apply(data, specId);
 		CharacterManager.changed(player);
 		pushCatalog(player);
+	}
+
+	/**
+	 * The M-2 form pick: species-select's second step. The form locks like
+	 * the species itself — one pick on multiplayer, re-pickable only on the
+	 * singleplayer/op seam. Picked INACTIVE: the player still toggles into
+	 * the shape via the morph ability. A re-pick while morphed strips the
+	 * active profile first so the old form's stats can't linger.
+	 */
+	private static void selectMorphForm(ServerPlayer player, ResourceLocation formId) {
+		PlayerCharacterData data = CharacterManager.getCharacter(player);
+		if (data == null) {
+			return;
+		}
+		if (!canSelectMorphForm(data, formId, freeRespec(player))) {
+			String reason = denialReason(data, formId);
+			// Not-capable maps to the generic "unavailable" — revealing the
+			// morph-capable rule to a non-anima picker leaks nothing anyway,
+			// but keeps one denial vocabulary for the picker UI.
+			deny(player, formId,
+					"not_morph_capable".equals(reason) ? "unavailable" : reason);
+			return;
+		}
+		MorphService.clearActiveMorph(player, data);
+		data.setMorph(new PlayerCharacterData.MorphState(formId, false,
+				System.currentTimeMillis()));
+		CharacterManager.changed(player);
+		pushCatalog(player);
+	}
+
+	/** Why a morph pick would be denied — "unknown" | "not_morph_capable" | "already_chosen". */
+	private static String denialReason(PlayerCharacterData data, ResourceLocation formId) {
+		if (!LifepathContent.morphForms().contains(formId)) {
+			return "unknown";
+		}
+		SpeciesDefinition species = data.speciesId() == null ? null
+				: LifepathContent.species().get(data.speciesId());
+		if (species == null || !MorphService.speciesHasMorphToggle(species)) {
+			return "not_morph_capable";
+		}
+		return "already_chosen";
+	}
+
+	/**
+	 * Form card footer lines: the disguise's entity name (translatable —
+	 * "Fox" in the client's locale), then one {@code Attribute: value} line
+	 * per declared stat so the trade-off reads before committing. Unknown
+	 * stat attributes drop out silently (M-1 already warned at load).
+	 */
+	private static List<Component> morphDetails(MorphFormDefinition def) {
+		List<Component> lines = new ArrayList<>();
+		var entityType = BuiltInRegistries.ENTITY_TYPE.get(def.entityType());
+		if (entityType != null) {
+			lines.add(Component.translatable(entityType.getDescriptionId()));
+		}
+		for (var stat : def.stats().entrySet()) {
+			var holder = BuiltInRegistries.ATTRIBUTE.getHolder(stat.getKey())
+					.orElse(null);
+			if (holder == null) {
+				continue;
+			}
+			double v = stat.getValue();
+			String value = v == Math.rint(v) ? Long.toString((long) v)
+					: String.format(java.util.Locale.ROOT, "%.2f", v);
+			lines.add(Component.translatable(holder.value().getDescriptionId())
+					.append(Component.literal(": " + value)));
+		}
+		return cap(lines);
 	}
 
 	private static void deny(ServerPlayer player, ResourceLocation id,

@@ -2,7 +2,9 @@ package io.github.durdeuvlad.lifepath.network.s2c;
 
 import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.network.LifepathNetworking;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -23,9 +25,15 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
  * refresh — which is what the screen sends when opened, so the list is
  * always fresh at the moment of choice even after datapack reloads or
  * mid-session unlocks.
+ *
+ * <p>M-2 morph forms: {@code morphForms} is the pickable whitelist and
+ * {@code morphSpecies} the species ids whose active abilities carry a
+ * {@code morph_toggle} action — the client shows the form step when the
+ * picked species is in that set, and never re-derives the capability rule.
  */
 public record SelectionCatalogPayload(List<Entry> species,
-		List<Entry> specializations) implements CustomPacketPayload {
+		List<Entry> specializations, List<Entry> morphForms,
+		Set<String> morphSpecies) implements CustomPacketPayload {
 	public static final CustomPacketPayload.Type<SelectionCatalogPayload> ID =
 			LifepathNetworking.payloadId(LifepathMod.id("selection/catalog"));
 
@@ -64,10 +72,16 @@ public record SelectionCatalogPayload(List<Entry> species,
 					SelectionCatalogPayload::species,
 					Entry.CODEC.apply(ByteBufCodecs.list()),
 					SelectionCatalogPayload::specializations,
+					Entry.CODEC.apply(ByteBufCodecs.list()),
+					SelectionCatalogPayload::morphForms,
+					ByteBufCodecs.STRING_UTF8.apply(
+							ByteBufCodecs.collection(HashSet::new)),
+					SelectionCatalogPayload::morphSpecies,
 					SelectionCatalogPayload::new);
 
 	public static SelectionCatalogPayload empty() {
-		return new SelectionCatalogPayload(List.of(), List.of());
+		return new SelectionCatalogPayload(List.of(), List.of(), List.of(),
+				Set.of());
 	}
 
 	@Override

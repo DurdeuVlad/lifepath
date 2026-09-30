@@ -65,6 +65,17 @@ public final class ClientSelectionState {
 				|| !LifepathConfig.getBoolean(LifepathConfig.CLIENT, "onboarding_auto_open")) {
 			return;
 		}
+		// M-2: a morph-capable species pick with no form still owes a pick —
+		// arm the picker the same way (the screen opens on the form step).
+		var identity = ClientCharacterState.identity();
+		if (!identity.identity().speciesId().isEmpty()
+				&& identity.morph().formId().isEmpty()
+				&& catalog.morphSpecies().contains(identity.identity().speciesId())
+				&& catalog.morphForms().stream()
+						.anyMatch(e -> e.availability() == Entry.AVAILABLE)) {
+			autoOpenTicks = AUTO_OPEN_WINDOW_TICKS;
+			return;
+		}
 		if (!ClientCharacterState.identity().identity().speciesName()
 				.getString().isEmpty()) {
 			return;

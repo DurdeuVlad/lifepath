@@ -5,6 +5,7 @@ import io.github.durdeuvlad.lifepath.client.icon.ClientIcons;
 import io.github.durdeuvlad.lifepath.client.platform.ClientPlatform;
 import io.github.durdeuvlad.lifepath.client.selection.ClientSelectionState;
 import io.github.durdeuvlad.lifepath.network.c2s.RequestSelectionCatalogPayload;
+import io.github.durdeuvlad.lifepath.network.c2s.SelectMorphFormPayload;
 import io.github.durdeuvlad.lifepath.network.c2s.SelectSpecializationPayload;
 import io.github.durdeuvlad.lifepath.network.c2s.SelectSpeciesPayload;
 import io.github.durdeuvlad.lifepath.network.s2c.SelectionCatalogPayload;
@@ -37,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
  */
 @ClientOnly
 public class SelectionScreen extends Screen {
-	public enum Step { SPECIES, SPECIALIZATION }
+	public enum Step { SPECIES, MORPH_FORM, SPECIALIZATION }
 
 	private static final int TEXT = 0xFFE0E0E0;
 	private static final int ACCENT = 0xFF55FFFF;
@@ -82,9 +83,11 @@ public class SelectionScreen extends Screen {
 	private int blockedHintTicks;
 
 	public SelectionScreen(Step step) {
-		super(Component.translatable(step == Step.SPECIES
-				? "screen.lifepath.selection.species_title"
-				: "screen.lifepath.selection.spec_title"));
+		super(Component.translatable(switch (step) {
+			case SPECIES -> "screen.lifepath.selection.species_title";
+			case MORPH_FORM -> "screen.lifepath.selection.morph_title";
+			case SPECIALIZATION -> "screen.lifepath.selection.spec_title";
+		}));
 		this.step = step;
 	}
 
@@ -94,6 +97,12 @@ public class SelectionScreen extends Screen {
 		// datapack reloads or mid-session unlocks — ask for a rebuild.
 		if (minecraft != null && minecraft.player != null) {
 			ClientPlatform.get().sendToServer(new RequestSelectionCatalogPayload());
+		}
+		// Reopening with a morph-capable species picked but no form lands
+		// straight on the form step — the pick is still outstanding and the
+		// species grid would only show locked cards.
+		if (step != Step.MORPH_FORM && morphFormOwed()) {
+			step = Step.MORPH_FORM;
 		}
 		int buttonY = panelTop() + panelHeight() - 24;
 		confirmButton = addRenderableWidget(Button.builder(
@@ -114,6 +123,13 @@ public class SelectionScreen extends Screen {
 		if (catalog != lastCatalog) {
 			lastCatalog = catalog;
 			confirmPending = false;
+			// init() ran before the fresh catalog landed — if the owed
+			// form pick only shows now, jump to the step the same way.
+			if (step != Step.MORPH_FORM && morphFormOwed()) {
+				step = Step.MORPH_FORM;
+				selectedId = null;
+				scroll = 0;
+			}
 		}
 		if (blockedHintTicks > 0) {
 			blockedHintTicks--;
@@ -413,6 +429,24 @@ public class SelectionScreen extends Screen {
 		}
 		if (step == Step.SPECIES) {
 			ClientPlatform.get().sendToServer(new SelectSpeciesPayload(id));
+			// Morph-capable species get a second step: the one-time form
+			// pick, using the same card grid (M-2).
+			if (morphStepPending(sel)) {
+				step = Step.MORPH_FORM;
+				selectedId = null;
+				scroll = 0;
+				return;
+			}
+			boolean specPickable = ClientSelectionState.catalog().specializations()
+					.stream().anyMatch(e -> e.availability() == Entry.AVAILABLE);
+			if (specPickable) {
+				step = Step.SPECIALIZATION;
+				selectedId = null;
+				scroll = 0;
+				return;
+			}
+		} else if (step == Step.MORPH_FORM) {
+			ClientPlatform.get().sendToServer(new SelectMorphFormPayload(id));
 			boolean specPickable = ClientSelectionState.catalog().specializations()
 					.stream().anyMatch(e -> e.availability() == Entry.AVAILABLE);
 			if (specPickable) {
@@ -436,11 +470,35 @@ public class SelectionScreen extends Screen {
 	 *  pick, or already picked). */
 	private boolean pickOutstanding() {
 		var core = ClientCharacterState.identity().identity();
-		boolean unset = step == Step.SPECIES
-				? core.speciesId().isEmpty()
-				: core.specId().isEmpty();
+		boolean unset = switch (step) {
+			case SPECIES -> core.speciesId().isEmpty();
+			case MORPH_FORM -> morphFormOwed();
+			case SPECIALIZATION -> core.specId().isEmpty();
+		};
 		return unset && entries().stream()
 				.anyMatch(e -> e.availability() == Entry.AVAILABLE);
+	}
+
+	/**
+	 * True while the character's picked species is morph-capable but no
+	 * form is locked in — the state that owns the MORPH_FORM step. The
+	 * catalog's {@code morphSpecies} set carries the capability answer
+	 * (server-resolved); the identity payload carries the picked form.
+	 */
+	private boolean morphFormOwed() {
+		var identity = ClientCharacterState.identity();
+		String speciesId = identity.identity().speciesId();
+		return !speciesId.isEmpty()
+				&& identity.morph().formId().isEmpty()
+				&& ClientSelectionState.catalog().morphSpecies().contains(speciesId);
+	}
+
+	/** Just-confirmed species needs a form pick before the spec chain. */
+	private boolean morphStepPending(Entry species) {
+		SelectionCatalogPayload catalog = ClientSelectionState.catalog();
+		return catalog.morphSpecies().contains(species.id())
+				&& catalog.morphForms().stream()
+						.anyMatch(e -> e.availability() == Entry.AVAILABLE);
 	}
 
 	@Override
@@ -456,17 +514,27 @@ public class SelectionScreen extends Screen {
 
 	private List<Entry> entries() {
 		SelectionCatalogPayload catalog = ClientSelectionState.catalog();
-		return step == Step.SPECIES ? catalog.species() : catalog.specializations();
+		return switch (step) {
+			case SPECIES -> catalog.species();
+			case MORPH_FORM -> catalog.morphForms();
+			case SPECIALIZATION -> catalog.specializations();
+		};
 	}
 
 	private String domain() {
-		return step == Step.SPECIES ? "species" : "specialization";
+		return switch (step) {
+			case SPECIES -> "species";
+			case MORPH_FORM -> "morph";
+			case SPECIALIZATION -> "specialization";
+		};
 	}
 
 	private Component stepTitle() {
-		return Component.translatable(step == Step.SPECIES
-				? "screen.lifepath.selection.species_title"
-				: "screen.lifepath.selection.spec_title");
+		return Component.translatable(switch (step) {
+			case SPECIES -> "screen.lifepath.selection.species_title";
+			case MORPH_FORM -> "screen.lifepath.selection.morph_title";
+			case SPECIALIZATION -> "screen.lifepath.selection.spec_title";
+		});
 	}
 
 	/** Greedy word wrap on plain text. font.split can't be used here: it

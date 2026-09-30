@@ -230,6 +230,7 @@ public final class LifepathMod {
 		CharacterCommands.init();
 		io.github.durdeuvlad.lifepath.command.SpecializationCommands.init();
 		io.github.durdeuvlad.lifepath.command.SpeciesCommands.init();
+		io.github.durdeuvlad.lifepath.command.MorphCommands.init();
 		io.github.durdeuvlad.lifepath.command.DebugCommands.init();
 		io.github.durdeuvlad.lifepath.command.ConditionCommands.init();
 		io.github.durdeuvlad.lifepath.command.AttunementCommands.init();
@@ -288,6 +289,10 @@ public final class LifepathMod {
 		LifepathNetworking.registerC2S(
 				io.github.durdeuvlad.lifepath.network.c2s.SelectSpecializationPayload.ID,
 				io.github.durdeuvlad.lifepath.network.c2s.SelectSpecializationPayload.PACKET_CODEC);
+		// M-2: the form pick rides the same GUI request path as species/spec.
+		LifepathNetworking.registerC2S(
+				io.github.durdeuvlad.lifepath.network.c2s.SelectMorphFormPayload.ID,
+				io.github.durdeuvlad.lifepath.network.c2s.SelectMorphFormPayload.PACKET_CODEC);
 		io.github.durdeuvlad.lifepath.selection.SelectionService.init();
 		LifepathNetworking.registerS2C(
 				io.github.durdeuvlad.lifepath.network.s2c.FeedbackPayload.ID,
