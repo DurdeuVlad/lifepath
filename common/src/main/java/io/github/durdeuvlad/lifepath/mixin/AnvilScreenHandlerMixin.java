@@ -18,8 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class AnvilScreenHandlerMixin {
 
 	@Inject(method = "onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V",
-			at = @At("HEAD"))
+			at = @At("HEAD"), cancellable = true)
 	private void lifepath$smithingOutput(Player player, ItemStack stack, CallbackInfo ci) {
+		if (io.github.durdeuvlad.lifepath.morph.MorphDisguise
+				.isDisguised(player)) {
+			ci.cancel();
+			return;
+		}
 		VanillaGameplayProducers.onForgeOutput(player, stack,
 				io.github.durdeuvlad.lifepath.LifepathMod.id("anvil"));
 	}
