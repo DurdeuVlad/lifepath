@@ -68,6 +68,9 @@ public class SelectionScreen extends Screen {
 	private @Nullable String selectedId;
 	private Button confirmButton;
 	private Button laterButton;
+	/** Description of the card under the cursor this frame — consumed by the
+	 *  post-loop tooltip render so the box always lands above the grid. */
+	private @Nullable Component hoveredDesc;
 
 	public SelectionScreen(Step step) {
 		super(Component.translatable(step == Step.SPECIES
@@ -142,6 +145,7 @@ public class SelectionScreen extends Screen {
 	/** Card grid: scrollable, scissored; locked entries dim with a reason line. */
 	private void renderGrid(GuiGraphics context, List<Entry> entries, int gridLeft,
 			int gridTop, int gridBottom, int mouseX, int mouseY) {
+		hoveredDesc = null;
 		context.enableScissor(0, gridTop, width, gridBottom);
 		for (int i = 0; i < entries.size(); i++) {
 			Entry e = entries.get(i);
@@ -200,12 +204,18 @@ public class SelectionScreen extends Screen {
 						x + 5, y + CARD_H - 11, WARN);
 			}
 			if (hovered && !descText.isEmpty()) {
-				context.renderTooltip(font,
-						font.split(e.description(), 240),
-						mouseX, mouseY);
+				hoveredDesc = e.description();
 			}
 		}
 		context.disableScissor();
+		// Tooltip drawn after the loop + scissor: rendering it mid-loop let
+		// later cards paint their icon/text over it, and the grid scissor
+		// clipped the tooltip frame (right-column hovers flip it onto
+		// neighbouring cards, which is where the bleed-through showed).
+		if (hoveredDesc != null) {
+			context.renderTooltip(font, font.split(hoveredDesc, 240),
+					mouseX, mouseY);
+		}
 	}
 
 	/**

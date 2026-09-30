@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-beta.5 — picker tooltip fix
+
+Hotfix over beta.4: card description tooltips were rendered inside the
+card loop while the grid scissor was still active, so later cards painted
+their icon/text over the tooltip and the tooltip frame got clipped —
+visible as icons bleeding through and text overlapping on right-column
+hovers. The hovered card's tooltip now renders after the grid pass.
+Take this build over beta.4.
+
 ## 1.0.0-beta.4 — GUI blur fix
 
 Hotfix over beta.3: the picker and character screens drew their content
