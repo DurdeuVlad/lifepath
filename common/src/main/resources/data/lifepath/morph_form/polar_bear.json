@@ -1,0 +1,11 @@
+{
+	"entity_type": "minecraft:polar_bear",
+	"display_name": "Polar Bear",
+	"description": "A wall of fur that hits like an avalanche.",
+	"icon": "morph/polar_bear",
+	"stats": {
+		"minecraft:generic.max_health": 30.0,
+		"minecraft:generic.attack_damage": 6.0,
+		"minecraft:generic.movement_speed": 0.25
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"entity_type": "minecraft:sheep",
+	"display_name": "Sheep",
+	"description": "Soft where it counts, stubborn everywhere else.",
+	"icon": "morph/sheep",
+	"stats": {
+		"minecraft:generic.max_health": 8.0,
+		"minecraft:generic.attack_damage": 2.0,
+		"minecraft:generic.movement_speed": 0.23
+	}
+}

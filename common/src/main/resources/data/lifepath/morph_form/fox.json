@@ -1,0 +1,11 @@
+{
+	"entity_type": "minecraft:fox",
+	"display_name": "Fox",
+	"description": "Small, quick, and suspiciously good at stealing chickens.",
+	"icon": "morph/fox",
+	"stats": {
+		"minecraft:generic.max_health": 10.0,
+		"minecraft:generic.attack_damage": 3.0,
+		"minecraft:generic.movement_speed": 0.3
+	}
+}

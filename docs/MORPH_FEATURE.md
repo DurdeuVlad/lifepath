@@ -1,6 +1,22 @@
 # Anima morph — design + plan
 
-Status: **decisions locked**, issues filed. Feature block for post-beta.6.
+Status: **shipped** (M-1…M-6, issues #159–#164 all merged).
+
+## Shipped roster
+
+Eight handpicked land animals under `data/lifepath/morph_form/` — stats
+mirror the mob's own vanilla profile:
+
+| Form | HP | Bite | Speed |
+|---|---|---|---|
+| fox | 10 | 3 | 0.30 |
+| wolf | 8 | 4 | 0.30 |
+| cat | 10 | 3 | 0.30 |
+| rabbit | 3 | 2 | 0.35 |
+| goat | 10 | 2 | 0.20 |
+| panda | 20 | 6 | 0.15 |
+| polar_bear | 30 | 6 | 0.25 |
+| sheep | 8 | 2 | 0.23 |
 
 ## Intent
 
