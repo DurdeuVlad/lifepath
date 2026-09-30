@@ -8,6 +8,7 @@ import io.github.durdeuvlad.lifepath.LifepathMod;
 import io.github.durdeuvlad.lifepath.character.CharacterManager;
 import io.github.durdeuvlad.lifepath.character.PlayerCharacterData;
 import io.github.durdeuvlad.lifepath.content.SpeciesDefinition;
+import io.github.durdeuvlad.lifepath.morph.MorphService;
 import io.github.durdeuvlad.lifepath.registry.LifepathContent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -24,10 +25,11 @@ import net.minecraft.server.level.ServerPlayer;
  * <ul>
  *   <li>{@code get <player>} (admin) — show the current species and its key fields.</li>
  *   <li>{@code set <player> <id>} (admin) — set the species. Species effects are
- *       derived at eval time (ability/resource/aptitude refs), so a switch
- *       needs no cleanup; materialized resources keep ticking as owned
- *       character state. Admin override: {@code selection} rules are not
- *       enforced here.</li>
+ *       derived at eval time (ability/resource/aptitude refs), so the only
+ *       cleanup a switch needs is retiring the morph pick (an active shape
+ *       would lose its demorph ability); materialized resources keep
+ *       ticking as owned character state. Admin override: {@code selection}
+ *       rules are not enforced here.</li>
  * </ul>
  */
 public final class SpeciesCommands {
@@ -97,6 +99,11 @@ public final class SpeciesCommands {
 		}
 		PlayerCharacterData data = CharacterManager.getCharacter(target);
 		data.setSpeciesId(speciesId);
+		// Species swap retires the morph pick — a stranded active shape has
+		// no toggle ability left to demorph with. Same cleanup the GUI path
+		// (SelectionService.selectSpecies) performs.
+		MorphService.clearActiveMorph(target, data);
+		data.setMorph(null);
 		CharacterManager.markDirty(target);
 		CharacterManager.saveCharacter(target);
 		CharacterManager.syncCharacter(target);

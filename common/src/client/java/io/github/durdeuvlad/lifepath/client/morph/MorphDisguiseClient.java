@@ -82,7 +82,10 @@ public final class MorphDisguiseClient {
 		if (cached != null) {
 			return cached;
 		}
-		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(typeId);
+		// getHolder, not get: ENTITY_TYPE is a DefaultedRegistry — get()
+		// answers AIR for unknown ids rather than null.
+		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getHolder(typeId)
+				.map(net.minecraft.core.Holder::value).orElse(null);
 		Entity created = type == null ? null : type.create(level);
 		if (created == null) {
 			if (WARNED.add(typeId)) {

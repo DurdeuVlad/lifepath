@@ -9,7 +9,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.FurnaceResultSlot;
+import net.minecraft.world.inventory.LoomMenu;
+import net.minecraft.world.inventory.MerchantResultSlot;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.ResultSlot;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -39,21 +47,100 @@ public final class MorphDisguise {
 		return MorphDisguised.typeIdOf(entity) != null;
 	}
 
+	/**
+	 * A slot a morphed player must not take items from (morph feature M-5):
+	 * every station's output slot. {@code ResultContainer} is the shared
+	 * backing container for crafting, anvil, smithing, stonecutter,
+	 * grindstone, and cartography results — including the anonymous Slot
+	 * subclasses those menus create — while furnace and merchant results
+	 * keep their own slot types on other containers.
+	 *
+	 * <p>The loom is the lone exception: its output slot is an anonymous
+	 * {@code Slot} on a plain {@code SimpleContainer}, so no slot- or
+	 * container-class signal exists. It is identified through the owning
+	 * menu in {@link #isResultSlot(AbstractContainerMenu, Slot)} — the
+	 * {@code clicked} funnel's variant, which also covers the
+	 * {@code PICKUP_ALL} gather via {@link #pickAllWouldTakeResult}.
+	 * {@code Slot}-level callers ({@code mayPickup}, {@code tryRemove})
+	 * have no menu context, so the loom slot answers "not a result" to
+	 * them — unreachable either way, since every extraction passes
+	 * through {@code clicked}.
+	 */
+	public static boolean isResultSlot(Slot slot) {
+		return slot instanceof ResultSlot
+				|| slot instanceof FurnaceResultSlot
+				|| slot instanceof MerchantResultSlot
+				|| slot.container instanceof ResultContainer;
+	}
+
+	/**
+	 * Menu-aware result-slot check for the {@code clicked} funnel —
+	 * everything {@link #isResultSlot(Slot)} covers, plus the loom result
+	 * identified via {@link LoomMenu#getResultSlot()}.
+	 */
+	public static boolean isResultSlot(AbstractContainerMenu menu, Slot slot) {
+		if (isResultSlot(slot)) {
+			return true;
+		}
+		return menu instanceof LoomMenu loom && loom.getResultSlot() == slot;
+	}
+
+	/**
+	 * Whether a double-click gather ({@code ClickType.PICKUP_ALL}) on this
+	 * menu would draw from a result slot. The gather walks EVERY slot —
+	 * the clicked slot being innocent proves nothing — so the predicate
+	 * replicates vanilla's per-slot test from {@code doClick} verbatim:
+	 * {@code hasItem}, {@code canItemQuickReplace}, {@code mayPickup},
+	 * {@code canTakeItemForPickAll}. Mirroring it matters: covered result
+	 * slots report {@code mayPickup} → false through the Slot-level inject,
+	 * and crafting/smithing/stonecutter/cartography results are excluded
+	 * by vanilla's own {@code canTakeItemForPickAll} override — the gather
+	 * skips all of them by itself, so they must NOT trip this refusal
+	 * (otherwise a matching stack sitting in a 2×2 result would block
+	 * double-click gathering anywhere in the inventory).
+	 *
+	 * <p>What survives the filter is exactly the up-front refusal's real
+	 * job: result slots whose take the per-slot gate can't see — the
+	 * anvil's {@code ItemCombinerMenu$2}, whose {@code mayPickup} override
+	 * bypasses the Slot inject, and the loom result, which the
+	 * slot-level classification can't identify (no menu context).
+	 */
+	public static boolean pickAllWouldTakeResult(AbstractContainerMenu menu,
+			Player player) {
+		ItemStack carried = menu.getCarried();
+		if (carried.isEmpty()) {
+			return false;
+		}
+		for (Slot slot : menu.slots) {
+			// hasItem first, as in the vanilla loop: canItemQuickReplace
+			// answers true for EMPTY slots (its quick-move clause).
+			if (slot.hasItem() && isResultSlot(menu, slot)
+					&& AbstractContainerMenu.canItemQuickReplace(slot, carried, true)
+					&& slot.mayPickup(player)
+					&& menu.canTakeItemForPickAll(carried, slot)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** The morphed player's disguise dims, or null when not morphed / unknown type. */
 	public static @Nullable EntityDimensions dimsFor(Entity entity) {
 		ResourceLocation typeId = MorphDisguised.typeIdOf(entity);
 		if (typeId == null) {
 			return null;
 		}
-		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(typeId);
-		if (type == null) {
+		// getHolder, not get: ENTITY_TYPE is a DefaultedRegistry — get()
+		// answers AIR for unknown ids rather than null.
+		var holder = BuiltInRegistries.ENTITY_TYPE.getHolder(typeId).orElse(null);
+		if (holder == null) {
 			if (WARNED.add(typeId)) {
 				LifepathMod.LOGGER.warn("morph disguise entity type {} not in registry"
 						+ " — vanilla dimensions", typeId);
 			}
 			return null;
 		}
-		return type.getDimensions();
+		return holder.value().getDimensions();
 	}
 
 	/**

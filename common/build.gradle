@@ -31,6 +31,10 @@ dependencies {
 	// runtime (fabric-loader ships sponge-mixin + MixinExtras).
 	compileOnly "net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7"
 	compileOnly "io.github.llamalad7:mixinextras-common:0.4.1"
+	// MixinExtras injectors (@WrapOperation, @ModifyExpressionValue) are not
+	// understood by sponge-mixin's AP; without MixinExtrasAP on the processor
+	// path their targets never reach the refmap and production apply fails.
+	annotationProcessor "io.github.llamalad7:mixinextras-common:0.4.1"
 	compileOnly "org.jetbrains:annotations:24.1.0"
 
 	// TOML config parsing — loaders bundle these into their own jars.
