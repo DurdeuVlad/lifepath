@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.0.0-beta.2 — guided onboarding + full localization
+
+Second beta build: the species/specialization pick is now a real GUI flow,
+and every player-facing string is translatable.
+
+### What's in (delta over beta.1)
+
+- **Guided selection screen** — the species + specialization pick auto-opens
+  on first join; cards show icon, name, description, and a "what you get"
+  strip. Reopen any time via the Character screen's Choose button (key `O`;
+  `client.toml onboarding_auto_open` toggles auto-open). `/lifepath` stays
+  admin-only — players never touch commands.
+- **Picker UX** — draggable scrollbar, details strip that collapses when
+  nothing is selected, word-wrapped descriptions with `…` + hover tooltips,
+  green `+` / red `-` pros/cons lines on every card (diet, environment,
+  fragility — plain language, no assumed Origins knowledge).
+- **Specialization pros/cons** — spec cards show the same `+`/`-` lines:
+  XP rates, decay floors, carry bonuses, honest trade-offs.
+- **Full localization** — all player-facing text lives in editable YAML at
+  `common/src/main/lang/*.yaml`; the build generates Minecraft lang JSON.
+  Content text (species, abilities, skills, resource bands, conditions,
+  attunements) travels as `translatableWithFallback` components, so every
+  client renders its own locale while custom datapack prose still works
+  with no lang file. Romanian (`ro_ro`) ships complete: 435/435 keys.
+- **Docs** — `docs/TRANSLATIONS.md` (add a language, content key convention),
+  `docs/DATAPACK_API.md` (`strengths`/`weaknesses` on species + spec).
+
+### Fixed
+
+- Picker auto-open no longer races the terrain-loading screen.
+- Screen render calls `super.render` — buttons and widgets always draw.
+- Character-screen default key moved `C` → `O` (vanilla save-toolbar
+  conflict made `C` unreachable).
+
 ## 1.0.0-beta.1 — public beta / release candidate
 
 First build intended for real-player testing. Feature-complete through
