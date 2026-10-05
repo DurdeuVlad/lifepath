@@ -47,19 +47,35 @@ public abstract class PlayerEntityMixin {
 	 * fully-negated hits proc nothing — a shield-ABSORBED hit still lands
 	 * and procs. Server-side only.
 	 */
-	@WrapOperation(method = "attack", at = {
-			@At(value = "INVOKE",
-					target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
-			@At(value = "INVOKE",
-					target = "Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z")})
-	private boolean lifepath$damageDealtAfterHit(net.minecraft.world.entity.Entity victim,
+	@WrapOperation(method = "attack", at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+	private boolean lifepath$damageDealtMainHit(net.minecraft.world.entity.Entity victim,
 			net.minecraft.world.damagesource.DamageSource source, float amount,
 			Operation<Boolean> original) {
 		boolean landed = original.call(victim, source, amount);
+		lifepath$procDamageDealt(victim, source, amount, landed);
+		return landed;
+	}
+
+	// Two handlers: the owner param must match each call site's declared
+	// owner — the main hit invokes Entity.hurt, the sweep LivingEntity.hurt —
+	// so a single wrapper signature can't cover both (MixinApplyError).
+	@WrapOperation(method = "attack", at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+	private boolean lifepath$damageDealtSweep(net.minecraft.world.entity.LivingEntity victim,
+			net.minecraft.world.damagesource.DamageSource source, float amount,
+			Operation<Boolean> original) {
+		boolean landed = original.call(victim, source, amount);
+		lifepath$procDamageDealt(victim, source, amount, landed);
+		return landed;
+	}
+
+	private void lifepath$procDamageDealt(net.minecraft.world.entity.Entity victim,
+			net.minecraft.world.damagesource.DamageSource source, float amount,
+			boolean landed) {
 		if (landed && (Object) this instanceof ServerPlayer player) {
 			AbilityEngine.onDamageDealt(player, victim, source, amount);
 		}
-		return landed;
 	}
 
 	@WrapOperation(method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;", at = @At(value = "INVOKE",

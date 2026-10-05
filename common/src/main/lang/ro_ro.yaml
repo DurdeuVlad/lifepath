@@ -541,6 +541,7 @@ screen.lifepath.skills.empty: "Nicio aptitudine încă. Vor apărea pe măsură 
 screen.lifepath.skills.level: "Nivelul %s"
 screen.lifepath.skills.title: "Aptitudini"
 screen.lifepath.skills.xp: "%s / %s XP"
+tag.item.lifepath.automaton_foods: "Mâncăruri pentru automate"
 tag.item.lifepath.cookable_foods: "Mâncăruri care se gătesc"
 tag.item.lifepath.coolants: "Agente de răcire"
 tag.item.lifepath.fishing_junk: "Resturi pescuite"
