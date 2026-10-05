@@ -58,6 +58,7 @@ public final class LifepathCommands {
 		initialized = true;
 
 		register(literal("version").executes(ctx -> version(ctx.getSource())));
+		register(literal("help").executes(ctx -> help(ctx.getSource())));
 		register(literal("reload")
 				.requires(src -> src.hasPermission(ADMIN_PERMISSION))
 				.executes(ctx -> reload(ctx.getSource())));
@@ -74,6 +75,21 @@ public final class LifepathCommands {
 		source.sendSuccess(() -> Component.literal(
 				"Lifepath " + LifepathMod.modVersion() + " (data version " + LifepathMod.DATA_VERSION + ")"),
 				false);
+		source.sendSuccess(() -> Component.literal(
+				"Run /lifepath help for the command list"), false);
+		return Command.SINGLE_SUCCESS;
+	}
+
+	/** In-game discovery (UX-A1): bare {@code /lifepath} used to answer with
+	 *  only the version — {@code help} names every registered subtree and
+	 *  points at the written reference. */
+	private static int help(CommandSourceStack source) {
+		var names = SUBCOMMANDS.stream().map(LiteralArgumentBuilder::getLiteral)
+				.sorted().toList();
+		source.sendSuccess(() -> Component.literal(
+				"Lifepath commands: " + String.join(", ", names)), false);
+		source.sendSuccess(() -> Component.literal(
+				"Full reference: docs/ADMIN_COMMANDS.md"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 

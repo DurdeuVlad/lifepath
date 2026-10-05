@@ -42,6 +42,19 @@ public final class ClientFeedback {
 		} else {
 			client.player.displayClientMessage(message, false);
 		}
+		// UX-P3: species assignment ends mandatory onboarding — name the two
+		// mod keys once, with the player's actual binds, else discovery of
+		// the Character screen relies on the controls menu alone.
+		if ("species_assigned".equals(payload.kind())
+				&& com.dwurdy.lifepath.client.LifepathClient.characterKey != null
+				&& com.dwurdy.lifepath.client.LifepathClient.abilityKey != null) {
+			client.player.displayClientMessage(Component.translatable(
+					"feedback.lifepath.keys_hint",
+					com.dwurdy.lifepath.client.LifepathClient.characterKey
+							.getTranslatedKeyMessage(),
+					com.dwurdy.lifepath.client.LifepathClient.abilityKey
+							.getTranslatedKeyMessage()), false);
+		}
 	}
 
 	/** Builds the localized message for a payload kind + args. */

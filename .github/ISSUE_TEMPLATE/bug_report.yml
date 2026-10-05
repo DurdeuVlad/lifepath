@@ -1,0 +1,45 @@
+name: Bug Report
+description: Something in Lifepath isn't working right
+labels: [bug]
+body:
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Loader
+      description: Which loader did you hit this on?
+      options:
+        - NeoForge
+        - Fabric
+        - Both
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Mod version
+      description: From `/lifepath version` (e.g. 1.0.0-beta.8)
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what actually happened. Step-by-step repro helps most.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Screenshots, video, or `latest.log` excerpt. A screenshot of the broken thing is worth more than a description of it.
+      placeholder: Drag screenshots or log excerpts here
+    validations:
+      required: false
+  - type: input
+    id: character
+    attributes:
+      label: Character setup (if relevant)
+      description: Species, specialization, held conditions — e.g. "Phoenix, no spec"
+      placeholder: Optional
+    validations:
+      required: false

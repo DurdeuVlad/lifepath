@@ -22,13 +22,13 @@ class LifepathCommandsTest {
 	}
 
 	@Test
-	void builtInSubcommandsAreVersionAndReload() {
+	void builtInSubcommandsAreVersionHelpAndReload() {
 		LifepathCommands.init();
 
 		Set<String> names = dispatchRoot().getChildren().stream()
 				.map(CommandNode::getName).collect(Collectors.toSet());
 
-		assertEquals(Set.of("version", "reload"), names);
+		assertEquals(Set.of("version", "help", "reload"), names);
 	}
 
 	@Test
