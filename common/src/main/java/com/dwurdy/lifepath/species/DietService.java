@@ -71,6 +71,17 @@ public final class DietService {
 	 * a denied stack past the use gates.
 	 */
 	public static void denyFood(ServerPlayer player) {
+		// A diet may name its own refusal line ("only iron nourishes you") —
+		// the stock message stays the fallback.
+		for (DietDefinition def : effectiveDiets(
+				com.dwurdy.lifepath.character.CharacterManager
+						.getCharacter(player))) {
+			if (def.denyMessage().isPresent()) {
+				player.displayClientMessage(net.minecraft.network.chat.Component
+						.literal(def.denyMessage().get()), true);
+				return;
+			}
+		}
 		player.displayClientMessage(net.minecraft.network.chat.Component
 				.translatable("lifepath.diet.denied"), true);
 	}

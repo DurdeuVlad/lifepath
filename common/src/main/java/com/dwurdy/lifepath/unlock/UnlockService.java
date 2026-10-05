@@ -2,11 +2,14 @@ package com.dwurdy.lifepath.unlock;
 
 import com.dwurdy.lifepath.character.CharacterManager;
 import com.dwurdy.lifepath.character.PlayerCharacterData;
+import com.dwurdy.lifepath.content.SpeciesDefinition;
 import com.dwurdy.lifepath.content.UnlockDefinition;
 import com.dwurdy.lifepath.event.ActivityEvent;
+import com.dwurdy.lifepath.feedback.FeedbackService;
 import com.dwurdy.lifepath.registry.LifepathContent;
 import java.util.List;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -59,9 +62,25 @@ public final class UnlockService {
 		for (ResourceLocation content : def.unlocks()) {
 			if (grant(data, player, content)) {
 				granted++;
+				// UX-P1: a consumed ritual item with no message reads as a
+				// no-op — name what landed. Admin grants go through grant()
+				// directly and report to the admin instead.
+				FeedbackService.send(player, "unlocked", contentName(def, content));
 			}
 		}
 		return granted;
+	}
+
+	/** Player-facing name for a granted id: the content's display name when
+	 *  it's a registered species, else the ritual's name, else the raw id. */
+	private static Component contentName(UnlockDefinition def,
+			ResourceLocation content) {
+		SpeciesDefinition species = LifepathContent.species().get(content);
+		if (species != null) {
+			return Component.literal(species.displayName());
+		}
+		return Component.literal(def.displayName().isEmpty()
+				? content.toString() : def.displayName());
 	}
 
 	/** {@code type:item} sources on a used stack; consumes on grant. */

@@ -230,11 +230,16 @@ range-locked effects/actions via the normal ability machinery. Referenced by
 ## `diet/` — allowed-food list
 
 ```json
-{ "allowed": ["minecraft:beef", "#lifepath:undead_foods"] }
+{ "allowed": ["minecraft:beef", "#lifepath:undead_foods"],
+  "deny_message": "Your body rejects that food — only meat nourishes you." }
 ```
 
 `allowed` mixes item ids and `#tags`. While a species/condition diet applies,
-non-listed foods yield zero nutrition. Referenced by `diet_rules`.
+non-listed foods are refused at use-start and yield zero nutrition through
+the `Player.eat` backstop. Referenced by `diet_rules`.
+
+`deny_message` (optional) replaces the stock refusal actionbar
+(`lifepath.diet.denied`) — use it to say what actually nourishes.
 
 ## `relation/` — mob disposition rules
 
