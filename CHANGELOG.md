@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.0.0-beta.8 — phoenix, diet law & journey polish
+
+A hidden species rises from the ashes, diets become real law instead of a
+debuff, the ability engine grows a victim-aware damage trigger, and every
+player/tester/admin journey got a pass — all exercised end-to-end on a live
+server with a headless client.
+
+- **Phoenix — the hidden species.** Offer a Totem of Undying and the
+  contract grants `lifepath:phoenix`: fire doesn't touch you, flame mends
+  you, and flight holds while the inner fire burns. Death is a molt — you
+  return frail and earthbound under Rebirth Molt (weakness, slowness, no
+  wings) until the stage burns out and flight returns. Secret for players:
+  the picker stays silent until the unlock lands; admins see it through
+  `/lifepath unlock` and `character inspect`.
+- **Dietary law.** Species diets hard-block eating entirely — three layers
+  (use-start, use-item, direct-eat backstop) so denied food is never
+  consumed. Denials are phrased per-diet: the ferrovore automaton hears
+  "only iron nourishes you", and `Devour Iron` turns nuggets and ingots
+  into real meals.
+- **Frostbite replaces Frost Walk.** Iceborn strikes now carry winter —
+  victims freeze (frost meter) and slow on hit, 8s cooldown, driven by the
+  new `damage_dealt` trigger and `victim` target resolver.
+- **Ability-engine vocabulary.** `damage_dealt` procs only on landed hits;
+  new conditions (`inventory_contains`, `food_level`, biome/temperature
+  reads) and actions (`freeze_ticks`, `feed`, `consume_item`, flight
+  grants) keep content datapack-driven — the engine never special-cases a
+  species.
+- **Skill panel overhaul.** The character screen lists every skill with
+  level, progress, and aptitude — no more hidden tracks.
+- **Namespace → `com.dwurdy`.** Java packages and Maven group moved to the
+  dwurdy.com domain (M18). The `lifepath` mod id and datapack namespace
+  are unchanged — worlds and datapacks keep working.
+- **Journey fixes (M19).** Unlock grants announce themselves
+  ("Unlocked: Phoenix"), first identity posts your actual keybind names,
+  `/lifepath help` maps the command tree, testers get a bug-report issue
+  template plus `docs/TESTING.md`.
+- **Live-verified.** Booted on both loaders and exercised with a real
+  (headless) client: totem → unlock → flight → death → frailty → restored,
+  diet denial, forged selection/activation packets re-validated
+  server-side, and XP awards — including one real mixin crash found and
+  fixed before release.
+
 ## 1.0.0-beta.7 — anima morph
 
 The anima species can now become an animal — picked once at species-select,
