@@ -1,0 +1,21 @@
+{
+	"display_name": "Compact Frame",
+	"description": "Built low to the ground — dwarves stand visibly shorter than most.",
+	"icon": "ability/dwarf_sturdy_frame",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.scale",
+			"operation": "add_multiplied_total",
+			"value": -0.15,
+			"duration_ticks": 100
+		}
+	]
+}

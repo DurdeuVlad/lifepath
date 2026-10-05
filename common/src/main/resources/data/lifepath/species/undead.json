@@ -6,7 +6,9 @@
 	"selection": "open",
 	"diet_rules": "lifepath:necrophage",
 	"mob_dispositions": "lifepath:undead_kin",
-	"passive_abilities": [],
+	"passive_abilities": [
+		"lifepath:undead_sun_burn"
+	],
 	"active_abilities": [
 		"lifepath:undead_death_sight"
 	]
@@ -16,6 +18,7 @@
 		"See the living outlined at night"
 	],
 	"weaknesses": [
-		"Only necrotic flesh feeds you"
+		"Only necrotic flesh feeds you",
+		"Daylight under open sky sets you alight"
 	]
 }

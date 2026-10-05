@@ -1,8 +1,8 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "io.github.durdeuvlad.lifepath.client.mixin",
-	"plugin": "io.github.durdeuvlad.lifepath.client.mixin.LifepathClientMixinPlugin",
+	"package": "com.dwurdy.lifepath.client.mixin",
+	"plugin": "com.dwurdy.lifepath.client.mixin.LifepathClientMixinPlugin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"EntityRenderDispatcherMixin",

@@ -1,0 +1,43 @@
+{
+	"display_name": "Rebirth Frailty",
+	"description": "Fresh from the pyre — small, slow, and weak until your true form returns.",
+	"icon": "ability/phoenix_rise",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:condition_stage",
+				"condition": "lifepath:phoenix_rebirth",
+				"op": "eq",
+				"stage": 0
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:weakness",
+			"duration": 100,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:slowness",
+			"duration": 100,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.scale",
+			"operation": "add_multiplied_total",
+			"value": -0.2,
+			"duration_ticks": 100
+		}
+	]
+}

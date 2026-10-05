@@ -1,15 +1,19 @@
 {
 	"display_name": "Rust",
-	"description": "Water gums your joints — submerged, you stiffen and slow.",
+	"description": "Water gums your joints — rain, snow or submersion stiffens you.",
 	"icon": "ability/automaton_rust",
 	"trigger": {
 		"type": "passive",
 		"interval_ticks": 40
 	},
 	"conditions": {
-		"all": [
+		"any": [
 			{
 				"type": "lifepath:submerged"
+			},
+			{
+				"type": "lifepath:in_precipitation",
+				"state": "any"
 			}
 		]
 	},

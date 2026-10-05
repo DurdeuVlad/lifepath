@@ -27,7 +27,7 @@ override semantics apply: same-id files in later packs win.
 |---|---|---|
 | `display_name` | yes | Human label (future UI). |
 | `enabled` | no, default `true` | `false` keeps the def registered (refs resolve, ownership counts) but every trigger path returns `DISABLED`. Does NOT skip load validation — a disabled file with errors is still rejected. |
-| `trigger` | yes | `{"type": "active"\|"passive"\|"event"\|"damage_taken"}`. `passive` honors `interval_ticks` (default 20, ignored on other kinds). `event` requires `events[]` (activity-type ids, e.g. `lifepath:mining`, `lifepath:resource_band_enter`). `damage_taken` evaluates synchronously inside the player's `damage()` call: passing conditions scale the incoming amount by `multiplier` (default 1.0), and `actions`/`cost`/`cooldown`/`resource_interactions` are ignored (warned at load). `events[]` on a non-event trigger warns and is ignored. `resource_interactions` likewise only apply under `passive`. |
+| `trigger` | yes | `{"type": "active"\|"passive"\|"event"\|"damage_taken"\|"damage_dealt"}`. `passive` honors `interval_ticks` (default 20, ignored on other kinds). `event` requires `events[]` (activity-type ids, e.g. `lifepath:mining`, `lifepath:resource_band_enter`). `damage_taken` evaluates synchronously inside the player's `damage()` call: passing conditions scale the incoming amount by `multiplier` (default 1.0), and `actions`/`cost`/`cooldown`/`resource_interactions` are ignored (warned at load). `damage_dealt` runs the FULL pipeline inside `Player.attack` after a landed hit — conditions see the struck entity and dealt amount through the damage context, `target` can be `lifepath:victim`, and `cooldown` gates the proc rate (`multiplier` is ignored). `events[]` on a non-event trigger warns and is ignored. `resource_interactions` likewise only apply under `passive`. |
 | `conditions` | no | `all[]` must ALL pass; `any[]` (if present) needs at least one pass. Empty = always true. |
 | `target` | yes | One spec node resolving the target set. |
 | `actions` | no, default `[]` | Spec nodes run per resolved target, in order. Empty warns on non-`damage_taken` triggers (cooldown-only ability). |
@@ -66,21 +66,27 @@ reference and skipped by the content-ref scan.
 | `resource_threshold` | `resource`, `op`, `value` |
 | `skill_level` | `skill`, `op`, `level` |
 | `health_threshold` | `op`, `value` |
+| `food_level` | `op`, `value` — compares the player's food level (half-shanks, 0–20); gates "eat"-style actives (e.g. `automaton_devour_iron` requires `lt 20` so iron can't be burned on a full bar) |
 | `biome_tag` | `tag` (biome tag id, `#` optional) |
 | `dimension` | `id` |
 | `daylight` / `night` | — |
 | `weather` | `state`: `thunder`\|`rain`\|`clear` |
-| `submerged` / `on_fire` | — |
+| `submerged` / `on_fire` / `is_flying` | — — `is_flying` reads `abilities.flying` (actively flying, not merely mayfly) — the gate for charging flight's cost only while airborne |
 | `block_nearby` | `block` (id or `#tag`), `radius` |
 | `entity_nearby` | `entity` (id or `#tag`), `radius` |
-| `inventory_contains` | `item` (id or `#tag`), `min_count` |
+| `inventory_contains` | `item` (id or `#tag`), `min_count` — counts every inventory slot (main + armor + offhand) |
 | `equipment_contains` | `item` (id or `#tag`), `slot`? |
 | `inside_block` | `block` (id or `#tag`, required) — the block state at the player's feet |
-| `attacker_entity` | `entity` (id or `#tag`) — matches `source.getAttacker()`; damage_taken only |
-| `damage_type` | `id` (id or `#tag` on the damage-type registry); damage_taken only |
-| `damage_amount` | `op`, `value` — compares the pre-modifier amount; damage_taken only |
+| `attacker_entity` | `entity` (id or `#tag`) — matches `source.getAttacker()`; damage contexts only (`damage_taken`/`damage_dealt`) |
+| `victim_entity` | `entity` (id or `#tag`) — matches the entity the player struck; `damage_dealt` only |
+| `damage_type` | `id` (id or `#tag` on the damage-type registry); damage contexts only |
+| `damage_amount` | `op`, `value` — compares the context amount (incoming base on `damage_taken`, dealt on `damage_dealt`); damage contexts only |
 | `has_condition` | `condition` (condition-def id) — true while the character holds it |
 | `condition_stage` | `condition`, `stage`, `op`? (default `>=`) — compares the held stage index |
+| `exposed_to_sky` | — — `canSeeSky` at the player's position |
+| `in_precipitation` | `state`?: `any`\|`rain`\|`snow` (default `any`) — vanilla `isRainingAt` semantics widened to count snow |
+| `light_level` | `op`, `value`, `source`?: `any`\|`block`\|`sky` (default `any` = max local raw brightness) |
+| `y_level` | `op`, `value` — compares the player's block-position Y |
 | `player_faction` | `faction` (id), `min_level`? — external faction membership via the TeamLapen bridge (Vampirism *and* Werewolves share it). Always false when the mod is absent or the bridge cut |
 | `not` | `condition` (an inline spec node) — negates one condition, Origins-style; a malformed or throwing inner node counts as true → the not yields false |
 
@@ -89,6 +95,7 @@ reference and skipped by the content-ref scan.
 | Type | Params |
 |---|---|
 | `self` | — |
+| `victim` | — — the entity the player struck; resolves only inside a `damage_dealt` eval |
 | `entities_in_radius` | `radius`, `entity` (id or `#tag`, optional), `living_only` (default true) |
 | `blocks_in_radius` | `radius`, `block` (id or `#tag`, **required** — absent resolves to nothing), `limit` (scan cap) |
 
@@ -107,11 +114,14 @@ reference and skipped by the content-ref scan.
 | `damage` | `amount`, `source`? (`magic`\|`starve`\|`fall`\|`fire`\|`wither`\|`drown`, else player-attack) |
 | `heal` | `amount` |
 | `ignite` | `duration_ticks`? (default 80) — sets burning; never shortens an existing burn |
+| `freeze_ticks` | `ticks` — extends the entity's frost meter (shiver overlay → freeze damage past the vanilla threshold); never thaws, skips `canFreeze=false` targets |
 | `random_teleport` | `range`? (default 8, max 64), `attempts`? (default 16, max 64) — chorus-fruit blink to a random safe spot (never into walls, void, or liquid); no-op if every sample fails |
 | `grow_blocks` | `growth_rolls` |
 | `freeze_water` | `temporary` (default true) |
 | `highlight_entities` | `duration_ticks`, `visibility` (`self`\|`global`) |
-| `consume_item` | `item` (id or `#tag`), `count` |
+| `consume_item` | `item` (id or `#tag`), `count` — removes from every inventory slot `inventory_contains` counts (main + armor + offhand) |
+| `feed` | `nutrition` (half-shanks), `saturation_modifier` — nourishes a ServerPlayer target without an eat animation (non-food items like automaton iron); saturation gained = nutrition × modifier × 2 |
+| `grant_flight` | `duration_ticks`? (default 60, min 20) — refreshed `mayfly` grant; expiry persists in a schedule marker and the passive sweep revokes it once conditions stop refreshing. Pair with a second `is_flying`-gated passive carrying negative `resource_interactions` to make flight cost something (see `phoenix_wings`/`phoenix_flight_drain`) |
 | `play_sound` | `sound`, `volume`?, `pitch`? |
 | `spawn_particle` | `particle`, `count`?, `dx`/`dy`/`dz`?, `speed`? |
 | `morph_toggle` | (none) — flips the character's picked `morph_form` disguise on/off; anima-only, needs a form chosen at species-select. Not composable — silently no-ops for characters without a form |

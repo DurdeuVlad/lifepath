@@ -1,0 +1,35 @@
+{
+	"display_name": "Sun Scorned",
+	"description": "Daylight under open sky sets you alight — shelter, shade and storms spare you.",
+	"icon": "ability/vampirism_sun_sickness",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:daylight"
+			},
+			{
+				"type": "lifepath:exposed_to_sky"
+			},
+			{
+				"type": "lifepath:not",
+				"condition": {
+					"type": "lifepath:in_precipitation",
+					"state": "any"
+				}
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:ignite",
+			"duration_ticks": 40
+		}
+	]
+}

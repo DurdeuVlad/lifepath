@@ -1,0 +1,26 @@
+{
+	"display_name": "Wingbeat",
+	"description": "True flight burns your inner flame — land, and it rekindles.",
+	"icon": "ability/phoenix_flare",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 20
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:is_flying"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [],
+	"resource_interactions": [
+		{
+			"resource": "lifepath:flame",
+			"per_second": -4.0
+		}
+	]
+}

@@ -14,14 +14,14 @@
 		"lifepath:iceborn_heat_sources",
 		"lifepath:iceborn_lava_nearby",
 		"lifepath:iceborn_coolant",
-		"lifepath:iceborn_overheat"
+		"lifepath:iceborn_overheat",
+		"lifepath:iceborn_frostbite"
 	],
-	"active_abilities": [
-		"lifepath:iceborn_frost_walk"
-	]
+	"active_abilities": []
 ,
 	"strengths": [
-		"Frost and ice keep you sharp and quick to mend"
+		"Frost and ice keep you sharp and quick to mend",
+		"Your strikes freeze and slow enemies"
 	],
 	"weaknesses": [
 		"Heat, fire and lava drag you toward sluggish weakness"

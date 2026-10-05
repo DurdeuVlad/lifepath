@@ -1,0 +1,109 @@
+package com.dwurdy.lifepath.network.s2c;
+
+import com.dwurdy.lifepath.LifepathMod;
+import com.dwurdy.lifepath.network.LifepathNetworking;
+import java.util.List;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+
+/**
+ * Per-skill display cards for the M6-2 skills screens (server → client).
+ * Every field the UI renders is resolved server-side: display names,
+ * description/hint text, rank-band key, progress numbers, floor, grace-end
+ * timestamp, next-milestone label, and current-bonus names. The client never
+ * reads content registries and never mutates state.
+ *
+ * <p>Decay is conveyed as raw inputs ({@link Progress#protectedFloor()},
+ * {@link Progress#graceEndsEpochMs()}) so the client can phrase it in plain
+ * language ("Protected for 2 days") without exposing timers or red arrows.
+ */
+public record SkillsSummaryPayload(List<SkillCard> skills)
+		implements CustomPacketPayload {
+
+	/** One skill's display card. */
+	public record SkillCard(String id, Display display, Progress progress,
+			Details details) {
+		/** {@code icon} is the normalized texture id from the def's
+		 * {@code icon} field, or "" when none (M12-1). */
+		public record Display(Component name, Component description,
+				String rankKey, String aptitude, Component improveHint,
+				String icon) {
+			static final StreamCodec<RegistryFriendlyByteBuf, Display> CODEC =
+					StreamCodec.composite(
+							ComponentSerialization.TRUSTED_STREAM_CODEC,
+									Display::name,
+							ComponentSerialization.TRUSTED_STREAM_CODEC,
+									Display::description,
+							ByteBufCodecs.STRING_UTF8, Display::rankKey,
+							ByteBufCodecs.STRING_UTF8, Display::aptitude,
+							ComponentSerialization.TRUSTED_STREAM_CODEC,
+									Display::improveHint,
+							ByteBufCodecs.STRING_UTF8, Display::icon,
+							Display::new);
+		}
+
+		public record Progress(int level, double xpIn, double xpNeed,
+				int protectedFloor, long graceEndsEpochMs) {
+			static final StreamCodec<RegistryFriendlyByteBuf, Progress> CODEC =
+					StreamCodec.composite(
+							ByteBufCodecs.INT, Progress::level,
+							ByteBufCodecs.DOUBLE, Progress::xpIn,
+							ByteBufCodecs.DOUBLE, Progress::xpNeed,
+							ByteBufCodecs.INT, Progress::protectedFloor,
+							ByteBufCodecs.VAR_LONG, Progress::graceEndsEpochMs,
+							Progress::new);
+		}
+
+		/**
+		 * {@code nextMilestoneEffects} (M16): the upcoming milestone's effect
+		 * refs resolved server-side (name + icon), so the client can show
+		 * "what you unlock", not just flavor text. Empty when no milestone
+		 * is ahead.
+		 */
+		public record Details(int nextMilestoneLevel, String nextMilestoneText,
+				List<IdentitySummaryPayload.Entry> bonuses,
+				List<IdentitySummaryPayload.Entry> nextMilestoneEffects) {
+			static final StreamCodec<RegistryFriendlyByteBuf, Details> CODEC =
+					StreamCodec.composite(
+							ByteBufCodecs.INT, Details::nextMilestoneLevel,
+							ByteBufCodecs.STRING_UTF8, Details::nextMilestoneText,
+							IdentitySummaryPayload.Entry.CODEC
+									.apply(ByteBufCodecs.list()),
+									Details::bonuses,
+							IdentitySummaryPayload.Entry.CODEC
+									.apply(ByteBufCodecs.list()),
+									Details::nextMilestoneEffects,
+							Details::new);
+		}
+
+		static final StreamCodec<RegistryFriendlyByteBuf, SkillCard> CODEC =
+				StreamCodec.composite(
+						ByteBufCodecs.STRING_UTF8, SkillCard::id,
+						Display.CODEC, SkillCard::display,
+						Progress.CODEC, SkillCard::progress,
+						Details.CODEC, SkillCard::details,
+						SkillCard::new);
+	}
+
+	public static final CustomPacketPayload.Type<SkillsSummaryPayload> ID =
+			LifepathNetworking.payloadId(LifepathMod.id("sync/skills"));
+
+	public static final StreamCodec<RegistryFriendlyByteBuf, SkillsSummaryPayload> PACKET_CODEC =
+			StreamCodec.composite(
+					SkillCard.CODEC.apply(ByteBufCodecs.list()),
+					SkillsSummaryPayload::skills,
+					SkillsSummaryPayload::new);
+
+	public static SkillsSummaryPayload empty() {
+		return new SkillsSummaryPayload(List.of());
+	}
+
+	@Override
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+		return ID;
+	}
+}

@@ -7,7 +7,12 @@
 	"passive_abilities": [
 		"lifepath:phoenix_fire_blood",
 		"lifepath:phoenix_warmth",
-		"lifepath:phoenix_quench"
+		"lifepath:phoenix_quench",
+		"lifepath:phoenix_wings",
+		"lifepath:phoenix_flight_drain"
+	],
+	"resources": [
+		"lifepath:flame"
 	],
 	"active_abilities": [
 		"lifepath:phoenix_rise",
@@ -16,9 +21,11 @@
 ,
 	"strengths": [
 		"Fire does not touch you and flame mends you",
-		"Immolate and rise again"
+		"Your wings carry you — flight burns your inner flame",
+		"Death is a molt — you return frail, then blaze back"
 	],
 	"weaknesses": [
-		"Water quenches your inner fire"
+		"Water quenches your inner fire",
+		"The rebirth molt leaves you small, slow, and earthbound"
 	]
 }

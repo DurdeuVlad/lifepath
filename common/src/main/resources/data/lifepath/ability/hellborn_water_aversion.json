@@ -7,10 +7,18 @@
 		"interval_ticks": 40
 	},
 	"conditions": {
-		"all": [
+		"any": [
 			{
 				"type": "lifepath:inside_block",
 				"block": "minecraft:water"
+			},
+			{
+				"type": "lifepath:in_precipitation",
+				"state": "any"
+			},
+			{
+				"type": "lifepath:biome_tag",
+				"tag": "#lifepath:cold"
 			}
 		]
 	},

@@ -1,16 +1,27 @@
 {
 	"display_name": "Void Attunement",
-	"description": "In the End your void nature sharpens.",
+	"description": "The deep void calls — the End, the depths below the world, or true darkness sharpens you.",
 	"icon": "ability/enderian_void_attunement",
 	"trigger": {
 		"type": "passive",
 		"interval_ticks": 40
 	},
 	"conditions": {
-		"all": [
+		"any": [
 			{
 				"type": "lifepath:dimension",
 				"id": "minecraft:the_end"
+			},
+			{
+				"type": "lifepath:y_level",
+				"op": "lt",
+				"value": 0
+			},
+			{
+				"type": "lifepath:light_level",
+				"source": "sky",
+				"op": "lte",
+				"value": 4
 			}
 		]
 	},

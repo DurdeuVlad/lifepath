@@ -4,21 +4,25 @@
 	"description": "Life inside a nonliving frame. They do not drown and their hull turns blows aside; but water gums their joints, and they can overclock their frame for short bursts.",
 	"visibility": "normal",
 	"selection": "open",
+	"diet_rules": "lifepath:ferrovore",
 	"passive_abilities": [
 		"lifepath:automaton_iron_frame",
 		"lifepath:automaton_no_breath",
 		"lifepath:automaton_rust"
 	],
 	"active_abilities": [
-		"lifepath:automaton_overclock"
+		"lifepath:automaton_overclock",
+		"lifepath:automaton_devour_iron"
 	]
 ,
 	"strengths": [
 		"Cannot drown",
 		"Iron hull turns blows aside",
-		"Overclock for short bursts"
+		"Overclock for short bursts",
+		"Iron feeds your chassis — ingots and nuggets are your meals"
 	],
 	"weaknesses": [
-		"Water gums your joints with rust"
+		"Water gums your joints with rust",
+		"Only iron nourishes you"
 	]
 }

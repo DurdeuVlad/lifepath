@@ -1,0 +1,37 @@
+{
+	"display_name": "True Wings",
+	"description": "While your inner flame burns bright enough, your wings carry you — flight feeds on it, and the rebirth molt leaves you earthbound.",
+	"icon": "ability/phoenix_flare",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:not",
+				"condition": {
+					"type": "lifepath:condition_stage",
+					"condition": "lifepath:phoenix_rebirth",
+					"op": "eq",
+					"stage": 0
+				}
+			},
+			{
+				"type": "lifepath:resource_threshold",
+				"resource": "lifepath:flame",
+				"op": ">=",
+				"value": 20
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:grant_flight",
+			"duration_ticks": 80
+		}
+	]
+}

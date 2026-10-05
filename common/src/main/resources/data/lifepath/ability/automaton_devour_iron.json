@@ -1,0 +1,44 @@
+{
+	"display_name": "Devour Iron",
+	"description": "Grind an iron nugget or ingot down into your frame — the only meal your body accepts. (10s cooldown)",
+	"icon": "ability/automaton_iron_frame",
+	"trigger": {
+		"type": "active"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:inventory_contains",
+				"item": "#lifepath:automaton_foods",
+				"min_count": 1
+			},
+			{
+				"type": "lifepath:food_level",
+				"op": "lt",
+				"value": 20
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:consume_item",
+			"item": "#lifepath:automaton_foods",
+			"count": 1
+		},
+		{
+			"type": "lifepath:feed",
+			"nutrition": 3,
+			"saturation_modifier": 0.4
+		},
+		{
+			"type": "lifepath:play_sound",
+			"sound": "minecraft:entity.iron_golem.repair"
+		}
+	],
+	"cooldown": {
+		"seconds": 10
+	}
+}

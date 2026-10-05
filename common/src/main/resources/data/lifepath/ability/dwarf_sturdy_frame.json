@@ -6,14 +6,6 @@
 		"type": "damage_taken",
 		"multiplier": 0.75
 	},
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:damage_type",
-				"id": "#minecraft:is_fall"
-			}
-		]
-	},
 	"target": {
 		"type": "lifepath:self"
 	}

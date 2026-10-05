@@ -1,7 +1,7 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "io.github.durdeuvlad.lifepath.mixin",
+	"package": "com.dwurdy.lifepath.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"AnvilScreenHandlerMixin",
@@ -20,7 +20,10 @@
 		"SlotMorphPickupMixin",
 		"AbstractContainerMenuMorphMixin",
 		"TargetPredicateMixin",
-		"PlayerAdvancementTrackerMixin"
+		"PlayerAdvancementTrackerMixin",
+		"ServerPlayerMixin",
+		"ItemMixin",
+		"ItemUtilsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -1,16 +1,28 @@
 {
 	"display_name": "Nether Vigor",
-	"description": "In the Nether you are at your strongest.",
+	"description": "Fire and hellish heat feed your strength — the Nether, standing flames and burning land sharpen you.",
 	"icon": "ability/hellborn_nether_vigor",
 	"trigger": {
 		"type": "passive",
 		"interval_ticks": 40
 	},
 	"conditions": {
-		"all": [
+		"any": [
 			{
 				"type": "lifepath:dimension",
 				"id": "minecraft:the_nether"
+			},
+			{
+				"type": "lifepath:on_fire"
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#lifepath:heat_sources",
+				"radius": 4
+			},
+			{
+				"type": "lifepath:biome_tag",
+				"tag": "#lifepath:arid"
 			}
 		]
 	},

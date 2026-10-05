@@ -17,13 +17,13 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"io.github.durdeuvlad.lifepath.fabric.FabricLifepath"
+			"com.dwurdy.lifepath.fabric.FabricLifepath"
 		],
 		"client": [
-			"io.github.durdeuvlad.lifepath.fabric.client.FabricLifepathClient"
+			"com.dwurdy.lifepath.fabric.client.FabricLifepathClient"
 		],
 		"lifepath:adapter": [
-			"io.github.durdeuvlad.lifepath.compat.overgeared.OvergearedCompat"
+			"com.dwurdy.lifepath.compat.overgeared.OvergearedCompat"
 		]
 	},
 	"mixins": [

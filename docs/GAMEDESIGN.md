@@ -852,16 +852,17 @@ Weakness + Slowness
 periodic heat damage
 ```
 
-### Active — Frost Walk / Frozen Ground
+### Passive — Frostbite (replaces Frost Walk, Beta 8)
 
 ```text
-Radius: 7 blocks
-Cooldown: 120 seconds
+Trigger: damage dealt
+Cooldown: 8 seconds
 ```
 
-Nearby valid water becomes temporary frozen terrain.
+Melee hits chill the victim — freeze ticks plus a brief Slowness burst.
 
-Prefer temporary/frosted ice behavior over permanent world modification unless intentionally configured otherwise.
+Combat-oriented replacement for the water-walking Frost Walk, which
+conflicted with the no-placed-block-traversal constraint.
 
 ---
 

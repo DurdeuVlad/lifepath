@@ -9,8 +9,16 @@
 	"conditions": {
 		"all": [
 			{
-				"type": "lifepath:inside_block",
-				"block": "minecraft:cave_air"
+				"type": "lifepath:not",
+				"condition": {
+					"type": "lifepath:exposed_to_sky"
+				}
+			},
+			{
+				"type": "lifepath:light_level",
+				"source": "sky",
+				"op": "lt",
+				"value": 4
 			}
 		]
 	},

@@ -84,7 +84,6 @@
 | ability/iceborn_arid_heat | FINAL |
 | ability/iceborn_cold_biome | FINAL |
 | ability/iceborn_coolant | FINAL |
-| ability/iceborn_frost_walk | FINAL |
 | ability/iceborn_heat_sources | FINAL |
 | ability/iceborn_ice_nearby | FINAL |
 | ability/iceborn_lava_nearby | FINAL |

@@ -1,0 +1,31 @@
+{
+	"display_name": "Rebirth Molt",
+	"description": "Death is a molt — the flame gutters and you return frail and earthbound, until the fire blazes back.",
+	"abilities": [],
+	"stages": [
+		{
+			"id": "rebirth",
+			"abilities": [
+				"lifepath:phoenix_rebirth_frailty"
+			],
+			"advance_after_seconds": 120
+		},
+		{
+			"id": "restored"
+		}
+	],
+	"acquisition": [
+		{
+			"type": "death",
+			"species": "lifepath:phoenix"
+		},
+		{
+			"type": "admin"
+		}
+	],
+	"cures": [
+		{
+			"type": "admin"
+		}
+	]
+}

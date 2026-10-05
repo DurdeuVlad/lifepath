@@ -1,0 +1,20 @@
+{
+	"display_name": "Inner Flame",
+	"icon": "ability/phoenix_flare",
+	"min": 0,
+	"max": 100,
+	"default": 100,
+	"regen_per_second": 2.5,
+	"bands": [
+		{
+			"range": [0, 20],
+			"name": "Guttering",
+			"effects": []
+		},
+		{
+			"range": [20.001, 100],
+			"name": "Burning",
+			"effects": []
+		}
+	]
+}

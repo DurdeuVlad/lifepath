@@ -1,7 +1,7 @@
 {
 	"display_name": "Enderian",
 	"icon": "species/enderian",
-	"description": "Void-touched wanderers. Ender pearls barely sting them, the End itself sharpens them, and they can blink through space; but water burns like acid.",
+	"description": "Void-touched wanderers. Ender pearls barely sting them, the deep places below the world — and true darkness — sharpen them, and they can blink through space; but water — and rain — burns like acid.",
 	"visibility": "normal",
 	"selection": "open",
 	"passive_abilities": [
@@ -15,10 +15,10 @@
 ,
 	"strengths": [
 		"Ender pearls barely sting",
-		"The End itself sharpens you",
+		"The deep void — or true darkness — sharpens you",
 		"Blink through space"
 	],
 	"weaknesses": [
-		"Water burns like acid"
+		"Water burns like acid — rain and snow too"
 	]
 }

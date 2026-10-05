@@ -278,8 +278,10 @@ diet id. Each stage needs an `id`; `advance_events` is a flat list of
 activity-type ids counted up to `advance_count` (default 1), OR
 `advance_after_seconds` elapsed in-stage — whichever fires first advances.
 `acquisition`/`cures` `type`s: `attack` (damaged by entity/`#tag`, optional
-`chance`), `item` (use), `admin`. Admin: `/lifepath condition
-add|remove|stage`.
+`chance`), `item` (use), `admin` — plus `death` (acquisition only: fires
+when the player dies; an optional `species` id gates which species it
+applies to, and re-dying while the condition is held resets it to stage 0
+rather than no-op'ing). Admin: `/lifepath condition add|remove|stage`.
 
 ## `attunement/` — flat affinity (air, earth, lightning)
 

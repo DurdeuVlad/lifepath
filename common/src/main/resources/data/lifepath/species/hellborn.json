@@ -1,7 +1,7 @@
 {
 	"display_name": "Hellborn",
 	"icon": "species/hellborn",
-	"description": "Infernal blood, nether-born. Piglins treat them as kin, fire barely singes them, and the Nether itself lends them strength; but standing water quenches their flame. They can ignite foes around them.",
+	"description": "Infernal blood, nether-born. Piglins treat them as kin, fire barely singes them, and burning land lends them strength; but rain, snow and cold sap their flame. They can ignite foes around them.",
 	"visibility": "normal",
 	"selection": "open",
 	"mob_dispositions": "lifepath:hellborn_kin",
@@ -17,10 +17,10 @@
 	"strengths": [
 		"Piglins treat you as kin",
 		"Fire barely singes you",
-		"The Nether lends you strength",
+		"Flame and burning land lend you strength",
 		"Ignite foes around you"
 	],
 	"weaknesses": [
-		"Standing water quenches your flame"
+		"Rain, snow and cold sap your flame"
 	]
 }

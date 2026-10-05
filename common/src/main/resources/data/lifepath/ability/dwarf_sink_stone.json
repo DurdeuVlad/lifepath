@@ -28,6 +28,13 @@
 			"effect": "minecraft:mining_fatigue",
 			"duration": 100,
 			"amplifier": 0
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.gravity",
+			"operation": "add_value",
+			"value": 0.08,
+			"duration_ticks": 60
 		}
 	]
 }

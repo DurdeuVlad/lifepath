@@ -14,7 +14,7 @@
 			"type": "lifepath:modify_attribute",
 			"attribute": "minecraft:generic.scale",
 			"operation": "add_multiplied_total",
-			"value": 0.12,
+			"value": 0.25,
 			"duration_ticks": 100
 		},
 		{

@@ -67,6 +67,19 @@ sheets (`art/audit/sheet_*.png`, 4× NEAREST upscale):
    `sylvian_arid_{nausea,slow}` contain red-pink pixels that matched the
    fuchsia hue band — inspected at 10×: all are intentional potion-fluid
    color, not contamination. Left unchanged.
+4. **M16-4 skill re-read (Beta-8 pass): all 13 skill icons REPLACED.**
+   The previous set were recolored weapon/shield sprites — `cooking`,
+   `farming`, `scholarship`, `woodcutting` et al. rendered as tinted
+   swords that did not read as their skills at 16×16. Every skill icon
+   is now a purpose-drawn silhouette: bow+arrow (archery), winged boot
+   (athletics), steaming pot (cooking), shield (defence), cog
+   (engineering), wheat (farming), fish (fishing), berry cluster
+   (foraging), paw print (hunting), pickaxe (mining), open book
+   (scholarship), anvil (smithing), axe (woodcutting). Verified on a
+   4×-zoom contact sheet and a native 1× strip
+   (`art/audit/_zoom_skills_final.png`, `_zoom_skills_1x.png`) — every
+   icon reads as its skill at render size. Still a static-asset check;
+   live client capture remains a #58 item.
 
 ## 4. Consistency
 

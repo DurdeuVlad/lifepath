@@ -37,7 +37,7 @@ Any mod or bridge can translate its events into normalized Lifepath activity:
 "entrypoints": { "lifepath:adapter": [ "com.example.MyAdapter" ] }
 ```
 
-Implement `io.github.durdeuvlad.lifepath.compat.ExternalActivityAdapter`.
+Implement `com.dwurdy.lifepath.compat.ExternalActivityAdapter`.
 Discovery is per-entrypoint `Throwable`-isolated — a bridge built against a
 different version logs an error and is skipped, never crashes init.
 
