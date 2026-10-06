@@ -1,6 +1,6 @@
 {
 	"display_name": "Foraging",
-	"icon": "skill/foraging",
+	"icon": "minecraft:textures/item/sweet_berries.png",
 	"description": "Gathering wood, leaves, and wild plants.",
 	"improve_hint": "Gather wild plants, berries, leaves, and shoots.",
 	"category": "gathering",

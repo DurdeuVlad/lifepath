@@ -7,15 +7,18 @@
 	"diet_rules": "lifepath:necrophage",
 	"mob_dispositions": "lifepath:undead_kin",
 	"passive_abilities": [
-		"lifepath:undead_sun_burn"
+		"lifepath:undead_sun_burn",
+		"lifepath:undead_night_strength",
+		"lifepath:undead_rot_touch"
 	],
 	"active_abilities": [
 		"lifepath:undead_death_sight"
-	]
-,
+	],
 	"strengths": [
 		"Walk unbothered among the undead",
-		"See the living outlined at night"
+		"See the living outlined at night",
+		"Night feeds your blows",
+		"Your touch festers"
 	],
 	"weaknesses": [
 		"Only necrotic flesh feeds you",

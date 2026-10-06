@@ -99,6 +99,11 @@ public final class IdentitySummary {
 			}
 		}
 
+		List<Component> speciesKit = species != null
+				? prosCons(data.speciesId(), "species",
+						species.strengths(), species.weaknesses())
+				: List.of();
+
 		String specId = "", specIcon = "";
 		Component specName = Component.empty();
 		List<IdentitySummaryPayload.Entry> focus = List.of();
@@ -187,8 +192,29 @@ public final class IdentitySummary {
 
 		return new IdentitySummaryPayload(
 				new IdentitySummaryPayload.IdentityCore(speciesId, speciesName,
-						speciesDesc, speciesIcon, specId, specName, specIcon),
+						speciesDesc, speciesIcon, specId, specName, specIcon,
+						speciesKit),
 				focus, sections, abilities, resourceDisplays, morph);
+	}
+
+	/** Colored "+"/"-" pro/con lines for a species' authored strengths and
+	 *  weaknesses — the same shape the selection cards show before the pick,
+	 *  now also carried on the identity wire so the character screen can
+	 *  re-tell the kit after it lands. */
+	public static List<Component> prosCons(ResourceLocation id, String domain,
+			List<String> strengths, List<String> weaknesses) {
+		List<Component> lines = new java.util.ArrayList<>();
+		for (int i = 0; i < strengths.size(); i++) {
+			lines.add(Component.literal("+ ")
+					.append(keyedText(id, domain, "strength." + i, strengths.get(i)))
+					.withStyle(net.minecraft.ChatFormatting.GREEN));
+		}
+		for (int i = 0; i < weaknesses.size(); i++) {
+			lines.add(Component.literal("- ")
+					.append(keyedText(id, domain, "weakness." + i, weaknesses.get(i)))
+					.withStyle(net.minecraft.ChatFormatting.RED));
+		}
+		return lines;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 {
 	"display_name": "Farming",
-	"icon": "skill/farming",
+	"icon": "minecraft:textures/item/wheat.png",
 	"description": "Planting, tending, and harvesting crops.",
 	"improve_hint": "Plant crops and harvest them when fully grown.",
 	"category": "gathering",

@@ -414,18 +414,7 @@ public final class SelectionService {
 	 *  custom datapack prose still renders as-is. */
 	private static void addProsCons(List<Component> lines, ResourceLocation id,
 			String domain, List<String> strengths, List<String> weaknesses) {
-		for (int i = 0; i < strengths.size(); i++) {
-			lines.add(Component.literal("+ ")
-					.append(IdentitySummary.keyedText(id, domain,
-							"strength." + i, strengths.get(i)))
-					.withStyle(ChatFormatting.GREEN));
-		}
-		for (int i = 0; i < weaknesses.size(); i++) {
-			lines.add(Component.literal("- ")
-					.append(IdentitySummary.keyedText(id, domain,
-							"weakness." + i, weaknesses.get(i)))
-					.withStyle(ChatFormatting.RED));
-		}
+		lines.addAll(IdentitySummary.prosCons(id, domain, strengths, weaknesses));
 	}
 
 	private static List<Component> cap(List<Component> lines) {

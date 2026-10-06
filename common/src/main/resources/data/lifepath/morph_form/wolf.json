@@ -2,7 +2,7 @@
 	"entity_type": "minecraft:wolf",
 	"display_name": "Wolf",
 	"description": "The pack's teeth — light frame, heavy bite.",
-	"icon": "morph/wolf",
+	"icon": "minecraft:textures/item/wolf_spawn_egg.png",
 	"stats": {
 		"minecraft:generic.max_health": 8.0,
 		"minecraft:generic.attack_damage": 4.0,

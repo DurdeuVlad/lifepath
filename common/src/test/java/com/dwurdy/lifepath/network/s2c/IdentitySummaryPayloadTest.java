@@ -38,7 +38,9 @@ class IdentitySummaryPayloadTest {
 						Component.literal("Desc here"),
 						"lifepath:textures/gui/species/sylvian.png",
 						"lifepath:miner", Component.literal("Miner"),
-						"lifepath:textures/gui/spec/miner.png"),
+						"lifepath:textures/gui/spec/miner.png",
+						List.of(Component.literal("+ Sturdy"),
+								Component.literal("- Slow"))),
 				List.of(new Entry("lifepath:mining", Component.literal("Mining"),
 						"lifepath:textures/gui/skill/mining.png")),
 				Map.of("conditions", List.of(
@@ -97,7 +99,7 @@ class IdentitySummaryPayloadTest {
 						"lifepath:miner",
 						Component.translatableWithFallback(
 								"lifepath.specialization.miner.name", "Miner"),
-						""),
+						"", List.of()),
 				List.of(new Entry("lifepath:smithing",
 						Component.translatableWithFallback(
 								"lifepath.skill.smithing.name", "Smithing"),

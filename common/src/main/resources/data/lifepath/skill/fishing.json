@@ -1,6 +1,6 @@
 {
 	"display_name": "Fishing",
-	"icon": "skill/fishing",
+	"icon": "minecraft:textures/item/fishing_rod.png",
 	"description": "Drawing fish, junk, and treasure from still water.",
 	"improve_hint": "Cast a fishing rod and wait for the bobber.",
 	"category": "gathering",

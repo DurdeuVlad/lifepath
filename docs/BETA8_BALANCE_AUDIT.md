@@ -15,9 +15,9 @@ shipped JSON under `data/lifepath/` — every claim maps to a file.
 
 | Species | Passives | Actives | Diet | Visibility | Strengths vs. weaknesses |
 |---|---|---|---|---|---|
-| human | 0 | 0 | — | open | True baseline — no kit, intended |
+| human | 2 | 0 | — | open | Earned-survivor kit (D11): low-hp Resolve burst + standing luck vs. nothing flashy |
 | sylvian | 6 | 1 | — | open | Forest affinity pack vs. arid intolerance |
-| iceborn | 8 | 0 | — | open | Temperature-economy kit (richer than average by design); Frost Walk → frostbite (D1) |
+| iceborn | 8 | 1 | — | open | Temperature-economy kit + Flash Freeze active (D13); Frost Walk → frostbite (D1) |
 | dwarf | 4 | 1 | — | open | Underground pack + compact frame (−15% scale) vs. sink-like-stone |
 | dragonborn | 3 | 1 | — | open | Fire immunity (fixed seam) + molten regen vs. frost vulnerability |
 | goliath | 3 | 1 | — | open | +25% scale frame (D7) vs. no stealth |
@@ -26,7 +26,7 @@ shipped JSON under `data/lifepath/` — every claim maps to a file.
 | automaton | 3 | 2 | **ferrovore** (new) | open | Overclock + devour-iron (D6/D10) vs. rust in water *and* precipitation |
 | enderian | 3 | 1 | — | open | Teleport kit vs. water burn incl. precipitation |
 | hellborn | 3 | 1 | — | open | Nether Vigor repurposed → heat sources (D3) vs. aversion incl. precipitation + cold biomes |
-| undead | 1 | 1 | necrophage | open | Kin disposition + death sight vs. **sun burn (new)** + hard diet |
+| undead | 3 | 1 | necrophage | open | Kin + death sight + night Strength + withering touch (D12) vs. **sun burn (new)** + hard diet |
 | phantom | 3 | 1 | — | hidden/unlocked | Phase resource kit vs. sunflare while phased |
 | celestial | 3 | 1 | — | hidden/unlocked | Unlockable tier |
 | phoenix | 4 | 2 | — | hidden/unlocked | Fire kit + wings + death-molt vs. quench + rebirth frailty (D8) |
@@ -74,6 +74,9 @@ final until the M18-3 session.
 | D8 | Phoenix form semantics | Rebirth = `phoenix_rebirth` stage 0: frailty (weakness+slowness+scale −20%, grounded) 120s → restored stage 1 (full kit). Flight = creative-style `grant_flight` refreshed while flame is whole | implemented — pending; elytra-style glide rejected (more reach than creative flight per Elytrian precedent: glide is traversal, hover is identity) |
 | D9 | Undead helmet exemption | **Rejected** — no armor-sense vocabulary exists; shade/shelter/precipitation mitigation already covers the vanilla rule's intent | implemented — pending |
 | D10 | Iron-eating surface | Active ability `automaton_devour_iron` (consume held iron → `feed` action) — data-driven, no bespoke eat logic | implemented — pending |
+| D11 | Human identity | "Earned survivor" micro-kit: `human_resolve` (passive sweep, health < 6 → Regen II 60t + Speed I 80t, 120s cd — fires on any cause) + `human_fortune` (luck +1 standing). No diet/dispositions/resources — stays the control species | implemented — live-verified (regen+speed observed at low hp; luck = 1.0) |
+| D12 | Undead kit depth | `undead_night_strength` (night → Strength I) + `undead_rot_touch` (damage_dealt → Wither I 60t victim, 12s cd) — night-predator identity pairs with sun-burn/day weakness | implemented — live-verified (strength at midnight; rot_touch cooldown on hit) |
+| D13 | Iceborn active | `iceborn_flash_freeze`: entities_in_radius r4 → 240 freeze ticks + Slowness II 80t, 90s cd — the only species lacking an actives button gets its AoE | implemented — live-verified (zombie TicksFrozen + cooldown stamped) |
 
 ### Residual balance concerns (carry into Beta 8 playtest)
 

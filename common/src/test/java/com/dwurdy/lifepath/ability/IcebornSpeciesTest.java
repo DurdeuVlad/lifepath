@@ -116,7 +116,7 @@ class IcebornSpeciesTest {
 	@Test
 	void icebornAbilityFilesAllValidate() throws Exception {
 		List<AbilityDefinition> defs = loadIcebornAbilities();
-		assertEquals(8, defs.size(), "iceborn ships 8 passives (frostbite replaced frost walk)");
+		assertEquals(9, defs.size(), "iceborn ships 8 passives + flash freeze (Beta 8 coolness pass)");
 		for (var def : defs) {
 			assertTrue(AbilityVocabulary.unknownNodeTypes(def).isEmpty(),
 					def.id() + " uses unknown spec nodes");
@@ -125,7 +125,8 @@ class IcebornSpeciesTest {
 		// (drivers), damage (overheat), freeze_ticks/apply_effect (frostbite).
 		Set<ResourceLocation> allowedActions = Set.of(LifepathMod.id("modify_resource"),
 				LifepathMod.id("damage"), LifepathMod.id("freeze_ticks"),
-				LifepathMod.id("apply_effect"), LifepathMod.id("spawn_particle"));
+				LifepathMod.id("apply_effect"), LifepathMod.id("spawn_particle"),
+				LifepathMod.id("play_sound"));
 		for (var def : defs) {
 			for (var action : def.actions()) {
 				assertTrue(allowedActions.contains(action.type()),
@@ -145,8 +146,9 @@ class IcebornSpeciesTest {
 		assertEquals(8, def.passiveAbilities().size());
 		assertTrue(def.passiveAbilities().contains(LifepathMod.id("iceborn_frostbite")),
 				"frostbite replaces frost walk as the combat passive");
-		assertTrue(def.activeAbilities().isEmpty(),
-				"frost walk is gone — iceborn ships no actives");
+		assertEquals(List.of(LifepathMod.id("iceborn_flash_freeze")),
+				def.activeAbilities(),
+				"flash freeze gives iceborn its one button");
 		// Every referenced ability ships as a real file.
 		var shipped = loadIcebornAbilities().stream().map(AbilityDefinition::id)
 				.collect(Collectors.toSet());
