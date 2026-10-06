@@ -1,0 +1,27 @@
+{
+	"display_name": "Grave Vigour",
+	"description": "The dark hours belong to the dead — at night your blows land harder.",
+	"icon": "minecraft:textures/item/fermented_spider_eye.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:night"
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 60,
+			"amplifier": 0
+		}
+	]
+}

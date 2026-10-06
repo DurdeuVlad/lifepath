@@ -1,6 +1,6 @@
 {
 	"display_name": "Archery",
-	"icon": "skill/archery",
+	"icon": "minecraft:textures/item/bow.png",
 	"description": "Striking true with bow and crossbow at range.",
 	"improve_hint": "Defeat creatures with arrows and bolts.",
 	"category": "physical",

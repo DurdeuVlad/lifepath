@@ -3,10 +3,15 @@
 	"icon": "species/human",
 	"description": "No innate gifts, no hidden burdens. Humans are the baseline. What they become is earned entirely through skill and specialization.",
 	"visibility": "normal",
-	"selection": "open"
-,
+	"selection": "open",
 	"strengths": [
-		"No innate drawbacks; what you become is earned"
+		"No innate drawbacks; what you become is earned",
+		"Luck simply finds you",
+		"At death's door you surge instead of crumbling"
 	],
-	"weaknesses": []
+	"weaknesses": [],
+	"passive_abilities": [
+		"lifepath:human_resolve",
+		"lifepath:human_fortune"
+	]
 }

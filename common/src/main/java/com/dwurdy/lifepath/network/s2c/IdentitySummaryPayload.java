@@ -116,7 +116,8 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	 *  translatable-with-fallback keys localize per-client. */
 	public record IdentityCore(String speciesId, Component speciesName,
 			Component speciesDescription, String speciesIcon,
-			String specId, Component specName, String specIcon) {
+			String specId, Component specName, String specIcon,
+			java.util.List<Component> speciesKit) {
 		// Mixed arity — past PacketCodec.tuple's arity, so write it out.
 		private static final StreamCodec<RegistryFriendlyByteBuf, IdentityCore> CORE_CODEC =
 				StreamCodec.of(
@@ -131,6 +132,9 @@ public record IdentitySummaryPayload(IdentityCore identity,
 							ComponentSerialization.TRUSTED_STREAM_CODEC
 									.encode(buf, c.specName());
 							ByteBufCodecs.STRING_UTF8.encode(buf, c.specIcon());
+							ComponentSerialization.TRUSTED_STREAM_CODEC
+									.apply(ByteBufCodecs.list())
+									.encode(buf, c.speciesKit());
 						},
 						buf -> new IdentityCore(
 								ByteBufCodecs.STRING_UTF8.decode(buf),
@@ -139,7 +143,9 @@ public record IdentitySummaryPayload(IdentityCore identity,
 								ByteBufCodecs.STRING_UTF8.decode(buf),
 								ByteBufCodecs.STRING_UTF8.decode(buf),
 								ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf),
-								ByteBufCodecs.STRING_UTF8.decode(buf)));
+								ByteBufCodecs.STRING_UTF8.decode(buf),
+								ComponentSerialization.TRUSTED_STREAM_CODEC
+										.apply(ByteBufCodecs.list()).decode(buf)));
 	}
 
 	public static final CustomPacketPayload.Type<IdentitySummaryPayload> ID =
@@ -166,7 +172,7 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	public static IdentitySummaryPayload empty() {
 		return new IdentitySummaryPayload(
 				new IdentityCore("", Component.empty(), Component.empty(), "",
-						"", Component.empty(), ""),
+						"", Component.empty(), "", List.of()),
 				List.of(), Map.of(), Map.of(), List.of(), MorphView.EMPTY);
 	}
 

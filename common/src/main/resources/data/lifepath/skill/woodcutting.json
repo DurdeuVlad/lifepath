@@ -1,6 +1,6 @@
 {
 	"display_name": "Woodcutting",
-	"icon": "skill/woodcutting",
+	"icon": "minecraft:textures/item/iron_axe.png",
 	"description": "Felling timber of every kind: from oak to nether stems.",
 	"improve_hint": "Chop logs and wood.",
 	"category": "gathering",

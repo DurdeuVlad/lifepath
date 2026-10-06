@@ -16,6 +16,8 @@ import com.dwurdy.lifepath.registry.LifepathContent;
 import com.dwurdy.lifepath.specialization.SpecializationService;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.AfterEach;
@@ -80,7 +82,10 @@ class ShippedSpeciesDefinitionsTest {
 		SpeciesDefinition human = loadShipped("human");
 		assertEquals(SpeciesDefinition.Visibility.NORMAL, human.visibility());
 		assertEquals(SpeciesDefinition.Selection.OPEN, human.selection());
-		assertTrue(human.passiveAbilities().isEmpty(), "no innate passives");
+		// Beta 8 balance pass: human is no longer the empty control — it owns
+		// the "earned survivor" micro-kit (low-health surge + standing luck).
+		assertEquals(List.of(LifepathMod.id("human_resolve"),
+				LifepathMod.id("human_fortune")), human.passiveAbilities());
 		assertTrue(human.activeAbilities().isEmpty(), "no innate actives");
 		assertTrue(human.resources().isEmpty(), "no innate resources");
 		assertTrue(human.minAptitudes().isEmpty(), "no aptitude floors");
@@ -97,8 +102,10 @@ class ShippedSpeciesDefinitionsTest {
 		SpeciesDefinition human = loadShipped("human");
 		LifepathContent.species().register(HUMAN, human);
 		data.setSpeciesId(HUMAN);
-		assertTrue(AbilityEngine.ownedAbilities(data).isEmpty(),
-				"human owns zero innate abilities");
+		assertEquals(Set.of(LifepathMod.id("human_resolve"),
+						LifepathMod.id("human_fortune")),
+				AbilityEngine.ownedAbilities(data),
+				"human owns its micro-kit");
 
 		// Ability-less species contributes nothing to the sweep/event paths
 		// (their no-op coverage lives in the package-private test seams).

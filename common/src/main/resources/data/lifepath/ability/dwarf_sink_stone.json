@@ -33,7 +33,7 @@
 			"type": "lifepath:modify_attribute",
 			"attribute": "minecraft:generic.gravity",
 			"operation": "add_value",
-			"value": 0.08,
+			"value": 0.16,
 			"duration_ticks": 60
 		}
 	]

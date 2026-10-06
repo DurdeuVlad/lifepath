@@ -133,7 +133,10 @@ class UndeadSpeciesTest {
 		assertEquals(NECROPHAGE, def.dietRules().orElseThrow());
 		assertEquals(UNDEAD_KIN, def.mobDispositions().orElseThrow());
 		assertEquals(List.of(LifepathMod.id("undead_death_sight")), def.activeAbilities());
-		assertEquals(List.of(LifepathMod.id("undead_sun_burn")), def.passiveAbilities());
+		assertEquals(List.of(LifepathMod.id("undead_sun_burn"),
+						LifepathMod.id("undead_night_strength"),
+						LifepathMod.id("undead_rot_touch")),
+				def.passiveAbilities());
 
 		// Service-level resolution: register the defs, set the species, the
 		// services resolve through data.speciesId() — no player needed.

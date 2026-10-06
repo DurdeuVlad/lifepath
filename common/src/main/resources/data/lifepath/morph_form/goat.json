@@ -2,7 +2,7 @@
 	"entity_type": "minecraft:goat",
 	"display_name": "Goat",
 	"description": "Head down, horns out — the hills answer to it.",
-	"icon": "morph/goat",
+	"icon": "minecraft:textures/item/goat_spawn_egg.png",
 	"stats": {
 		"minecraft:generic.max_health": 10.0,
 		"minecraft:generic.attack_damage": 2.0,

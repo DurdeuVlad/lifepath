@@ -1,6 +1,6 @@
 {
 	"display_name": "Stoneform",
-	"description": "Become stone: harder to hurt, harder to move. (240s cooldown)",
+	"description": "Become stone: harder to hurt, harder to move. (120s cooldown)",
 	"icon": "ability/dwarf_stoneform",
 	"trigger": {
 		"type": "active"
@@ -12,13 +12,13 @@
 		{
 			"type": "lifepath:apply_effect",
 			"effect": "minecraft:resistance",
-			"duration": 100,
+			"duration": 600,
 			"amplifier": 1
 		},
 		{
 			"type": "lifepath:apply_effect",
 			"effect": "minecraft:slowness",
-			"duration": 100,
+			"duration": 600,
 			"amplifier": 0
 		},
 		{
@@ -28,6 +28,6 @@
 		}
 	],
 	"cooldown": {
-		"seconds": 240
+		"seconds": 120
 	}
 }

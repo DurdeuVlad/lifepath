@@ -1,6 +1,6 @@
 {
 	"display_name": "Defence",
-	"icon": "skill/defence",
+	"icon": "minecraft:textures/item/shield.png",
 	"description": "Enduring blows and wearing the fight.",
 	"improve_hint": "Survive attacks from hostile creatures.",
 	"category": "physical",

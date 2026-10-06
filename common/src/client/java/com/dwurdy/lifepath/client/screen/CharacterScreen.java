@@ -159,6 +159,16 @@ public class CharacterScreen extends Screen {
 								core.speciesDescription(), panelW - 8),
 						mouseX, mouseY);
 			}
+			// The authored kit in the same "+"/"-" style as the selection
+			// card — a species' non-ability rules (diet, mob neutrality)
+			// otherwise read as "nothing" once the picker closes.
+			for (Component kitLine : core.speciesKit()) {
+				for (var wrapped : font.split(kitLine, panelW - 14)) {
+					context.drawString(font, wrapped, left + 8, y,
+							TEXT);
+					y += 10;
+				}
+			}
 		}
 
 		// --- Specialization + starting focus ---
@@ -345,6 +355,12 @@ public class CharacterScreen extends Screen {
 		IdentitySummaryPayload.IdentityCore core = id.identity();
 		int h = 22;                              // title gap
 		h += 11 + (core.speciesName().getString().isEmpty() ? 11 : 18);
+		// Kit lines wrap under the hero row — same wrap width as render.
+		if (!core.speciesName().getString().isEmpty()) {
+			for (Component kitLine : core.speciesKit()) {
+				h += 10 * font.split(kitLine, PANEL_W - 14).size();
+			}
+		}
 		h += 4 + 11 + (core.specName().getString().isEmpty() ? 11 : 18);
 		if (!core.specName().getString().isEmpty() && !id.specFocus().isEmpty()) {
 			h += 11;

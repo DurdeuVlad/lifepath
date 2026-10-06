@@ -17,11 +17,13 @@
 		"lifepath:iceborn_overheat",
 		"lifepath:iceborn_frostbite"
 	],
-	"active_abilities": []
-,
+	"active_abilities": [
+		"lifepath:iceborn_flash_freeze"
+	],
 	"strengths": [
 		"Frost and ice keep you sharp and quick to mend",
-		"Your strikes freeze and slow enemies"
+		"Your strikes freeze and slow enemies",
+		"Freeze a crowd solid at a word"
 	],
 	"weaknesses": [
 		"Heat, fire and lava drag you toward sluggish weakness"

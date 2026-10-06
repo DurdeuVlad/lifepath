@@ -1,0 +1,39 @@
+{
+	"display_name": "Flash Freeze",
+	"description": "Vent the cold in your veins — everything close snaps frozen. (90s cooldown)",
+	"icon": "minecraft:textures/block/blue_ice.png",
+	"trigger": {
+		"type": "active"
+	},
+	"target": {
+		"type": "lifepath:entities_in_radius",
+		"radius": 4,
+		"living_only": true
+	},
+	"actions": [
+		{
+			"type": "lifepath:freeze_ticks",
+			"ticks": 240
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:slowness",
+			"duration": 80,
+			"amplifier": 1
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:snowflake",
+			"count": 30
+		},
+		{
+			"type": "lifepath:play_sound",
+			"sound": "minecraft:block.glass.break",
+			"volume": 1.0,
+			"pitch": 0.6
+		}
+	],
+	"cooldown": {
+		"seconds": 90
+	}
+}

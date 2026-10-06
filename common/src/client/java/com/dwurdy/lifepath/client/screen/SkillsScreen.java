@@ -8,6 +8,7 @@ import java.util.List;
 import com.dwurdy.lifepath.platform.ClientOnly;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -113,6 +114,12 @@ public class SkillsScreen extends Screen {
 					tooltip = new ArrayList<>();
 					tooltip.add(c.display().name().getVisualOrderText());
 					tooltip.addAll(font.split(c.display().description(), 200));
+					// "How to train it" — the flavor line alone left testers
+					// asking what a skill actually *does* (Beta 8 bug set).
+					if (!c.display().improveHint().getString().isEmpty()) {
+						tooltip.addAll(font.split(c.display().improveHint()
+								.copy().withStyle(ChatFormatting.GRAY), 200));
+					}
 				}
 			}
 			y += ROW_H;

@@ -1,6 +1,6 @@
 {
 	"display_name": "Mining",
-	"icon": "skill/mining",
+	"icon": "minecraft:textures/item/iron_pickaxe.png",
 	"description": "Breaking natural stone, ore, and deep rock.",
 	"improve_hint": "Mine valuable natural blocks and ores.",
 	"category": "gathering",

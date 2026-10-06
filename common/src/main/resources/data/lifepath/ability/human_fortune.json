@@ -1,0 +1,21 @@
+{
+	"display_name": "Fortune of the Mundane",
+	"description": "No destiny, no curse — luck simply finds you more often.",
+	"icon": "minecraft:textures/item/rabbit_foot.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.luck",
+			"operation": "add_value",
+			"value": 1.0,
+			"duration_ticks": 100
+		}
+	]
+}

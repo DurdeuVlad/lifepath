@@ -1,0 +1,43 @@
+{
+	"display_name": "Resolve",
+	"description": "Death's door is where humans shine — drop low and instinct surges you. (120s cooldown)",
+	"icon": "minecraft:textures/item/totem_of_undying.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 20
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:health_threshold",
+				"op": "lt",
+				"value": 6.0
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:regeneration",
+			"duration": 60,
+			"amplifier": 1
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 80,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:heart",
+			"count": 10
+		}
+	],
+	"cooldown": {
+		"seconds": 120
+	}
+}

@@ -1,6 +1,6 @@
 {
 	"display_name": "Scholarship",
-	"icon": "skill/scholarship",
+	"icon": "minecraft:textures/item/book.png",
 	"description": "Reading, writing, and charting the world.",
 	"improve_hint": "Craft books, maps, and scholarly tools.",
 	"category": "knowledge",

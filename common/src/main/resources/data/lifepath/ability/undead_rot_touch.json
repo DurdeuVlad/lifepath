@@ -1,0 +1,27 @@
+{
+	"display_name": "Rotting Touch",
+	"description": "Your strikes carry the grave's decay — what you hit begins to wither. (12s cooldown)",
+	"icon": "minecraft:textures/item/rotten_flesh.png",
+	"trigger": {
+		"type": "damage_dealt"
+	},
+	"target": {
+		"type": "lifepath:victim"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:wither",
+			"duration": 60,
+			"amplifier": 0
+		},
+		{
+			"type": "lifepath:spawn_particle",
+			"particle": "minecraft:smoke",
+			"count": 8
+		}
+	],
+	"cooldown": {
+		"seconds": 12
+	}
+}

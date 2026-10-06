@@ -1,6 +1,6 @@
 {
 	"display_name": "Smithing",
-	"icon": "skill/smithing",
+	"icon": "minecraft:textures/item/anvil.png",
 	"description": "Working metal at anvils and smithing tables.",
 	"improve_hint": "Forge, repair, and upgrade gear at an anvil or smithing table.",
 	"category": "crafting",

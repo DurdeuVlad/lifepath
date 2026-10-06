@@ -27,7 +27,7 @@ class HudModelTest {
 		return new IdentitySummaryPayload(
 				new IdentitySummaryPayload.IdentityCore("lifepath:iceborn",
 						Component.literal("Iceborn"), Component.empty(), "", "",
-						Component.empty(), ""),
+						Component.empty(), "", List.of()),
 				List.of(),
 				Map.of("conditions",
 						List.of(new IdentitySummaryPayload.Entry(
