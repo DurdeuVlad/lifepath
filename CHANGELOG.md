@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.0.0-beta.9 — tester bug-set remediation & species balance
+
+The Beta 8 report batch triaged and fixed, plus a balance pass so every
+species — humans included — has a kit worth picking.
+
+- **Species kit now visible.** The character screen lists the species'
+  authored strengths/weaknesses under the hero row — the root cause of
+  "Undead has nothing": diet and mob-kin rules were live but invisible.
+- **Skill tooltips explain themselves.** Hover shows the description plus
+  the improve hint (already synced, previously never rendered).
+- **Balance:** Stoneform 5s/240s → 30s/120s; Sink Like Stone gravity
+  0.08 → 0.16 (swim-up can no longer beat it); "Nether Vigor" renamed to
+  **Infernal Vigor** — it always fired on fire, heat, and arid biomes.
+- **Icons:** skills moved to readable vanilla item art (bow, pickaxe,
+  piston, axe…); morph forms use spawn-egg art.
+- **New abilities:** `human_resolve` (below 3 hearts → Regen II + Speed,
+  120s cd) and `human_fortune` (+1 luck standing) — human goes from the
+  empty control to an earned-survivor micro-kit; `undead_night_strength`
+  (night Strength I) and `undead_rot_touch` (hits apply Wither, 12s cd);
+  `iceborn_flash_freeze` (4-block AoE freeze + Slowness II, 90s cd) —
+  iceborn gets its first active.
+- All five new abilities verified firing on a live server via headless
+  client + RCON; content reload stays clean (16/16, 0 warnings).
+
 ## 1.0.0-beta.8 — phoenix, diet law & journey polish
 
 A hidden species rises from the ashes, diets become real law instead of a
