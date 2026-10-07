@@ -62,9 +62,15 @@ class OutcomeServiceTest {
 		LifepathContent.levelCurves().clear();
 	}
 
+	private static OutcomeRuleDefinition.BandModifiers mods(double count, double fail,
+			double failCount, Optional<String> quality, boolean sign) {
+		return new OutcomeRuleDefinition.BandModifiers(count, fail, failCount,
+				quality, sign, 1.0);
+	}
+
 	private static OutcomeRuleDefinition rule(Map<RankBands.RankBand, OutcomeRuleDefinition.BandModifiers> bands) {
 		return new OutcomeRuleDefinition(LifepathMod.id("test_rule"), SMITHING,
-				Optional.of(SMITHING_ACTIVITY), Set.of(), Set.of(), bands);
+				Optional.of(SMITHING_ACTIVITY), Set.of(), Set.of(), Set.of(), bands);
 	}
 
 	private static void register(OutcomeRuleDefinition def) {
@@ -81,9 +87,9 @@ class OutcomeServiceTest {
 	@Test
 	void resolveMapsLevelToBandModifiers() {
 		register(rule(Map.of(
-				RankBands.RankBand.UNTRAINED, new OutcomeRuleDefinition.BandModifiers(0.8, 0.15, 0.5,
+				RankBands.RankBand.UNTRAINED, mods(0.8, 0.15, 0.5,
 						Optional.of("crude"), false),
-				RankBands.RankBand.MASTER, new OutcomeRuleDefinition.BandModifiers(1.25, 0.0, 0.5,
+				RankBands.RankBand.MASTER, mods(1.25, 0.0, 0.5,
 						Optional.of("masterwork"), true))));
 		try {
 			SkillXpService.setLevelCore(data, SMITHING, 0);
@@ -108,11 +114,10 @@ class OutcomeServiceTest {
 	@Test
 	void resolveHonorsActivityAndTagMatching() {
 		register(new OutcomeRuleDefinition(LifepathMod.id("tagged_rule"), SMITHING,
-				Optional.of(SMITHING_ACTIVITY),
+				Optional.of(SMITHING_ACTIVITY), Set.of(),
 				Set.of(LifepathMod.id("smithing_tier_diamond")),
 				Set.of(), Map.of(RankBands.RankBand.NOVICE,
-						new OutcomeRuleDefinition.BandModifiers(0.9, 0.0, 0.5,
-								Optional.empty(), false))));
+						mods(0.9, 0.0, 0.5, Optional.empty(), false))));
 		try {
 			SkillXpService.setLevelCore(data, SMITHING, 5);
 			// Wrong activity → no match
@@ -136,12 +141,32 @@ class OutcomeServiceTest {
 	@Test
 	void excludedSubjectsNeverMatch() {
 		register(new OutcomeRuleDefinition(LifepathMod.id("excl_rule"), SMITHING,
-				Optional.empty(), Set.of(), Set.of(rl("minecraft", "shears")),
-				Map.of(RankBands.RankBand.UNTRAINED, new OutcomeRuleDefinition.BandModifiers(0.5, 0.0, 0.5,
+				Optional.empty(), Set.of(), Set.of(),
+				Set.of(rl("minecraft", "shears")),
+				Map.of(RankBands.RankBand.UNTRAINED, mods(0.5, 0.0, 0.5,
 						Optional.empty(), false))));
 		try {
 			assertEquals(OutcomeService.Outcome.IDENTITY, OutcomeService.resolve(data,
 					SMITHING_ACTIVITY, rl("minecraft", "shears"), Set.of()));
+		} finally {
+			LifepathContent.outcomeRules().clear();
+		}
+	}
+
+	@Test
+	void subjectListRestrictsMatching() {
+		register(new OutcomeRuleDefinition(LifepathMod.id("subject_rule"), SMITHING,
+				Optional.empty(), Set.of(rl("create", "shaft")), Set.of(), Set.of(),
+				Map.of(RankBands.RankBand.NOVICE, mods(0.9, 0.0, 0.5,
+						Optional.empty(), false))));
+		try {
+			SkillXpService.setLevelCore(data, SMITHING, 5);
+			// Subject-listed item matches.
+			assertEquals(0.9, OutcomeService.resolve(data, SMITHING_ACTIVITY,
+					rl("create", "shaft"), Set.of()).countMult());
+			// Anything else doesn't.
+			assertEquals(OutcomeService.Outcome.IDENTITY, OutcomeService.resolve(data,
+					SMITHING_ACTIVITY, rl("create", "cogwheel"), Set.of()));
 		} finally {
 			LifepathContent.outcomeRules().clear();
 		}
@@ -165,10 +190,9 @@ class OutcomeServiceTest {
 	@Test
 	void unknownBandKeysAreWarnedNotFatal() {
 		OutcomeRuleDefinition.OutcomeRuleFile file = new OutcomeRuleDefinition.OutcomeRuleFile(
-				SMITHING, Optional.empty(), List.of(), List.of(),
+				SMITHING, Optional.empty(), List.of(), List.of(), List.of(),
 				Map.of("grandmaster", OutcomeRuleDefinition.BandModifiers.IDENTITY,
-						"untrained", new OutcomeRuleDefinition.BandModifiers(0.9, 0.0, 0.5,
-								Optional.empty(), false)));
+						"untrained", mods(0.9, 0.0, 0.5, Optional.empty(), false)));
 		OutcomeRuleDefinition def = OutcomeRuleDefinition.fromFile(LifepathMod.id("warn"), file);
 		assertEquals(1, def.bands().size());
 		assertEquals(0.9, def.forBand(RankBands.RankBand.UNTRAINED).outputCountMult());

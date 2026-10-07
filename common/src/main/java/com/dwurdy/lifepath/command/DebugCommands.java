@@ -17,6 +17,7 @@ import com.dwurdy.lifepath.skill.DiminishingReturns;
 import com.dwurdy.lifepath.skill.SkillDecayService;
 import com.dwurdy.lifepath.skill.SkillProgress;
 import com.dwurdy.lifepath.skill.SkillService;
+import com.dwurdy.lifepath.skill.SkillXpService;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
@@ -73,7 +74,16 @@ public final class DebugCommands {
 								.then(argument("skill", ResourceLocationArgument.id())
 										.executes(ctx -> skill(ctx.getSource(),
 												EntityArgument.getPlayer(ctx, "player"),
-												ResourceLocationArgument.getId(ctx, "skill")))))));
+												ResourceLocationArgument.getId(ctx, "skill")))
+										.then(literal("set")
+												.then(argument("level",
+														com.mojang.brigadier.arguments.IntegerArgumentType
+																.integer(0))
+														.executes(ctx -> skillSet(ctx.getSource(),
+																EntityArgument.getPlayer(ctx, "player"),
+																ResourceLocationArgument.getId(ctx, "skill"),
+																com.mojang.brigadier.arguments.IntegerArgumentType
+																		.getInteger(ctx, "level")))))))));
 		LifepathCommands.register(literal("cooldown")
 				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 				.then(literal("clear")
@@ -156,6 +166,21 @@ public final class DebugCommands {
 		} catch (Exception e) {
 			return "threw:" + e.getClass().getSimpleName();
 		}
+	}
+
+	/** {@code debug skill <player> <skill> set <level>} — admin override for
+	 * testing/band verification; goes through the normal level-set path so
+	 * sync, milestones, and clamping all behave as if it were earned. */
+	private static int skillSet(CommandSourceStack source, ServerPlayer target,
+			ResourceLocation skillId, int level) {
+		var result = SkillXpService.setLevel(target, skillId, level,
+				com.dwurdy.lifepath.event.ActivityEvent.of(
+						LifepathMod.id("admin_set"), skillId));
+		source.sendSuccess(() -> Component.literal("set " + skillId + " for "
+				+ target.getName().getString() + ": " + result.oldLevel()
+				+ " -> " + result.newLevel()
+				+ (result.applied() ? "" : " (no change)")), false);
+		return Command.SINGLE_SUCCESS;
 	}
 
 	private static int skill(CommandSourceStack source, ServerPlayer target,

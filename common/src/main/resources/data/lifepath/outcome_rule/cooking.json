@@ -1,0 +1,40 @@
+{
+	"skill": "lifepath:cooking",
+	"activity": "lifepath:crafting",
+	"required_tags": [
+		"lifepath:cookable_foods"
+	],
+	"bands": {
+		"untrained": {
+			"failure_chance": 0.25,
+			"failure_count_mult": 0.5,
+			"output_count_mult": 0.75,
+			"quality_tier": "crude"
+		},
+		"novice": {
+			"failure_chance": 0.10,
+			"failure_count_mult": 0.5,
+			"output_count_mult": 0.9,
+			"quality_tier": "poor"
+		},
+		"apprentice": {},
+		"skilled": {
+			"quality_tier": "fine"
+		},
+		"expert": {
+			"quality_tier": "fine",
+			"sign_items": true,
+			"output_count_mult": 1.15
+		},
+		"master": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"output_count_mult": 1.3
+		},
+		"legendary": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"output_count_mult": 1.5
+		}
+	}
+}

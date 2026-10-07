@@ -1,0 +1,41 @@
+{
+	"skill": "lifepath:smithing",
+	"activity": "lifepath:smithing",
+	"bands": {
+		"untrained": {
+			"failure_chance": 0.20,
+			"failure_count_mult": 0.5,
+			"quality_tier": "crude",
+			"anvil_cost_mult": 1.25
+		},
+		"novice": {
+			"failure_chance": 0.08,
+			"failure_count_mult": 0.5,
+			"quality_tier": "poor",
+			"anvil_cost_mult": 1.15
+		},
+		"apprentice": {
+			"quality_tier": "standard"
+		},
+		"skilled": {
+			"quality_tier": "fine",
+			"anvil_cost_mult": 0.9
+		},
+		"expert": {
+			"quality_tier": "fine",
+			"sign_items": true,
+			"anvil_cost_mult": 0.75
+		},
+		"master": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"anvil_cost_mult": 0.5
+		},
+		"legendary": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"output_count_mult": 1.1,
+			"anvil_cost_mult": 0.5
+		}
+	}
+}

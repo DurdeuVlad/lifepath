@@ -1,0 +1,65 @@
+{
+	"skill": "lifepath:engineering",
+	"activity": "lifepath:crafting",
+	"subjects": [
+		"create:shaft",
+		"create:cogwheel",
+		"create:large_cogwheel",
+		"create:andesite_casing",
+		"create:brass_casing",
+		"create:copper_casing",
+		"create:railway_casing",
+		"create:andesite_funnel",
+		"create:brass_funnel",
+		"create:andesite_tunnel",
+		"create:brass_tunnel",
+		"create:depot",
+		"create:basin",
+		"create:empty_schematic",
+		"create:schematic",
+		"create:millstone",
+		"create:mechanical_press",
+		"create:mechanical_drill",
+		"create:mechanical_saw",
+		"create:mechanical_mixer",
+		"create:mechanical_bearing",
+		"create:windmill_bearing",
+		"create:clockwork_bearing",
+		"create:crushing_wheel",
+		"create:water_wheel",
+		"create:flywheel",
+		"create:large_water_wheel"
+	],
+	"bands": {
+		"untrained": {
+			"failure_chance": 0.15,
+			"failure_count_mult": 0.5,
+			"output_count_mult": 0.75,
+			"quality_tier": "crude"
+		},
+		"novice": {
+			"failure_chance": 0.05,
+			"output_count_mult": 0.9,
+			"quality_tier": "poor"
+		},
+		"apprentice": {},
+		"skilled": {
+			"quality_tier": "fine"
+		},
+		"expert": {
+			"quality_tier": "fine",
+			"sign_items": true,
+			"output_count_mult": 1.1
+		},
+		"master": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"output_count_mult": 1.25
+		},
+		"legendary": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"output_count_mult": 1.5
+		}
+	}
+}

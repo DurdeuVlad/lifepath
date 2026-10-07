@@ -5,7 +5,9 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"AnvilScreenHandlerMixin",
+		"AnvilMenuCostMixin",
 		"CraftingResultSlotMixin",
+		"FurnaceResultSlotMixin",
 		"BlockItemMixin",
 		"FishingBobberEntityMixin",
 		"SmithingScreenHandlerMixin",
