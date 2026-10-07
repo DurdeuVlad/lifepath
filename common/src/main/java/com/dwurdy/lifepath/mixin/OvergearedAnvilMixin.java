@@ -127,12 +127,48 @@ public abstract class OvergearedAnvilMixin {
 						.forEach(tags::add);
 				tags.add(OvergearedCompat.FORGE_WORKSTATION);
 				tags.add(LifepathMod.id("smithing_workstations"));
-				com.dwurdy.lifepath.skill.OutcomeService.apply(player,
+				var applied = com.dwurdy.lifepath.skill.OutcomeService.apply(player,
 						com.dwurdy.lifepath.event.ActivityTypes.SMITHING,
 						net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(expected),
 						tags, stack);
+				lifepath$biasForgingQuality(stack, applied.effectiveQualityTier());
 				return;
 			}
+		}
+	}
+
+	/**
+	 * Maps our {@code quality_tier} onto Overgeared's native
+	 * {@code ForgingQuality} component (durability/speed/price multipliers —
+	 * the real "low quality starters, recognized experts" lever). Invoked
+	 * reflectively so an Overgeared refactor degrades to a debug log. A
+	 * {@code null}/{@code "standard"} tier leaves the minigame-rolled quality
+	 * untouched.
+	 */
+	@Unique
+	private static void lifepath$biasForgingQuality(ItemStack stack,
+			@org.jetbrains.annotations.Nullable String tier) {
+		if (tier == null || "standard".equals(tier)) {
+			return;
+		}
+		String qualityName = switch (tier) {
+			case "crude", "poor" -> "POOR";
+			case "fine" -> "EXPERT";
+			case "masterwork" -> "MASTER";
+			default -> null;
+		};
+		if (qualityName == null) {
+			return;
+		}
+		try {
+			Class<?> qualityEnum = Class.forName("net.stirdrem.overgeared.ForgingQuality");
+			@SuppressWarnings({"unchecked", "rawtypes"})
+			Object quality = Enum.valueOf((Class) qualityEnum, qualityName);
+			Class.forName("net.stirdrem.overgeared.util.ForgingQualityHelper")
+					.getMethod("applyQuality", ItemStack.class, qualityEnum)
+					.invoke(null, stack, quality);
+		} catch (ReflectiveOperationException | ClassCastException e) {
+			LifepathMod.LOGGER.debug("Overgeared quality bias degraded: {}", e.toString());
 		}
 	}
 

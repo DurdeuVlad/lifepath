@@ -309,6 +309,21 @@ public final class VanillaGameplayProducers {
 	}
 
 	/**
+	 * Furnace/smoker/blast-furnace output, called by {@code
+	 * mixin.FurnaceResultSlotMixin}. Only edible outputs feed the cooking
+	 * loop — ore smelting must not earn crafting XP or trip cooking
+	 * outcome rules.
+	 */
+	public static void onFurnaceCookOutput(net.minecraft.world.entity.player.Player player,
+			net.minecraft.world.item.ItemStack output) {
+		if (output.isEmpty()
+				|| !output.has(net.minecraft.core.component.DataComponents.FOOD)) {
+			return;
+		}
+		onCraftOutput(player, output);
+	}
+
+	/**
 	 * Fishing catch, called by {@code mixin.FishingBobberEntityMixin} for each
 	 * spawned loot stack. sourceId = caught item id → repetition signatures
 	 * distinguish junk spam; caught-item tags carry vanilla/classification

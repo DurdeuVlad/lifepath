@@ -85,6 +85,129 @@ async function cmd(line) {
 						+ " abilities=" + JSON.stringify(bot.abilities)
 						+ " inv=" + bot.inventory.items().map((i) => i.name + "x" + i.count).join(","));
 				break;
+			case "inv": {
+				// full component dump — lore/custom_data/quality visible
+				for (const i of bot.inventory.items()) {
+					console.log("ITEM " + i.name + "x" + i.count
+							+ " comps=" + JSON.stringify(i.components || i.nbt || {}));
+				}
+				break;
+			}
+			case "craft": {
+				// craft <itemName> [count] — needs materials in inventory;
+				// uses a crafting table within reach if the recipe requires one
+				const name = rest.join(" ").replace(/ /g, "_");
+				const mcData = require("minecraft-data")(bot.version);
+				const item = mcData.itemsByName[name];
+				if (!item) { console.log("CRAFT unknown item " + name); break; }
+				const recipes = bot.recipesFor(item.id, null, 1, null);
+				const all = bot.recipesAll ? bot.recipesAll(item.id, null, null) : [];
+				console.log("CRAFT dbg recipes=" + recipes.length + " all=" + all.length
+						+ " ver=" + bot.version);
+				if (!recipes.length) { console.log("CRAFT no recipe " + name); break; }
+				const needsTable = recipes[0].requiresTable;
+				let table = null;
+				if (needsTable) {
+					table = bot.findBlock({
+						matching: (b) => b.name === "crafting_table",
+						maxDistance: 8,
+					});
+					if (!table) { console.log("CRAFT no table near"); break; }
+				}
+				try {
+					await bot.craft(recipes[0], 1, table);
+					console.log("CRAFTED " + name);
+				} catch (e) { console.log("CRAFT fail " + e.message); }
+				break;
+			}
+			case "furnace_open": {
+				const f = bot.findBlock({
+					matching: (b) => ["furnace", "smoker", "blast_furnace"].includes(b.name),
+					maxDistance: 8,
+				});
+				if (!f) { console.log("FURNACE none near"); break; }
+				try {
+					bot._furnace = await bot.openFurnace(f);
+					console.log("FURNACE opened " + f.name + " " + f.position);
+				} catch (e) { console.log("FURNACE open fail " + e.message); }
+				break;
+			}
+			case "furnace_put": {
+				// furnace_put input|fuel|output <item> [count]
+				const slot = rest[0];
+				const name = (rest[1] || "").replace(/ /g, "_");
+				const count = parseInt(rest[2] || "64", 10);
+				const it = bot.inventory.items().find((i) => i.name === name);
+				if (!it) { console.log("FURNACE no item " + name); break; }
+				const f = bot._furnace;
+				if (!f) { console.log("FURNACE not open"); break; }
+				try {
+					if (slot === "input") await f.putInput(it.type, null, count);
+					else if (slot === "fuel") await f.putFuel(it.type, null, count);
+					console.log("FURNACE put " + slot + " " + name + "x" + Math.min(count, it.count));
+				} catch (e) { console.log("FURNACE put fail " + e.message); }
+				break;
+			}
+			case "furnace_take": {
+				const f = bot._furnace;
+				if (!f) { console.log("FURNACE not open"); break; }
+				try {
+					const out = f.outputItem();
+					if (!out) { console.log("FURNACE output empty"); break; }
+					await f.takeOutput();
+					console.log("FURNACE took " + out.name + "x" + out.count);
+				} catch (e) { console.log("FURNACE take fail " + e.message); }
+				break;
+			}
+			case "furnace_state": {
+				const f = bot._furnace;
+				if (!f) { console.log("FURNACE not open"); break; }
+				const o = f.outputItem();
+				const inp = f.inputItem();
+				console.log("FURNACE in=" + (inp ? inp.name + "x" + inp.count : "empty")
+						+ " out=" + (o ? o.name + "x" + o.count : "empty")
+						+ " progress=" + f.progress);
+				break;
+			}
+			case "anvil_open": {
+				const a = bot.findBlock({
+					matching: (b) => /anvil/.test(b.name),
+					maxDistance: 8,
+				});
+				if (!a) { console.log("ANVIL none near"); break; }
+				try {
+					bot._anvil = await bot.openAnvil(a);
+					console.log("ANVIL opened " + a.position);
+				} catch (e) { console.log("ANVIL open fail " + e.message); }
+				break;
+			}
+			case "anvil_combine": {
+				// anvil_combine <item1> <item2> [newName] — takes result,
+				// prints xp-level delta (the real charged cost)
+				const n1 = (rest[0] || "").replace(/ /g, "_");
+				const n2 = (rest[1] || "").replace(/ /g, "_");
+				const name = rest[2] || null;
+				const a = bot._anvil;
+				if (!a) { console.log("ANVIL not open"); break; }
+				const i1 = bot.inventory.items().find((i) => i.name === n1);
+				const i2 = bot.inventory.items().find((i) => i.name === n2);
+				if (!i1 || !i2) { console.log("ANVIL missing " + n1 + "/" + n2); break; }
+				const before = bot.experience.level;
+				try {
+					await a.combine(i1, i2, name);
+					console.log("ANVIL combined xp " + before + " -> " + bot.experience.level);
+				} catch (e) { console.log("ANVIL combine fail " + e.message); }
+				break;
+			}
+			case "anvil_close": {
+				if (bot._anvil) { bot._anvil.close(); bot._anvil = null; }
+				console.log("ANVIL closed");
+				break;
+			}
+			case "xp":
+				console.log("XP level=" + bot.experience.level
+						+ " points=" + bot.experience.points);
+				break;
 			case "quit":
 				bot.quit();
 				break;

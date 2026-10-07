@@ -1,0 +1,39 @@
+{
+	"skill": "lifepath:scholarship",
+	"activity": "lifepath:crafting",
+	"required_tags": [
+		"lifepath:scholarly"
+	],
+	"bands": {
+		"untrained": {
+			"failure_chance": 0.15,
+			"failure_count_mult": 0.5,
+			"output_count_mult": 0.75,
+			"quality_tier": "crude"
+		},
+		"novice": {
+			"failure_chance": 0.05,
+			"output_count_mult": 0.9,
+			"quality_tier": "poor"
+		},
+		"apprentice": {},
+		"skilled": {
+			"quality_tier": "fine"
+		},
+		"expert": {
+			"quality_tier": "fine",
+			"sign_items": true,
+			"output_count_mult": 1.1
+		},
+		"master": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"output_count_mult": 1.25
+		},
+		"legendary": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"output_count_mult": 1.5
+		}
+	}
+}

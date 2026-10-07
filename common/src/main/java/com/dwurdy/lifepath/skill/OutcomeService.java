@@ -46,9 +46,10 @@ public final class OutcomeService {
 			double failureChance,
 			double failureCountMult,
 			@Nullable String qualityTier,
-			boolean signItems) {
+			boolean signItems,
+			double anvilCostMult) {
 		public static final Outcome IDENTITY =
-				new Outcome(1.0, 0.0, 0.5, null, false);
+				new Outcome(1.0, 0.0, 0.5, null, false, 1.0);
 	}
 
 	/**
@@ -56,6 +57,13 @@ public final class OutcomeService {
 	 * context implied by the event. Among matching rules the most specific wins
 	 * (required_tags count, then activity-pin); ties break on id for stability.
 	 */
+	public static Outcome resolveForPlayer(ServerPlayer player, ResourceLocation activityId,
+			ResourceLocation sourceId, Set<ResourceLocation> tags) {
+		return resolve(
+				com.dwurdy.lifepath.character.CharacterManager.getCharacter(player),
+				activityId, sourceId, tags);
+	}
+
 	public static Outcome resolve(PlayerCharacterData data, ResourceLocation activityId,
 			ResourceLocation sourceId, Set<ResourceLocation> tags) {
 		if (!cfgEnabled()) {
@@ -81,25 +89,37 @@ public final class OutcomeService {
 						cfgDouble("outcome_max_failure_chance", 0.5)),
 				mods.failureCountMult(),
 				mods.qualityTier().orElse(null),
-				mods.signItems());
+				mods.signItems(),
+				mods.anvilCostMult());
+	}
+
+	/** What {@link #apply} did to the stack — seams post-process off this. */
+	public record AppliedOutcome(
+			Outcome outcome,
+			boolean failed,
+			@Nullable String effectiveQualityTier) {
+		public static final AppliedOutcome NONE =
+				new AppliedOutcome(Outcome.IDENTITY, false, null);
 	}
 
 	/**
 	 * Apply the outcome to {@code stack} in place — this is the unified seam
 	 * mixins call (result-slot takes, forge completions, drops). Mutates the
 	 * passed stack: scales count, stamps quality/signature, degrades on
-	 * failure and notifies the player. Returns the same stack for chaining.
+	 * failure and notifies the player. Returns what was applied so seams can
+	 * post-process (e.g. Overgeared maps {@code effectiveQualityTier} onto its
+	 * own ForgingQuality component).
 	 */
-	public static ItemStack apply(ServerPlayer player, ResourceLocation activityId,
+	public static AppliedOutcome apply(ServerPlayer player, ResourceLocation activityId,
 			ResourceLocation sourceId, Set<ResourceLocation> tags, ItemStack stack) {
 		if (stack.isEmpty()) {
-			return stack;
+			return AppliedOutcome.NONE;
 		}
 		Outcome outcome = resolve(
 				com.dwurdy.lifepath.character.CharacterManager.getCharacter(player),
 				activityId, sourceId, tags);
 		if (outcome == Outcome.IDENTITY) {
-			return stack;
+			return AppliedOutcome.NONE;
 		}
 		boolean failed = outcome.failureChance() > 0
 				&& player.getRandom().nextDouble() < outcome.failureChance();
@@ -111,6 +131,10 @@ public final class OutcomeService {
 		}
 		String quality = failed ? "crude" : outcome.qualityTier();
 		boolean sign = outcome.signItems() && !failed;
+		// "standard" is the explicit vanilla baseline — no stamp noise.
+		if ("standard".equals(quality)) {
+			quality = null;
+		}
 		if (quality != null || sign) {
 			stamp(player, stack, quality, sign);
 		}
@@ -120,7 +144,7 @@ public final class OutcomeService {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
 					SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.4f, 1.2f);
 		}
-		return stack;
+		return new AppliedOutcome(outcome, failed, quality);
 	}
 
 	/**

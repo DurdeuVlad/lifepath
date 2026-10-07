@@ -39,6 +39,7 @@ public record OutcomeRuleDefinition(
 		ResourceLocation id,
 		ResourceLocation skill,
 		Optional<ResourceLocation> activity,
+		Set<ResourceLocation> subjects,
 		Set<ResourceLocation> requiredTags,
 		Set<ResourceLocation> excludedSubjects,
 		Map<RankBands.RankBand, BandModifiers> bands) {
@@ -49,10 +50,11 @@ public record OutcomeRuleDefinition(
 			double failureChance,
 			double failureCountMult,
 			Optional<String> qualityTier,
-			boolean signItems) {
+			boolean signItems,
+			double anvilCostMult) {
 
 		public static final BandModifiers IDENTITY = new BandModifiers(
-				1.0, 0.0, 0.5, Optional.empty(), false);
+				1.0, 0.0, 0.5, Optional.empty(), false, 1.0);
 
 		public static final Codec<BandModifiers> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.doubleRange(0.0, 8.0).optionalFieldOf("output_count_mult", 1.0)
@@ -64,7 +66,9 @@ public record OutcomeRuleDefinition(
 				Codec.STRING.optionalFieldOf("quality_tier")
 						.forGetter(BandModifiers::qualityTier),
 				Codec.BOOL.optionalFieldOf("sign_items", false)
-						.forGetter(BandModifiers::signItems))
+						.forGetter(BandModifiers::signItems),
+				Codec.doubleRange(0.0, 4.0).optionalFieldOf("anvil_cost_mult", 1.0)
+						.forGetter(BandModifiers::anvilCostMult))
 				.apply(i, BandModifiers::new));
 	}
 
@@ -82,8 +86,8 @@ public record OutcomeRuleDefinition(
 			bands.put(band, e.getValue());
 		}
 		return new OutcomeRuleDefinition(id, file.skill(), file.activity(),
-				Set.copyOf(file.requiredTags()), Set.copyOf(file.excludedSubjects()),
-				Map.copyOf(bands));
+				Set.copyOf(file.subjects()), Set.copyOf(file.requiredTags()),
+				Set.copyOf(file.excludedSubjects()), Map.copyOf(bands));
 	}
 
 	/** Modifiers for a band (absent → identity). */
@@ -101,6 +105,9 @@ public record OutcomeRuleDefinition(
 		if (activity.isPresent() && !activity.get().equals(activityId)) {
 			return false;
 		}
+		if (!subjects.isEmpty() && !subjects.contains(sourceId)) {
+			return false;
+		}
 		if (excludedSubjects.contains(sourceId)) {
 			return false;
 		}
@@ -112,12 +119,14 @@ public record OutcomeRuleDefinition(
 	 * tag-filtered rules outrank blanket rules.
 	 */
 	public int specificity() {
-		return requiredTags.size() + (activity.isPresent() ? 1 : 0);
+		return subjects.size() * 10 + requiredTags.size()
+				+ (activity.isPresent() ? 1 : 0);
 	}
 
 	public record OutcomeRuleFile(
 			ResourceLocation skill,
 			Optional<ResourceLocation> activity,
+			List<ResourceLocation> subjects,
 			List<ResourceLocation> requiredTags,
 			List<ResourceLocation> excludedSubjects,
 			Map<String, BandModifiers> bands) {
@@ -126,6 +135,8 @@ public record OutcomeRuleDefinition(
 				ResourceLocation.CODEC.fieldOf("skill").forGetter(OutcomeRuleFile::skill),
 				ResourceLocation.CODEC.optionalFieldOf("activity")
 						.forGetter(OutcomeRuleFile::activity),
+				ResourceLocation.CODEC.listOf().optionalFieldOf("subjects", List.of())
+						.forGetter(OutcomeRuleFile::subjects),
 				ResourceLocation.CODEC.listOf().optionalFieldOf("required_tags", List.of())
 						.forGetter(OutcomeRuleFile::requiredTags),
 				ResourceLocation.CODEC.listOf().optionalFieldOf("excluded_subjects", List.of())
