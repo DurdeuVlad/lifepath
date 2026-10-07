@@ -8,6 +8,50 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
+## [Unreleased] — outcome-scaling economy (M21–M25)
+
+Skill now shapes what you **produce**, not just what you earn. The player
+doing the work gets the XP and the outcome — novices craft worse, masters
+craft better, and experts sign their work.
+
+### Added
+
+- **Outcome scaling for 11 skills.** Every product-bearing skill maps rank
+  bands (`untrained`…`legendary`) to output modifiers: count multiplier,
+  failure chance, quality tier (`Crude`/`Poor`/`Fine`/`Masterwork` — visible
+  in item lore), and `Crafted by <name>` signatures at expert+. Datapack-
+  driven via `data/lifepath/outcome_rule/*.json` — see `docs/BALANCE.md`
+  for the full matrix and `docs/DATAPACK_API.md` for the schema.
+- **Smithing**: Overgeared forges bias native `ForgingQuality` (POOR→MASTER)
+  by band; vanilla anvil repair/rename costs scale ±25%/−50%; failed rolls
+  produce a `Crude` partial result at reduced count.
+- **Cooking, engineering, scholarship**: crafted/smelted outputs scale
+  (subjects discriminated so shared `crafting` activity doesn't collide).
+- **Mining, woodcutting, foraging, farming**: drops roll probabilistically —
+  at untrained ~40% of stack drops never land; at legendary ~60% bonus.
+- **Hunting + archery**: kill loot scales; projectile kills use archery,
+  melee uses hunting (`lifepath:animals` tag). Mob-grinder kills get
+  vanilla drops — scaling requires a real player damage source.
+- **Fishing**: catches scale per stack; at expert+ junk catches can upgrade
+  to rolled fish (`junk_upgrade_chance` 25/40/60%).
+- **`/lifepath debug skill <player> <skill> set <level>`** — admin/tester
+  setter for band verification (uses the existing XP service path).
+
+### Changed
+
+- **Attribution audit** (`docs/ATTRIBUTION.md`): verified every XP producer
+  credits the actor — Overgeared's anvil owner is the hammer-swinger, not
+  the placer (bytecode-confirmed; earlier assumption corrected).
+
+### For testers
+
+- Try crafting/smelting/mining at a fresh character — expect fewer, `Crude`
+  outputs and occasional botches. Then have a skilled player do it — more
+  output, signed, better quality.
+- Re-mine a block you placed: expect plain vanilla drops (anti-exploit).
+- Verification matrix + live evidence: `docs/BALANCE.md`; tester steps:
+  `docs/TESTING.md` → "Outcome scaling".
+
 ## [1.0.0-beta.9] — 2026-10-06
 
 Tester bug-set remediation and a species balance pass. Every species now has

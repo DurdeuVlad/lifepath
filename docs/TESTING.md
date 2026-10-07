@@ -37,6 +37,20 @@ server (dev-world-only proof doesn't count — that bit us in beta.7).
 | Icons | Skills use vanilla item art (bow, pickaxe, piston, axe…); morph forms use spawn-egg art; cards/HUD rows show real icons — no text placeholders. |
 | Key hint | Pick a species → chat prints the Character/Ability keybind names once. |
 
+## Outcome scaling (skill → what you produce)
+
+Admins can jump straight to a band: `/lifepath debug skill <player> <skill> set <level>`.
+
+| Area | How to verify |
+|---|---|
+| Cooking yield | Untrained cook (`set 0`): smelt food → ~75% count, `Crude` lore line. Legendary (`set 95`): ~150% count, `Masterwork` + `Crafted by <name>`. |
+| Smithing cost | Vanilla anvil repair: untrained pays ~1.25× levels; master+ pays half. |
+| Smithing quality | Forge/repair at legendary → item lore shows `Masterwork` + your name. Untrained → `Crude`, occasional botch (partial output + break sound + actionbar line). |
+| Gather drops | Dig ore/logs/crops at level 0 → some drops simply don't land (~40% loss) and survivors are `Crude`-stamped. At 95 → bonus rolls, `Masterwork`+signed. |
+| Hunting | Kill animals (melee) → drops scale with hunting. Kill with a bow → scales with archery instead. Mob-grinder kills (no player damage) get vanilla drops. |
+| Fishing | Catch at 0 → `Crude`. At 95 → `Masterwork`+signed catches and junk occasionally upgrades to fish. |
+| Re-mine guard | Place an ore yourself then re-break it → vanilla drops, no stamp (placed blocks are excluded). |
+
 ## Admin-side checks
 
 - `/lifepath` bare → version + a pointer to `/lifepath help`.

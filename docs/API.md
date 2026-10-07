@@ -33,6 +33,7 @@ skipped; unknown references warn and resolve to nothing. Datapack reload
 | `skill` | `display_name`, `category` (`gathering`\|`crafting`\|`physical`\|`knowledge`), `max_level`, `level_curve`, `milestones[]` | level_curve id |
 | `skill/curve` (domain id `level_curve`) | nested path: `data/<ns>/skill/curve/<name>.json` — `{ "thresholds": [0, ...] }` cumulative XP per level | — |
 | `xp_source` | activity → skill mapping with `required_tags`, `per_subject`, `per_tag` weighting | skill ids, activity type ids |
+| `outcome_rule` | skill rank-band → output modifiers (`output_count_mult`, `failure_chance`, `failure_count_mult`, `quality_tier`, `sign_items`, `anvil_cost_mult`, `junk_upgrade_chance`) with `activity`/`subjects`/`required_tags`/`excluded_subjects` matching | skill ids, activity type ids |
 | `ability` | `display_name`, `trigger` (`passive`/`active`/`event`/`damage_taken`), `conditions` SpecNode, `target` SpecNode, `actions[]`, `cooldown?`, `cost?`, `events[]` | ability vocabulary ids, resource/skill params |
 | `resource` | `display_name?`, `min`, `max`, `default?`, `regen_per_second?`, `bands[]` (`range`, `name`, `effects[]`, `actions[]`) | effect/ability ids |
 | `diet` | food rules (allowed item ids/`#tags`) | item ids |
@@ -55,7 +56,7 @@ ids won't be renamed or silently re-purposed in 1.x.
 - **unlock** (3): `celestial_blessing phantom_touch phoenix_contract`
 - **resource** (4): `blood load phantom_form temperature`
 - **ability** (79 files) — every `ability/*.json` ships a frozen `lifepath:<file>` id.
-- **diet** (3), **relation** (3), **item_weight** (1), **xp_source** (14), **level_curve** (1: `default` at `skill/curve/default.json`).
+- **diet** (3), **relation** (3), **item_weight** (1), **xp_source** (14), **level_curve** (1: `default` at `skill/curve/default.json`), **outcome_rule** (11).
 
 ### Shipped tag ids (`data/lifepath/tags/`) — Stable (additive)
 

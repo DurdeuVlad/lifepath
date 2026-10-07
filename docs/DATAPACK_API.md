@@ -95,6 +95,62 @@ unmapped_sources_award_xp`. Built-in activity ids: `lifepath:mining`,
 `foraging`, `woodcutting`, `cooking`, `athletics`, `hunting`, `scholarship`,
 `engineering`, `decay` (internal).
 
+## `outcome_rule/` — skill band → output modifiers
+
+Scales what an activity **produces** based on the performing player's rank
+band in `skill`. Files at `data/<ns>/outcome_rule/<name>.json`.
+
+```json
+{
+  "skill": "lifepath:smithing",
+  "activity": "lifepath:smithing",
+  "subjects": ["minecraft:cake"],
+  "required_tags": ["lifepath:forged_outputs"],
+  "excluded_subjects": ["minecraft:shears"],
+  "bands": {
+    "untrained": { "output_count_mult": 0.75, "failure_chance": 0.2,
+                   "failure_count_mult": 0.5, "quality_tier": "crude",
+                   "anvil_cost_mult": 1.25 },
+    "master":    { "output_count_mult": 1.25, "quality_tier": "masterwork",
+                   "sign_items": true }
+  }
+}
+```
+
+Fields: `skill` (required — the performer's level in this skill picks the
+band), `activity` (optional pin — absent matches any activity), `subjects`
+(optional allowlist on `sourceId` — use it to split skills that share an
+activity, e.g. cooking vs engineering on `lifepath:crafting`),
+`required_tags` (event must carry all), `excluded_subjects` (denylist).
+
+Per-band modifiers (all optional, absent = identity):
+
+- `output_count_mult` (0–8, default 1) — take-seams round to a whole count
+  with a minimum of 1; drop-seams (block/entity/fishing loot) roll it
+  probabilistically per stack and **can reduce a drop to zero**.
+- `failure_chance` (0–1) — take-seams only: consume inputs, produce a
+  `crude` partial result at `failure_count_mult`× count.
+- `quality_tier` — `crude`/`poor`/`fine`/`masterwork` stamped into
+  `custom_data` + lore; Overgeared forges map it onto native
+  `ForgingQuality`. `"standard"` = explicit vanilla baseline (no stamp).
+- `sign_items` — adds `lifepath:crafter` data + "Crafted by" lore.
+- `anvil_cost_mult` (0–4) — scales the vanilla anvil XP-level cost.
+- `junk_upgrade_chance` (0–1) — fishing only: chance a `lifepath:fishing_junk`
+  catch is replaced by a rolled `#minecraft:fishes` pick.
+
+Matching: when several rules match, most specific wins —
+`subjects` count ×10 + `required_tags` count + activity pin, then stable id
+order. Band keys are the rank-band names (`untrained` … `legendary`);
+unknown keys warn once at load, never fail the file.
+
+Gates & clamps (`config/lifepath/skills.toml`): `outcome_scaling_enabled`,
+`outcome_max_failure_chance` (.5), `outcome_min_count_mult` (.25),
+`outcome_max_count_mult` (2.0). Applied at resolve time, not load.
+
+Attribution: outcomes follow the **performing player** — taker, breaker,
+killer (shooter on projectile kills), fishing-hook owner, Overgeared
+hammer-swinger. Player-placed blocks and automation get no scaling.
+
 ## `skill/curve/` — XP thresholds (domain id `level_curve`)
 
 Nested path: `data/<ns>/skill/curve/<name>.json` — referenced by `skill`'s
