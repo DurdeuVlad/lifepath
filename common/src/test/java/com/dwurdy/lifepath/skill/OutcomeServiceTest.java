@@ -34,6 +34,9 @@ class OutcomeServiceTest {
 
 	@BeforeEach
 	void setUp() {
+		// ItemStack/component paths need the vanilla registries up.
+		net.minecraft.SharedConstants.tryDetectVersion();
+		net.minecraft.server.Bootstrap.bootStrap();
 		data = PlayerCharacterData.createDefault();
 		LifepathContent.skills().clear();
 		LifepathContent.levelCurves().clear();
@@ -65,7 +68,7 @@ class OutcomeServiceTest {
 	private static OutcomeRuleDefinition.BandModifiers mods(double count, double fail,
 			double failCount, Optional<String> quality, boolean sign) {
 		return new OutcomeRuleDefinition.BandModifiers(count, fail, failCount,
-				quality, sign, 1.0);
+				quality, sign, 1.0, 0.0);
 	}
 
 	private static OutcomeRuleDefinition rule(Map<RankBands.RankBand, OutcomeRuleDefinition.BandModifiers> bands) {
@@ -197,6 +200,54 @@ class OutcomeServiceTest {
 		assertEquals(1, def.bands().size());
 		assertEquals(0.9, def.forBand(RankBands.RankBand.UNTRAINED).outputCountMult());
 		assertNull(def.bands().get(RankBands.RankBand.MASTER));
+	}
+
+	@Test
+	void applyDropScalesStackableCountsProbabilistically() {
+		// 0.6 on a 1-count stack: ~60% survive as 1, rest drop to 0.
+		OutcomeService.Outcome low = new OutcomeService.Outcome(
+				0.6, 0.0, 0.5, null, false, 1.0, 0.0);
+		net.minecraft.util.RandomSource seeded = net.minecraft.util.RandomSource.create(42);
+		int kept = 0;
+		for (int i = 0; i < 1000; i++) {
+			var s = new net.minecraft.world.item.ItemStack(
+					net.minecraft.world.item.Items.STONE, 1);
+			if (OutcomeService.applyDrop("Tester", seeded, low, s)) {
+				kept++;
+				assertEquals(1, s.getCount());
+			}
+		}
+		assertTrue(kept > 520 && kept < 680, "0.6 roll kept " + kept + "/1000");
+
+		// 1.5 on a 1-count stack: always >=1, ~50% get a bonus copy.
+		OutcomeService.Outcome high = new OutcomeService.Outcome(
+				1.5, 0.0, 0.5, null, false, 1.0, 0.0);
+		seeded = net.minecraft.util.RandomSource.create(42);
+		int total = 0;
+		for (int i = 0; i < 1000; i++) {
+			var s = new net.minecraft.world.item.ItemStack(
+					net.minecraft.world.item.Items.STONE, 1);
+			assertTrue(OutcomeService.applyDrop("Tester", seeded, high, s));
+			assertTrue(s.getCount() >= 1 && s.getCount() <= 2);
+			total += s.getCount();
+		}
+		assertTrue(total > 1400 && total < 1600, "1.5 roll totalled " + total);
+	}
+
+	@Test
+	void applyDropTreatsUnstackableAsDropChance() {
+		OutcomeService.Outcome zero = new OutcomeService.Outcome(
+				0.0, 0.0, 0.5, null, false, 1.0, 0.0);
+		net.minecraft.util.RandomSource seeded = net.minecraft.util.RandomSource.create(7);
+		// unstackable (maxStackSize 1): countMult < 1 can void the drop entirely.
+		var sword = new net.minecraft.world.item.ItemStack(
+				net.minecraft.world.item.Items.IRON_SWORD, 1);
+		for (int i = 0; i < 10; i++) {
+			sword = new net.minecraft.world.item.ItemStack(
+					net.minecraft.world.item.Items.IRON_SWORD, 1);
+			assertTrue(!OutcomeService.applyDrop("Tester", seeded, zero, sword)
+					|| !sword.isEmpty());
+		}
 	}
 
 	private static ResourceLocation rl(String ns, String path) {

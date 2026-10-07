@@ -330,11 +330,12 @@ public final class VanillaGameplayProducers {
 	 * tags ({@code minecraft:fishes}, {@code lifepath:fishing_treasure},
 	 * {@code lifepath:fishing_junk}) for data-side weighting.
 	 */
-	public static void onFishCaught(net.minecraft.world.entity.player.Player player,
+	public static net.minecraft.world.item.ItemStack onFishCaught(
+			net.minecraft.world.entity.player.Player player,
 			net.minecraft.world.item.ItemStack caught) {
 		if (!(player instanceof ServerPlayer serverPlayer) || isAutomation(player)
 				|| caught.isEmpty()) {
-			return;
+			return caught;
 		}
 		Set<ResourceLocation> itemTags = caught.getTags()
 				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
@@ -349,6 +350,101 @@ public final class VanillaGameplayProducers {
 		ActivityDispatcher.publish(com.dwurdy.lifepath.event.ActivityEvents.fishing(
 				serverPlayer, itemId, itemTags,
 				Map.of("count", Integer.toString(caught.getCount()))));
+		// M24: outcome scaling on the catch — count/quality, and at high bands
+		// junk can upgrade to a real fish (junk_upgrade_chance).
+		var applied = com.dwurdy.lifepath.skill.OutcomeService.apply(serverPlayer,
+				com.dwurdy.lifepath.event.ActivityTypes.FISHING, itemId, itemTags, caught);
+		if (applied.outcome().junkUpgradeChance() > 0
+				&& caught.is(FISHING_JUNK)
+				&& serverPlayer.getRandom().nextDouble()
+						< applied.outcome().junkUpgradeChance()) {
+			var fishes = net.minecraft.core.registries.BuiltInRegistries.ITEM
+					.getTag(net.minecraft.tags.ItemTags.FISHES);
+			if (fishes.isPresent()) {
+				var list = fishes.get().stream().toList();
+				var pick = list.get(serverPlayer.getRandom().nextInt(list.size()));
+				var upgraded = new net.minecraft.world.item.ItemStack(pick, caught.getCount());
+				com.dwurdy.lifepath.skill.OutcomeService.apply(serverPlayer,
+						com.dwurdy.lifepath.event.ActivityTypes.FISHING,
+						net.minecraft.core.registries.BuiltInRegistries.ITEM
+								.getKey(upgraded.getItem()),
+						upgraded.getTags().map(TagKey::location)
+								.collect(Collectors.toCollection(HashSet::new)),
+						upgraded);
+				return upgraded;
+			}
+		}
+		return caught;
+	}
+
+	private static final TagKey<net.minecraft.world.item.Item> FISHING_JUNK =
+			TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+					LifepathMod.id("fishing_junk"));
+
+	/**
+	 * Block-break drops — called by {@code mixin.BlockDropOutcomeMixin} from
+	 * {@code Block.getDrops} when the breaker is a real player. Re-uses the
+	 * mining/farming discrimination of the XP producer: farmable+mature
+	 * blocks resolve against FARMING, everything else against MINING, and
+	 * placed blocks get no yield scaling (re-mine exploit guard, non-consuming
+	 * peek — the XP path owns the consume).
+	 */
+	public static void onBlockDrops(ServerPlayer player, BlockPos pos,
+			BlockState state, java.util.List<net.minecraft.world.item.ItemStack> drops) {
+		if (isAutomation(player) || drops.isEmpty()
+				|| PlacedBlockTracker.contains(player.level(), pos)) {
+			return;
+		}
+		ResourceLocation blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK
+				.getKey(state.getBlock());
+		Set<ResourceLocation> blockTags = state.getTags()
+				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
+		ResourceLocation activity = isFarmable(state) && isMature(state)
+				? com.dwurdy.lifepath.event.ActivityTypes.FARMING
+				: com.dwurdy.lifepath.event.ActivityTypes.MINING;
+		com.dwurdy.lifepath.skill.OutcomeService.applyDrops(player, activity,
+				blockId, blockTags, drops);
+	}
+
+	/**
+	 * Entity kill drops — called by {@code mixin.EntityLootOutcomeMixin},
+	 * which wraps the loot consumer inside
+	 * {@code LivingEntity.dropFromLootTable}. The victim is the dying entity;
+	 * the credited player is the damage source's causing entity (the shooter
+	 * for projectile kills — {@code getEntity()} returns the shooter, not the
+	 * arrow). Projectile kills resolve ARCHERY, everything else COMBAT; the
+	 * victim's entity-type tags are the match surface (hunting rules key on
+	 * {@code lifepath:animals}). Each produced stack is scaled in place and
+	 * dropped entirely when its count reaches zero.
+	 */
+	public static java.util.function.Consumer<net.minecraft.world.item.ItemStack>
+			wrapKillDropConsumer(net.minecraft.world.entity.LivingEntity victim,
+			net.minecraft.world.damagesource.DamageSource source,
+			java.util.function.Consumer<net.minecraft.world.item.ItemStack> consumer) {
+		if (victim instanceof net.minecraft.world.entity.player.Player
+				|| !(source.getEntity() instanceof ServerPlayer player)
+				|| isAutomation(player)) {
+			return consumer;
+		}
+		ResourceLocation victimId = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+				.getKey(victim.getType());
+		Set<ResourceLocation> tags = victim.getType().builtInRegistryHolder()
+				.tags().map(TagKey::location)
+				.collect(Collectors.toCollection(HashSet::new));
+		ResourceLocation activity = source.is(
+				net.minecraft.tags.DamageTypeTags.IS_PROJECTILE)
+				? com.dwurdy.lifepath.event.ActivityTypes.ARCHERY
+				: com.dwurdy.lifepath.event.ActivityTypes.COMBAT;
+		var outcome = com.dwurdy.lifepath.skill.OutcomeService.resolveForPlayer(
+				player, activity, victimId, tags);
+		if (outcome == com.dwurdy.lifepath.skill.OutcomeService.Outcome.IDENTITY) {
+			return consumer;
+		}
+		return stack -> {
+			if (com.dwurdy.lifepath.skill.OutcomeService.applyDrop(player, outcome, stack)) {
+				consumer.accept(stack);
+			}
+		};
 	}
 
 	private static void publishHarvest(ServerPlayer player, BlockState state) {

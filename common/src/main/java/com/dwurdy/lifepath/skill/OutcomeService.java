@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -47,9 +48,10 @@ public final class OutcomeService {
 			double failureCountMult,
 			@Nullable String qualityTier,
 			boolean signItems,
-			double anvilCostMult) {
+			double anvilCostMult,
+			double junkUpgradeChance) {
 		public static final Outcome IDENTITY =
-				new Outcome(1.0, 0.0, 0.5, null, false, 1.0);
+				new Outcome(1.0, 0.0, 0.5, null, false, 1.0, 0.0);
 	}
 
 	/**
@@ -90,7 +92,70 @@ public final class OutcomeService {
 				mods.failureCountMult(),
 				mods.qualityTier().orElse(null),
 				mods.signItems(),
-				mods.anvilCostMult());
+				mods.anvilCostMult(),
+				mods.junkUpgradeChance());
+	}
+
+	/**
+	 * Drop-path variant of {@link #apply} for spawned loot (block drops,
+	 * entity drops). {@code output_count_mult} applies <em>probabilistically
+	 * per stack</em>: 0.6 on a single-item drop means "40% chance it never
+	 * lands"; 1.4 means "40% chance of a bonus copy". Stacks can reach zero
+	 * and are removed — unlike take-seams, a lost drop is the intended low
+	 * skill penalty. Failure/botch logic does not apply here.
+	 */
+	public static void applyDrops(ServerPlayer player, ResourceLocation activityId,
+			ResourceLocation sourceId, Set<ResourceLocation> tags,
+			List<ItemStack> drops) {
+		if (drops.isEmpty()) {
+			return;
+		}
+		Outcome outcome = resolve(
+				com.dwurdy.lifepath.character.CharacterManager.getCharacter(player),
+				activityId, sourceId, tags);
+		if (outcome == Outcome.IDENTITY) {
+			return;
+		}
+		drops.removeIf(stack -> !applyDrop(player, outcome, stack));
+	}
+
+	/**
+	 * Single-stack variant of {@link #applyDrops} — probabilistic count roll,
+	 * quality/signature stamp, empty-check. Returns false when the drop should
+	 * be discarded (used by the kill-drop consumer wrapper, where removal from
+	 * a list isn't possible).
+	 */
+	public static boolean applyDrop(ServerPlayer player, Outcome outcome, ItemStack stack) {
+		return applyDrop(player.getGameProfile().getName(), player.getRandom(),
+				outcome, stack);
+	}
+
+	/** Testable core — random + signer name supplied instead of a player. */
+	static boolean applyDrop(String signerName, RandomSource random,
+			Outcome outcome, ItemStack stack) {
+		if (stack.isEmpty()) {
+			return false;
+		}
+		if (stack.getMaxStackSize() > 1) {
+			double raw = stack.getCount() * outcome.countMult();
+			int floor = (int) Math.floor(raw);
+			int newCount = floor
+					+ (random.nextDouble() < raw - floor ? 1 : 0);
+			stack.setCount(Math.min(newCount, stack.getMaxStackSize()));
+		} else {
+			// unstackable drops: countMult degrades to a drop chance.
+			if (random.nextDouble() >= outcome.countMult()) {
+				stack.setCount(0);
+			}
+		}
+		String quality = outcome.qualityTier();
+		if ("standard".equals(quality)) {
+			quality = null;
+		}
+		if (!stack.isEmpty() && (quality != null || outcome.signItems())) {
+			stamp(signerName, stack, quality, outcome.signItems());
+		}
+		return !stack.isEmpty();
 	}
 
 	/** What {@link #apply} did to the stack — seams post-process off this. */
@@ -153,6 +218,11 @@ public final class OutcomeService {
 	 */
 	private static void stamp(ServerPlayer player, ItemStack stack,
 			@Nullable String quality, boolean sign) {
+		stamp(player.getGameProfile().getName(), stack, quality, sign);
+	}
+
+	private static void stamp(String signerName, ItemStack stack,
+			@Nullable String quality, boolean sign) {
 		if (quality != null) {
 			CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
 					.copyTag();
@@ -162,7 +232,7 @@ public final class OutcomeService {
 		if (sign) {
 			CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
 					.copyTag();
-			tag.putString("lifepath:crafter", player.getGameProfile().getName());
+			tag.putString("lifepath:crafter", signerName);
 			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		}
 		List<Component> extra = new ArrayList<>(2);
@@ -170,8 +240,7 @@ public final class OutcomeService {
 			extra.add(Component.translatable("lifepath.quality." + quality));
 		}
 		if (sign) {
-			extra.add(Component.translatable("lifepath.outcome.crafted_by",
-					player.getGameProfile().getName()));
+			extra.add(Component.translatable("lifepath.outcome.crafted_by", signerName));
 		}
 		if (!extra.isEmpty()) {
 			stack.update(DataComponents.LORE, ItemLore.EMPTY, lore -> {

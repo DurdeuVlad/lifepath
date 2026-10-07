@@ -1,0 +1,33 @@
+{
+	"skill": "lifepath:archery",
+	"activity": "lifepath:archery",
+	"bands": {
+		"untrained": {
+			"output_count_mult": 0.75,
+			"quality_tier": "poor"
+		},
+		"novice": {
+			"output_count_mult": 0.9
+		},
+		"apprentice": {},
+		"skilled": {
+			"output_count_mult": 1.1,
+			"quality_tier": "fine"
+		},
+		"expert": {
+			"output_count_mult": 1.25,
+			"quality_tier": "fine",
+			"sign_items": true
+		},
+		"master": {
+			"output_count_mult": 1.4,
+			"quality_tier": "masterwork",
+			"sign_items": true
+		},
+		"legendary": {
+			"output_count_mult": 1.6,
+			"quality_tier": "masterwork",
+			"sign_items": true
+		}
+	}
+}
