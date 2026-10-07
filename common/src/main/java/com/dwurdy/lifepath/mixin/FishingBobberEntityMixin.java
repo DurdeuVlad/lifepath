@@ -34,8 +34,8 @@ public abstract class FishingBobberEntityMixin {
 					target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;)Lit/unimi/dsi/fastutil/objects/ObjectArrayList;"))
 	private ObjectArrayList<ItemStack> lifepath$onCatch(ObjectArrayList<ItemStack> loot) {
 		Player owner = getPlayerOwner();
-		for (ItemStack caught : loot) {
-			VanillaGameplayProducers.onFishCaught(owner, caught);
+		for (int i = 0; i < loot.size(); i++) {
+			loot.set(i, VanillaGameplayProducers.onFishCaught(owner, loot.get(i)));
 		}
 		return loot;
 	}

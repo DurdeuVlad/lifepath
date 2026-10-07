@@ -51,10 +51,11 @@ public record OutcomeRuleDefinition(
 			double failureCountMult,
 			Optional<String> qualityTier,
 			boolean signItems,
-			double anvilCostMult) {
+			double anvilCostMult,
+			double junkUpgradeChance) {
 
 		public static final BandModifiers IDENTITY = new BandModifiers(
-				1.0, 0.0, 0.5, Optional.empty(), false, 1.0);
+				1.0, 0.0, 0.5, Optional.empty(), false, 1.0, 0.0);
 
 		public static final Codec<BandModifiers> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.doubleRange(0.0, 8.0).optionalFieldOf("output_count_mult", 1.0)
@@ -68,7 +69,9 @@ public record OutcomeRuleDefinition(
 				Codec.BOOL.optionalFieldOf("sign_items", false)
 						.forGetter(BandModifiers::signItems),
 				Codec.doubleRange(0.0, 4.0).optionalFieldOf("anvil_cost_mult", 1.0)
-						.forGetter(BandModifiers::anvilCostMult))
+						.forGetter(BandModifiers::anvilCostMult),
+				Codec.doubleRange(0.0, 1.0).optionalFieldOf("junk_upgrade_chance", 0.0)
+						.forGetter(BandModifiers::junkUpgradeChance))
 				.apply(i, BandModifiers::new));
 	}
 

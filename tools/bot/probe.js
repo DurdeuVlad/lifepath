@@ -204,10 +204,65 @@ async function cmd(line) {
 				console.log("ANVIL closed");
 				break;
 			}
+			case "dig": {
+				// dig <blockName> — break nearest matching block
+				const name = (rest[0] || "").replace(/ /g, "_");
+				const b = bot.findBlock({
+					matching: (bl) => bl && bl.name === name,
+					maxDistance: 8,
+				});
+				if (!b) { console.log("DIG none " + name); break; }
+				try {
+					await bot.dig(b);
+					console.log("DUG " + name + " at " + b.position);
+				} catch (e) { console.log("DIG fail " + name + ": " + e.message); }
+				break;
+			}
 			case "xp":
 				console.log("XP level=" + bot.experience.level
 						+ " points=" + bot.experience.points);
 				break;
+			case "face": {
+				// face <x> <y> <z> — point the camera at a block position
+				const [x, y, z] = rest.map(Number);
+				await bot.lookAt(new (require("vec3"))(x, y, z));
+				console.log("FACED " + x + " " + y + " " + z);
+				break;
+			}
+			case "fish": {
+				// fish — needs rod in hand + water in reach; bot.fish() casts,
+				// waits for the bite, reels. Prints the caught stack if it
+				// landed in inventory (drop spawn is server-side either way).
+				const rod = bot.inventory.items().find((i) => i.name === "fishing_rod");
+				if (!rod) { console.log("FISH no rod"); break; }
+				await bot.equip(rod, "hand");
+				try {
+					await Promise.race([bot.fish(),
+						new Promise((_, rej) => setTimeout(
+							() => rej(new Error("fish timeout")), 45000))]);
+					const got = bot.inventory.items().at(-1);
+					console.log("FISHED got " + (got ? got.name + "x" + got.count : "unknown"));
+				} catch (e) { console.log("FISH fail " + e.message); }
+				break;
+			}
+			case "shoot": {
+				// shoot — draw held bow at nearest entity and release.
+				// Damage source = projectile → exercises the archery path.
+				const bow = bot.inventory.items().find((i) => i.name === "bow");
+				if (!bow) { console.log("SHOOT no bow"); break; }
+				const e = bot.nearestEntity((en) => en.name !== bot.username
+						&& !["item", "projectile", "experience_orb", "player"]
+							.includes(en.type)
+						&& !["experience_orb"].includes(en.name));
+				if (!e) { console.log("SHOOT no target"); break; }
+				await bot.equip(bow, "hand");
+				await bot.lookAt(e.position.offset(0, e.height * 0.5, 0));
+				bot.activateItem();
+				await new Promise((r) => setTimeout(r, 1150));
+				bot.deactivateItem();
+				console.log("SHOT at " + e.name);
+				break;
+			}
 			case "quit":
 				bot.quit();
 				break;

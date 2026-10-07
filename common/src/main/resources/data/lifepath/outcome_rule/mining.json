@@ -1,0 +1,37 @@
+{
+	"skill": "lifepath:mining",
+	"activity": "lifepath:mining",
+	"required_tags": [
+		"lifepath:minable"
+	],
+	"bands": {
+		"untrained": {
+			"output_count_mult": 0.6,
+			"quality_tier": "crude"
+		},
+		"novice": {
+			"output_count_mult": 0.8,
+			"quality_tier": "poor"
+		},
+		"apprentice": {},
+		"skilled": {
+			"output_count_mult": 1.1,
+			"quality_tier": "fine"
+		},
+		"expert": {
+			"output_count_mult": 1.25,
+			"quality_tier": "fine",
+			"sign_items": true
+		},
+		"master": {
+			"output_count_mult": 1.4,
+			"quality_tier": "masterwork",
+			"sign_items": true
+		},
+		"legendary": {
+			"output_count_mult": 1.6,
+			"quality_tier": "masterwork",
+			"sign_items": true
+		}
+	}
+}

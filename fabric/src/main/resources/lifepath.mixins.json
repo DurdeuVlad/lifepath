@@ -9,6 +9,8 @@
 		"AnvilMenuCostMixin",
 		"CraftingResultSlotMixin",
 		"FurnaceResultSlotMixin",
+		"BlockDropOutcomeMixin",
+		"EntityLootOutcomeMixin",
 		"BlockItemMixin",
 		"FishingBobberEntityMixin",
 		"SmithingScreenHandlerMixin",
