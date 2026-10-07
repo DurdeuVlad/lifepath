@@ -85,10 +85,60 @@ public abstract class OvergearedAnvilMixin {
 				return;
 			}
 			lifepath$lastForgeAwardTick = tick;
+			lifepath$pendingOutcomePlayer = player;
+			lifepath$pendingOutcomeItem = stack.getItem();
 			VanillaGameplayProducers.onForgeOutput(player, stack,
 					OvergearedCompat.FORGE_WORKSTATION);
 		} catch (ReflectiveOperationException e) {
 			LifepathMod.LOGGER.debug("Overgeared anvil XP hook degraded: {}", e.toString());
 		}
 	}
+
+	/**
+	 * M22 outcome seam: {@code craftItem} drops the forged stack straight into
+	 * the world — there is no result slot to mutate. At RETURN, find the
+	 * just-spawned ItemEntity (age 0, same item as the recipe result) at the
+	 * anvil and scale it in place. Misses degrade silently — the XP award in
+	 * HEAD already fired.
+	 */
+	@Inject(method = {"craftItem", "craftItemWithBlueprint"},
+			at = @At("RETURN"), remap = false, require = 0)
+	private void lifepath$scaleForgeOutput(CallbackInfo ci) {
+		ServerPlayer player = lifepath$pendingOutcomePlayer;
+		net.minecraft.world.item.Item expected = lifepath$pendingOutcomeItem;
+		lifepath$pendingOutcomePlayer = null;
+		lifepath$pendingOutcomeItem = null;
+		if (player == null || expected == null) {
+			return;
+		}
+		BlockEntity self = (BlockEntity) (Object) this;
+		Level level = self.getLevel();
+		if (level == null || level.isClientSide()) {
+			return;
+		}
+		var box = new net.minecraft.world.phys.AABB(self.getBlockPos()).inflate(1.5);
+		for (var entity : level.getEntitiesOfClass(
+				net.minecraft.world.entity.item.ItemEntity.class, box)) {
+			ItemStack stack = entity.getItem();
+			if (stack.is(expected) && entity.getAge() <= 1) {
+				java.util.Set<net.minecraft.resources.ResourceLocation> tags =
+						new java.util.HashSet<>();
+				stack.getTags().map(net.minecraft.tags.TagKey::location)
+						.forEach(tags::add);
+				tags.add(OvergearedCompat.FORGE_WORKSTATION);
+				tags.add(LifepathMod.id("smithing_workstations"));
+				com.dwurdy.lifepath.skill.OutcomeService.apply(player,
+						com.dwurdy.lifepath.event.ActivityTypes.SMITHING,
+						net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(expected),
+						tags, stack);
+				return;
+			}
+		}
+	}
+
+	@Unique
+	private ServerPlayer lifepath$pendingOutcomePlayer;
+
+	@Unique
+	private net.minecraft.world.item.Item lifepath$pendingOutcomeItem;
 }
