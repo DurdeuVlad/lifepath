@@ -83,6 +83,9 @@ public final class LifepathContent {
 	 *  {@code morph_form} entries can ever be morph targets. */
 	private static final ContentRegistry<MorphFormDefinition> MORPH_FORMS =
 			new ContentRegistry<>(LifepathMod.id("morph_form"));
+	/** M22: outcome-scaling rules — rank-band → output modifiers per skill. */
+	private static final ContentRegistry<com.dwurdy.lifepath.content.OutcomeRuleDefinition>
+			OUTCOME_RULES = new ContentRegistry<>(LifepathMod.id("outcome_rule"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, ResourceLocation source, ResourceLocation ref, String targetDomain) {
@@ -170,6 +173,11 @@ public final class LifepathContent {
 				manager -> loadDomain(manager, "morph_form",
 						MorphFormDefinition.MorphFormFile.CODEC,
 						LifepathContent::decodeMorphForm, MORPH_FORMS));
+		// Outcome scaling (M22): refs skills — decode validates the skill ref.
+		ReloadManager.registerData(LifepathMod.id("outcome_rule"),
+				manager -> loadDomain(manager, "outcome_rule",
+						com.dwurdy.lifepath.content.OutcomeRuleDefinition.OutcomeRuleFile.CODEC,
+						LifepathContent::decodeOutcomeRule, OUTCOME_RULES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateAll());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -185,6 +193,10 @@ public final class LifepathContent {
 
 	public static ContentRegistry<SkillDefinition> skills() {
 		return SKILLS;
+	}
+
+	public static ContentRegistry<com.dwurdy.lifepath.content.OutcomeRuleDefinition> outcomeRules() {
+		return OUTCOME_RULES;
 	}
 
 	public static ContentRegistry<LevelCurveDefinition> levelCurves() {
@@ -254,6 +266,7 @@ public final class LifepathContent {
 			case "attunement" -> ATTUNEMENTS.contains(id);
 			case "unlock" -> UNLOCKS.contains(id);
 			case "morph_form" -> MORPH_FORMS.contains(id);
+			case "outcome_rule" -> OUTCOME_RULES.contains(id);
 			// M9-4: unlocks[] holds gated CONTENT ids (species today), not def
 			// ids — an entry is known iff it names gated content directly or a
 			// surviving def still grants it.
@@ -345,6 +358,22 @@ public final class LifepathContent {
 		if (!errors.isEmpty()) {
 			throw new IllegalArgumentException(
 					"ability " + id + " invalid — " + String.join("; ", errors));
+		}
+		return def;
+	}
+
+	/**
+	 * Outcome-rule decode (M22): the {@code skill} ref must resolve — a rule
+	 * for a missing skill is always a typo, never forward-compat.
+	 */
+	public static com.dwurdy.lifepath.content.OutcomeRuleDefinition decodeOutcomeRule(
+			ResourceLocation id,
+			com.dwurdy.lifepath.content.OutcomeRuleDefinition.OutcomeRuleFile file) {
+		com.dwurdy.lifepath.content.OutcomeRuleDefinition def =
+				com.dwurdy.lifepath.content.OutcomeRuleDefinition.fromFile(id, file);
+		if (!SKILLS.contains(def.skill())) {
+			throw new IllegalArgumentException("outcome_rule " + id
+					+ " invalid — skill " + def.skill() + " has no skill definition");
 		}
 		return def;
 	}

@@ -264,6 +264,28 @@ public final class VanillaGameplayProducers {
 	}
 
 	/**
+	 * M22: screen-handler takes (anvil, smithing table) — the taken stack is
+	 * mutated in place by outcome scaling. Overgeared calls {@link
+	 * #onForgeOutput} directly instead (its output drops into the world; the
+	 * mixin applies scaling to the spawned ItemEntity).
+	 */
+	public static void onForgeTake(net.minecraft.world.entity.player.Player player,
+			net.minecraft.world.item.ItemStack output, ResourceLocation workstationId) {
+		onForgeOutput(player, output, workstationId);
+		if (!(player instanceof ServerPlayer serverPlayer) || output.isEmpty()) {
+			return;
+		}
+		Set<ResourceLocation> tags = output.getTags()
+				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
+		tags.add(workstationId);
+		tags.add(com.dwurdy.lifepath.LifepathMod.id("smithing_workstations"));
+		com.dwurdy.lifepath.skill.OutcomeService.apply(serverPlayer,
+				com.dwurdy.lifepath.event.ActivityTypes.SMITHING,
+				net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.getItem()),
+				tags, output);
+	}
+
+	/**
 	 * Crafting-table output, called by {@code mixin.CraftingResultSlotMixin}
 	 * when the player takes the result stack. The output item id + its tags are
 	 * the event surface — all weighting lives in xp_source data.
@@ -281,6 +303,9 @@ public final class VanillaGameplayProducers {
 				serverPlayer, itemId, itemTags,
 				Map.of("count", Integer.toString(output.getCount())),
 				ActivityEvent.Cause.PLAYER));
+		// M22: outcome scaling mutates the taken stack (count/quality/failure).
+		com.dwurdy.lifepath.skill.OutcomeService.apply(serverPlayer,
+				com.dwurdy.lifepath.event.ActivityTypes.CRAFTING, itemId, itemTags, output);
 	}
 
 	/**

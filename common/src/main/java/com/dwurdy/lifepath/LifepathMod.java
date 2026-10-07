@@ -113,6 +113,15 @@ public final class LifepathMod {
 						"When false, activity events matching no per_subject/per_tag entry"
 								+ " grant nothing (base_xp ignored). When true, unmapped"
 								+ " sources yield the file's base_xp.")
+				.define("outcome_scaling_enabled", true,
+						"Master switch for M22 outcome scaling (outcome_rule datapack"
+								+ " domain). When false all outputs are vanilla.")
+				.define("outcome_max_failure_chance", 0.5, v -> v >= 0 && v <= 1,
+						"Hard cap on a rule's failure_chance regardless of datapack value.")
+				.define("outcome_min_count_mult", 0.25, v -> v >= 0 && v <= 100,
+						"Floor for output_count_mult applied to produced stacks.")
+				.define("outcome_max_count_mult", 2.0, v -> v >= 0 && v <= 100,
+						"Ceiling for output_count_mult applied to produced stacks.")
 				.build());
 		LifepathConfig.define(SkillDecayService.DECAY_CONFIG, ConfigSpec.builder()
 				.define("enabled", true,

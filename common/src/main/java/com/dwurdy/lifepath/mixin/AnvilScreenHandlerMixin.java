@@ -20,7 +20,7 @@ public abstract class AnvilScreenHandlerMixin {
 	@Inject(method = "onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V",
 			at = @At("HEAD"))
 	private void lifepath$smithingOutput(Player player, ItemStack stack, CallbackInfo ci) {
-		VanillaGameplayProducers.onForgeOutput(player, stack,
+		VanillaGameplayProducers.onForgeTake(player, stack,
 				com.dwurdy.lifepath.LifepathMod.id("anvil"));
 	}
 }
