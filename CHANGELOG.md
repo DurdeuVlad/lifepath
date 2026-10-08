@@ -26,6 +26,12 @@ report" template, include loader, version, and repro steps.
 
 ### Added
 
+- **`conditional_bonuses` on xp_source** — player-state-gated XP
+  multipliers via the ability condition vocabulary (species/faction/
+  condition/season-scoped material bonuses, no Java). Ships a ×1.5
+  vampire-steel forging bonus (`vampirism:vampire` faction or the
+  `lifepath:vampirism` condition) — compensation for vampires' silver/gold
+  allergy.
 - **A milestone every 10 levels.** Each of the 13 skills now also grants a
   milestone at 10/30/50/70/90/100 — a second thematic passive line per
   skill (e.g. *Smith's Strength* I–VI, *Quick Draw*, *Riverborn*), on top of

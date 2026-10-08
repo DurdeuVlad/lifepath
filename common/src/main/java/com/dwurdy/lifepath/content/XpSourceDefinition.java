@@ -40,13 +40,15 @@ public record XpSourceDefinition(
 		Map<ResourceLocation, Double> perSubject,
 		Map<ResourceLocation, Double> perTag,
 		Set<ResourceLocation> requiredTags,
-		Set<ResourceLocation> excludedSubjects) {
+		Set<ResourceLocation> excludedSubjects,
+		List<ConditionalBonus> conditionalBonuses) {
 
 	public static XpSourceDefinition fromFile(ResourceLocation id, XpSourceFile file) {
 		return new XpSourceDefinition(id, file.activity(), file.skill(),
 				file.playerCausedOnly(), file.baseXp(),
 				Map.copyOf(file.perSubject()), new java.util.LinkedHashMap<>(file.perTag()),
-				Set.copyOf(file.requiredTags()), Set.copyOf(file.excludedSubjects()));
+				Set.copyOf(file.requiredTags()), Set.copyOf(file.excludedSubjects()),
+				List.copyOf(file.conditionalBonuses()));
 	}
 
 	/** Whether this source matches the event (type, cause, tags, exclusions). */
@@ -90,6 +92,24 @@ public record XpSourceDefinition(
 		return perSubject.getOrDefault(sourceId, baseXp);
 	}
 
+	/**
+	 * A player-state-gated XP multiplier applied to the resolved amount when
+	 * the event carries {@code tag} and {@code when} (an ability condition
+	 * node — {@code player_faction}, {@code has_condition}, …) holds. First
+	 * matching bonus wins; a throwing/unknown condition fails closed.
+	 * Datapack authors get species/faction-scoped material bonuses (e.g.
+	 * vampires forge steel better) without Java.
+	 */
+	public record ConditionalBonus(ResourceLocation tag,
+			AbilityDefinition.SpecNode when, double multiplier) {
+		public static final Codec<ConditionalBonus> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				ResourceLocation.CODEC.fieldOf("tag").forGetter(ConditionalBonus::tag),
+				AbilityDefinition.SpecNode.CODEC.fieldOf("when").forGetter(ConditionalBonus::when),
+				Codec.doubleRange(0.0, 1e15).optionalFieldOf("multiplier", 1.0)
+						.forGetter(ConditionalBonus::multiplier)
+		).apply(instance, ConditionalBonus::new));
+	}
+
 	public record XpSourceFile(
 			ResourceLocation activity,
 			ResourceLocation skill,
@@ -98,7 +118,8 @@ public record XpSourceDefinition(
 			Map<ResourceLocation, Double> perSubject,
 			Map<ResourceLocation, Double> perTag,
 			List<ResourceLocation> requiredTags,
-			List<ResourceLocation> excludedSubjects) {
+			List<ResourceLocation> excludedSubjects,
+			List<ConditionalBonus> conditionalBonuses) {
 
 		public static final Codec<XpSourceFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				ResourceLocation.CODEC.fieldOf("activity").forGetter(XpSourceFile::activity),
@@ -112,7 +133,9 @@ public record XpSourceDefinition(
 				ResourceLocation.CODEC.listOf().optionalFieldOf("required_tags", List.of())
 						.forGetter(XpSourceFile::requiredTags),
 				ResourceLocation.CODEC.listOf().optionalFieldOf("excluded_subjects", List.of())
-						.forGetter(XpSourceFile::excludedSubjects)
+						.forGetter(XpSourceFile::excludedSubjects),
+				ConditionalBonus.CODEC.listOf().optionalFieldOf("conditional_bonuses", List.of())
+						.forGetter(XpSourceFile::conditionalBonuses)
 		).apply(instance, XpSourceFile::new));
 	}
 }

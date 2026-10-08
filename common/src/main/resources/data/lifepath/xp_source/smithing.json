@@ -12,5 +12,23 @@
 		"lifepath:smithing_tier_copper": 1.0,
 		"lifepath:smithing_tier_stone": 0.75,
 		"lifepath:smithing_materials": 0.5
-	}
+	},
+	"conditional_bonuses": [
+		{
+			"tag": "lifepath:smithing_tier_steel",
+			"multiplier": 1.5,
+			"when": {
+				"type": "lifepath:player_faction",
+				"faction": "vampirism:vampire"
+			}
+		},
+		{
+			"tag": "lifepath:smithing_tier_steel",
+			"multiplier": 1.5,
+			"when": {
+				"type": "lifepath:has_condition",
+				"condition": "lifepath:vampirism"
+			}
+		}
+	]
 }

@@ -82,7 +82,8 @@ Fields: `activity` (activity-type id, required), `skill` (skill id, required),
 `base_xp` (default `0.0` — award when no per-entry matches; `0` = gate-only),
 `per_subject` (exact `sourceId` → xp), `per_tag` (event tag → xp),
 `required_tags` (event must carry **all** of these or the rule doesn't fire),
-`excluded_subjects` (sourceIds that never match).
+`excluded_subjects` (sourceIds that never match),
+`conditional_bonuses` (optional player-state multipliers — see below).
 
 **Matching model.** Producers emit `ActivityEvent`s carrying `type`
 (the activity id), `sourceId` (what was acted on — broken block id, killed
@@ -90,7 +91,24 @@ entity id, crafted item id, fish id), `tags` (registry tags on that subject),
 `cause`, `timestamp`, `attributes`. Award resolution: `per_subject[sourceId]`
 wins; else the first `per_tag` entry whose tag the event carries; else
 `base_xp`. Unmapped events fall back per `skills.toml:
-unmapped_sources_award_xp`. Built-in activity ids: `lifepath:mining`,
+unmapped_sources_award_xp`.
+
+`conditional_bonuses` multiplies the resolved award when the event carries
+`tag` **and** the performer satisfies `when` — a standard ability condition
+(`player_faction`, `has_condition`, `season`, …). First matching bonus wins;
+unknown or throwing conditions warn once and skip. Shipped example:
+vampires (`vampirism:vampire` faction or the `lifepath:vampirism`
+condition) forge `smithing_tier_steel` at ×1.5.
+
+```json
+"conditional_bonuses": [
+  { "tag": "lifepath:smithing_tier_steel", "multiplier": 1.5,
+    "when": { "type": "lifepath:player_faction",
+              "faction": "vampirism:vampire" } }
+]
+```
+
+Built-in activity ids: `lifepath:mining`,
 `farming`, `smithing`, `fishing`, `crafting`, `combat`, `archery`, `defence`,
 `foraging`, `woodcutting`, `cooking`, `athletics`, `hunting`, `scholarship`,
 `engineering`, `decay` (internal).
