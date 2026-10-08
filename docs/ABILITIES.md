@@ -88,6 +88,7 @@ reference and skipped by the content-ref scan.
 | `light_level` | `op`, `value`, `source`?: `any`\|`block`\|`sky` (default `any` = max local raw brightness) |
 | `y_level` | `op`, `value` — compares the player's block-position Y |
 | `player_faction` | `faction` (id), `min_level`? — external faction membership via the TeamLapen bridge (Vampirism *and* Werewolves share it). Always false when the mod is absent or the bridge cut |
+| `season` | `seasons` (string list) — Serene Seasons soft-dep. Coarse `spring`/`summer`/`autumn`/`winter` cover all three sub-seasons; sub names `early_spring`…`late_winter` pin a third; tropical biomes expose `wet`/`dry` + `early_wet`…`late_dry`. False (warn once) when the mod is absent |
 | `not` | `condition` (an inline spec node) — negates one condition, Origins-style; a malformed or throwing inner node counts as true → the not yields false |
 
 ### Targets

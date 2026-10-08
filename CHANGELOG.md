@@ -41,6 +41,11 @@ craft better, and experts sign their work.
   dwarf `0.7`, goliath `1.4`. Applied on species set, re-applied on
   join/respawn, persistent through death. Without Pehkui the field is
   inert — no classes load, no crash, identical behavior.
+- **`lifepath:season` condition (soft-dep, #154)**: SpecNode condition
+  composable anywhere conditions are — `seasons` list matches coarse
+  (`winter`), sub-season (`early_winter`), and tropical (`wet`/`dry`)
+  names via Serene Seasons when installed; fail-closed with a one-time
+  warning when absent.
 
 ### Changed
 
