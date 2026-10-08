@@ -2,6 +2,7 @@ package com.dwurdy.lifepath.skill;
 
 import com.dwurdy.lifepath.character.IdentitySummary;
 import com.dwurdy.lifepath.character.PlayerCharacterData;
+import com.dwurdy.lifepath.content.OutcomeRuleDefinition;
 import com.dwurdy.lifepath.content.SkillDefinition;
 import com.dwurdy.lifepath.network.s2c.IdentitySummaryPayload;
 import com.dwurdy.lifepath.network.s2c.SkillsSummaryPayload;
@@ -60,20 +61,27 @@ public final class SkillSummary {
 		String nextText = "";
 		List<IdentitySummaryPayload.Entry> bonuses = new ArrayList<>();
 		List<IdentitySummaryPayload.Entry> nextEffects = new ArrayList<>();
+		List<SkillCard.MilestoneRow> roadmap = new ArrayList<>();
 		for (SkillDefinition.Milestone m : def.milestones()) {
+			List<IdentitySummaryPayload.Entry> effects = new ArrayList<>();
+			for (ResourceLocation ref : m.effectRefs()) {
+				effects.add(IdentitySummary.entry(ref));
+			}
+			// M26: every milestone becomes a roadmap row — the client ladder
+			// shows reached vs. upcoming with the XP the level costs.
+			roadmap.add(new SkillCard.MilestoneRow(m.level(), m.descriptionKey(),
+					LevelCurves.xpForLevel(curveId, m.level()),
+					List.copyOf(effects)));
 			if (m.level() <= level) {
-				for (ResourceLocation ref : m.effectRefs()) {
-					bonuses.add(IdentitySummary.entry(ref));
-				}
+				bonuses.addAll(effects);
 			} else if (nextLevel == 0 || m.level() < nextLevel) {
 				nextLevel = m.level();
 				nextText = m.descriptionKey();
 				nextEffects.clear();
-				for (ResourceLocation ref : m.effectRefs()) {
-					nextEffects.add(IdentitySummary.entry(ref));
-				}
+				nextEffects.addAll(effects);
 			}
 		}
+		roadmap.sort(Comparator.comparingInt(SkillCard.MilestoneRow::level));
 
 		return new SkillCard(id.toString(),
 				new SkillCard.Display(
@@ -85,9 +93,48 @@ public final class SkillSummary {
 						IdentitySummary.keyedText(id, "skill", "improve_hint",
 								def.improveHint()),
 						def.icon().map(ResourceLocation::toString).orElse("")),
-				new SkillCard.Progress(level, xpIn, xpNeed, floor, graceEnd),
+				new SkillCard.Progress(level, xpIn, xpNeed,
+						prog != null ? prog.xp() : 0.0, floor, graceEnd),
 				new SkillCard.Details(nextLevel, nextText, List.copyOf(bonuses),
-						List.copyOf(nextEffects)));
+						List.copyOf(nextEffects), List.copyOf(roadmap),
+						bandStats(id), bandThresholds()));
+	}
+
+	/**
+	 * Per-band outcome odds for the skill's {@code outcome_rule} (M26). One
+	 * row per rank band, in ascending level order; empty when the skill has
+	 * no rule — athletics/defence genuinely have no odds to show.
+	 */
+	private static List<SkillCard.BandStat> bandStats(ResourceLocation skillId) {
+		OutcomeRuleDefinition rule = LifepathContent.outcomeRules().all()
+				.values().stream()
+				.filter(r -> r.skill().equals(skillId))
+				.findFirst().orElse(null);
+		if (rule == null) {
+			return List.of();
+		}
+		int[] thresholds = RankBands.thresholds();
+		RankBands.RankBand[] order = RankBands.RankBand.values();
+		List<SkillCard.BandStat> out = new ArrayList<>(order.length);
+		for (int i = 0; i < order.length; i++) {
+			OutcomeRuleDefinition.BandModifiers m = rule.forBand(order[i]);
+			out.add(new SkillCard.BandStat(order[i].key(), thresholds[i],
+					m.outputCountMult(), m.failureChance(), m.failureCountMult(),
+					m.qualityTier().orElse(""), m.signItems(),
+					m.anvilCostMult(), m.junkUpgradeChance()));
+		}
+		return List.copyOf(out);
+	}
+
+	/** Server-side band thresholds — the client names bands off these, not
+	 * its own (possibly divergent) config. */
+	private static List<Integer> bandThresholds() {
+		int[] t = RankBands.thresholds();
+		List<Integer> out = new ArrayList<>(t.length);
+		for (int v : t) {
+			out.add(v);
+		}
+		return List.copyOf(out);
 	}
 
 	/** Species minAptitudes floor, else the neutral default grade. */

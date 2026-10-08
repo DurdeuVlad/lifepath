@@ -41,6 +41,14 @@ report" template, include loader, version, and repro steps.
   Covers the previously orphan combat skills — no spec touched archery or
   defence before. **Hunter** now also starts with archery 10 and `b`
   aptitude (hunters shoot things).
+- **Progression transparency (UX).** The skill detail screen now shows the
+  real numbers: an "At your level" odds block (yield ×, quality tier, botch
+  %, anvil cost, signature) and a scrollable **Roadmap** — every milestone
+  level as a hoverable row revealing its band odds, unlocks, and XP cost
+  ("4,675 XP total · 3,100 to go"). Skills list tooltips show a compact
+  odds line. Powered by new sync fields (`roadmap`, `bands`,
+  `bandThresholds`, `xpTotal`) resolved server-side — the client never
+  trusts its own config.
 
 ## [1.0.0-beta.10] — 2026-10-08
 

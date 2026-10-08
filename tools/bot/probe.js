@@ -27,8 +27,9 @@ bot.once("spawn", () => {
 
 bot.on("messagestr", (msg) => console.log("CHAT " + msg));
 bot._client.on("custom_payload", (p) => {
+	// Full payload — truncation hid new wire fields (e.g. skills roadmap).
 	console.log("PAYLOAD " + p.channel + " "
-			+ Buffer.from(p.data || []).toString("hex").slice(0, 160));
+			+ Buffer.from(p.data || []).toString("hex"));
 });
 bot.on("death", () => console.log("BOT DIED"));
 bot.on("playerCollect", (collector, entity) => {

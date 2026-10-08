@@ -120,6 +120,24 @@ public class SkillsScreen extends Screen {
 						tooltip.addAll(font.split(c.display().improveHint()
 								.copy().withStyle(ChatFormatting.GRAY), 200));
 					}
+					// M26: the odds at the current level — yield, quality,
+					// botch — the numbers players used to have to guess.
+					SkillCard.BandStat b = bandAt(c.details().bands(),
+							c.details().bandThresholds(),
+							c.progress().level());
+					if (b != null) {
+						tooltip.add(Component.translatable(
+								"screen.lifepath.skills.odds",
+								fmt(b.outputMult()),
+								b.qualityTier().isEmpty()
+										? Component.translatable(
+												"lifepath.quality.standard")
+										: Component.translatable(
+												"lifepath.quality."
+														+ b.qualityTier()),
+								(int) Math.round(b.failChance() * 100))
+								.getVisualOrderText());
+					}
 				}
 			}
 			y += ROW_H;
@@ -133,6 +151,27 @@ public class SkillsScreen extends Screen {
 		context.drawCenteredString(font,
 				Component.translatable("screen.lifepath.skills.click_hint"),
 				width / 2, top + panelH + 8, DIM);
+	}
+
+	/** Band row at {@code level} (server thresholds); null = no rule. */
+	private static SkillCard.BandStat bandAt(List<SkillCard.BandStat> bands,
+			List<Integer> thresholds, int level) {
+		if (bands.isEmpty()) {
+			return null;
+		}
+		int idx = 0;
+		for (int i = 0; i < thresholds.size() && i < bands.size(); i++) {
+			if (level >= thresholds.get(i)) {
+				idx = i;
+			}
+		}
+		return bands.get(idx);
+	}
+
+	private static String fmt(double v) {
+		return v == Math.floor(v) ? Integer.toString((int) v)
+				: String.format(java.util.Locale.ROOT, "%.2f", v)
+						.replaceAll("0+$", "").replaceAll("\\.$", "");
 	}
 
 	@Override
