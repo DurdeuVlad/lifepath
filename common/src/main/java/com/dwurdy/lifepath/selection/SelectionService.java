@@ -259,6 +259,7 @@ public final class SelectionService {
 		// demorph (the ability that flips it would be unowned).
 		MorphService.clearActiveMorph(player, data);
 		data.setMorph(null);
+		com.dwurdy.lifepath.species.SpeciesScaleService.apply(player);
 		// changed() syncs; the species_assigned feedback + description come
 		// from the sync diff — no bespoke chat needed here.
 		CharacterManager.changed(player);

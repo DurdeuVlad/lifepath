@@ -104,6 +104,7 @@ public final class SpeciesCommands {
 		// (SelectionService.selectSpecies) performs.
 		MorphService.clearActiveMorph(target, data);
 		data.setMorph(null);
+		com.dwurdy.lifepath.species.SpeciesScaleService.apply(target);
 		CharacterManager.markDirty(target);
 		CharacterManager.saveCharacter(target);
 		CharacterManager.syncCharacter(target);
