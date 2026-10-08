@@ -104,6 +104,37 @@ class XpSourceRouterTest {
 	}
 
 	@Test
+	void conditionalBonusesScaleByPlayerState() {
+		com.dwurdy.lifepath.ability.AbilityVocabulary.init();
+		registerSource("""
+				{"activity": "lifepath:smithing", "skill": "lifepath:smithing",
+				 "base_xp": 0.5, "per_tag": {"lifepath:smithing_tier_steel": 3.0},
+				 "conditional_bonuses": [
+				   {"tag": "lifepath:smithing_tier_steel", "multiplier": 1.5,
+				    "when": {"type": "lifepath:player_faction", "faction": "vampirism:vampire"}},
+				   {"tag": "lifepath:smithing_tier_steel", "multiplier": 1.5,
+				    "when": {"type": "lifepath:has_condition", "condition": "lifepath:vampirism"}}]}
+				""", ResourceLocation.fromNamespaceAndPath("lifepath", "smithing"));
+		var def = LifepathContent.xpSources()
+				.get(ResourceLocation.fromNamespaceAndPath("lifepath", "smithing"));
+		ResourceLocation steel = LifepathMod.id("smithing_tier_steel");
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		var ctx = new com.dwurdy.lifepath.ability.AbilityVocabulary.EvalContext(null, data, 0L);
+
+		// No faction (mod absent fails closed) and no condition → base amount.
+		assertEquals(3.0, XpSourceRouter.applyBonuses(def, Set.of(steel), ctx, 3.0), 1e-9);
+
+		// Held lifepath:vampirism condition → the steel bonus fires.
+		data.putCondition(LifepathMod.id("vampirism"),
+				com.dwurdy.lifepath.condition.ConditionState.fresh(0L));
+		assertEquals(4.5, XpSourceRouter.applyBonuses(def, Set.of(steel), ctx, 3.0), 1e-9);
+
+		// Bonus is tag-scoped: non-steel work is untouched.
+		assertEquals(0.5, XpSourceRouter.applyBonuses(def,
+				Set.of(LifepathMod.id("smithing_materials")), ctx, 0.5), 1e-9);
+	}
+
+	@Test
 	void unlistedSubjectFallsBackToBaseXp() {
 		registerSkill();
 		registerSource("""

@@ -78,13 +78,65 @@ public final class XpSourceRouter {
 		for (XpSourceDefinition def : LifepathContent.xpSources().all().values()) {
 			if (def.matches(event)) {
 				XpSourceDefinition.Resolved resolved = def.resolve(event.sourceId(), event.tags());
+				double amount = resolved.amount();
+				if (amount > 0 && !def.conditionalBonuses().isEmpty()) {
+					amount = applyBonuses(def, event.tags(), ctxFor(event), amount);
+				}
 				// Unmapped events (no exact/tag match) can be config-disabled.
-				if (resolved.amount() > 0 && (resolved.specific() || allowUnmapped)) {
-					awards.add(new Award(def.skill(), def.id(), resolved.amount()));
+				if (amount > 0 && (resolved.specific() || allowUnmapped)) {
+					awards.add(new Award(def.skill(), def.id(), amount));
 				}
 			}
 		}
 		return awards;
+	}
+
+	private static com.dwurdy.lifepath.ability.AbilityVocabulary.EvalContext ctxFor(ActivityEvent event) {
+		ServerPlayer p = event.player();
+		return new com.dwurdy.lifepath.ability.AbilityVocabulary.EvalContext(p,
+				p != null ? com.dwurdy.lifepath.character.CharacterManager.getCharacter(p) : null,
+				System.currentTimeMillis());
+	}
+
+	private static final java.util.Set<String> WARNED_BONUSES =
+			java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+	/**
+	 * Conditional-bonus pass: the first bonus whose {@code tag} is on the
+	 * event AND whose {@code when} condition holds multiplies the amount.
+	 * The condition vocabulary is the ability one ({@code player_faction},
+	 * {@code has_condition}, …) — player-state gating without Java. Fails
+	 * closed per source/condition pair with one warning. Playerless
+	 * contexts reach conditions too — playerless-evaluable nodes like
+	 * {@code has_condition} can still pass.
+	 */
+	static double applyBonuses(XpSourceDefinition def, java.util.Set<ResourceLocation> eventTags,
+			com.dwurdy.lifepath.ability.AbilityVocabulary.EvalContext ctx, double amount) {
+		for (XpSourceDefinition.ConditionalBonus b : def.conditionalBonuses()) {
+			if (!eventTags.contains(b.tag())) {
+				continue;
+			}
+			var eval = com.dwurdy.lifepath.ability.AbilityVocabulary.condition(b.when().type());
+			String warnKey = def.id() + "|" + b.when().type();
+			if (eval == null) {
+				if (WARNED_BONUSES.add(warnKey)) {
+					LifepathMod.LOGGER.warn("xp source {} bonus references unknown condition '{}' — skipped",
+							def.id(), b.when().type());
+				}
+				continue;
+			}
+			try {
+				if (eval.test(ctx, b.when().raw())) {
+					return amount * b.multiplier();
+				}
+			} catch (Throwable t) {
+				if (WARNED_BONUSES.add(warnKey)) {
+					LifepathMod.LOGGER.warn("xp source {} bonus condition '{}' threw — skipped ({})",
+							def.id(), b.when().type(), t.getMessage());
+				}
+			}
+		}
+		return amount;
 	}
 
 	/** Test hook: swap the sink. Always pair with {@link #resetForTests()}. */
