@@ -1,6 +1,6 @@
 {
-	"display_name": "Defence",
-	"icon": "minecraft:textures/item/shield.png",
+	"display_name": "Defense",
+	"icon": "minecraft:textures/item/iron_chestplate.png",
 	"description": "Enduring blows and wearing the fight.",
 	"improve_hint": "Survive attacks from hostile creatures.",
 	"category": "physical",

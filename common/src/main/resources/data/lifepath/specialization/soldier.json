@@ -1,6 +1,6 @@
 {
 	"display_name": "Soldier",
-	"icon": "specialization/soldier",
+	"icon": "minecraft:textures/item/iron_chestplate.png",
 	"starting_skills": {
 		"lifepath:defence": 20,
 		"lifepath:archery": 15,
@@ -27,8 +27,8 @@
 		"lifepath:hold_the_line"
 	],
 	"strengths": [
-		"Learns defence 35% faster",
-		"Defence can't decay below Lv30",
+		"Learns defense 35% faster",
+		"Defense can't decay below Lv30",
 		"Also trains archery and athletics"
 	],
 	"weaknesses": []

@@ -1,6 +1,6 @@
 {
 	"display_name": "Herbalist",
-	"icon": "specialization/herbalist",
+	"icon": "minecraft:textures/block/poppy.png",
 	"starting_skills": {
 		"lifepath:foraging": 20,
 		"lifepath:farming": 15

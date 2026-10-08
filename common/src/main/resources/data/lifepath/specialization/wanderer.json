@@ -1,6 +1,6 @@
 {
 	"display_name": "Wanderer",
-	"icon": "specialization/wanderer",
+	"icon": "minecraft:textures/item/leather.png",
 	"starting_skills": {},
 	"aptitudes": {},
 	"strengths": [

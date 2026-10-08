@@ -42,12 +42,14 @@ class IdentitySummaryPayloadTest {
 						List.of(Component.literal("+ Sturdy"),
 								Component.literal("- Slow"))),
 				List.of(new Entry("lifepath:mining", Component.literal("Mining"),
-						"lifepath:textures/gui/skill/mining.png")),
+						"lifepath:textures/gui/skill/mining.png", Component.empty())),
 				Map.of("conditions", List.of(
 						new Entry("lifepath:chilled", Component.literal("Chilled"),
-								"lifepath:textures/gui/condition/chilled.png")),
+								"lifepath:textures/gui/condition/chilled.png",
+								Component.empty())),
 						"traits", List.of(
-								new Entry("lifepath:night_eyes", Component.literal("Night Eyes"), ""))),
+								new Entry("lifepath:night_eyes", Component.literal("Night Eyes"), "",
+								Component.empty()))),
 				// Two entries so iteration order is observable — the decode
 				// must preserve the sender's order (LinkedHashMap), since the
 				// character screen iterates the values directly.
@@ -103,13 +105,13 @@ class IdentitySummaryPayloadTest {
 				List.of(new Entry("lifepath:smithing",
 						Component.translatableWithFallback(
 								"lifepath.skill.smithing.name", "Smithing"),
-						"")),
+						"", Component.empty())),
 				Map.of("traits", List.of(new Entry("lifepath:x",
 						Component.translatable("text.lifepath.detail.skill_start_apt",
 								Component.translatableWithFallback(
 										"lifepath.skill.smithing.name", "Smithing"),
 								20, "A"),
-						""))),
+						"", Component.empty()))),
 				Map.of(), List.of(), IdentitySummaryPayload.MorphView.EMPTY);
 		var buf = new net.minecraft.network.RegistryFriendlyByteBuf(
 				io.netty.buffer.Unpooled.buffer(),

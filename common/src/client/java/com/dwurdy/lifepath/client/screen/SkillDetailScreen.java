@@ -6,6 +6,7 @@ import com.dwurdy.lifepath.network.s2c.SkillsSummaryPayload.SkillCard;
 import com.dwurdy.lifepath.platform.ClientOnly;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -382,16 +383,28 @@ public class SkillDetailScreen extends Screen {
 						"screen.lifepath.skill.odds.sign"));
 			}
 		}
-		if (!row.effects().isEmpty()) {
-			lines.add(Component.translatable(
-					"screen.lifepath.skill.tip.unlocks"));
-			for (IdentitySummaryPayload.Entry e : row.effects()) {
-				lines.add(Component.literal("· ").append(e.name()));
-			}
-		}
 		List<FormattedCharSequence> out = new ArrayList<>();
 		for (Component c : lines) {
 			out.add(c.getVisualOrderText());
+		}
+		if (!row.effects().isEmpty()) {
+			out.add(Component.translatable(
+					"screen.lifepath.skill.tip.unlocks").getVisualOrderText());
+			FormattedCharSequence indent = Component.literal("  ")
+					.getVisualOrderText();
+			for (IdentitySummaryPayload.Entry e : row.effects()) {
+				out.add(Component.literal("· ").append(e.name())
+						.getVisualOrderText());
+				// Beta-10: the unlock's actual effect text — a milestone
+				// name alone ("Stone Skin I") never said what it grants.
+				if (!e.description().getString().isEmpty()) {
+					for (var wrapped : font.split(e.description().copy()
+							.withStyle(ChatFormatting.GRAY), 190)) {
+						out.add(FormattedCharSequence.composite(indent,
+								wrapped));
+					}
+				}
+			}
 		}
 		return out;
 	}

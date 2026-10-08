@@ -44,12 +44,15 @@ public record IdentitySummaryPayload(IdentityCore identity,
 	 * One displayable content reference (M12-1): the content id, its
 	 * server-resolved display name, and its icon texture id ("" when none).
 	 */
-	public record Entry(String id, Component name, String icon) {
+	public record Entry(String id, Component name, String icon,
+			Component description) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, Entry> CODEC =
 				StreamCodec.composite(
 						ByteBufCodecs.STRING_UTF8, Entry::id,
 						ComponentSerialization.TRUSTED_STREAM_CODEC, Entry::name,
 						ByteBufCodecs.STRING_UTF8, Entry::icon,
+						ComponentSerialization.TRUSTED_STREAM_CODEC,
+								Entry::description,
 						Entry::new);
 	}
 

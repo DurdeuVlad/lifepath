@@ -167,6 +167,16 @@ public final class VanillaGameplayProducers {
 					com.dwurdy.lifepath.unlock.UnlockService
 							.onUseItem(serverPlayer, serverPlayer.getItemInHand(hand),
 									System.currentTimeMillis());
+					// Beta-10: diet-allowed non-food items (automaton
+					// ingots) consume on right-click — vanilla has no eat
+					// path for items without a FOOD component.
+					net.minecraft.world.item.ItemStack held =
+							serverPlayer.getItemInHand(hand);
+					if (com.dwurdy.lifepath.species.DietService
+							.tryEatDietItem(serverPlayer, held)) {
+						return net.minecraft.world.InteractionResultHolder
+								.consume(held);
+					}
 					return net.minecraft.world.InteractionResultHolder.pass(
 							serverPlayer.getItemInHand(hand));
 				});

@@ -1,6 +1,6 @@
 {
 	"display_name": "Farmer",
-	"icon": "specialization/farmer",
+	"icon": "minecraft:textures/item/wheat.png",
 	"starting_skills": {
 		"lifepath:farming": 20
 	},
