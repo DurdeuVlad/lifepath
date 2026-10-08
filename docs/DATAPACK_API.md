@@ -180,7 +180,8 @@ Nested path: `data/<ns>/skill/curve/<name>.json` — referenced by `skill`'s
   "active_abilities": ["lifepath:phoenix_flare"],
   "capacity_multiplier": 1.0,
   "strengths": ["Fire heals you", "Rise again when felled"],
-  "weaknesses": ["Water quenches your inner fire"]
+  "weaknesses": ["Water quenches your inner fire"],
+  "scale": 1.0
 }
 ```
 
@@ -192,7 +193,13 @@ unlock — then it surfaces as a normal card).
 `diet_rules`/`mob_dispositions` are single ids into the `diet`/`relation`
 domains. `resources`/`passive_abilities`/`active_abilities` are id lists
 validated against `resource`/`ability`. `capacity_multiplier` scales
-encumbrance capacity (default `1.0`).
+encumbrance capacity (default `1.0`). `scale` (optional, `0.1`–`8.0`) sets
+the player's physical size through Pehkui's `pehkui:base` scale when that
+mod is installed — shipped defaults: dwarf `0.7`, goliath `1.4`. Applied on
+species set, re-applied on join and respawn (the bridge also marks the
+value persistent so it survives death). Species without `scale` reset to
+`1.0`; without Pehkui the field is ignored entirely — no classes load, no
+crash, behavior identical to before.
 `strengths`/`weaknesses` are free-text lists the selection picker shows as
 green `+` / red `-` lines — the player's "what's good / what's bad" summary
 before committing (diet, environment, fragility). Keep each line short.

@@ -97,6 +97,16 @@ class ShippedSpeciesDefinitionsTest {
 	}
 
 	@Test
+	void speciesScaleFieldIsOptionalAndDecodes() throws Exception {
+		// Compat A5: scale is opt-in — species without it parse with empty,
+		// dwarf/goliath pin the shipped small/large ends.
+		SpeciesDefinition human = loadShipped("human");
+		assertTrue(human.scale().isEmpty(), "unscaled species carry no field");
+		assertEquals(0.7, loadShipped("dwarf").scale().orElseThrow(), 1e-6);
+		assertEquals(1.4, loadShipped("goliath").scale().orElseThrow(), 1e-6);
+	}
+
+	@Test
 	void humanFlowsThroughTheFullPipeline() throws Exception {
 		// Species set → owned abilities is just the empty lists.
 		SpeciesDefinition human = loadShipped("human");

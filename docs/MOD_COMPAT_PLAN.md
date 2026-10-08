@@ -135,7 +135,7 @@ mixin into FD's container, gated behind mod presence. Attribution when
 player A places the pot but player B takes the food — decide: taker gets XP
 (simple) vs owner (needs tracking). **needs-input** on that choice.
 
-### Issue A5 — Species physicality via Pehkui (soft-dep)
+### Issue A5 — Species physicality via Pehkui (soft-dep) — **DONE**
 
 **Intent**: the pack ships Pehkui; Dwarf/Goliath should *be* their size, not
 just claim it in flavor text.
@@ -143,6 +143,14 @@ just claim it in flavor text.
 **Expectation**: optional `scale` field on species; when Pehkui is present,
 apply `pehkui:base` scale on identity set (Goliath ~1.2, Dwarf ~0.8 …).
 Absent Pehkui → field ignored, no crash, no class loading.
+
+**Shipped**: `scale` field on `species/` (dwarf `0.7`, goliath `1.4`),
+`compat/pehkui/PehkuiScale` method-handle bridge (`ScaleTypes.BASE` →
+`getScaleData` → `setScale` + `setPersistence`), applied on species set,
+join, and respawn by `SpeciesScaleService`. **Live-verified on Fabric with
+Pehkui 3.8.3**: `/scale get` read back `0.7` after `species set dwarf`,
+`1.4` for goliath, reset `1.0` for unscaled species, and `0.7` held through
+death→respawn.
 
 **Non-goals**: hitbox/gameplay-affecting scale beyond Pehkui's own
 mechanics; no scale for specs.
@@ -235,4 +243,4 @@ post-beta.6 flavor pass.
 
 Shipped: #149 (B1 fake-player gate, c6caf91), #150 (B2 data sweep, cb596fe), #151 (B3 Overgeared, a84b717), #152 (B4 FD stations, 9c7c8ed), #156 (B6 vampire bridge, c768636), #157 (B5 skill milestones, 09c00fa), #158 (beta.6 release).
 
-Open: #153 (A5 Pehkui scale), #154 (A6 season condition), #155 (A7 fishing/harvest audit) — scheduled after the morph block (#159–#164); #165 tracks beta.7.
+Open: #154 (A6 season condition), #155 (A7 fishing/harvest audit) — #153 (A5 Pehkui scale) shipped and live-verified; #165 tracks beta.7.

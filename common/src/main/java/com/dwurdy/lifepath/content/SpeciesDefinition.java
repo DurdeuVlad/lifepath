@@ -30,7 +30,23 @@ public record SpeciesDefinition(
 		double capacityMultiplier,
 		Optional<ResourceLocation> icon,
 		List<String> strengths,
-		List<String> weaknesses) {
+		List<String> weaknesses,
+		Optional<Double> scale) {
+
+	/** Back-compatible constructor for call sites predating {@code scale} (A5). */
+	public SpeciesDefinition(ResourceLocation id, String displayName,
+			Optional<String> description, Visibility visibility,
+			Selection selection, List<ResourceLocation> passiveAbilities,
+			List<ResourceLocation> activeAbilities, Map<ResourceLocation, Aptitude> minAptitudes,
+			List<ResourceLocation> resources, Optional<ResourceLocation> dietRules,
+			Optional<ResourceLocation> mobDispositions, double capacityMultiplier,
+			Optional<ResourceLocation> icon, List<String> strengths,
+			List<String> weaknesses) {
+		this(id, displayName, description, visibility, selection,
+				passiveAbilities, activeAbilities, minAptitudes, resources,
+				dietRules, mobDispositions, capacityMultiplier, icon,
+				strengths, weaknesses, Optional.empty());
+	}
 
 	/** Back-compatible constructor for call sites predating {@code strengths}/{@code weaknesses}. */
 	public SpeciesDefinition(ResourceLocation id, String displayName,
@@ -99,7 +115,7 @@ public record SpeciesDefinition(
 				file.resources(), file.dietRules(), file.mobDispositions(),
 				file.capacityMultiplier(),
 				file.icon().map(raw -> IconRef.resolve("species", id, raw)),
-				file.strengths(), file.weaknesses());
+				file.strengths(), file.weaknesses(), file.scale());
 	}
 
 	/**
@@ -120,7 +136,8 @@ public record SpeciesDefinition(
 			double capacityMultiplier,
 			Optional<String> icon,
 			List<String> strengths,
-			List<String> weaknesses) {
+			List<String> weaknesses,
+			Optional<Double> scale) {
 
 		public static final Codec<SpeciesDefinitionFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("display_name").forGetter(SpeciesDefinitionFile::displayName),
@@ -136,7 +153,8 @@ public record SpeciesDefinition(
 			Codec.doubleRange(0.0, 100.0).optionalFieldOf("capacity_multiplier", 1.0).forGetter(SpeciesDefinitionFile::capacityMultiplier),
 			Codec.STRING.optionalFieldOf("icon").forGetter(SpeciesDefinitionFile::icon),
 			Codec.STRING.listOf().optionalFieldOf("strengths", List.of()).forGetter(SpeciesDefinitionFile::strengths),
-			Codec.STRING.listOf().optionalFieldOf("weaknesses", List.of()).forGetter(SpeciesDefinitionFile::weaknesses)
+			Codec.STRING.listOf().optionalFieldOf("weaknesses", List.of()).forGetter(SpeciesDefinitionFile::weaknesses),
+			Codec.doubleRange(0.1, 8.0).optionalFieldOf("scale").forGetter(SpeciesDefinitionFile::scale)
 		).apply(instance, SpeciesDefinitionFile::new));
 	}
 }

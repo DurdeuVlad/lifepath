@@ -36,6 +36,11 @@ craft better, and experts sign their work.
   to rolled fish (`junk_upgrade_chance` 25/40/60%).
 - **`/lifepath debug skill <player> <skill> set <level>`** — admin/tester
   setter for band verification (uses the existing XP service path).
+- **Pehkui species scale (soft-dep, #153)**: optional `scale` field on
+  `species/` applies `pehkui:base` size when Pehkui is installed — shipped
+  dwarf `0.7`, goliath `1.4`. Applied on species set, re-applied on
+  join/respawn, persistent through death. Without Pehkui the field is
+  inert — no classes load, no crash, identical behavior.
 
 ### Changed
 

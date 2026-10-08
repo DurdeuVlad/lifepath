@@ -279,6 +279,7 @@ public final class LifepathMod {
 		// M-3 (morph): join/respawn re-apply of the active form's stat profile —
 		// registered after CharacterManager so the character cache is warm.
 		com.dwurdy.lifepath.morph.MorphService.init();
+		com.dwurdy.lifepath.species.SpeciesScaleService.init();
 		com.dwurdy.lifepath.resource.ResourceService.init();
 		com.dwurdy.lifepath.feedback.FeedbackService.init();
 		// M14: GUI-first identity onboarding — per-player selection catalog +

@@ -26,5 +26,6 @@
 	"weaknesses": [
 		"Arrows find you easier",
 		"Falls land harder"
-	]
+	],
+	"scale": 1.4
 }
