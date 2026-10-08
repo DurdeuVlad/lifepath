@@ -1,0 +1,35 @@
+{
+	"display_name": "Soldier",
+	"icon": "specialization/soldier",
+	"starting_skills": {
+		"lifepath:defence": 20,
+		"lifepath:archery": 15,
+		"lifepath:athletics": 10
+	},
+	"aptitudes": {
+		"lifepath:defence": "a",
+		"lifepath:archery": "b",
+		"lifepath:athletics": "c"
+	},
+	"xp_modifiers": {
+		"lifepath:defence": 1.35,
+		"lifepath:archery": 1.2,
+		"lifepath:athletics": 1.1
+	},
+	"decay_modifiers": {
+		"lifepath:defence": 0.3,
+		"lifepath:archery": 0.5
+	},
+	"protected_floors": {
+		"lifepath:defence": 30
+	},
+	"signature": [
+		"lifepath:hold_the_line"
+	],
+	"strengths": [
+		"Learns defence 35% faster",
+		"Defence can't decay below Lv30",
+		"Also trains archery and athletics"
+	],
+	"weaknesses": []
+}

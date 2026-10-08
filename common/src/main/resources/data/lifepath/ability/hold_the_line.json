@@ -1,0 +1,29 @@
+{
+	"display_name": "Hold the Line",
+	"description": "Wounded soldiers harden — below three hearts you shrug off part of every blow.",
+	"icon": "ability/hold_the_line",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:health_threshold",
+				"op": "<=",
+				"value": 6.0
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 80,
+			"amplifier": 0
+		}
+	]
+}

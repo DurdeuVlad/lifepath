@@ -3,14 +3,17 @@
 	"icon": "specialization/hunter",
 	"starting_skills": {
 		"lifepath:hunting": 20,
+		"lifepath:archery": 10,
 		"lifepath:athletics": 10
 	},
 	"aptitudes": {
 		"lifepath:hunting": "a",
+		"lifepath:archery": "b",
 		"lifepath:athletics": "c"
 	},
 	"xp_modifiers": {
-		"lifepath:hunting": 1.35
+		"lifepath:hunting": 1.35,
+		"lifepath:archery": 1.2
 	},
 	"decay_modifiers": {
 		"lifepath:hunting": 0.3
@@ -20,7 +23,8 @@
 	},
 	"strengths": [
 		"Learns hunting 35% faster",
-		"Hunting can't decay below Lv30"
+		"Hunting can't decay below Lv30",
+		"Also trains archery"
 	],
 	"weaknesses": [
 		"No signature ability"
