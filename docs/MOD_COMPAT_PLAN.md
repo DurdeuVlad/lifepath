@@ -189,31 +189,29 @@ pack; verified 2026-10):
 
 | Mod | Catch/harvest path | Lifepath visibility | Verdict |
 |---|---|---|---|
-| `stardew_fishing` 3.7 | `C2SCompleteMinigamePacket` → `FishingHookLogic.endMinigame` produces loot via its **own** `LootTable.getRandomItems` + constructs its own `ItemFishedEvent`; `FishingHook.retrieve`'s loot seam never runs. Treasure via own `getTreasureChestLoot` | **None** — `FishingBobberEntityMixin` wraps the `getRandomItems` call inside `retrieve`, which stardew never reaches. No `lifepath:fishing` activity, no XP, no outcome scaling, no stamps | **GAP** — adapter follow-up #208 filed |
+| `stardew_fishing` 3.7 | Its `FishingHookMixin.retrieve` **captures the vanilla-produced loot list** (`List<ItemStack>` local) after `getRandomItems` runs, stashes it in `FishingHookAttachment.rewards`, cancels the vanilla spawn, and replays it through `endMinigame`'s own `ItemFishedEvent` after the minigame | **Covered for catches** — our `FishingBobberEntityMixin` transforms that same list in place at roll time, so `lifepath:fishing` activity, XP, and outcome scaling all fire before stardew diverts the stacks. **Residual**: (a) XP commits at reel-in regardless of minigame outcome — a failed catch still granted the attempt's XP; (b) stardew's *bonus treasure chest* loot (`getTreasureChestLoot`, its own `getRandomItems` call inside `endMinigame`) bypasses — accepted gap, that loot is stardew's content not vanilla fishing output | **COVERED** — no adapter needed |
 | `rightclickharvest` 4.6.1 | `RightClickHarvest.harvest` posts the platform break event, then calls `Block.getDrops(state, level, pos, be, player, tool)` with the real player | **Covered on both seams**: `getDrops` IS our `BlockDropOutcomeMixin` target (drops scale, or stay vanilla for player-planted crops — same rule as a vanilla break); NeoForge `BlockEvent.BreakEvent` → `onBlockBroken` → `publishHarvest` on mature+farmable = farming XP | **NO ADAPTER NEEDED** |
 | `hearthandharvest` (content mod, noted) | Adds crops/bushes (blueberry, salt, mums) via vanilla mechanics | Inherits the generic crop path where its crops are vanilla-shaped (`CropBlock`/age property) | informational |
 
-**Adapter design (stardew follow-up)**: conditional compat mixin targeting
-the `getRandomItems` call inside `FishingHookLogic.endMinigame` —
-`shouldApplyMixin` gated on `isModLoaded("stardew_fishing")`, transform
-identical to `FishingBobberEntityMixin` (route each produced stack through
-`onFishCaught`). Alternative `ItemFishedEvent` listener needs dedupe vs
-the vanilla retrieve path — rejected as stateful and fragile.
+**Correction history**: the first audit read `endMinigame` in isolation
+and missed that `FishingHookMixin.retrieve` steals the vanilla-produced
+list — re-analysis confirmed the catch path rides our seam; #208 was
+filed on the wrong analysis and closed as not-a-gap.
 
-**Caveats**: (a) inspection is NeoForge-jar-only — stardew's common
-package is architectury-style shared code, so the Fabric variant almost
-certainly has the same `FishingHookLogic` seam, but that is inferred, not
-verified; (b) stardew with its minigame disabled in config presumably
-falls back to vanilla `retrieve` — expected-covered, not verified;
-(c) live stardew verification is blocked — the minigame requires an
-interactive client the headless bot cannot drive.
+**Caveats**: (a) inspection is NeoForge-jar-only — stardew's `common/`
+package is shared architectury-style code and the Fabric variant almost
+certainly uses the same `retrieve`-capture pattern, but that is inferred,
+not verified; (b) ordering between our `@ModifyExpressionValue` (at the
+`getRandomItems` call) and stardew's post-production local capture is
+structurally guaranteed — our transform runs at the call, stardew reads
+the list afterward; (c) live stardew verification is blocked — the
+minigame requires an interactive client the headless bot cannot drive.
 
 **Expectation**: document which emits events we see; where silent, decide
 adapter vs accept-gap per system. **needs-input**: is Stardew fishing worth
 an adapter, or is vanilla-rod fishing a niche path in this pack?
-→ **Answered by audit above**: stardew is a *silent* bypass (not a
-config-visible gap), so an adapter is warranted; follow-up issue #208 filed for
-the conditional compat mixin.
+→ **Answered by audit above**: stardew turns out to ride the vanilla
+loot list — catches are covered without an adapter.
 
 ### Issue A8 — Vampirism/Werewolves bridge (decided: integrate)
 
