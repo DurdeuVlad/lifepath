@@ -8,7 +8,9 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
-## [Unreleased] — outcome-scaling economy (M21–M25)
+## [1.0.0-beta.10] — 2026-10-08
+
+Outcome-scaling economy (M21–M25) + soft-dep compat layer.
 
 Skill now shapes what you **produce**, not just what you earn. The player
 doing the work gets the XP and the outcome — novices craft worse, masters
