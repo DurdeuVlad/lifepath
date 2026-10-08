@@ -1,0 +1,21 @@
+{
+	"display_name": "Scholar's Focus III",
+	"description": "Milestone reward for reaching scholarship level 50.",
+	"icon": "skill/scholarship",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.entity_interaction_range",
+			"operation": "add_value",
+			"value": 0.45,
+			"duration_ticks": 120
+		}
+	]
+}

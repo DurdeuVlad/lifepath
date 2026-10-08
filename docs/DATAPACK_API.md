@@ -443,7 +443,7 @@ Blocks: `lifepath:minable`, `forageable`, `harvestable`, `click_harvest`,
 `growable`, `vegetation`, `rare_crop`, `valuable_ores`, `heat_sources`,
 `smithing_workstations`. Entities: `lifepath:animals`, `undead`,
 `bloodsuckers`, `wolves`. Items: `lifepath:cookable_foods`, `scholarly`,
-`smithing_*` (materials/tools/tier_iron/gold/diamond/netherite),
+`smithing_*` (materials/tools/tier_stone/copper/iron/gold/steel/diamond/netherite),
 `forged_outputs`, `fishing_junk`, `fishing_treasure`, `coolants`,
 `undead_foods`. Effects: `lifepath:nature_purifiable`. Biomes:
 `lifepath:arid`, `cold`. Vanilla tags (`minecraft:logs`, `minecraft:*_ores`,

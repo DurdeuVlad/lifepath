@@ -4,6 +4,27 @@
 		"minecraft:iron_ingot", "minecraft:gold_ingot", "minecraft:copper_ingot",
 		"minecraft:netherite_ingot", "minecraft:diamond", "minecraft:emerald",
 		"minecraft:amethyst_shard", "minecraft:quartz", "minecraft:leather",
-		"minecraft:rabbit_hide", "minecraft:iron_nugget", "minecraft:gold_nugget"
+		"minecraft:rabbit_hide", "minecraft:iron_nugget", "minecraft:gold_nugget",
+		{ "id": "#overgeared:tool_parts", "required": false },
+		{ "id": "#overgeared:heated_metals", "required": false },
+		{ "id": "#overgeared:hot_items", "required": false },
+		{ "id": "#c:ingots/steel", "required": false },
+		{ "id": "#c:ingots/bronze", "required": false },
+		{ "id": "#c:ingots/silver", "required": false },
+		{ "id": "#c:ingots/tin", "required": false },
+		{ "id": "#c:nuggets/steel", "required": false },
+		{ "id": "#c:nuggets/silver", "required": false },
+		{ "id": "#c:nuggets/copper", "required": false },
+		{ "id": "#c:plates/steel", "required": false },
+		{ "id": "#c:plates/iron", "required": false },
+		{ "id": "#c:plates/copper", "required": false },
+		{ "id": "overgeared:steel_ingot", "required": false },
+		{ "id": "overgeared:steel_nugget", "required": false },
+		{ "id": "overgeared:crude_steel", "required": false },
+		{ "id": "overgeared:netherite_alloy", "required": false },
+		{ "id": "overgeared:diamond_shard", "required": false },
+		{ "id": "overgeared:iron_plate", "required": false },
+		{ "id": "overgeared:copper_plate", "required": false },
+		{ "id": "overgeared:steel_plate", "required": false }
 	]
 }

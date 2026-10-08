@@ -1,0 +1,21 @@
+{
+	"display_name": "Hardy Frame II",
+	"description": "Milestone reward for reaching athletics level 30.",
+	"icon": "skill/athletics",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.safe_fall_distance",
+			"operation": "add_value",
+			"value": 1,
+			"duration_ticks": 120
+		}
+	]
+}

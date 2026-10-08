@@ -8,6 +8,29 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
+## [Unreleased]
+
+### Changed
+
+- **Level curve is now linear.** Each level costs `40 + 5·level` XP (was a
+  growing ~8%/level ramp): level 20→21 drops from 325 → 145 XP, total to
+  100 drops ~78k → 29k. Early levels are cheap, late levels still climb.
+- **Smithing XP covers all Overgeared materials.** New tier tags
+  `smithing_tier_steel` (3.0 — `overgeared:steel_*` gear, steel arrows,
+  `#c:forged/steel`), `smithing_tier_copper` (1.0), `smithing_tier_stone`
+  (0.75); `smithing_materials` now references `#overgeared:tool_parts`,
+  `heated_metals`, `hot_items` and `c:ingots/nuggets/plates/*` — addon mods
+  (Spartan, Epic Knights) that register into those tags are covered
+  automatically. All foreign entries are `required:false`. Fixes steel
+  work paying untagged base XP.
+
+### Added
+
+- **A milestone every 10 levels.** Each of the 13 skills now also grants a
+  milestone at 10/30/50/70/90/100 — a second thematic passive line per
+  skill (e.g. *Smith's Strength* I–VI, *Quick Draw*, *Riverborn*), on top of
+  the existing 20/40/60/80/95 landmark abilities. 78 new ability defs.
+
 ## [1.0.0-beta.10] — 2026-10-08
 
 Outcome-scaling economy (M21–M25) + soft-dep compat layer.

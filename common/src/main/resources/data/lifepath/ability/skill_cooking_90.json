@@ -1,0 +1,21 @@
+{
+	"display_name": "Calloused Hands V",
+	"description": "Milestone reward for reaching cooking level 90.",
+	"icon": "skill/cooking",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.burning_time",
+			"operation": "add_multiplied_base",
+			"value": -0.25,
+			"duration_ticks": 120
+		}
+	]
+}

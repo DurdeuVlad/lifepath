@@ -1,0 +1,21 @@
+{
+	"display_name": "Smith's Strength IV",
+	"description": "Milestone reward for reaching smithing level 70.",
+	"icon": "skill/smithing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.attack_damage",
+			"operation": "add_value",
+			"value": 2,
+			"duration_ticks": 120
+		}
+	]
+}

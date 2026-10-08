@@ -1,0 +1,21 @@
+{
+	"display_name": "Crippling Blow III",
+	"description": "Milestone reward for reaching hunting level 50.",
+	"icon": "skill/hunting",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.attack_knockback",
+			"operation": "add_value",
+			"value": 0.3,
+			"duration_ticks": 120
+		}
+	]
+}

@@ -1,0 +1,21 @@
+{
+	"display_name": "Deepstone Frame I",
+	"description": "Milestone reward for reaching mining level 10.",
+	"icon": "skill/mining",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.knockback_resistance",
+			"operation": "add_value",
+			"value": 0.02,
+			"duration_ticks": 120
+		}
+	]
+}

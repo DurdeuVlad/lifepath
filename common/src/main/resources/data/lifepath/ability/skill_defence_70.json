@@ -1,0 +1,21 @@
+{
+	"display_name": "Immovable IV",
+	"description": "Milestone reward for reaching defence level 70.",
+	"icon": "skill/defence",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.knockback_resistance",
+			"operation": "add_value",
+			"value": 0.08,
+			"duration_ticks": 120
+		}
+	]
+}

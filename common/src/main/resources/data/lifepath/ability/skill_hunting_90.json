@@ -1,0 +1,21 @@
+{
+	"display_name": "Crippling Blow V",
+	"description": "Milestone reward for reaching hunting level 90.",
+	"icon": "skill/hunting",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.attack_knockback",
+			"operation": "add_value",
+			"value": 0.5,
+			"duration_ticks": 120
+		}
+	]
+}

@@ -41,6 +41,32 @@ class ShippedSkillDefinitionsTest {
 	}
 
 	@Test
+	void everySkillGrantsAMilestoneEveryTenLevels() throws Exception {
+		Path abilityDir = Path.of("src/main/resources/data/lifepath/ability");
+		try (Stream<Path> files = Files.list(SKILL_DIR)) {
+			for (Path file : files.filter(p -> p.toString().endsWith(".json")).toList()) {
+				var def = SkillDefinition.SkillDefinitionFile.CODEC
+						.parse(JsonOps.INSTANCE, JsonParser.parseString(Files.readString(file)))
+						.result().orElseThrow(() -> new AssertionError(file + " failed to parse"));
+				String skill = file.getFileName().toString().replace(".json", "");
+				java.util.Set<Integer> levels = new java.util.HashSet<>();
+				for (var m : def.milestones()) {
+					levels.add(m.level());
+					for (var ref : m.effectRefs()) {
+						Path ability = abilityDir.resolve(ref.getPath() + ".json");
+						assertTrue(Files.exists(ability),
+								skill + " milestone " + m.level() + " grants missing ability " + ref);
+					}
+				}
+				for (int lvl = 10; lvl <= def.maxLevel(); lvl += 10) {
+					assertTrue(levels.contains(lvl),
+							skill + " must grant a milestone at level " + lvl);
+				}
+			}
+		}
+	}
+
+	@Test
 	void requiredSkillsExistWithCorrectCategories() throws Exception {
 		for (Map.Entry<String, String> e : REQUIRED.entrySet()) {
 			Path file = SKILL_DIR.resolve(e.getKey() + ".json");

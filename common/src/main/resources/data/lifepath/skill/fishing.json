@@ -7,10 +7,24 @@
 	"max_level": 100,
 	"milestones": [
 		{
+			"level": 10,
+			"description_key": "lifepath.skill.fishing.milestone.10",
+			"effects": [
+				"lifepath:skill_fishing_10"
+			]
+		},
+		{
 			"level": 20,
 			"description_key": "lifepath.skill.fishing.milestone.20",
 			"effects": [
 				"lifepath:skill_fishing_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.fishing.milestone.30",
+			"effects": [
+				"lifepath:skill_fishing_30"
 			]
 		},
 		{
@@ -21,10 +35,24 @@
 			]
 		},
 		{
+			"level": 50,
+			"description_key": "lifepath.skill.fishing.milestone.50",
+			"effects": [
+				"lifepath:skill_fishing_50"
+			]
+		},
+		{
 			"level": 60,
 			"description_key": "lifepath.skill.fishing.milestone.60",
 			"effects": [
 				"lifepath:skill_fishing_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.fishing.milestone.70",
+			"effects": [
+				"lifepath:skill_fishing_70"
 			]
 		},
 		{
@@ -35,10 +63,24 @@
 			]
 		},
 		{
+			"level": 90,
+			"description_key": "lifepath.skill.fishing.milestone.90",
+			"effects": [
+				"lifepath:skill_fishing_90"
+			]
+		},
+		{
 			"level": 95,
 			"description_key": "lifepath.skill.fishing.milestone.95",
 			"effects": [
 				"lifepath:skill_fishing_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.fishing.milestone.100",
+			"effects": [
+				"lifepath:skill_fishing_100"
 			]
 		}
 	]

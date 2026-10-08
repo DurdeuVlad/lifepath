@@ -1,0 +1,18 @@
+{
+	"replace": false,
+	"values": [
+		{ "id": "overgeared:steel_sword", "required": false },
+		{ "id": "overgeared:steel_axe", "required": false },
+		{ "id": "overgeared:steel_pickaxe", "required": false },
+		{ "id": "overgeared:steel_shovel", "required": false },
+		{ "id": "overgeared:steel_hoe", "required": false },
+		{ "id": "overgeared:steel_helmet", "required": false },
+		{ "id": "overgeared:steel_chestplate", "required": false },
+		{ "id": "overgeared:steel_leggings", "required": false },
+		{ "id": "overgeared:steel_boots", "required": false },
+		{ "id": "overgeared:steel_arrow", "required": false },
+		{ "id": "overgeared:steel_arrow_tipped", "required": false },
+		{ "id": "overgeared:steel_arrow_lingering", "required": false },
+		{ "id": "#c:forged/steel", "required": false }
+	]
+}

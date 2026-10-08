@@ -7,10 +7,24 @@
 	"max_level": 100,
 	"milestones": [
 		{
+			"level": 10,
+			"description_key": "lifepath.skill.archery.milestone.10",
+			"effects": [
+				"lifepath:skill_archery_10"
+			]
+		},
+		{
 			"level": 20,
 			"description_key": "lifepath.skill.archery.milestone.20",
 			"effects": [
 				"lifepath:skill_archery_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.archery.milestone.30",
+			"effects": [
+				"lifepath:skill_archery_30"
 			]
 		},
 		{
@@ -21,10 +35,24 @@
 			]
 		},
 		{
+			"level": 50,
+			"description_key": "lifepath.skill.archery.milestone.50",
+			"effects": [
+				"lifepath:skill_archery_50"
+			]
+		},
+		{
 			"level": 60,
 			"description_key": "lifepath.skill.archery.milestone.60",
 			"effects": [
 				"lifepath:skill_archery_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.archery.milestone.70",
+			"effects": [
+				"lifepath:skill_archery_70"
 			]
 		},
 		{
@@ -35,10 +63,24 @@
 			]
 		},
 		{
+			"level": 90,
+			"description_key": "lifepath.skill.archery.milestone.90",
+			"effects": [
+				"lifepath:skill_archery_90"
+			]
+		},
+		{
 			"level": 95,
 			"description_key": "lifepath.skill.archery.milestone.95",
 			"effects": [
 				"lifepath:skill_archery_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.archery.milestone.100",
+			"effects": [
+				"lifepath:skill_archery_100"
 			]
 		}
 	]

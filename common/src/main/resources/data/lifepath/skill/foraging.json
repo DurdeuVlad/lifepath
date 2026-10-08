@@ -7,10 +7,24 @@
 	"max_level": 100,
 	"milestones": [
 		{
+			"level": 10,
+			"description_key": "lifepath.skill.foraging.milestone.10",
+			"effects": [
+				"lifepath:skill_foraging_10"
+			]
+		},
+		{
 			"level": 20,
 			"description_key": "lifepath.skill.foraging.milestone.20",
 			"effects": [
 				"lifepath:skill_foraging_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.foraging.milestone.30",
+			"effects": [
+				"lifepath:skill_foraging_30"
 			]
 		},
 		{
@@ -21,10 +35,24 @@
 			]
 		},
 		{
+			"level": 50,
+			"description_key": "lifepath.skill.foraging.milestone.50",
+			"effects": [
+				"lifepath:skill_foraging_50"
+			]
+		},
+		{
 			"level": 60,
 			"description_key": "lifepath.skill.foraging.milestone.60",
 			"effects": [
 				"lifepath:skill_foraging_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.foraging.milestone.70",
+			"effects": [
+				"lifepath:skill_foraging_70"
 			]
 		},
 		{
@@ -35,10 +63,24 @@
 			]
 		},
 		{
+			"level": 90,
+			"description_key": "lifepath.skill.foraging.milestone.90",
+			"effects": [
+				"lifepath:skill_foraging_90"
+			]
+		},
+		{
 			"level": 95,
 			"description_key": "lifepath.skill.foraging.milestone.95",
 			"effects": [
 				"lifepath:skill_foraging_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.foraging.milestone.100",
+			"effects": [
+				"lifepath:skill_foraging_100"
 			]
 		}
 	]
