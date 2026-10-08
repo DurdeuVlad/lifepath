@@ -1,6 +1,6 @@
 {
 	"display_name": "Explorer",
-	"icon": "specialization/explorer",
+	"icon": "minecraft:textures/item/leather_boots.png",
 	"starting_skills": {
 		"lifepath:athletics": 15,
 		"lifepath:foraging": 15

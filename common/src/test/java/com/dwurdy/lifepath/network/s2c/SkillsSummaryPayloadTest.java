@@ -31,7 +31,8 @@ class SkillsSummaryPayloadTest {
 	void packetCodecRoundTripsRoadmapAndBandStats() {
 		var entry = new IdentitySummaryPayload.Entry("lifepath:skill_mining_10",
 				Component.literal("Miner's Strength I"),
-				"lifepath:textures/gui/ability/m.png");
+				"lifepath:textures/gui/ability/m.png",
+				Component.literal("+1 attack damage"));
 		SkillCard card = new SkillCard("lifepath:mining",
 				new SkillCard.Display(Component.literal("Mining"),
 						Component.literal("Dig things."), "expert", "B",

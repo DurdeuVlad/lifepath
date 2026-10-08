@@ -89,6 +89,23 @@ class UndeadSpeciesTest {
 				ResourceLocation.fromNamespaceAndPath("minecraft", "bread"), null, Registries.ITEM));
 	}
 
+	/** Beta-10: the ferrovore diet must declare non-food nutrition so
+	 *  right-clicking ingots actually eats — a diet without it gates but
+	 *  never feeds. */
+	@Test
+	void ferrovoreDietDeclaresNonFoodNutrition() throws Exception {
+		DietDefinition def = DietDefinition.fromFile(
+				LifepathMod.id("ferrovore"),
+				decode("diet", "ferrovore", DietDefinition.DietFile.CODEC));
+		assertEquals(3, def.nutrition());
+		assertEquals(0.4f, def.saturationModifier(), 0.001f);
+		// Diets without the fields decode to 0 → gate-only (back-compat).
+		DietDefinition gateOnly = DietDefinition.fromFile(NECROPHAGE,
+				decode("diet", "necrophage", DietDefinition.DietFile.CODEC));
+		assertEquals(0, gateOnly.nutrition());
+		assertEquals(0.0f, gateOnly.saturationModifier());
+	}
+
 	@Test
 	void relationDefDecodesAndMatchesUndeadKin() throws Exception {
 		RelationDefinition def = RelationDefinition.fromFile(UNDEAD_KIN,

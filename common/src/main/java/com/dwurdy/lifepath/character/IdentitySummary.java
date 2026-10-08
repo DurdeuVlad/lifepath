@@ -290,10 +290,38 @@ public final class IdentitySummary {
 		return "";
 	}
 
-	/** One displayable reference: id + localizable name + icon ref ("" none). */
+	/** One displayable reference: id + localizable name + icon ref ("" none)
+	 *  + localizable description (empty for domains that don't author one —
+	 *  Beta-10: milestone/roadmap rows need "what does Stone Skin do"). */
 	public static IdentitySummaryPayload.Entry entry(ResourceLocation id) {
+		String domain = domainOf(id);
 		return new IdentitySummaryPayload.Entry(id.toString(),
-				displayNameComponent(id), iconRef(id));
+				displayNameComponent(id), iconRef(id),
+				domain == null ? Component.empty()
+						: keyedText(id, domain, "description",
+								descriptionFallback(id)));
+	}
+
+	/** The def's authored description literal — the translatable key's
+	 *  fallback so datapack content still reads without a lang entry. */
+	private static String descriptionFallback(ResourceLocation id) {
+		var ability = LifepathContent.abilities().get(id);
+		if (ability != null) {
+			return ability.description().orElse("");
+		}
+		var skill = LifepathContent.skills().get(id);
+		if (skill != null) {
+			return skill.description();
+		}
+		var condition = LifepathContent.conditions().get(id);
+		if (condition != null) {
+			return condition.description().orElse("");
+		}
+		var form = LifepathContent.morphForms().get(id);
+		if (form != null) {
+			return form.description().orElse("");
+		}
+		return "";
 	}
 
 	private static List<IdentitySummaryPayload.Entry> entriesOf(List<ResourceLocation> ids) {

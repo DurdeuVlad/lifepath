@@ -2,7 +2,7 @@
 	"entity_type": "minecraft:cat",
 	"display_name": "Cat",
 	"description": "Nine lives' worth of caution in one quiet step.",
-	"icon": "minecraft:textures/item/cat_spawn_egg.png",
+	"icon": "morph/cat",
 	"stats": {
 		"minecraft:generic.max_health": 10.0,
 		"minecraft:generic.attack_damage": 3.0,

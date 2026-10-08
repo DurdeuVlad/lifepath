@@ -322,6 +322,11 @@ the `Player.eat` backstop. Referenced by `diet_rules`.
 `deny_message` (optional) replaces the stock refusal actionbar
 (`lifepath.diet.denied`) — use it to say what actually nourishes.
 
+`nutrition` + `saturation_modifier` (optional, default 0): when `nutrition`
+is >0, allowed items that aren't vanilla food become edible on right-click —
+one item is consumed and feeds like `FoodData.eat`. This is how ferrovores
+eat iron ingots; a diet that omits them only gates normal food.
+
 ## `relation/` — mob disposition rules
 
 ```json

@@ -1,6 +1,6 @@
 {
 	"display_name": "Hunter",
-	"icon": "specialization/hunter",
+	"icon": "minecraft:textures/item/arrow.png",
 	"starting_skills": {
 		"lifepath:hunting": 20,
 		"lifepath:archery": 10,

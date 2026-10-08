@@ -56,4 +56,45 @@ class IconRefTest {
 		assertEquals("icon", warnings.get(0).field());
 		assertTrue(IconRef.drainWarnings().isEmpty());
 	}
+
+	/**
+	 * Beta-10 regression: shipped {@code lifepath:} icon refs must point at
+	 * real PNGs under {@code assets/lifepath/}. {@code anima_morph} and
+	 * {@code hold_the_line} declared icons with no file behind them and
+	 * rendered as placeholders — a missed asset is a silent UI bug, so the
+	 * check walks every shipped definition's {@code icon} field.
+	 */
+	@Test
+	void shippedLifepathIconsResolveToRealFiles() throws Exception {
+		java.nio.file.Path data = java.nio.file.Path.of(
+				"src/main/resources/data/lifepath");
+		java.nio.file.Path assets = java.nio.file.Path.of(
+				"src/main/resources/assets");
+		var missing = new java.util.ArrayList<String>();
+		try (var stream = java.nio.file.Files.walk(data)) {
+			for (var f : stream.filter(p -> p.toString().endsWith(".json"))
+					.toList()) {
+				String json = java.nio.file.Files.readString(f);
+				var m = java.util.regex.Pattern
+						.compile("\"icon\"\\s*:\\s*\"([^\"]+)\"")
+						.matcher(json);
+				while (m.find()) {
+					String raw = m.group(1);
+					ResourceLocation rl = IconRef.resolve(
+							f.getParent().getFileName().toString(),
+							ResourceLocation.fromNamespaceAndPath(
+									"lifepath", f.getFileName().toString()),
+							raw);
+					if (rl != null && rl.getNamespace().equals("lifepath")
+							&& !java.nio.file.Files.exists(assets.resolve(
+									rl.getNamespace()).resolve(rl.getPath()))) {
+						missing.add(f.getFileName() + " -> " + rl);
+					}
+				}
+			}
+		}
+		IconRef.drainWarnings();
+		assertTrue(missing.isEmpty(),
+				"icon refs with no texture on disk: " + missing);
+	}
 }

@@ -1,6 +1,6 @@
 {
 	"display_name": "Fisherman",
-	"icon": "specialization/fisherman",
+	"icon": "minecraft:textures/item/fishing_rod.png",
 	"starting_skills": {
 		"lifepath:fishing": 20
 	},

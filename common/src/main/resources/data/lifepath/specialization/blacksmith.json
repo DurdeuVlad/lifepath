@@ -1,6 +1,6 @@
 {
 	"display_name": "Blacksmith",
-	"icon": "specialization/blacksmith",
+	"icon": "minecraft:textures/block/anvil.png",
 	"starting_skills": {
 		"lifepath:smithing": 20,
 		"lifepath:mining": 10,

@@ -1,6 +1,6 @@
 {
 	"display_name": "Laborer",
-	"icon": "specialization/laborer",
+	"icon": "minecraft:textures/item/iron_shovel.png",
 	"starting_skills": {
 		"lifepath:athletics": 15,
 		"lifepath:mining": 15

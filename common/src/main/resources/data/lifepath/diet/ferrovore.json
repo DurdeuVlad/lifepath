@@ -1,4 +1,6 @@
 {
 	"allowed": ["#lifepath:automaton_foods"],
-	"deny_message": "Your body rejects that food — only iron nourishes you."
+	"deny_message": "Your body rejects that food — only iron nourishes you.",
+	"nutrition": 3,
+	"saturation_modifier": 0.4
 }

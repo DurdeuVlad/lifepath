@@ -51,6 +51,10 @@ public class CharacterScreen extends Screen {
 	/** Ability row under the cursor this frame — its tooltip renders after
 	 *  all content so the box always lands on top. */
 	private @Nullable IdentitySummaryPayload.AbilityEntry hoveredAbility;
+	/** Body scroll offset — content taller than the viewport scrolls under
+	 *  the fixed title/key-hint chrome (Beta-10: the panel used to grow past
+	 *  the screen and push the Skills tab off the bottom). */
+	private int scroll;
 
 	/** The skills entry point — re-anchored under the panel each render so
 	 *  growing/shrinking content never leaves it stranded or overlapped. */
@@ -109,10 +113,12 @@ public class CharacterScreen extends Screen {
 		int panelW = PANEL_W;
 		IdentitySummaryPayload id = ClientCharacterState.identity();
 		IdentitySummaryPayload.IdentityCore core = id.identity();
-		// The panel wraps measured content — sections flow past a fixed
-		// height, so it must grow or the key hint lands on the last rows.
-		int panelH = panelHeight(id);
-		int top = panelTop(panelH);
+		// The panel wraps measured content, but never past the viewport —
+		// the Skills/Choose row below the panel must stay on screen, so
+		// reserve its 24px strip. Excess content scrolls inside the body.
+		int panelH = Math.min(height - 44, panelHeight(id));
+		int top = Math.max(6, (height - 26 - panelH) / 2);
+		scroll = Math.max(0, Math.min(scroll, panelHeight(id) - panelH));
 		if (skillsButton != null) {
 			skillsButton.setY(top + panelH + 6);
 		}
@@ -132,7 +138,15 @@ public class CharacterScreen extends Screen {
 				Component.translatable("screen.lifepath.character.title"),
 				width / 2, top + 4, ACCENT);
 
-		int y = top + 22;
+		// Clip the body region only — title band and the key hint below stay
+		// fixed while content scrolls under them. Tooltips are captured
+		// while rows render and drawn after the scissor closes.
+		context.enableScissor(left - 4, top + 16, left + panelW + 4,
+				top + panelH - 16);
+		List<net.minecraft.util.FormattedCharSequence> deferredTip = null;
+		int y = top + 22 - scroll;
+		int bodyTop = top + 16;
+		int bodyBottom = top + panelH - 16;
 
 		// --- Species (the identity hero line) ---
 		y = section(context, left, y,
@@ -153,11 +167,10 @@ public class CharacterScreen extends Screen {
 			// hover the hero row to read it (name stays always-on).
 			if (!core.speciesDescription().getString().isEmpty() && mouseX >= left
 					&& mouseX <= left + panelW && mouseY >= rowTop - 2
-					&& mouseY <= rowTop + 16) {
-				context.renderTooltip(font,
-						font.split(
-								core.speciesDescription(), panelW - 8),
-						mouseX, mouseY);
+					&& mouseY <= rowTop + 16 && mouseY >= bodyTop
+					&& mouseY <= bodyBottom) {
+				deferredTip = font.split(
+						core.speciesDescription(), panelW - 8);
 			}
 			// The authored kit in the same "+"/"-" style as the selection
 			// card — a species' non-ability rules (diet, mob neutrality)
@@ -256,11 +269,16 @@ public class CharacterScreen extends Screen {
 								e.name());
 				context.drawString(font, GuiText.fit(font, label, panelW - 25),
 						left + 19, y + 1, sel ? ACCENT : (e.active() ? TEXT : DIM));
-				if (e.active()) {
+				// Only visible rows are clickable/hoverable — a scrolled-out
+				// row's screen rect would otherwise eat clicks meant for the
+				// buttons below the panel.
+				boolean rowVisible = rowY + 11 > bodyTop && rowY < bodyBottom;
+				if (e.active() && rowVisible) {
 					abilityRows.add(new AbilityRow(e.id(), left, rowY, panelW, 11));
 				}
-				if (mouseX >= left && mouseX < left + panelW
-						&& mouseY >= rowY && mouseY < rowY + 11) {
+				if (rowVisible && mouseX >= left && mouseX < left + panelW
+						&& mouseY >= rowY && mouseY < rowY + 11
+						&& mouseY >= bodyTop && mouseY < bodyBottom) {
 					hoveredAbility = e;
 				}
 				y += 11;
@@ -278,6 +296,24 @@ public class CharacterScreen extends Screen {
 					y += 10;
 				}
 			}
+		}
+
+		context.disableScissor();
+		// Scroll affordance — a 2px track + thumb on the panel edge, only
+		// when content actually overflows.
+		int contentH = panelHeight(id);
+		if (contentH > panelH) {
+			int trackTop = top + 16, trackH = panelH - 32;
+			int thumbH = Math.max(10, trackH * panelH / contentH);
+			int thumbY = trackTop + (trackH - thumbH) * scroll
+					/ Math.max(1, contentH - panelH);
+			context.fill(left + panelW + 1, trackTop, left + panelW + 3,
+					trackTop + trackH, 0xFF2E2E36);
+			context.fill(left + panelW + 1, thumbY, left + panelW + 3,
+					thumbY + thumbH, 0xFF8A8A9A);
+		}
+		if (deferredTip != null) {
+			context.renderTooltip(font, deferredTip, mouseX, mouseY);
 		}
 
 		// M6-4: visible keybind hints — the ability key is never discoverable
@@ -337,13 +373,19 @@ public class CharacterScreen extends Screen {
 		return super.mouseClicked(mouseX, mouseY, button);
 	}
 
-	private int panelTop() {
-		return panelTop(panelHeight(ClientCharacterState.identity()));
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY,
+			double horizontalAmount, double verticalAmount) {
+		// Content beyond the panel scrolls; the panel itself never moves.
+		int panelH = Math.min(height - 44, panelHeight(ClientCharacterState.identity()));
+		int max = Math.max(0, panelHeight(ClientCharacterState.identity()) - panelH);
+		scroll = Math.max(0, Math.min(max, scroll - (int) (verticalAmount * 12)));
+		return true;
 	}
 
-	/** Center the grown panel vertically; clamp so it never starts off-screen. */
-	private int panelTop(int panelH) {
-		return Math.max(8, (height - panelH) / 2);
+	private int panelTop() {
+		return Math.max(6, (height - 26 - Math.min(height - 44,
+				panelHeight(ClientCharacterState.identity()))) / 2);
 	}
 
 	/**

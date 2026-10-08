@@ -2,7 +2,7 @@
 	"entity_type": "minecraft:panda",
 	"display_name": "Panda",
 	"description": "Half the speed, twice the mass, all the opinions.",
-	"icon": "minecraft:textures/item/panda_spawn_egg.png",
+	"icon": "morph/panda",
 	"stats": {
 		"minecraft:generic.max_health": 20.0,
 		"minecraft:generic.attack_damage": 6.0,

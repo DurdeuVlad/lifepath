@@ -103,4 +103,42 @@ public final class DietService {
 		}
 		return false;
 	}
+
+	/**
+	 * Beta-10 ferrovore path: right-clicking an allowed item that isn't
+	 * vanilla food consumes one and feeds directly — vanilla never starts an
+	 * eat on items without a FOOD component, so {@code automaton_foods} were
+	 * dead clicks. Requires a diet with {@code nutrition > 0} that actually
+	 * allows the stack; returns true when a consume happened.
+	 */
+	public static boolean tryEatDietItem(ServerPlayer player, ItemStack stack) {
+		var data = com.dwurdy.lifepath.character.CharacterManager
+				.getCharacter(player);
+		var diets = effectiveDiets(data);
+		if (diets.isEmpty() || stack.isEmpty()
+				|| stack.has(net.minecraft.core.component.DataComponents.FOOD)
+				|| player.getFoodData().getFoodLevel() >= 20) {
+			return false;
+		}
+		ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		var entry = BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem());
+		for (DietDefinition def : diets) {
+			for (var allowed : def.allowed()) {
+				if (!allowed.matches(itemId, entry, Registries.ITEM)) {
+					continue;
+				}
+				if (def.nutrition() <= 0) {
+					return false;
+				}
+				stack.shrink(1);
+				player.getFoodData().eat(def.nutrition(),
+						def.saturationModifier());
+				player.level().playSound(null, player,
+						net.minecraft.sounds.SoundEvents.GENERIC_EAT,
+						net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.0f);
+				return true;
+			}
+		}
+		return false;
+	}
 }

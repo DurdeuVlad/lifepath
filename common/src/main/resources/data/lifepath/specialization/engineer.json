@@ -1,6 +1,6 @@
 {
 	"display_name": "Engineer",
-	"icon": "specialization/engineer",
+	"icon": "minecraft:textures/item/redstone.png",
 	"starting_skills": {
 		"lifepath:engineering": 20,
 		"lifepath:smithing": 10

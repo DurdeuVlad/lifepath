@@ -31,7 +31,8 @@ class HudModelTest {
 				List.of(),
 				Map.of("conditions",
 						List.of(new IdentitySummaryPayload.Entry(
-								"lifepath:chilled", Component.literal("Chilled"), ""))),
+								"lifepath:chilled", Component.literal("Chilled"), "",
+								Component.empty()))),
 				abilities, res, IdentitySummaryPayload.MorphView.EMPTY);
 	}
 

@@ -1,6 +1,6 @@
 {
 	"display_name": "Miner",
-	"icon": "specialization/miner",
+	"icon": "minecraft:textures/block/torch.png",
 	"starting_skills": {
 		"lifepath:mining": 20
 	},

@@ -1,6 +1,6 @@
 {
 	"display_name": "Scholar",
-	"icon": "specialization/scholar",
+	"icon": "minecraft:textures/item/book.png",
 	"starting_skills": {
 		"lifepath:scholarship": 20,
 		"lifepath:engineering": 10

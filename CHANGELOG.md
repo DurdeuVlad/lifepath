@@ -50,6 +50,41 @@ report" template, include loader, version, and repro steps.
   `bandThresholds`, `xpTotal`) resolved server-side — the client never
   trusts its own config.
 
+### Fixed
+
+- **Automatons can actually eat.** Allowed non-food items (`#automaton_foods`
+  — iron ingots/nuggets) now consume on right-click and feed 3 hunger /
+  0.4 saturation, gated by new `nutrition`/`saturation_modifier` diet fields
+  (diets without them stay gate-only). Previously the items were legal but
+  vanilla never started an eat on non-food items — dead clicks. Bread still
+  correctly refuses with the diet deny message.
+- **Character screen overflow** — content taller than the viewport used to
+  push the Skills/Choose buttons off the bottom of the screen. The panel now
+  caps below the viewport and the body scrolls (scissor + wheel + a thin
+  scrollbar), title and key hints stay pinned.
+- **"Defence" → "Defense"** in English UI text (skill name, Soldier
+  strengths). Internal ids unchanged — datapack compatibility preserved.
+- **Broken icon refs** — Defence/Engineering/Smithing skill icons pointed at
+  `minecraft:textures/item/{shield,piston,anvil}.png`, which don't exist as
+  flat item sprites (now: iron chestplate, redstone, anvil block texture).
+  Eight ability defs referenced PNGs that never shipped (`anima_morph`,
+  `hold_the_line`, and vanilla paths like `blue_ice`). A new test walks every
+  shipped `icon` field and fails on dangling lifepath refs.
+- **Morph picker icons** — spawn-egg texture paths like
+  `minecraft:textures/item/cat_spawn_egg.png` don't exist in 1.21.1 (the egg
+  is a tinted base sprite, not per-mob art). Morph icons now ship as real
+  tinted vanilla spawn-egg sprites under `gui/morph/` — extracted from the
+  client jar, tinted with the exact colors from `Items.<clinit>`.
+- **Noise icons.** The ability/species icon sets were procedurally generated
+  per-pixel noise — visually meaningless at 16×16 and the source of the
+  "passives look weird" report. Regenerated as flat two-tone semantic
+  glyphs (gear, bolt, flame, moon, paw…) tinted per species group, matching
+  the skill-icon style. Generator lives at `tools/icons/make_icons.py`.
+- **Milestone hover descriptions** — roadmap rows and milestone effects now
+  carry the referenced ability's description on the wire (`Entry.description`),
+  so hovering "Stone Skin I" actually says what it does instead of just
+  naming it.
+
 ## [1.0.0-beta.10] — 2026-10-08
 
 Outcome-scaling economy (M21–M25) + soft-dep compat layer.
