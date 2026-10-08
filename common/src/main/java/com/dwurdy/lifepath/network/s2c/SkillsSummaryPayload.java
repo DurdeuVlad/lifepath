@@ -47,15 +47,70 @@ public record SkillsSummaryPayload(List<SkillCard> skills)
 		}
 
 		public record Progress(int level, double xpIn, double xpNeed,
-				int protectedFloor, long graceEndsEpochMs) {
+				double xpTotal, int protectedFloor, long graceEndsEpochMs) {
 			static final StreamCodec<RegistryFriendlyByteBuf, Progress> CODEC =
 					StreamCodec.composite(
 							ByteBufCodecs.INT, Progress::level,
 							ByteBufCodecs.DOUBLE, Progress::xpIn,
 							ByteBufCodecs.DOUBLE, Progress::xpNeed,
+							ByteBufCodecs.DOUBLE, Progress::xpTotal,
 							ByteBufCodecs.INT, Progress::protectedFloor,
 							ByteBufCodecs.VAR_LONG, Progress::graceEndsEpochMs,
 							Progress::new);
+		}
+
+		/**
+		 * One roadmap row (M26 transparency): a milestone level, its flavor
+		 * key, resolved effect entries, and the cumulative XP the level costs
+		 * — so hover tooltips can say "what you get AND what it takes".
+		 */
+		public record MilestoneRow(int level, String descKey, double xpTotal,
+				List<IdentitySummaryPayload.Entry> effects) {
+			static final StreamCodec<RegistryFriendlyByteBuf, MilestoneRow> CODEC =
+					StreamCodec.composite(
+							ByteBufCodecs.INT, MilestoneRow::level,
+							ByteBufCodecs.STRING_UTF8, MilestoneRow::descKey,
+							ByteBufCodecs.DOUBLE, MilestoneRow::xpTotal,
+							IdentitySummaryPayload.Entry.CODEC
+									.apply(ByteBufCodecs.list()),
+									MilestoneRow::effects,
+							MilestoneRow::new);
+		}
+
+		/**
+		 * One rank band's outcome odds (M26): resolved server-side from the
+		 * skill's {@code outcome_rule} — yield multiplier, botch chance,
+		 * quality tier ("" = unstamped), signature flag, anvil cost. Empty
+		 * {@code bands} on Details = the skill has no outcome rule.
+		 */
+		public record BandStat(String key, int firstLevel, double outputMult,
+				double failChance, double failCountMult, String qualityTier,
+				boolean signItems, double anvilCostMult, double junkChance) {
+			// 9 fields exceed StreamCodec.composite's arity — hand-rolled
+			// encoder keeps the wire flat and the record honest.
+			static final StreamCodec<RegistryFriendlyByteBuf, BandStat> CODEC =
+					StreamCodec.of(
+							(buf, s) -> {
+								ByteBufCodecs.STRING_UTF8.encode(buf, s.key());
+								ByteBufCodecs.INT.encode(buf, s.firstLevel());
+								ByteBufCodecs.DOUBLE.encode(buf, s.outputMult());
+								ByteBufCodecs.DOUBLE.encode(buf, s.failChance());
+								ByteBufCodecs.DOUBLE.encode(buf, s.failCountMult());
+								ByteBufCodecs.STRING_UTF8.encode(buf, s.qualityTier());
+								ByteBufCodecs.BOOL.encode(buf, s.signItems());
+								ByteBufCodecs.DOUBLE.encode(buf, s.anvilCostMult());
+								ByteBufCodecs.DOUBLE.encode(buf, s.junkChance());
+							},
+							buf -> new BandStat(
+									ByteBufCodecs.STRING_UTF8.decode(buf),
+									ByteBufCodecs.INT.decode(buf),
+									ByteBufCodecs.DOUBLE.decode(buf),
+									ByteBufCodecs.DOUBLE.decode(buf),
+									ByteBufCodecs.DOUBLE.decode(buf),
+									ByteBufCodecs.STRING_UTF8.decode(buf),
+									ByteBufCodecs.BOOL.decode(buf),
+									ByteBufCodecs.DOUBLE.decode(buf),
+									ByteBufCodecs.DOUBLE.decode(buf)));
 		}
 
 		/**
@@ -63,21 +118,52 @@ public record SkillsSummaryPayload(List<SkillCard> skills)
 		 * refs resolved server-side (name + icon), so the client can show
 		 * "what you unlock", not just flavor text. Empty when no milestone
 		 * is ahead.
+		 *
+		 * <p>{@code roadmap} (M26): every milestone row for the skill, sorted
+		 * by level — powers the hoverable level ladder. {@code bands}: the
+		 * skill's per-band outcome odds (empty = no outcome rule);
+		 * {@code bandThresholds}: the 7 server-side rank-band start levels so
+		 * the client names bands without trusting its local config.
 		 */
 		public record Details(int nextMilestoneLevel, String nextMilestoneText,
 				List<IdentitySummaryPayload.Entry> bonuses,
-				List<IdentitySummaryPayload.Entry> nextMilestoneEffects) {
+				List<IdentitySummaryPayload.Entry> nextMilestoneEffects,
+				List<MilestoneRow> roadmap, List<BandStat> bands,
+				List<Integer> bandThresholds) {
+			// 7 fields exceed StreamCodec.composite's arity — hand-rolled.
+			private static final StreamCodec<RegistryFriendlyByteBuf,
+					List<IdentitySummaryPayload.Entry>> ENTRY_LIST =
+							IdentitySummaryPayload.Entry.CODEC
+									.apply(ByteBufCodecs.list());
+			private static final StreamCodec<RegistryFriendlyByteBuf,
+					List<MilestoneRow>> ROW_LIST =
+							MilestoneRow.CODEC.apply(ByteBufCodecs.list());
+			private static final StreamCodec<RegistryFriendlyByteBuf,
+					List<BandStat>> BAND_LIST =
+							BandStat.CODEC.apply(ByteBufCodecs.list());
+			private static final StreamCodec<io.netty.buffer.ByteBuf,
+					List<Integer>> INT_LIST =
+							ByteBufCodecs.INT.apply(ByteBufCodecs.list());
+
 			static final StreamCodec<RegistryFriendlyByteBuf, Details> CODEC =
-					StreamCodec.composite(
-							ByteBufCodecs.INT, Details::nextMilestoneLevel,
-							ByteBufCodecs.STRING_UTF8, Details::nextMilestoneText,
-							IdentitySummaryPayload.Entry.CODEC
-									.apply(ByteBufCodecs.list()),
-									Details::bonuses,
-							IdentitySummaryPayload.Entry.CODEC
-									.apply(ByteBufCodecs.list()),
-									Details::nextMilestoneEffects,
-							Details::new);
+					StreamCodec.of(
+							(buf, d) -> {
+								ByteBufCodecs.INT.encode(buf, d.nextMilestoneLevel());
+								ByteBufCodecs.STRING_UTF8.encode(buf, d.nextMilestoneText());
+								ENTRY_LIST.encode(buf, d.bonuses());
+								ENTRY_LIST.encode(buf, d.nextMilestoneEffects());
+								ROW_LIST.encode(buf, d.roadmap());
+								BAND_LIST.encode(buf, d.bands());
+								INT_LIST.encode(buf, d.bandThresholds());
+							},
+							buf -> new Details(
+									ByteBufCodecs.INT.decode(buf),
+									ByteBufCodecs.STRING_UTF8.decode(buf),
+									ENTRY_LIST.decode(buf),
+									ENTRY_LIST.decode(buf),
+									ROW_LIST.decode(buf),
+									BAND_LIST.decode(buf),
+									INT_LIST.decode(buf)));
 		}
 
 		static final StreamCodec<RegistryFriendlyByteBuf, SkillCard> CODEC =

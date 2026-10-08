@@ -4,9 +4,12 @@ import com.dwurdy.lifepath.client.icon.ClientIcons;
 import com.dwurdy.lifepath.network.s2c.IdentitySummaryPayload;
 import com.dwurdy.lifepath.network.s2c.SkillsSummaryPayload.SkillCard;
 import com.dwurdy.lifepath.platform.ClientOnly;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 
 /**
  * M6-2 skill detail — level, rank, aptitude, bonuses, next milestone, decay
@@ -25,6 +28,7 @@ public class SkillDetailScreen extends Screen {
 
 	private final SkillCard card;
 	private final Screen parent;
+	private int scroll;
 
 	public SkillDetailScreen(SkillCard card, Screen parent) {
 		super(card.display().name());
@@ -46,6 +50,9 @@ public class SkillDetailScreen extends Screen {
 		// The panel caps at height-16 but content doesn't shrink — clip so
 		// rows never paint below the panel on short viewports.
 		context.enableScissor(left - 4, top - 4, left + panelW + 4, top + panelH + 4);
+		// M26: tooltips are captured while rows render but drawn after the
+		// scissor closes — same contract as SkillsScreen.
+		List<FormattedCharSequence> tooltip = null;
 
 		// M12-2: skill icon sits beside the centered title — zero vertical
 		// cost, and an absent icon leaves just the title.
@@ -57,7 +64,7 @@ public class SkillDetailScreen extends Screen {
 		context.drawCenteredString(font,
 				GuiText.fit(font, card.display().name(), panelW - 16),
 				width / 2, top + 4, ACCENT);
-		int y = top + 20;
+		int y = top + 20 - scroll;
 
 		// Level + rank + aptitude.
 		y = line(context, left, y, Component.translatable(
@@ -81,7 +88,16 @@ public class SkillDetailScreen extends Screen {
 						(int) card.progress().xpIn(), (int) card.progress().xpNeed()),
 				DIM);
 
-		// Current bonuses (milestone effects already unlocked).
+		// M26: the numbers behind the current band — yield, quality, botch
+		// chance, anvil cost — exactly what testers needed to verify, and
+		// what players need to see the grind is worth it.
+		SkillCard.BandStat cur = bandAt(card.details().bands(),
+				card.details().bandThresholds(), card.progress().level());
+		if (cur != null) {
+			y = section(context, left, y + 4,
+					Component.translatable("screen.lifepath.skill.odds"));
+			y = oddsLines(context, left, y, cur);
+		}
 		if (!card.details().bonuses().isEmpty()) {
 			y = section(context, left, y + 4,
 					Component.translatable("screen.lifepath.skill.bonuses"));
@@ -142,6 +158,35 @@ public class SkillDetailScreen extends Screen {
 			}
 		}
 
+		// M26: the level ladder — every milestone as a hoverable row. Reached
+		// rows read plain, the next one glows, future rows dim; hovering any
+		// row shows the band odds + unlocks + XP cost at that level.
+		if (!card.details().roadmap().isEmpty()) {
+			y = section(context, left, y + 4,
+					Component.translatable("screen.lifepath.skill.roadmap"));
+			for (SkillCard.MilestoneRow row : card.details().roadmap()) {
+				boolean reached = row.level() <= card.progress().level();
+				boolean isNext = row.level()
+						== card.details().nextMilestoneLevel();
+				int color = reached ? TEXT : isNext ? ACCENT : DIM;
+				Component label = row.descKey().isEmpty()
+						? Component.translatable(
+								"screen.lifepath.skill.milestone_level",
+								row.level())
+						: Component.translatable(
+								"screen.lifepath.skill.milestone", row.level(),
+								Component.translatable(row.descKey()));
+				context.drawString(font,
+						GuiText.fit(font, label, panelW - 12), left + 6, y,
+						color);
+				if (mouseX >= left && mouseX <= left + panelW
+						&& mouseY >= y && mouseY < y + 10) {
+					tooltip = roadmapTooltip(row);
+				}
+				y += 10;
+			}
+		}
+
 		// Decay in friendly terms.
 		y = section(context, left, y + 4,
 				Component.translatable("screen.lifepath.skill.decay"));
@@ -165,6 +210,9 @@ public class SkillDetailScreen extends Screen {
 						"screen.lifepath.skill.back_hint"), panelW - 16),
 				width / 2, top + panelH - 10, DIM);
 		context.disableScissor();
+		if (tooltip != null) {
+			context.renderTooltip(font, tooltip, mouseX, mouseY);
+		}
 	}
 
 	/**
@@ -176,11 +224,19 @@ public class SkillDetailScreen extends Screen {
 		int h = 20;                        // title band (rows start at top+20)
 		h += 20;                           // level/rank + aptitude
 		h += 9 + 10;                       // xp bar + caption
+		if (bandAt(card.details().bands(), card.details().bandThresholds(),
+				card.progress().level()) != null) {
+			h += 15 + 10 * oddsLineCount(bandAt(card.details().bands(),
+					card.details().bandThresholds(), card.progress().level()));
+		}
 		if (!card.details().bonuses().isEmpty()) {
 			h += 15 + 10 * card.details().bonuses().size();
 		}
 		if (card.details().nextMilestoneLevel() > 0) {
 			h += 15 + 10 + 10 * card.details().nextMilestoneEffects().size();
+		}
+		if (!card.details().roadmap().isEmpty()) {
+			h += 15 + 10 * card.details().roadmap().size();
 		}
 		h += 15 + 10;                      // decay section + line
 		h += 15;                           // how-to-improve header
@@ -218,6 +274,146 @@ public class SkillDetailScreen extends Screen {
 				p.protectedFloor());
 	}
 
+	/**
+	 * The band stat row whose {@code [firstLevel, nextFirstLevel)} window
+	 * contains {@code level}; null when the skill has no outcome rule.
+	 */
+	private static SkillCard.BandStat bandAt(List<SkillCard.BandStat> bands,
+			List<Integer> thresholds, int level) {
+		if (bands.isEmpty()) {
+			return null;
+		}
+		// Band order is the fixed RankBands enum order; bandThresholds[i] is
+		// the first level of bands[i].
+		int idx = 0;
+		for (int i = 0; i < thresholds.size() && i < bands.size(); i++) {
+			if (level >= thresholds.get(i)) {
+				idx = i;
+			}
+		}
+		return bands.get(idx);
+	}
+
+	/** Count of odds lines {@link #oddsLines} will emit for {@code b}. */
+	private static int oddsLineCount(SkillCard.BandStat b) {
+		int n = 1;                                   // yield
+		if (!b.qualityTier().isEmpty()) n++;
+		if (b.failChance() > 0) n++;
+		if (b.anvilCostMult() != 1.0) n++;
+		if (b.signItems()) n++;
+		if (b.junkChance() > 0) n++;
+		return n;
+	}
+
+	/** Renders one band's odds as compact lines; returns the next y. */
+	private int oddsLines(GuiGraphics context, int left, int y,
+			SkillCard.BandStat b) {
+		y = line(context, left, y, Component.translatable(
+				"screen.lifepath.skill.odds.yield", fmt(b.outputMult())), DIM);
+		if (!b.qualityTier().isEmpty()) {
+			y = line(context, left, y, Component.translatable(
+					"screen.lifepath.skill.odds.quality",
+					Component.translatable("lifepath.quality." + b.qualityTier())),
+					DIM);
+		}
+		if (b.failChance() > 0) {
+			y = line(context, left, y, Component.translatable(
+					"screen.lifepath.skill.odds.fail",
+					(int) Math.round(b.failChance() * 100)), DIM);
+		}
+		if (b.anvilCostMult() != 1.0) {
+			y = line(context, left, y, Component.translatable(
+					"screen.lifepath.skill.odds.anvil", fmt(b.anvilCostMult())),
+					DIM);
+		}
+		if (b.signItems()) {
+			y = line(context, left, y, Component.translatable(
+					"screen.lifepath.skill.odds.sign"), DIM);
+		}
+		if (b.junkChance() > 0) {
+			y = line(context, left, y, Component.translatable(
+					"screen.lifepath.skill.odds.junk",
+					(int) Math.round(b.junkChance() * 100)), DIM);
+		}
+		return y;
+	}
+
+	/** Full transparency tooltip for a roadmap row (M26). */
+	private List<FormattedCharSequence> roadmapTooltip(SkillCard.MilestoneRow row) {
+		List<Component> lines = new ArrayList<>();
+		boolean reached = row.level() <= card.progress().level();
+		// Header: level + band name at that level.
+		lines.add(Component.translatable("screen.lifepath.skill.tip.level",
+				row.level(),
+				Component.translatable("lifepath.rank."
+						+ bandKeyAt(row.level()))));
+		lines.add(reached
+				? Component.translatable("screen.lifepath.skill.tip.reached",
+						(int) Math.round(row.xpTotal()))
+				: Component.translatable("screen.lifepath.skill.tip.xp",
+						(int) Math.round(row.xpTotal()),
+						(int) Math.max(0, Math.round(row.xpTotal()
+								- card.progress().xpTotal()))));
+		SkillCard.BandStat b = bandAt(card.details().bands(),
+				card.details().bandThresholds(), row.level());
+		if (b != null) {
+			lines.add(Component.translatable("screen.lifepath.skill.odds.yield",
+					fmt(b.outputMult())));
+			if (!b.qualityTier().isEmpty()) {
+				lines.add(Component.translatable(
+						"screen.lifepath.skill.odds.quality",
+						Component.translatable("lifepath.quality."
+								+ b.qualityTier())));
+			}
+			if (b.failChance() > 0) {
+				lines.add(Component.translatable(
+						"screen.lifepath.skill.odds.fail",
+						(int) Math.round(b.failChance() * 100)));
+			}
+			if (b.anvilCostMult() != 1.0) {
+				lines.add(Component.translatable(
+						"screen.lifepath.skill.odds.anvil",
+						fmt(b.anvilCostMult())));
+			}
+			if (b.signItems()) {
+				lines.add(Component.translatable(
+						"screen.lifepath.skill.odds.sign"));
+			}
+		}
+		if (!row.effects().isEmpty()) {
+			lines.add(Component.translatable(
+					"screen.lifepath.skill.tip.unlocks"));
+			for (IdentitySummaryPayload.Entry e : row.effects()) {
+				lines.add(Component.literal("· ").append(e.name()));
+			}
+		}
+		List<FormattedCharSequence> out = new ArrayList<>();
+		for (Component c : lines) {
+			out.add(c.getVisualOrderText());
+		}
+		return out;
+	}
+
+	/** Band translation key at {@code level} using server-sent thresholds. */
+	private String bandKeyAt(int level) {
+		String[] keys = {"untrained", "novice", "apprentice", "skilled",
+				"expert", "master", "legendary"};
+		List<Integer> t = card.details().bandThresholds();
+		int idx = 0;
+		for (int i = 0; i < t.size() && i < keys.length; i++) {
+			if (level >= t.get(i)) {
+				idx = i;
+			}
+		}
+		return keys[idx];
+	}
+
+	private static String fmt(double v) {
+		return v == Math.floor(v) ? Integer.toString((int) v)
+				: String.format(java.util.Locale.ROOT, "%.2f", v)
+						.replaceAll("0+$", "").replaceAll("\\.$", "");
+	}
+
 	private int section(GuiGraphics context, int x, int y, Component label) {
 		context.drawString(font, label, x, y, ACCENT);
 		return y + 11;
@@ -227,6 +423,16 @@ public class SkillDetailScreen extends Screen {
 		context.drawString(font, GuiText.fit(font, text, PANEL_W - 8),
 				x + 6, y, color);
 		return y + 10;
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY,
+			double horizontalAmount, double verticalAmount) {
+		// Content beyond the panel scrolls; the panel itself never moves.
+		int panelH = Math.min(height - 16, contentHeight());
+		int max = Math.max(0, contentHeight() - panelH);
+		scroll = Math.max(0, Math.min(max, scroll - (int) (verticalAmount * 12)));
+		return true;
 	}
 
 	@Override

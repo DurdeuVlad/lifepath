@@ -120,6 +120,64 @@ class SkillSummaryTest {
 	}
 
 	@Test
+	void roadmapCarriesEveryMilestoneWithCurveXp() throws Exception {
+		// M26: the client ladder needs every milestone + its curve cost —
+		// resolved server-side so the client never reads registries.
+		LifepathContent.skills().register(LifepathMod.id("mining"), skill("mining"));
+		SkillsSummaryPayload p = SkillSummary.build(data, System.currentTimeMillis());
+		SkillCard c = p.skills().get(0);
+		List<Integer> levels = c.details().roadmap().stream()
+				.map(SkillCard.MilestoneRow::level).toList();
+		assertEquals(List.of(10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100),
+				levels, "roadmap covers every milestone, sorted");
+		// Fallback curve (tests run without datapack reload): thresholds
+		// 0/40/120/300/600/1000 — level 10 clamps to the last rung.
+		assertEquals(LevelCurves.xpForLevel(LevelCurves.DEFAULT_ID, 10),
+				c.details().roadmap().get(0).xpTotal(), 0.001);
+		for (SkillCard.MilestoneRow row : c.details().roadmap()) {
+			assertEquals(1, row.effects().size(),
+					"each shipped milestone grants one ability");
+			assertTrue(row.descKey().startsWith("lifepath.skill.mining.milestone"));
+		}
+		// Band thresholds arrive even though the test never loads outcome rules.
+		assertEquals(List.of(0, 1, 20, 40, 60, 80, 95),
+				c.details().bandThresholds());
+		assertTrue(c.details().bands().isEmpty(),
+				"no outcome rule registered → no odds (honest empty, not fake)");
+	}
+
+	@Test
+	void bandStatsComeFromTheSkillOutcomeRule() throws Exception {
+		LifepathContent.skills().register(LifepathMod.id("mining"), skill("mining"));
+		// Load the shipped mining outcome rule — real data, not a stub.
+		var json = JsonParser.parseString(Files.readString(
+				DATA.resolve("outcome_rule/mining.json"))).getAsJsonObject();
+		var file = com.dwurdy.lifepath.content.OutcomeRuleDefinition
+				.OutcomeRuleFile.CODEC.parse(JsonOps.INSTANCE, json)
+				.result().orElseThrow();
+		LifepathContent.outcomeRules().register(LifepathMod.id("mining"),
+				com.dwurdy.lifepath.content.OutcomeRuleDefinition.fromFile(
+						LifepathMod.id("mining"), file));
+		try {
+			SkillCard c = SkillSummary.build(data, System.currentTimeMillis())
+					.skills().get(0);
+			assertEquals(7, c.details().bands().size());
+			SkillCard.BandStat untrained = c.details().bands().get(0);
+			assertEquals("untrained", untrained.key());
+			assertEquals(0, untrained.firstLevel());
+			assertTrue(untrained.outputMult() < 1.0,
+					"untrained penalty reaches the wire");
+			SkillCard.BandStat legendary = c.details().bands().get(6);
+			assertEquals("legendary", legendary.key());
+			assertEquals(95, legendary.firstLevel());
+			assertTrue(legendary.outputMult() > 1.0,
+					"legendary bonus reaches the wire");
+		} finally {
+			LifepathContent.outcomeRules().clear();
+		}
+	}
+
+	@Test
 	void decayInputsReflectPracticeAndFloor() throws Exception {
 		SkillDefinition def = skill("mining");
 		LifepathContent.skills().register(LifepathMod.id("mining"), def);
