@@ -47,9 +47,6 @@ public class SkillDetailScreen extends Screen {
 		int top = Math.max(8, height / 2 - panelH / 2);
 		context.fill(left - 4, top - 4, left + panelW + 4, top + panelH + 4, PANEL_EDGE);
 		context.fill(left - 3, top - 3, left + panelW + 3, top + panelH + 3, PANEL);
-		// The panel caps at height-16 but content doesn't shrink — clip so
-		// rows never paint below the panel on short viewports.
-		context.enableScissor(left - 4, top - 4, left + panelW + 4, top + panelH + 4);
 		// M26: tooltips are captured while rows render but drawn after the
 		// scissor closes — same contract as SkillsScreen.
 		List<FormattedCharSequence> tooltip = null;
@@ -64,6 +61,10 @@ public class SkillDetailScreen extends Screen {
 		context.drawCenteredString(font,
 				GuiText.fit(font, card.display().name(), panelW - 16),
 				width / 2, top + 4, ACCENT);
+		// The panel caps at height-16 but content doesn't shrink — clip the
+		// BODY region only (below the title band, above the back-hint) so
+		// scrolled rows can never paint over the chrome.
+		context.enableScissor(left - 4, top + 18, left + panelW + 4, top + panelH - 14);
 		int y = top + 20 - scroll;
 
 		// Level + rank + aptitude.
@@ -205,11 +206,12 @@ public class SkillDetailScreen extends Screen {
 			y += 10;
 		}
 
+		context.disableScissor();
+		// Chrome paints outside the clip — scrolled content scrolls under it.
 		context.drawCenteredString(font,
 				GuiText.fit(font, Component.translatable(
 						"screen.lifepath.skill.back_hint"), panelW - 16),
 				width / 2, top + panelH - 10, DIM);
-		context.disableScissor();
 		if (tooltip != null) {
 			context.renderTooltip(font, tooltip, mouseX, mouseY);
 		}

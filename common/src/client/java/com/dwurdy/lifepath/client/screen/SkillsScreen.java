@@ -107,13 +107,14 @@ public class SkillsScreen extends Screen {
 							"screen.lifepath.skills.xp",
 							(int) c.progress().xpIn(),
 							(int) c.progress().xpNeed()).getVisualOrderText());
-				} else if (hovered && mouseX < barX && !c.display().description()
-						.getString().isEmpty()) {
+				} else if (hovered && mouseX < barX) {
 					// M16: hovering the name/level zone explains the skill —
 					// the description was already on the wire, never rendered.
 					tooltip = new ArrayList<>();
 					tooltip.add(c.display().name().getVisualOrderText());
-					tooltip.addAll(font.split(c.display().description(), 200));
+					if (!c.display().description().getString().isEmpty()) {
+						tooltip.addAll(font.split(c.display().description(), 200));
+					}
 					// "How to train it" — the flavor line alone left testers
 					// asking what a skill actually *does* (Beta 8 bug set).
 					if (!c.display().improveHint().getString().isEmpty()) {
