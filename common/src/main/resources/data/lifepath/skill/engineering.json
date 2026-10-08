@@ -7,10 +7,24 @@
 	"max_level": 100,
 	"milestones": [
 		{
+			"level": 10,
+			"description_key": "lifepath.skill.engineering.milestone.10",
+			"effects": [
+				"lifepath:skill_engineering_10"
+			]
+		},
+		{
 			"level": 20,
 			"description_key": "lifepath.skill.engineering.milestone.20",
 			"effects": [
 				"lifepath:skill_engineering_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.engineering.milestone.30",
+			"effects": [
+				"lifepath:skill_engineering_30"
 			]
 		},
 		{
@@ -21,10 +35,24 @@
 			]
 		},
 		{
+			"level": 50,
+			"description_key": "lifepath.skill.engineering.milestone.50",
+			"effects": [
+				"lifepath:skill_engineering_50"
+			]
+		},
+		{
 			"level": 60,
 			"description_key": "lifepath.skill.engineering.milestone.60",
 			"effects": [
 				"lifepath:skill_engineering_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.engineering.milestone.70",
+			"effects": [
+				"lifepath:skill_engineering_70"
 			]
 		},
 		{
@@ -35,10 +63,24 @@
 			]
 		},
 		{
+			"level": 90,
+			"description_key": "lifepath.skill.engineering.milestone.90",
+			"effects": [
+				"lifepath:skill_engineering_90"
+			]
+		},
+		{
 			"level": 95,
 			"description_key": "lifepath.skill.engineering.milestone.95",
 			"effects": [
 				"lifepath:skill_engineering_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.engineering.milestone.100",
+			"effects": [
+				"lifepath:skill_engineering_100"
 			]
 		}
 	]

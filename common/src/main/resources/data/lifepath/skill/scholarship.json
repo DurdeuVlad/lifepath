@@ -7,10 +7,24 @@
 	"max_level": 100,
 	"milestones": [
 		{
+			"level": 10,
+			"description_key": "lifepath.skill.scholarship.milestone.10",
+			"effects": [
+				"lifepath:skill_scholarship_10"
+			]
+		},
+		{
 			"level": 20,
 			"description_key": "lifepath.skill.scholarship.milestone.20",
 			"effects": [
 				"lifepath:skill_scholarship_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.scholarship.milestone.30",
+			"effects": [
+				"lifepath:skill_scholarship_30"
 			]
 		},
 		{
@@ -21,10 +35,24 @@
 			]
 		},
 		{
+			"level": 50,
+			"description_key": "lifepath.skill.scholarship.milestone.50",
+			"effects": [
+				"lifepath:skill_scholarship_50"
+			]
+		},
+		{
 			"level": 60,
 			"description_key": "lifepath.skill.scholarship.milestone.60",
 			"effects": [
 				"lifepath:skill_scholarship_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.scholarship.milestone.70",
+			"effects": [
+				"lifepath:skill_scholarship_70"
 			]
 		},
 		{
@@ -35,10 +63,24 @@
 			]
 		},
 		{
+			"level": 90,
+			"description_key": "lifepath.skill.scholarship.milestone.90",
+			"effects": [
+				"lifepath:skill_scholarship_90"
+			]
+		},
+		{
 			"level": 95,
 			"description_key": "lifepath.skill.scholarship.milestone.95",
 			"effects": [
 				"lifepath:skill_scholarship_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.scholarship.milestone.100",
+			"effects": [
+				"lifepath:skill_scholarship_100"
 			]
 		}
 	]

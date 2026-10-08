@@ -1,0 +1,21 @@
+{
+	"display_name": "Scholar's Focus V",
+	"description": "Milestone reward for reaching scholarship level 90.",
+	"icon": "skill/scholarship",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.entity_interaction_range",
+			"operation": "add_value",
+			"value": 0.75,
+			"duration_ticks": 120
+		}
+	]
+}

@@ -70,9 +70,9 @@ class SkillSummaryTest {
 		assertEquals(SkillSummary.NEVER_PRACTICED, c.progress().graceEndsEpochMs());
 		assertTrue(c.display().improveHint().getString().contains("Mine"),
 				"shipped hint reaches the card");
-		// First milestone is next (level 0 < 20).
-		assertEquals(20, c.details().nextMilestoneLevel());
-		assertEquals("lifepath.skill.mining.milestone.20",
+		// First milestone is next (level 0 < 10).
+		assertEquals(10, c.details().nextMilestoneLevel());
+		assertEquals("lifepath.skill.mining.milestone.10",
 				c.details().nextMilestoneText());
 	}
 
@@ -90,8 +90,8 @@ class SkillSummaryTest {
 	@Test
 	void progressPopulatesLevelBandAndBar() throws Exception {
 		LifepathContent.skills().register(LifepathMod.id("mining"), skill("mining"));
-		// Mid-band level: 40 XP is past the level-1 threshold (40) on the
-		// default curve → level ≥ 1.
+		// Unit tests resolve xpIn against the LevelCurves fallback (level-1
+		// threshold 40) — 50 XP → level 1 with 10 XP in.
 		data.setSkillProgress(LifepathMod.id("mining"),
 				new SkillProgress(50.0, 1, 1, 0, Aptitude.A, 0L));
 		SkillsSummaryPayload p = SkillSummary.build(data, System.currentTimeMillis());
@@ -101,8 +101,8 @@ class SkillSummaryTest {
 		assertTrue(c.progress().xpNeed() > 0);
 		assertEquals("A", c.display().aptitude());
 		assertTrue(c.details().bonuses().isEmpty(),
-				"no milestone unlocked below level 20");
-		assertEquals(20, c.details().nextMilestoneLevel());
+				"no milestone unlocked below level 10");
+		assertEquals(10, c.details().nextMilestoneLevel());
 	}
 
 	@Test
@@ -112,8 +112,8 @@ class SkillSummaryTest {
 				new SkillProgress(0.0, 60, 60, 30, Aptitude.B, 0L));
 		SkillsSummaryPayload p = SkillSummary.build(data, System.currentTimeMillis());
 		SkillCard c = p.skills().get(0);
-		// Level 60 → next milestone is 80; floor 30 reaches the card.
-		assertEquals(80, c.details().nextMilestoneLevel());
+		// Level 60 → next milestone is 70; floor 30 reaches the card.
+		assertEquals(70, c.details().nextMilestoneLevel());
 		assertEquals(30, c.progress().protectedFloor());
 		assertEquals("expert", c.display().rankKey(),
 				"bandFor(60) is the expert band (thresholds 0/1/20/40/60/80/95)");

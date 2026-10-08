@@ -8,6 +8,9 @@
 		"minecraft:iron_hoe", "minecraft:chainmail_helmet",
 		"minecraft:chainmail_chestplate", "minecraft:chainmail_leggings",
 		"minecraft:chainmail_boots", "minecraft:shield", "minecraft:shears",
-		"minecraft:flint_and_steel"
+		"minecraft:flint_and_steel",
+		{ "id": "overgeared:iron_arrow", "required": false },
+		{ "id": "overgeared:iron_arrow_tipped", "required": false },
+		{ "id": "overgeared:iron_arrow_lingering", "required": false }
 	]
 }

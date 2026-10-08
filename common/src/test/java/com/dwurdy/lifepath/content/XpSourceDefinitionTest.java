@@ -108,6 +108,30 @@ class XpSourceDefinitionTest {
 	}
 
 	@Test
+	void shippedSmithingSourceCoversEveryShippedTierTag() throws Exception {
+		// Every per_tag key must name a shipped item tag file — a typo'd tag
+		// silently falls through to base_xp in-game.
+		Path file = Path.of("src/main/resources/data/lifepath/xp_source/smithing.json");
+		var def = XpSourceDefinition.fromFile(ResourceLocation.fromNamespaceAndPath("lifepath", "smithing"),
+				XpSourceDefinition.XpSourceFile.CODEC.parse(JsonOps.INSTANCE,
+						JsonParser.parseString(Files.readString(file))).result().orElseThrow());
+		Path tagDir = Path.of("src/main/resources/data/lifepath/tags/item");
+		for (ResourceLocation tag : def.perTag().keySet()) {
+			if (!tag.getNamespace().equals("lifepath")) {
+				continue;
+			}
+			assertTrue(Files.exists(tagDir.resolve(tag.getPath() + ".json")),
+					"xp_source references missing item tag " + tag);
+		}
+		// The Overgeared material ladder must be present (steel above gold,
+		// copper/stone below iron) so forged work doesn't collapse to base_xp.
+		for (String tier : new String[]{"smithing_tier_steel", "smithing_tier_copper", "smithing_tier_stone"}) {
+			assertTrue(def.perTag().containsKey(LifepathMod_id(tier)),
+					"missing per_tag entry for " + tier);
+		}
+	}
+
+	@Test
 	void resolvePrefersSubjectThenTagThenBase() {
 		var def = parse("""
 				{"activity": "lifepath:mining", "skill": "lifepath:mining",

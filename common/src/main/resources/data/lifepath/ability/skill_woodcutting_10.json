@@ -1,0 +1,21 @@
+{
+	"display_name": "Cleaving Swing I",
+	"description": "Milestone reward for reaching woodcutting level 10.",
+	"icon": "skill/woodcutting",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.sweeping_damage_ratio",
+			"operation": "add_value",
+			"value": 0.05,
+			"duration_ticks": 120
+		}
+	]
+}

@@ -5,6 +5,9 @@
 		"minecraft:diamond_leggings", "minecraft:diamond_boots",
 		"minecraft:diamond_sword", "minecraft:diamond_axe",
 		"minecraft:diamond_pickaxe", "minecraft:diamond_shovel",
-		"minecraft:diamond_hoe"
+		"minecraft:diamond_hoe",
+		{ "id": "overgeared:diamond_arrow", "required": false },
+		{ "id": "overgeared:diamond_arrow_tipped", "required": false },
+		{ "id": "overgeared:diamond_arrow_lingering", "required": false }
 	]
 }

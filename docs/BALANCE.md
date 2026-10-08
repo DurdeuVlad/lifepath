@@ -37,6 +37,37 @@ produce a crude partial result at `failure_count_mult`×) · `ac` anvil_cost_mul
 outside clamps are clamped at resolve time — hostile packs can't zero-drop the
 economy.
 
+## Progression curve — linear
+
+`data/lifepath/skill/curve/default.json` ships a **linear** per-level cost:
+reaching level *L* costs `40 + 5·L` XP — cumulative `40L + 5·L(L+1)/2`
+(pinned by `LevelCurveTest.shippedDefaultCurveIsLinear`). Level 1 → 45 XP,
+20→21 → 145 XP, 50 → 8375 cumulative, 100 → 29,250 total (previously ~78k
+exponential — the linear ramp is ~2.7× more generous overall).
+
+Smithing XP tier ladder (`xp_source/smithing.json`, first matching tag wins):
+
+| Tier | Raw XP | Contents |
+|---|---:|---|
+| netherite | 8.0 | netherite gear |
+| diamond | 4.0 | diamond gear, `overgeared:diamond_arrow*` |
+| **steel** | 3.0 | `overgeared:steel_*` gear/arrows, `#c:forged/steel` |
+| gold | 2.5 | golden gear |
+| iron | 1.5 | iron/chainmail gear, `overgeared:iron_arrow*` |
+| **copper** | 1.0 | `overgeared:copper_*` gear |
+| **stone** | 0.75 | stone tools (Overgeared-forgeable) |
+| materials | 0.5 | ingots/nuggets + `#overgeared:tool_parts`, `heated_metals`, `hot_items`, `c:ingots|nuggets|plates/*` |
+| base | 0.5 | anything else |
+
+All foreign ids/tag refs are `required:false` — absent Overgeared costs
+nothing. Addon mods registering into `#overgeared:tool_parts` (Spartan,
+Epic Knights) are covered automatically.
+
+**Milestones every 10 levels**: all 13 skills grant an ability at
+10/30/50/70/90/100 (a second passive line — e.g. smithing *Smith's
+Strength* I–VI `+0.5…+3 attack_damage`) alongside the existing 20/40/60/80/95
+landmarks. Guaranteed by `ShippedSkillDefinitionsTest`.
+
 ## Attribution contract
 
 XP and outcomes always credit the **performing player** — result-slot taker,
@@ -106,5 +137,5 @@ clients).
 
 ## Open
 
-- Defence/athletics have no product surface (issue #197) — decision pending:
-  perk-only vs. folding defence into melee kill-loot.
+- Defence/athletics have no product surface (issue #197, closed) — decided
+  perk-only; folding defence into melee kill-loot was rejected.

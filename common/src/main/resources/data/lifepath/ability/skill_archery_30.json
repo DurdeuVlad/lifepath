@@ -1,0 +1,21 @@
+{
+	"display_name": "Quick Draw II",
+	"description": "Milestone reward for reaching archery level 30.",
+	"icon": "skill/archery",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.attack_speed",
+			"operation": "add_multiplied_base",
+			"value": 0.04,
+			"duration_ticks": 120
+		}
+	]
+}

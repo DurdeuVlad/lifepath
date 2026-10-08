@@ -1,0 +1,21 @@
+{
+	"display_name": "Fine Calibration III",
+	"description": "Milestone reward for reaching engineering level 50.",
+	"icon": "skill/engineering",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.mining_efficiency",
+			"operation": "add_value",
+			"value": 3,
+			"duration_ticks": 120
+		}
+	]
+}

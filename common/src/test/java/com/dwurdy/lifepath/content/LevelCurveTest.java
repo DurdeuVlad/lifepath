@@ -73,6 +73,24 @@ class LevelCurveTest {
 	}
 
 	@Test
+	void shippedDefaultCurveIsLinear() throws Exception {
+		Path file = Path.of("src/main/resources/data/lifepath/skill/curve/default.json");
+		var parsed = LevelCurveDefinition.LevelCurveFile.CODEC
+				.parse(JsonOps.INSTANCE, JsonParser.parseString(Files.readString(file)))
+				.result().orElseThrow(() -> new AssertionError("default.json failed to parse"));
+		// Linear design: the XP cost of each level is 40 + 5 * level — an
+		// arithmetic ramp, never exponential, never flat.
+		List<Double> t = parsed.thresholds();
+		assertEquals(101, t.size(), "default curve must define levels 0-100");
+		assertEquals(0.0, t.get(0));
+		for (int level = 1; level <= 100; level++) {
+			double delta = t.get(level) - t.get(level - 1);
+			assertEquals(40.0 + 5.0 * level, delta, 1e-6,
+					"level " + level + " cost must follow the linear ramp");
+		}
+	}
+
+	@Test
 	void missingCurveFallsBackGracefully() {
 		LifepathContent.levelCurves().clear();
 		// No curve registered — lookup warns once and falls back, never throws.
