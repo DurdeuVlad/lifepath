@@ -36,6 +36,11 @@ report" template, include loader, version, and repro steps.
   milestone at 10/30/50/70/90/100 — a second thematic passive line per
   skill (e.g. *Smith's Strength* I–VI, *Quick Draw*, *Riverborn*), on top of
   the existing 20/40/60/80/95 landmark abilities. 78 new ability defs.
+- **Soldier specialization** — defence `a` / archery `b` / athletics `c`,
+  defence floor 30, signature *Hold the Line* (Resistance I below 3 hearts).
+  Covers the previously orphan combat skills — no spec touched archery or
+  defence before. **Hunter** now also starts with archery 10 and `b`
+  aptitude (hunters shoot things).
 
 ## [1.0.0-beta.10] — 2026-10-08
 
