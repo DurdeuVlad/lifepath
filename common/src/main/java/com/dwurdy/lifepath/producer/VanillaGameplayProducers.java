@@ -382,17 +382,39 @@ public final class VanillaGameplayProducers {
 					LifepathMod.id("fishing_junk"));
 
 	/**
+	 * Snapshot of "was this position player-placed" taken at
+	 * {@code destroyBlock} HEAD — before the XP path's
+	 * {@code PlacedBlockTracker.consume} runs (NeoForge {@code BreakEvent}
+	 * fires pre-break, so without the snapshot the mark is already gone by
+	 * the time {@code getDrops} runs). Keyed by player; a break produces at
+	 * most one drop batch so the flag is consumed on first read.
+	 */
+	private static final java.util.Map<java.util.UUID, Boolean> placedAtBreak =
+			new java.util.HashMap<>();
+
+	/** Called by {@code mixin.GameModeOutcomeMixin} at destroyBlock HEAD. */
+	public static void onDestroyBlockStart(ServerPlayer player, BlockPos pos) {
+		placedAtBreak.put(player.getUUID(),
+				PlacedBlockTracker.contains(player.level(), pos));
+	}
+
+	/**
 	 * Block-break drops — called by {@code mixin.BlockDropOutcomeMixin} from
 	 * {@code Block.getDrops} when the breaker is a real player. Re-uses the
 	 * mining/farming discrimination of the XP producer: farmable+mature
 	 * blocks resolve against FARMING, everything else against MINING, and
-	 * placed blocks get no yield scaling (re-mine exploit guard, non-consuming
-	 * peek — the XP path owns the consume).
+	 * placed blocks get no yield scaling (re-mine exploit guard — reads the
+	 * HEAD-time snapshot; drops generated outside destroyBlock fall back to
+	 * a non-consuming tracker peek).
 	 */
 	public static void onBlockDrops(ServerPlayer player, BlockPos pos,
 			BlockState state, java.util.List<net.minecraft.world.item.ItemStack> drops) {
-		if (isAutomation(player) || drops.isEmpty()
-				|| PlacedBlockTracker.contains(player.level(), pos)) {
+		if (isAutomation(player) || drops.isEmpty()) {
+			return;
+		}
+		Boolean placed = placedAtBreak.remove(player.getUUID());
+		if (placed == null ? PlacedBlockTracker.contains(player.level(), pos)
+				: placed) {
 			return;
 		}
 		ResourceLocation blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK

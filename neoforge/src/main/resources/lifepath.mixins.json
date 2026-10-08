@@ -9,6 +9,7 @@
 		"CraftingResultSlotMixin",
 		"FurnaceResultSlotMixin",
 		"BlockDropOutcomeMixin",
+		"GameModeOutcomeMixin",
 		"EntityLootOutcomeMixin",
 		"BlockItemMixin",
 		"FishingBobberEntityMixin",

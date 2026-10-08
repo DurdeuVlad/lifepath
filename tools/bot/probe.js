@@ -31,6 +31,24 @@ bot._client.on("custom_payload", (p) => {
 			+ Buffer.from(p.data || []).toString("hex").slice(0, 160));
 });
 bot.on("death", () => console.log("BOT DIED"));
+bot.on("playerCollect", (collector, entity) => {
+	if (collector === bot.entity)
+		console.log("PICKED " + (entity.name || entity.objectType) + " " + entity.position);
+});
+bot._client.on("action_bar", (p) => {
+	try { console.log("ACTIONBAR " + JSON.stringify(p.text || p).slice(0, 200)); }
+	catch { console.log("ACTIONBAR <unparseable>"); }
+});
+bot._client.on("packet", (data, meta) => {
+	if (/chat|action|title|text/i.test(meta.name))
+		console.log("PKT " + meta.name + " " + JSON.stringify(data).slice(0, 160));
+});
+bot._client.on("system_chat", (p) => {
+	try {
+		if (p.isActionBar || p.overlay)
+			console.log("ACTIONBAR " + JSON.stringify(p.content ?? p).slice(0, 200));
+	} catch { console.log("ACTIONBAR <unparseable>"); }
+});
 bot.on("respawn", () => console.log("BOT RESPAWNED health=" + bot.health + " food=" + bot.food));
 bot.on("health", () => console.log("BOT HEALTH " + bot.health + " food=" + bot.food));
 bot.on("kicked", (r) => console.log("BOT KICKED " + JSON.stringify(r)));
@@ -199,9 +217,111 @@ async function cmd(line) {
 				} catch (e) { console.log("ANVIL combine fail " + e.message); }
 				break;
 			}
+			case "ctable_open": {
+				// ctable_open — open nearest crafting table as a raw window
+				const t = bot.findBlock({
+					matching: (b) => b && b.name === "crafting_table",
+					maxDistance: 8,
+				});
+				if (!t) { console.log("CTABLE none near"); break; }
+				try {
+					bot._ctable = await bot.openBlock(t);
+					console.log("CTABLE opened " + t.position
+							+ " slots=" + bot._ctable.slots.length);
+				} catch (e) { console.log("CTABLE open fail " + e.message); }
+				break;
+			}
+			case "wslots": {
+				// wslots — dump current window slots
+				const w = bot.currentWindow;
+				if (!w) { console.log("WSLOTS no window"); break; }
+				console.log("WSLOTS " + w.slots.map((s, i) =>
+						s ? i + ":" + s.name + "x" + s.count : i + ":empty").join(", "));
+				break;
+			}
+			case "wmove": {
+				// wmove <from> <to> — move item between window slots
+				const w = bot.currentWindow;
+				if (!w) { console.log("WMOVE no window"); break; }
+				try {
+					await bot.moveSlotItem(parseInt(rest[0]), parseInt(rest[1]));
+					console.log("WMOVED " + rest[0] + " -> " + rest[1]);
+				} catch (e) { console.log("WMOVE fail " + e.message); }
+				break;
+			}
+			case "wtake": {
+				// wtake <slot> — click-take a window slot (fires slot.onTake)
+				const w = bot.currentWindow;
+				if (!w) { console.log("WTAKE no window"); break; }
+				try {
+					const slot = parseInt(rest[0]);
+					await bot.clickWindow(slot, 0, 0);
+					await new Promise((r) => setTimeout(r, 250));
+					console.log("WTOOK slot " + slot);
+				} catch (e) { console.log("WTAKE fail " + e.message); }
+				break;
+			}
+			case "wclick": {
+				// wclick <slot> <button:0=left,1=right> — raw window click
+				const w = bot.currentWindow;
+				if (!w) { console.log("WCLICK no window"); break; }
+				try {
+					await bot.clickWindow(parseInt(rest[0]), parseInt(rest[1]), 0);
+					// settle so server resyncs container state before next click
+					await new Promise((r) => setTimeout(r, 160));
+					console.log("WCLICKED " + rest[0] + " btn" + rest[1]);
+				} catch (e) { console.log("WCLICK fail " + e.message); }
+				break;
+			}
+			case "wclose": {
+				if (bot.currentWindow) bot.currentWindow.close();
+				if (bot._ctable) bot._ctable = null;
+				console.log("WCLOSED");
+				break;
+			}
 			case "anvil_close": {
 				if (bot._anvil) { bot._anvil.close(); bot._anvil = null; }
 				console.log("ANVIL closed");
+				break;
+			}
+			case "place": {
+				// place <itemName> — place held/inventory block against a
+				// face of a nearby solid block (tests placed-block paths).
+				// Tries every face of every solid block within reach and
+				// uses the first adjacent cell that is free air and not the
+				// bot's own feet/head.
+				const name = (rest[0] || "").replace(/ /g, "_");
+				const item = bot.inventory.items().find((i) => i.name === name);
+				if (!item) { console.log("PLACE no item " + name); break; }
+				const Vec3 = require("vec3");
+				const botFeet = bot.entity.position.floored();
+				const isFree = (p) => {
+					if (p.equals(botFeet) || p.equals(botFeet.offset(0, 1, 0)))
+						return false;
+					const t = bot.blockAt(p);
+					return !t || t.name === "air" || t.name === "cave_air";
+				};
+				const dirs = [new Vec3(0, 1, 0), new Vec3(1, 0, 0),
+						new Vec3(-1, 0, 0), new Vec3(0, 0, 1), new Vec3(0, 0, -1)];
+				const cands = bot.findBlocks({
+					matching: (b) => b && b.name !== "air" && b.name !== "cave_air"
+							&& b.boundingBox === "block",
+					maxDistance: 4, count: 64,
+				});
+				let ref = null, face = null;
+				for (const pos of cands) {
+					for (const d of dirs) {
+						if (isFree(pos.plus(d))) { ref = bot.blockAt(pos); face = d; break; }
+					}
+					if (ref) break;
+				}
+				if (!ref) { console.log("PLACE no ref block"); break; }
+				await bot.equip(item, "hand");
+				try {
+					await bot.placeBlock(ref, face);
+					console.log("PLACED " + name + " on " + ref.name + " " + ref.position
+							+ " face " + face);
+				} catch (e) { console.log("PLACE fail " + e.message); }
 				break;
 			}
 			case "dig": {
@@ -222,6 +342,33 @@ async function cmd(line) {
 				console.log("XP level=" + bot.experience.level
 						+ " points=" + bot.experience.points);
 				break;
+			case "drops": {
+				// drops — list item entities the client knows about
+				const ents = Object.values(bot.entities)
+						.filter((e) => e.name === "item" || e.type === "item"
+								|| (e.objectType && /item/i.test(e.objectType)))
+						.map((e) => (e.name || "?") + "@" + e.position
+								+ (e.metadata && e.metadata[8]
+										? " meta=" + JSON.stringify(e.metadata[8]).slice(0, 120)
+										: ""));
+				console.log("DROPS " + (ents.length ? ents.join(" | ") : "none"));
+				break;
+			}
+			case "scan": {
+				// scan — dump non-air blocks in a small cube around the bot
+				const p = bot.entity.position.floored();
+				const seen = [];
+				for (let dx = -3; dx <= 3; dx++)
+					for (let dy = -3; dy <= 3; dy++)
+						for (let dz = -3; dz <= 3; dz++) {
+							const b = bot.blockAt(p.offset(dx, dy, dz));
+							if (b && b.name !== "air" && b.name !== "cave_air"
+									&& seen.length < 40)
+								seen.push(b.name + "@" + b.position + ":bb=" + b.boundingBox);
+						}
+				console.log("SCAN " + (seen.length ? seen.join(", ") : "empty"));
+				break;
+			}
 			case "face": {
 				// face <x> <y> <z> — point the camera at a block position
 				const [x, y, z] = rest.map(Number);
