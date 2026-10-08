@@ -46,9 +46,21 @@ class BuiltinConditionsTest {
 		for (String name : new String[] {"biome_tag", "dimension", "block_nearby",
 				"entity_nearby", "daylight", "night", "health_threshold",
 				"inventory_contains", "equipment_contains", "submerged", "on_fire",
-				"weather", "skill_level", "resource_threshold"}) {
+				"weather", "skill_level", "resource_threshold", "season"}) {
 			assertTrue(cond(name) != null, "missing condition " + name);
 		}
+	}
+
+	@Test
+	void seasonConditionFailsClosed() {
+		// A6: null self → false regardless of params; malformed seasons list
+		// → false; absent Serene Seasons → false (bridge no-ops headless).
+		assertFalse(cond("season").test(ctx,
+				params("{\"seasons\": [\"winter\"]}")));
+		assertFalse(cond("season").test(ctx, params("{}")));
+		assertFalse(cond("season").test(ctx, params("{\"seasons\": []}")));
+		assertFalse(cond("season").test(ctx,
+				params("{\"seasons\": \"winter\"}")));
 	}
 
 	@Test

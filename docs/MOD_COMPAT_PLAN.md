@@ -155,7 +155,7 @@ death→respawn.
 **Non-goals**: hitbox/gameplay-affecting scale beyond Pehkui's own
 mechanics; no scale for specs.
 
-### Issue A6 — Serene Seasons condition primitive
+### Issue A6 — Serene Seasons condition primitive — **DONE**
 
 **Intent**: seasons are the pack's biggest ambient system; species fantasy
 demands seasonal reactions.
@@ -165,6 +165,16 @@ list) usable in abilities/conditions; reads SereneSeasons when present,
 always-false (with one-time warn) when absent. Enables: Iceborn abilities
 stronger in winter, Amphibian `dry_skin` harsher in summer, Sylvian bloom in
 spring — authored as data, not code.
+
+**Shipped**: `lifepath:season` SpecNode condition +
+`compat/sereneseasons/SereneSeasonsBridge` method-handle bridge
+(`SeasonHelper.getSeasonState` → season / sub-season / tropical-gated
+wet-dry). Vocabulary: coarse `spring|summer|autumn|winter`, sub-season
+`early_spring`…`late_winter`, tropical `wet|dry` + `early_wet`…`late_dry`
+(tropical only where the position's biome uses tropical seasons).
+**Live-verified on Fabric + SereneSeasons 10.1.0.9**: dev-datapack probes
+via `debug ability` — `early_spring`/`spring`/all-four → true,
+`mid_spring`/`winter` → false, bridge-active log fired once.
 
 **Dependencies**: none, but pairs naturally with new content abilities.
 
@@ -243,4 +253,4 @@ post-beta.6 flavor pass.
 
 Shipped: #149 (B1 fake-player gate, c6caf91), #150 (B2 data sweep, cb596fe), #151 (B3 Overgeared, a84b717), #152 (B4 FD stations, 9c7c8ed), #156 (B6 vampire bridge, c768636), #157 (B5 skill milestones, 09c00fa), #158 (beta.6 release).
 
-Open: #154 (A6 season condition), #155 (A7 fishing/harvest audit) — #153 (A5 Pehkui scale) shipped and live-verified; #165 tracks beta.7.
+Open: #155 (A7 fishing/harvest audit) — #153 (A5 Pehkui scale) and #154 (A6 season condition) shipped and live-verified on Fabric.

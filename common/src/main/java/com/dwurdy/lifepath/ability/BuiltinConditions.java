@@ -389,6 +389,29 @@ public final class BuiltinConditions {
 					|| com.dwurdy.lifepath.compat.vampirism.VampirismFactions
 							.factionLevel(p) >= num(params, "min_level", 0);
 		});
+		// A6: external season probe — Serene Seasons soft-dep. Coarse names
+		// (winter) cover all three sub-seasons; sub names (early_winter) pin
+		// a third; tropical biomes expose wet/dry. Fail-closed: absent mod /
+		// cut bridge / null self → false, and the bridge warns once.
+		// {"type":"lifepath:season","seasons":["winter","early_spring"]}
+		register("season", (ctx, params) -> {
+			ServerPlayer p = ctx.self();
+			JsonElement list = params.get("seasons");
+			if (p == null || !(list instanceof com.google.gson.JsonArray arr)
+					|| arr.isEmpty()) {
+				return false;
+			}
+			java.util.Set<String> wanted = new java.util.HashSet<>();
+			for (JsonElement el : arr) {
+				if (el.isJsonPrimitive() && el.getAsJsonPrimitive().isString()) {
+					wanted.add(el.getAsString().toLowerCase(java.util.Locale.ROOT));
+				}
+			}
+			return !wanted.isEmpty()
+					&& com.dwurdy.lifepath.compat.sereneseasons
+							.SereneSeasonsBridge.matches(
+									p.level(), p.blockPosition(), wanted);
+		});
 		// Origins-style negation: {"type":"lifepath:not","condition":{...node}}.
 		// Fail-closed — malformed or throwing inner counts as "inner true",
 		// so the not yields false and a defer can never wrongly suppress.
