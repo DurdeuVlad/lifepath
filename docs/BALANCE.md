@@ -62,15 +62,30 @@ Overgeared hammer-swinger. Full seam table: `docs/ATTRIBUTION.md`.
 | archery legendary | arrow-killed cow → `masterwork` beef |
 | fishing untrained | catch → `crude` cod |
 | fishing legendary | catches `masterwork`+signed; count-2 fish stacks |
+| scholarship untrained | bookshelf craft → `crude` stamp |
+| scholarship legendary | bookshelf craft → **x2** (1.5× roll), `masterwork`+signed |
+| botch path | forced failure (fc=1.0 test rule, torch craft) → actionbar
+  `lifepath.outcome.failed`, count 4→**2**, `crude`, no signature |
+| placed-block guard | bot-placed iron_ore re-mined at mining 95 → vanilla
+  `raw_iron x1`, no stamp, no XP; orphan/untracked ore at same spot →
+  `masterwork x2` scaled (contrast cell) |
 
-Rows not marked live (e.g. novice/skilled/expert bands, engineering/scholarship
-subjects) are covered by `OutcomeServiceTest` resolution pins — band→modifier
+Rows not marked live (e.g. novice/skilled/expert bands, engineering subjects)
+are covered by `OutcomeServiceTest` resolution pins — band→modifier
 mapping is deterministic; the live cells prove the transport seams.
+NeoForge: boots with all 11 rules + outcome mixins applied (live gameplay
+verified on Fabric only — NeoForge dev server rejects vanilla-protocol
+clients).
 
 ## Exploit audit
 
-- **Replant/re-mine**: `PlacedBlockTracker.contains()` guard — player-placed
-  blocks get no outcome scaling and no XP. Replant-and-reharvest a wheat crop
+- **Replant/re-mine**: `PlacedBlockTracker` + `destroyBlock`-HEAD snapshot
+  (`GameModeOutcomeMixin`) — player-placed blocks get no outcome scaling and
+  no XP. Live-verified: placed iron_ore re-mine → vanilla unstamped drop.
+  The snapshot exists because loader event order diverges: NeoForge's
+  `BreakEvent` (pre-break) consumes the tracker record before drops run, and
+  on Fabric the XP `consume` also lands before `getDrops` — a drop-time peek
+  would see nothing on either loader. Replant-and-reharvest a wheat crop
   still works (the *crop* is natural growth — intended).
 - **Automation**: `isAutomation` gates every producer — fake players, clicker
   mods, and non-player damage sources get vanilla drops. Mob-grinder kills
