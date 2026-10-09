@@ -122,6 +122,12 @@ public class SkillDetailScreen extends Screen {
 									panelW - 12),
 							left + 6, y + 1, TEXT);
 				}
+				// Bonus rows carry the same Entry payload as the roadmap —
+				// hovering shows what the ability actually does.
+				if (mouseX >= left && mouseX <= left + panelW
+						&& mouseY >= y && mouseY < y + 10) {
+					tooltip = entryTooltip(b);
+				}
 				y += 10;
 			}
 		}
@@ -155,6 +161,10 @@ public class SkillDetailScreen extends Screen {
 									Component.literal("· ").append(effect.name()),
 									panelW - 16),
 							left + 10, y + 1, DIM);
+				}
+				if (mouseX >= left && mouseX <= left + panelW
+						&& mouseY >= y && mouseY < y + 10) {
+					tooltip = entryTooltip(effect);
 				}
 				y += 10;
 			}
@@ -405,6 +415,23 @@ public class SkillDetailScreen extends Screen {
 					}
 				}
 			}
+		}
+		return out;
+	}
+
+	/**
+	 * Tooltip for a named effect row (Current bonuses, Next-milestone
+	 * effects): bold name plus the entry's synced description — the same
+	 * payload the roadmap tooltip renders under each unlock.
+	 */
+	private List<FormattedCharSequence> entryTooltip(
+			IdentitySummaryPayload.Entry e) {
+		List<FormattedCharSequence> out = new ArrayList<>();
+		out.add(e.name().copy().withStyle(ChatFormatting.BOLD)
+				.getVisualOrderText());
+		if (!e.description().getString().isEmpty()) {
+			out.addAll(font.split(e.description().copy()
+					.withStyle(ChatFormatting.GRAY), 190));
 		}
 		return out;
 	}

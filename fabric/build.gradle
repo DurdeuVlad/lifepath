@@ -6,6 +6,19 @@ plugins {
 loom {
 	splitEnvironmentSourceSets()
 
+	runs {
+		// Client gets its own game dir — the default fabric/run is shared
+		// with runServer, and a running server holds locks on
+		// logs/latest.log and .fabric/processedMods that make a parallel
+		// client launch fail during mod remapping.
+		client {
+			runDir "run-client"
+			// Same dev-UX default as neoforge's runClient: auto-join the
+			// local dev server instead of landing on the title screen.
+			programArgs '--quickPlayMultiplayer', 'localhost:25565'
+		}
+	}
+
 	mods {
 		"lifepath" {
 			sourceSet sourceSets.main
