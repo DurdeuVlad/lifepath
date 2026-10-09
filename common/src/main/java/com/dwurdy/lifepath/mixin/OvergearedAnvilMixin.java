@@ -49,6 +49,11 @@ public abstract class OvergearedAnvilMixin {
 	@Inject(method = {"craftItem", "craftItemWithBlueprint"},
 			at = @At("HEAD"), remap = false, require = 0, cancellable = true)
 	private void lifepath$awardForgeXp(CallbackInfo ci) {
+		// Drop any pending outcome a previous craft left behind when its body
+		// threw mid-run — a new attempt must not inherit stale attribution.
+		lifepath$pendingOutcomePlayer = null;
+		lifepath$pendingOutcomeItem = null;
+		lifepath$preCraftOutput = ItemStack.EMPTY;
 		BlockEntity self = (BlockEntity) (Object) this;
 		Level level = self.getLevel();
 		if (level == null || level.isClientSide()) {
@@ -68,11 +73,6 @@ public abstract class OvergearedAnvilMixin {
 			if (server == null) {
 				return;
 			}
-			// Offline forgers earn nothing — XP needs an online recipient.
-			ServerPlayer player = server.getPlayerList().getPlayer(ownerId);
-			if (player == null) {
-				return;
-			}
 			Object recipe = ((Optional<?>) beClass.getMethod("getCurrentRecipe")
 					.invoke(self)).orElse(null);
 			if (recipe == null) {
@@ -84,19 +84,33 @@ public abstract class OvergearedAnvilMixin {
 			if (!(result instanceof ItemStack stack) || stack.isEmpty()) {
 				return;
 			}
+			boolean licensed = lifepath$blueprintPresent(self);
+			// Offline forgers earn nothing — XP needs an online recipient. The
+			// material gate still runs: with nobody online to check levels
+			// against, gated output must fail CLOSED or an anvil retaining an
+			// offline session owner becomes an unlicensed bypass.
+			ServerPlayer player = server.getPlayerList().getPlayer(ownerId);
+			if (player == null) {
+				if (com.dwurdy.lifepath.skill.MaterialGates
+						.isGatedOutput(stack, licensed)) {
+					ci.cancel();
+				}
+				return;
+			}
 			// Material gate (anti one-man-army): tier-tagged outputs need the
 			// skill level — OR a blueprint in the anvil's blueprint slot, the
 			// tradeable bypass. Denial cancels the craft BEFORE XP/scaling.
-			if (lifepath$gateDenied(self, player, stack, tick)) {
+			if (lifepath$gateDenied(player, stack, licensed)) {
 				ci.cancel();
 				return;
 			}
 			lifepath$lastForgeAwardTick = tick;
 			lifepath$pendingOutcomePlayer = player;
 			lifepath$pendingOutcomeItem = stack.getItem();
+			lifepath$preCraftOutput = lifepath$readOutput(self).copy();
 			VanillaGameplayProducers.onForgeOutput(player, stack,
 					OvergearedCompat.FORGE_WORKSTATION);
-		} catch (ReflectiveOperationException e) {
+		} catch (ReflectiveOperationException | ClassCastException e) {
 			LifepathMod.LOGGER.debug("Overgeared anvil XP hook degraded: {}", e.toString());
 		}
 	}
@@ -113,8 +127,10 @@ public abstract class OvergearedAnvilMixin {
 	private void lifepath$scaleForgeOutput(CallbackInfo ci) {
 		ServerPlayer player = lifepath$pendingOutcomePlayer;
 		net.minecraft.world.item.Item expected = lifepath$pendingOutcomeItem;
+		ItemStack preCraft = lifepath$preCraftOutput;
 		lifepath$pendingOutcomePlayer = null;
 		lifepath$pendingOutcomeItem = null;
+		lifepath$preCraftOutput = ItemStack.EMPTY;
 		if (player == null || expected == null) {
 			return;
 		}
@@ -126,7 +142,8 @@ public abstract class OvergearedAnvilMixin {
 		// Newer Overgeared writes the result into OUTPUT_SLOT instead of
 		// dropping it — check the slot first, fall back to the world drop.
 		ItemStack produced = lifepath$outputStack(self, expected);
-		if (produced == null) {
+		boolean fromSlot = produced != null;
+		if (!fromSlot) {
 			var box = new net.minecraft.world.phys.AABB(self.getBlockPos()).inflate(1.5);
 			for (var entity : level.getEntitiesOfClass(
 					net.minecraft.world.entity.item.ItemEntity.class, box)) {
@@ -146,11 +163,65 @@ public abstract class OvergearedAnvilMixin {
 				.forEach(tags::add);
 		tags.add(OvergearedCompat.FORGE_WORKSTATION);
 		tags.add(LifepathMod.id("smithing_workstations"));
+		net.minecraft.resources.ResourceLocation itemId =
+				net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(expected);
+		int preExisting = fromSlot && !preCraft.isEmpty()
+				&& ItemStack.isSameItemSameComponents(preCraft, produced)
+				? preCraft.getCount() : 0;
+		int crafted = produced.getCount() - preExisting;
+		if (crafted <= 0) {
+			return;
+		}
+		if (preExisting > 0) {
+			// The result merged into a matching stack already in the slot.
+			// Scale + stamp only the delta this craft added — scaling the
+			// whole merged stack would multiply items the craft didn't
+			// produce — then carry the outcome components onto the stack so
+			// the merged contents stay consistent.
+			ItemStack fresh = produced.copy();
+			fresh.setCount(crafted);
+			var applied = com.dwurdy.lifepath.skill.OutcomeService.apply(player,
+					com.dwurdy.lifepath.event.ActivityTypes.SMITHING, itemId,
+					tags, fresh);
+			lifepath$biasForgingQuality(fresh, applied.effectiveQualityTier());
+			produced.applyComponents(fresh.getComponentsPatch());
+			produced.setCount(Math.min(preExisting + fresh.getCount(),
+					produced.getMaxStackSize()));
+			return;
+		}
 		var applied = com.dwurdy.lifepath.skill.OutcomeService.apply(player,
-				com.dwurdy.lifepath.event.ActivityTypes.SMITHING,
-				net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(expected),
+				com.dwurdy.lifepath.event.ActivityTypes.SMITHING, itemId,
 				tags, produced);
 		lifepath$biasForgingQuality(produced, applied.effectiveQualityTier());
+	}
+
+	/** Index of the anvil's output slot, or -1 when the field is absent
+	 * (older Overgeared dropped the result into the world instead). */
+	@Unique
+	private static int lifepath$outputSlotIndex(BlockEntity self) {
+		Class<?> cls = self.getClass();
+		while (cls != null) {
+			try {
+				var f = cls.getDeclaredField("OUTPUT_SLOT");
+				f.setAccessible(true);
+				return f.getInt(null);
+			} catch (NoSuchFieldException e) {
+				cls = cls.getSuperclass();
+			} catch (ReflectiveOperationException e) {
+				return -1;
+			}
+		}
+		return -1;
+	}
+
+	/** Live contents of the anvil's output slot (empty when unsupported). */
+	@Unique
+	private static ItemStack lifepath$readOutput(BlockEntity self) {
+		if (!(self instanceof net.minecraft.world.Container c)) {
+			return ItemStack.EMPTY;
+		}
+		int slot = lifepath$outputSlotIndex(self);
+		return slot < 0 ? ItemStack.EMPTY : c.getItem(slot);
 	}
 
 	/** Fresh result in the anvil's output slot — only accepted when the stack
@@ -158,21 +229,8 @@ public abstract class OvergearedAnvilMixin {
 	@Unique
 	private static ItemStack lifepath$outputStack(BlockEntity self,
 			net.minecraft.world.item.Item expected) {
-		if (!(self instanceof net.minecraft.world.Container c)) {
-			return null;
-		}
-		Class<?> cls = self.getClass();
-		while (cls != null) {
-			try {
-				var f = cls.getDeclaredField("OUTPUT_SLOT");
-				f.setAccessible(true);
-				ItemStack s = c.getItem(f.getInt(null));
-				return s.is(expected) ? s : null;
-			} catch (ReflectiveOperationException e) {
-				cls = cls.getSuperclass();
-			}
-		}
-		return null;
+		ItemStack s = lifepath$readOutput(self);
+		return s.is(expected) ? s : null;
 	}
 
 	/**
@@ -215,22 +273,19 @@ public abstract class OvergearedAnvilMixin {
 
 	/**
 	 * Forge-time material gate. The blueprint slot bypasses the level check —
-	 * a blueprint bought from a smith IS the licensed path. Messages are
-	 * throttled because {@code craftItem} retries every tick while progress
-	 * stays finished.
+	 * a blueprint bought from a smith IS the licensed path. Deny messaging is
+	 * rate-limited inside {@code MaterialGates.notifyDenied} because {@code
+	 * craftItem} retries every tick while progress stays finished.
 	 */
 	@Unique
-	private static boolean lifepath$gateDenied(BlockEntity self,
-			ServerPlayer player, ItemStack stack, long tick) {
-		var denial = com.dwurdy.lifepath.skill.MaterialGates.denialFor(player,
-				stack, lifepath$blueprintPresent(self));
+	private static boolean lifepath$gateDenied(ServerPlayer player,
+			ItemStack stack, boolean blueprintLicensed) {
+		var denial = com.dwurdy.lifepath.skill.MaterialGates
+				.denialFor(player, stack, blueprintLicensed);
 		if (denial == null) {
 			return false;
 		}
-		if (tick - lifepath$lastGateDenyTick >= 60) {
-			lifepath$lastGateDenyTick = tick;
-			com.dwurdy.lifepath.skill.MaterialGates.notifyDenied(player, denial);
-		}
+		com.dwurdy.lifepath.skill.MaterialGates.notifyDenied(player, denial);
 		return true;
 	}
 
@@ -261,6 +316,10 @@ public abstract class OvergearedAnvilMixin {
 	@Unique
 	private net.minecraft.world.item.Item lifepath$pendingOutcomeItem;
 
+	/**
+	 * Output-slot snapshot taken in HEAD before {@code craftItem} mutates it —
+	 * a merged result must be scaled by its delta, not the whole stack.
+	 */
 	@Unique
-	private static long lifepath$lastGateDenyTick = Long.MIN_VALUE;
+	private ItemStack lifepath$preCraftOutput = ItemStack.EMPTY;
 }
