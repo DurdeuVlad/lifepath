@@ -19,9 +19,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * be dead, so creation itself is skilled work.
  *
  * <p>NeoForge-only via {@code lifepath.compat.overgeared.mixins.json}; the
- * player is resolved reflectively from the menu's input container (the
- * player's {@link Inventory}), so an Overgeared refactor degrades to a debug
- * log, not a crash.
+ * menu keeps no player field, so the player is recovered from the registered
+ * slots' containers (player-inventory slots carry the {@link Inventory}).
+ * An Overgeared refactor degrades to a skipped check, not a crash.
  */
 @Pseudo
 @Mixin(targets = "net.stirdrem.overgeared.screen.BlueprintWorkbenchMenu", remap = false)
@@ -39,9 +39,10 @@ public abstract class OvergearedBlueprintWorkbenchMixin {
 			if (min < 0) {
 				continue;
 			}
-			int level = com.dwurdy.lifepath.skill.SkillService.progress(
+			var progress = com.dwurdy.lifepath.skill.SkillService.progress(
 					com.dwurdy.lifepath.character.CharacterManager
-							.getCharacter(player), rule.skill()).level();
+							.getCharacter(player), rule.skill());
+			int level = progress == null ? 0 : progress.level();
 			if (level < min) {
 				player.displayClientMessage(net.minecraft.network.chat.Component
 						.translatable("lifepath.forge.blueprint_gated",
@@ -52,24 +53,17 @@ public abstract class OvergearedBlueprintWorkbenchMixin {
 		}
 	}
 
-	/** The menu holds no player ref — the input container IS the player's
-	 *  inventory in practice; walk fields for any {@link Inventory}. */
+	/** The menu drops the player ref after construction — recover it through
+	 * the registered slots: player-inventory slots carry the {@link Inventory}
+	 * whose {@code player} is the ServerPlayer doing the drafting. */
 	@Unique
 	private ServerPlayer lifepath$player() {
-		Class<?> cls = getClass();
-		while (cls != null) {
-			for (java.lang.reflect.Field f : cls.getDeclaredFields()) {
-				try {
-					f.setAccessible(true);
-					Object v = f.get(this);
-					if (v instanceof Inventory inv
-							&& inv.player instanceof ServerPlayer sp) {
-						return sp;
-					}
-				} catch (Throwable ignored) {
-				}
+		for (var slot : ((net.minecraft.world.inventory.AbstractContainerMenu)
+				(Object) this).slots) {
+			if (slot.container instanceof Inventory inv
+					&& inv.player instanceof ServerPlayer sp) {
+				return sp;
 			}
-			cls = cls.getSuperclass();
 		}
 		return null;
 	}

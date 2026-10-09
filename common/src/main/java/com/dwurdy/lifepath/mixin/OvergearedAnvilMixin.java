@@ -2,7 +2,6 @@ package com.dwurdy.lifepath.mixin;
 
 import com.dwurdy.lifepath.LifepathMod;
 import com.dwurdy.lifepath.compat.overgeared.OvergearedCompat;
-import com.dwurdy.lifepath.registry.LifepathContent;
 import com.dwurdy.lifepath.producer.VanillaGameplayProducers;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -48,7 +47,7 @@ public abstract class OvergearedAnvilMixin {
 	private long lifepath$lastForgeAwardTick = Long.MIN_VALUE;
 
 	@Inject(method = {"craftItem", "craftItemWithBlueprint"},
-			at = @At("HEAD"), remap = false, require = 0)
+			at = @At("HEAD"), remap = false, require = 0, cancellable = true)
 	private void lifepath$awardForgeXp(CallbackInfo ci) {
 		BlockEntity self = (BlockEntity) (Object) this;
 		Level level = self.getLevel();
@@ -124,25 +123,56 @@ public abstract class OvergearedAnvilMixin {
 		if (level == null || level.isClientSide()) {
 			return;
 		}
-		var box = new net.minecraft.world.phys.AABB(self.getBlockPos()).inflate(1.5);
-		for (var entity : level.getEntitiesOfClass(
-				net.minecraft.world.entity.item.ItemEntity.class, box)) {
-			ItemStack stack = entity.getItem();
-			if (stack.is(expected) && entity.getAge() <= 1) {
-				java.util.Set<net.minecraft.resources.ResourceLocation> tags =
-						new java.util.HashSet<>();
-				stack.getTags().map(net.minecraft.tags.TagKey::location)
-						.forEach(tags::add);
-				tags.add(OvergearedCompat.FORGE_WORKSTATION);
-				tags.add(LifepathMod.id("smithing_workstations"));
-				var applied = com.dwurdy.lifepath.skill.OutcomeService.apply(player,
-						com.dwurdy.lifepath.event.ActivityTypes.SMITHING,
-						net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(expected),
-						tags, stack);
-				lifepath$biasForgingQuality(stack, applied.effectiveQualityTier());
-				return;
+		// Newer Overgeared writes the result into OUTPUT_SLOT instead of
+		// dropping it — check the slot first, fall back to the world drop.
+		ItemStack produced = lifepath$outputStack(self, expected);
+		if (produced == null) {
+			var box = new net.minecraft.world.phys.AABB(self.getBlockPos()).inflate(1.5);
+			for (var entity : level.getEntitiesOfClass(
+					net.minecraft.world.entity.item.ItemEntity.class, box)) {
+				ItemStack stack = entity.getItem();
+				if (stack.is(expected) && entity.getAge() <= 1) {
+					produced = stack;
+					break;
+				}
 			}
 		}
+		if (produced == null) {
+			return;
+		}
+		java.util.Set<net.minecraft.resources.ResourceLocation> tags =
+				new java.util.HashSet<>();
+		produced.getTags().map(net.minecraft.tags.TagKey::location)
+				.forEach(tags::add);
+		tags.add(OvergearedCompat.FORGE_WORKSTATION);
+		tags.add(LifepathMod.id("smithing_workstations"));
+		var applied = com.dwurdy.lifepath.skill.OutcomeService.apply(player,
+				com.dwurdy.lifepath.event.ActivityTypes.SMITHING,
+				net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(expected),
+				tags, produced);
+		lifepath$biasForgingQuality(produced, applied.effectiveQualityTier());
+	}
+
+	/** Fresh result in the anvil's output slot — only accepted when the stack
+	 * was placed there this craft (matches {@code expected}). */
+	@Unique
+	private static ItemStack lifepath$outputStack(BlockEntity self,
+			net.minecraft.world.item.Item expected) {
+		if (!(self instanceof net.minecraft.world.Container c)) {
+			return null;
+		}
+		Class<?> cls = self.getClass();
+		while (cls != null) {
+			try {
+				var f = cls.getDeclaredField("OUTPUT_SLOT");
+				f.setAccessible(true);
+				ItemStack s = c.getItem(f.getInt(null));
+				return s.is(expected) ? s : null;
+			} catch (ReflectiveOperationException e) {
+				cls = cls.getSuperclass();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -159,9 +189,12 @@ public abstract class OvergearedAnvilMixin {
 		if (tier == null || "standard".equals(tier)) {
 			return;
 		}
+		// Same tier table as ExternalQualityBridge: the anvil's native quality
+		// must agree with what the bridge writes elsewhere.
 		String qualityName = switch (tier) {
-			case "crude", "poor" -> "POOR";
-			case "fine" -> "EXPERT";
+			case "crude" -> "POOR";
+			case "poor" -> "WELL";
+			case "fine" -> "PERFECT";
 			case "masterwork" -> "MASTER";
 			default -> null;
 		};
@@ -189,37 +222,16 @@ public abstract class OvergearedAnvilMixin {
 	@Unique
 	private static boolean lifepath$gateDenied(BlockEntity self,
 			ServerPlayer player, ItemStack stack, long tick) {
-		for (var rule : LifepathContent.outcomeRules().all().values()) {
-			if (rule.materialGates().isEmpty()) {
-				continue;
-			}
-			for (var gate : rule.materialGates().entrySet()) {
-				net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag =
-						net.minecraft.tags.TagKey.create(
-								net.minecraft.core.registries.Registries.ITEM,
-								gate.getKey());
-				if (!stack.is(tag)) {
-					continue;
-				}
-				if (lifepath$blueprintPresent(self)) {
-					return false; // licensed work — no level needed
-				}
-				int level = com.dwurdy.lifepath.skill.SkillService.progress(
-						com.dwurdy.lifepath.character.CharacterManager
-								.getCharacter(player), rule.skill()).level();
-				if (level >= gate.getValue()) {
-					return false;
-				}
-				if (tick - lifepath$lastGateDenyTick >= 60) {
-					lifepath$lastGateDenyTick = tick;
-					player.displayClientMessage(net.minecraft.network.chat.Component
-							.translatable("lifepath.forge.gated",
-									rule.skill().getPath(), gate.getValue()), true);
-				}
-				return true;
-			}
+		var denial = com.dwurdy.lifepath.skill.MaterialGates.denialFor(player,
+				stack, lifepath$blueprintPresent(self));
+		if (denial == null) {
+			return false;
 		}
-		return false;
+		if (tick - lifepath$lastGateDenyTick >= 60) {
+			lifepath$lastGateDenyTick = tick;
+			com.dwurdy.lifepath.skill.MaterialGates.notifyDenied(player, denial);
+		}
+		return true;
 	}
 
 	/** Blueprint slot non-empty → the craft is licensed, gate bypassed. */

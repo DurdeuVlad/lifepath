@@ -86,3 +86,44 @@ result carrying `#lifepath:forged_outputs` translates with zero Java):
 // data/lifepath/tags/item/forged_outputs.json
 { "id": "mymod:forged_ingot", "required": false }
 ```
+
+## Material-gate leak surface (M26, issue #223)
+
+`material_gates` on an outcome rule deny producing tier-tagged outputs
+below a skill level. The gate is enforced at result-computation time on every
+production seam, not just the Overgeared anvil:
+
+| Path | Seam | Blueprint bypass |
+|---|---|---|
+| Overgeared smithing anvil | `AbstractSmithingAnvilBlockEntity.craftItem`/`craftItemWithBlueprint` (HEAD, `cancellable`) | Yes — non-empty blueprint slot licenses the craft |
+| Overgeared drafting table | `BlueprintWorkbenchMenu.createBlueprint` (HEAD) — `blueprint_min_level` gates blueprint creation itself | n/a |
+| Vanilla crafting table + inventory 2x2 | `CraftingMenu.slotChangedCraftingGrid` (TAIL clears result) — covers click, shift-click, and pick-all | No — no blueprint slot exists |
+| Vanilla smithing table | `SmithingMenu.createResult` (TAIL clears result) — gates `smithing_transform` and trims producing tagged gear | No |
+
+Shared check: `com.dwurdy.lifepath.skill.MaterialGates.denialFor(player, stack, licensed)`.
+
+Live-verified on the NeoForge dev server (Overgeared 1.6.19 + Kaleidoscope
+Cookery 1.5.1 co-loaded):
+
+- Crafting grid, `flint_and_steel` (tier_iron): output empty at Smithing 0,
+  crafted at 10.
+- Smithing table, iron-chestplate trim (tier_iron): denied at 0 with the
+  "Beyond your craft" actionbar; netherite upgrade (tier_netherite) denied at
+  10, produced at 70.
+- Anvil, `steel_boots` (tier_steel): denied at 0 (inputs unconsumed), produced
+  at 30; `steel_sword_blade` produced at 0 with a sword blueprint.
+- Drafting table: empty blueprint consumed → output blueprint at Smithing 20;
+  nothing happens at 0.
+
+Remaining intentional non-goals: loot chests, mob drops, villager trades,
+and item repair/acquisition (anvil, grindstone) are *not* crafting — they are
+not gated. Netherite is gated at 70 via `smithing_tier_netherite` — the tag
+existed but was missing from `material_gates`, which let anyone upgrade
+straight past the ladder.
+
+Known residual leak: the vanilla **Crafter** block produces recipe results
+with no player involved, so it bypasses every gate. On NeoForge+Overgeared
+this is mostly moot (vanilla gear recipes are wiped to air), but on Fabric a
+Crafter can mass-produce tier-tagged gear such as iron tools. Closing it
+requires a design decision — whether automated crafting should check the
+*owner* of the placer — and is deliberately out of scope for M26.

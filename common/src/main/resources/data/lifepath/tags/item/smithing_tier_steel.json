@@ -13,6 +13,14 @@
 		{ "id": "overgeared:steel_arrow", "required": false },
 		{ "id": "overgeared:steel_arrow_tipped", "required": false },
 		{ "id": "overgeared:steel_arrow_lingering", "required": false },
+		{ "id": "overgeared:steel_arrow_head", "required": false },
+		{ "id": "overgeared:steel_axe_head", "required": false },
+		{ "id": "overgeared:steel_hoe_head", "required": false },
+		{ "id": "overgeared:steel_pickaxe_head", "required": false },
+		{ "id": "overgeared:steel_shovel_head", "required": false },
+		{ "id": "overgeared:steel_sword_blade", "required": false },
+		{ "id": "overgeared:steel_hammer_head", "required": false },
+		{ "id": "overgeared:steel_plate", "required": false },
 		{ "id": "#c:forged/steel", "required": false }
 	]
 }

@@ -39,6 +39,28 @@ report" template, include loader, version, and repro steps.
   smithing rule — below it, the Blueprint Workbench refuses the draft,
   so non-smiths can't self-supply the bypass.
 
+### Fixed — live-verification follow-ups
+
+- **Vanilla leak closure.** Material gates now also bind the vanilla
+  crafting grid (`CraftingMenu.slotChangedCraftingGrid` clears denied
+  results — covers click, shift-click, and pick-all) and the vanilla
+  smithing table (`SmithingMenu.createResult` clears denied transform/trim
+  results). Netherite joins the ladder at `smithing_tier_netherite`: 70.
+- **Blueprint workbench gate actually fires.** The menu keeps no player
+  reference — the check now resolves the drafter through the menu's slots
+  (previously it silently found nothing and never denied).
+- **Anvil output seam.** Overgeared 1.6.19 writes forged results into the
+  anvil's output slot instead of dropping them — outcome scaling, quality
+  stamping, and the `forging_quality` bias now inspect that slot too.
+- **Denial no longer NPEs** for players with no recorded progress on the
+  gated skill (treated as level 0).
+- **Tier tags now cover Overgeared intermediate parts** (blades, heads,
+  plates) so blueprint-licensed recipes are actually gated.
+- `debug open <player> <pos>` opens any container GUI (block-entity menus
+  plus `BlockState.getMenuProvider` blocks like the drafting table) and
+  `debug forge <pos>` fires the anvil's real craft path — admin tooling for
+  autonomous verification.
+
 ### Added
 
 - **Brewer specialization + Brewing skill** — potion take-outs from a
