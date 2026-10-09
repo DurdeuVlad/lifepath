@@ -1,37 +1,35 @@
 {
-	"skill": "lifepath:mining",
-	"activity": "lifepath:mining",
-	"required_tags": [
-		"lifepath:minable"
-	],
+	"skill": "lifepath:brewing",
+	"activity": "lifepath:brewing",
 	"bands": {
 		"untrained": {
-			"output_count_mult": 0.4,
+			"failure_chance": 0.15,
+			"failure_count_mult": 0.5,
 			"quality_tier": "crude"
 		},
 		"novice": {
-			"output_count_mult": 0.7,
+			"failure_chance": 0.08,
+			"failure_count_mult": 0.5,
 			"quality_tier": "poor"
 		},
-		"apprentice": {},
+		"apprentice": {
+			"quality_tier": "standard"
+		},
 		"skilled": {
-			"output_count_mult": 1.1,
 			"quality_tier": "fine"
 		},
 		"expert": {
-			"output_count_mult": 1.25,
 			"quality_tier": "fine",
 			"sign_items": true
 		},
 		"master": {
-			"output_count_mult": 1.5,
 			"quality_tier": "masterwork",
 			"sign_items": true
 		},
 		"legendary": {
-			"output_count_mult": 1.7,
 			"quality_tier": "masterwork",
-			"sign_items": true
+			"sign_items": true,
+			"output_count_mult": 1.2
 		}
 	}
 }

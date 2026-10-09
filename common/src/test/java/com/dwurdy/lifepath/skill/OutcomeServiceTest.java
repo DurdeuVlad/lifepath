@@ -73,7 +73,8 @@ class OutcomeServiceTest {
 
 	private static OutcomeRuleDefinition rule(Map<RankBands.RankBand, OutcomeRuleDefinition.BandModifiers> bands) {
 		return new OutcomeRuleDefinition(LifepathMod.id("test_rule"), SMITHING,
-				Optional.of(SMITHING_ACTIVITY), Set.of(), Set.of(), Set.of(), bands);
+				Optional.of(SMITHING_ACTIVITY), Set.of(), Set.of(), Set.of(), bands,
+				Map.of(), -1);
 	}
 
 	private static void register(OutcomeRuleDefinition def) {
@@ -120,7 +121,8 @@ class OutcomeServiceTest {
 				Optional.of(SMITHING_ACTIVITY), Set.of(),
 				Set.of(LifepathMod.id("smithing_tier_diamond")),
 				Set.of(), Map.of(RankBands.RankBand.NOVICE,
-						mods(0.9, 0.0, 0.5, Optional.empty(), false))));
+						mods(0.9, 0.0, 0.5, Optional.empty(), false)),
+				Map.of(), -1));
 		try {
 			SkillXpService.setLevelCore(data, SMITHING, 5);
 			// Wrong activity → no match
@@ -147,7 +149,7 @@ class OutcomeServiceTest {
 				Optional.empty(), Set.of(), Set.of(),
 				Set.of(rl("minecraft", "shears")),
 				Map.of(RankBands.RankBand.UNTRAINED, mods(0.5, 0.0, 0.5,
-						Optional.empty(), false))));
+						Optional.empty(), false)), Map.of(), -1));
 		try {
 			assertEquals(OutcomeService.Outcome.IDENTITY, OutcomeService.resolve(data,
 					SMITHING_ACTIVITY, rl("minecraft", "shears"), Set.of()));
@@ -161,7 +163,7 @@ class OutcomeServiceTest {
 		register(new OutcomeRuleDefinition(LifepathMod.id("subject_rule"), SMITHING,
 				Optional.empty(), Set.of(rl("create", "shaft")), Set.of(), Set.of(),
 				Map.of(RankBands.RankBand.NOVICE, mods(0.9, 0.0, 0.5,
-						Optional.empty(), false))));
+						Optional.empty(), false)), Map.of(), -1));
 		try {
 			SkillXpService.setLevelCore(data, SMITHING, 5);
 			// Subject-listed item matches.
@@ -195,7 +197,8 @@ class OutcomeServiceTest {
 		OutcomeRuleDefinition.OutcomeRuleFile file = new OutcomeRuleDefinition.OutcomeRuleFile(
 				SMITHING, Optional.empty(), List.of(), List.of(), List.of(),
 				Map.of("grandmaster", OutcomeRuleDefinition.BandModifiers.IDENTITY,
-						"untrained", mods(0.9, 0.0, 0.5, Optional.empty(), false)));
+						"untrained", mods(0.9, 0.0, 0.5, Optional.empty(), false)),
+				Map.of(), -1);
 		OutcomeRuleDefinition def = OutcomeRuleDefinition.fromFile(LifepathMod.id("warn"), file);
 		assertEquals(1, def.bands().size());
 		assertEquals(0.9, def.forBand(RankBands.RankBand.UNTRAINED).outputCountMult());

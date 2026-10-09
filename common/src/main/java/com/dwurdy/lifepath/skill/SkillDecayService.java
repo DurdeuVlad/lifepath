@@ -7,6 +7,7 @@ import com.dwurdy.lifepath.config.LifepathConfig;
 import com.dwurdy.lifepath.content.SkillDefinition;
 import com.dwurdy.lifepath.specialization.SpecializationService;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -156,7 +157,8 @@ public final class SkillDecayService {
 				SkillService.effectiveAptitude(data.speciesId(), def.id(), cur));
 		double resistance = SpecializationService.decayResistanceFor(
 				data.specializationId(), def.id());
-		double remaining = days * aptitudeMult * Math.max(0.0, 1.0 - resistance);
+		double remaining = days * aptitudeMult * Math.max(0.0, 1.0 - resistance)
+				* breadthMultiplier(data, def.id());
 		return walkBands(frac, remaining, bands());
 	}
 
@@ -213,6 +215,37 @@ public final class SkillDecayService {
 		return lo + (frac - level) * (hi - lo);
 	}
 
+	/**
+	 * Breadth tax: holding many high-level skills at once is upkeep —
+	 * each NON-specialization skill at or above {@code breadth_threshold}
+	 * adds {@code breadth_per_skill} to this decay pass's rate, capped at
+	 * {@code 1 + breadth_cap}. A one-man-army carrying six skills at 80
+	 * decays them all meaningfully faster; a specialist's own skills are
+	 * exempt so the tax punishes breadth, not depth.
+	 */
+	private static double breadthMultiplier(PlayerCharacterData data,
+			ResourceLocation selfId) {
+		if (!breadthEnabled()) {
+			return 1.0;
+		}
+		ResourceLocation specId = data.specializationId();
+		if (SpecializationService.isSpecializationSkill(specId, selfId)) {
+			return 1.0; // the spec's own skills never pay the breadth tax
+		}
+		int threshold = breadthThreshold();
+		int count = 0;
+		for (Map.Entry<ResourceLocation, SkillProgress> e : data.skills().entrySet()) {
+			if (e.getKey().equals(selfId) || e.getValue().level() < threshold) {
+				continue;
+			}
+			if (SpecializationService.isSpecializationSkill(specId, e.getKey())) {
+				continue;
+			}
+			count++;
+		}
+		return 1.0 + Math.min(breadthCap(), count * breadthPerSkill());
+	}
+
 	// ---- config (decay.toml) ----
 
 	public static boolean enabled() {
@@ -225,6 +258,22 @@ public final class SkillDecayService {
 
 	public static double maintenanceMinutes() {
 		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "maintenance_minutes", 60.0)).doubleValue();
+	}
+
+	public static boolean breadthEnabled() {
+		return ((Boolean) LifepathConfig.getOrDefault(DECAY_CONFIG, "breadth_enabled", Boolean.TRUE));
+	}
+
+	public static int breadthThreshold() {
+		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "breadth_threshold", 25)).intValue();
+	}
+
+	public static double breadthPerSkill() {
+		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "breadth_per_skill", 0.15)).doubleValue();
+	}
+
+	public static double breadthCap() {
+		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "breadth_cap", 1.5)).doubleValue();
 	}
 
 	/**

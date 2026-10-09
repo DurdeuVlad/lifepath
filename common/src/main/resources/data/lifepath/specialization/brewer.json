@@ -1,0 +1,33 @@
+{
+	"display_name": "Brewer",
+	"icon": "minecraft:textures/item/potion.png",
+	"starting_skills": {
+		"lifepath:brewing": 20,
+		"lifepath:scholarship": 15,
+		"lifepath:foraging": 10
+	},
+	"aptitudes": {
+		"lifepath:brewing": "a",
+		"lifepath:scholarship": "b",
+		"lifepath:foraging": "c"
+	},
+	"xp_modifiers": {
+		"lifepath:brewing": 1.35,
+		"lifepath:scholarship": 1.1
+	},
+	"decay_modifiers": {
+		"lifepath:brewing": 0.3,
+		"lifepath:scholarship": 0.2
+	},
+	"protected_floors": {
+		"lifepath:brewing": 30
+	},
+	"strengths": [
+		"Learns brewing 35% faster",
+		"Brewing can't decay below Lv30",
+		"Also trains scholarship and foraging"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
+}

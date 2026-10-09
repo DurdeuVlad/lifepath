@@ -3,39 +3,45 @@
 	"activity": "lifepath:smithing",
 	"bands": {
 		"untrained": {
-			"failure_chance": 0.20,
-			"failure_count_mult": 0.5,
+			"failure_chance": 0.3,
+			"failure_count_mult": 0.35,
 			"quality_tier": "crude",
-			"anvil_cost_mult": 1.25
+			"anvil_cost_mult": 1.75
 		},
 		"novice": {
-			"failure_chance": 0.08,
+			"failure_chance": 0.13,
 			"failure_count_mult": 0.5,
 			"quality_tier": "poor",
-			"anvil_cost_mult": 1.15
+			"anvil_cost_mult": 1.4
 		},
 		"apprentice": {
 			"quality_tier": "standard"
 		},
 		"skilled": {
 			"quality_tier": "fine",
-			"anvil_cost_mult": 0.9
+			"anvil_cost_mult": 0.85
 		},
 		"expert": {
 			"quality_tier": "fine",
 			"sign_items": true,
-			"anvil_cost_mult": 0.75
+			"anvil_cost_mult": 0.65
 		},
 		"master": {
 			"quality_tier": "masterwork",
 			"sign_items": true,
-			"anvil_cost_mult": 0.5
+			"anvil_cost_mult": 0.4
 		},
 		"legendary": {
 			"quality_tier": "masterwork",
 			"sign_items": true,
-			"output_count_mult": 1.1,
-			"anvil_cost_mult": 0.5
+			"output_count_mult": 1.2,
+			"anvil_cost_mult": 0.4
 		}
-	}
+	},
+	"material_gates": {
+		"lifepath:smithing_tier_iron": 10,
+		"lifepath:smithing_tier_steel": 30,
+		"lifepath:smithing_tier_diamond": 50
+	},
+	"blueprint_min_level": 20
 }

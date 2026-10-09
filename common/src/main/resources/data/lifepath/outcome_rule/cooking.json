@@ -6,15 +6,15 @@
 	],
 	"bands": {
 		"untrained": {
-			"failure_chance": 0.25,
-			"failure_count_mult": 0.5,
-			"output_count_mult": 0.75,
+			"failure_chance": 0.35,
+			"failure_count_mult": 0.35,
+			"output_count_mult": 0.5,
 			"quality_tier": "crude"
 		},
 		"novice": {
-			"failure_chance": 0.10,
+			"failure_chance": 0.15,
 			"failure_count_mult": 0.5,
-			"output_count_mult": 0.9,
+			"output_count_mult": 0.8,
 			"quality_tier": "poor"
 		},
 		"apprentice": {},
@@ -29,12 +29,12 @@
 		"master": {
 			"quality_tier": "masterwork",
 			"sign_items": true,
-			"output_count_mult": 1.3
+			"output_count_mult": 1.4
 		},
 		"legendary": {
 			"quality_tier": "masterwork",
 			"sign_items": true,
-			"output_count_mult": 1.5
+			"output_count_mult": 1.6
 		}
 	}
 }

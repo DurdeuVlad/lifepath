@@ -9,6 +9,7 @@
 		"AnvilMenuCostMixin",
 		"CraftingResultSlotMixin",
 		"FurnaceResultSlotMixin",
+		"BrewingStandSlotMixin",
 		"BlockDropOutcomeMixin",
 		"GameModeOutcomeMixin",
 		"EntityLootOutcomeMixin",

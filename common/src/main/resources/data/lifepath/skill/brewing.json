@@ -1,0 +1,54 @@
+{
+	"display_name": "Brewing",
+	"icon": "minecraft:textures/item/brewing_stand.png",
+	"description": "Distilling reagents into potions at the brewing stand.",
+	"improve_hint": "Brew and bottle potions at a brewing stand.",
+	"category": "crafting",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 10,
+			"description_key": "lifepath.skill.brewing.milestone.10"
+		},
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.brewing.milestone.20"
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.brewing.milestone.30"
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.brewing.milestone.40"
+		},
+		{
+			"level": 50,
+			"description_key": "lifepath.skill.brewing.milestone.50"
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.brewing.milestone.60"
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.brewing.milestone.70"
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.brewing.milestone.80"
+		},
+		{
+			"level": 90,
+			"description_key": "lifepath.skill.brewing.milestone.90"
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.brewing.milestone.95"
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.brewing.milestone.100"
+		}
+	]
+}

@@ -334,6 +334,37 @@ public final class VanillaGameplayProducers {
 	}
 
 	/**
+	 * Brewing-stand potion take-out, called by {@code
+	 * mixin.BrewingStandSlotMixin} for output slots 0–2. Tags carry
+	 * {@code lifepath:brewed} plus {@code lifepath:potion/<effect_id>} so
+	 * xp_source data can pay more for strong potions. The taken stack also
+	 * gets outcome-scaled (brewing botch/quality bands).
+	 */
+	public static void onBrewingOutput(net.minecraft.world.entity.player.Player player,
+			net.minecraft.world.item.ItemStack output) {
+		if (!(player instanceof ServerPlayer serverPlayer) || isAutomation(player)
+				|| output.isEmpty()
+				|| !output.has(net.minecraft.core.component.DataComponents.POTION_CONTENTS)) {
+			return;
+		}
+		Set<ResourceLocation> itemTags = output.getTags()
+				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
+		itemTags.add(LifepathMod.id("brewed"));
+		var contents = output.get(
+				net.minecraft.core.component.DataComponents.POTION_CONTENTS);
+		contents.potion().flatMap(h -> h.unwrapKey())
+				.ifPresent(key -> itemTags.add(
+						LifepathMod.id("potion/" + key.location().getPath())));
+		ResourceLocation itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM
+				.getKey(output.getItem());
+		ActivityDispatcher.publish(com.dwurdy.lifepath.event.ActivityEvents.brewing(
+				serverPlayer, itemId, itemTags, ActivityEvent.Cause.PLAYER));
+		com.dwurdy.lifepath.skill.OutcomeService.apply(serverPlayer,
+				com.dwurdy.lifepath.event.ActivityTypes.BREWING, itemId,
+				itemTags, output);
+	}
+
+	/**
 	 * Fishing catch, called by {@code mixin.FishingBobberEntityMixin} for each
 	 * spawned loot stack. sourceId = caught item id → repetition signatures
 	 * distinguish junk spam; caught-item tags carry vanilla/classification

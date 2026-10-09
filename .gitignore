@@ -28,3 +28,10 @@ logs/
 .DS_Store
 Thumbs.db
 trinity_pilot.db*
+
+# Local run dirs / logs / release artifacts
+run-client/
+fabric/run-client/
+fabric-server.log
+release/
+tools/bot/*.log

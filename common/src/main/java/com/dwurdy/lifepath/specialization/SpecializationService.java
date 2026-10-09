@@ -119,4 +119,25 @@ public final class SpecializationService {
 		}
 		return Math.max(0.0, def.decayModifiers().getOrDefault(skillId, 0.0));
 	}
+
+	/**
+	 * True when {@code skillId} belongs to the specialization — appears in
+	 * any of its skill-keyed tables (starting skills, aptitudes, xp/decay
+	 * modifiers, protected floors). Spec skills are exempt from the decay
+	 * breadth tax; a {@code null}/unknown spec means nothing is exempt.
+	 */
+	public static boolean isSpecializationSkill(@Nullable ResourceLocation specId, ResourceLocation skillId) {
+		if (specId == null) {
+			return false;
+		}
+		SpecializationDefinition def = LifepathContent.specializations().get(specId);
+		if (def == null) {
+			return false;
+		}
+		return def.startingSkills().containsKey(skillId)
+				|| def.aptitudes().containsKey(skillId)
+				|| def.xpModifiers().containsKey(skillId)
+				|| def.decayModifiers().containsKey(skillId)
+				|| def.protectedFloors().containsKey(skillId);
+	}
 }

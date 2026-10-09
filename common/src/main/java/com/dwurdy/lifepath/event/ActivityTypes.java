@@ -21,4 +21,6 @@ public final class ActivityTypes {
 	public static final ResourceLocation ARCHERY = ResourceLocation.fromNamespaceAndPath("lifepath", "archery");
 	/** Hostile damage survived — emitted when a mob damages a player (M8-3). */
 	public static final ResourceLocation DEFENCE = ResourceLocation.fromNamespaceAndPath("lifepath", "defence");
+	/** Potion take-outs from a brewing stand (M24 Brewer). */
+	public static final ResourceLocation BREWING = ResourceLocation.fromNamespaceAndPath("lifepath", "brewing");
 }

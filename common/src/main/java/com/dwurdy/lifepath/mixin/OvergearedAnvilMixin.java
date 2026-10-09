@@ -2,6 +2,7 @@ package com.dwurdy.lifepath.mixin;
 
 import com.dwurdy.lifepath.LifepathMod;
 import com.dwurdy.lifepath.compat.overgeared.OvergearedCompat;
+import com.dwurdy.lifepath.registry.LifepathContent;
 import com.dwurdy.lifepath.producer.VanillaGameplayProducers;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -82,6 +83,13 @@ public abstract class OvergearedAnvilMixin {
 					.getMethod("getResultItem", HolderLookup.Provider.class);
 			Object result = getResultItem.invoke(recipe, level.registryAccess());
 			if (!(result instanceof ItemStack stack) || stack.isEmpty()) {
+				return;
+			}
+			// Material gate (anti one-man-army): tier-tagged outputs need the
+			// skill level — OR a blueprint in the anvil's blueprint slot, the
+			// tradeable bypass. Denial cancels the craft BEFORE XP/scaling.
+			if (lifepath$gateDenied(self, player, stack, tick)) {
+				ci.cancel();
 				return;
 			}
 			lifepath$lastForgeAwardTick = tick;
@@ -172,9 +180,75 @@ public abstract class OvergearedAnvilMixin {
 		}
 	}
 
+	/**
+	 * Forge-time material gate. The blueprint slot bypasses the level check —
+	 * a blueprint bought from a smith IS the licensed path. Messages are
+	 * throttled because {@code craftItem} retries every tick while progress
+	 * stays finished.
+	 */
+	@Unique
+	private static boolean lifepath$gateDenied(BlockEntity self,
+			ServerPlayer player, ItemStack stack, long tick) {
+		for (var rule : LifepathContent.outcomeRules().all().values()) {
+			if (rule.materialGates().isEmpty()) {
+				continue;
+			}
+			for (var gate : rule.materialGates().entrySet()) {
+				net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag =
+						net.minecraft.tags.TagKey.create(
+								net.minecraft.core.registries.Registries.ITEM,
+								gate.getKey());
+				if (!stack.is(tag)) {
+					continue;
+				}
+				if (lifepath$blueprintPresent(self)) {
+					return false; // licensed work — no level needed
+				}
+				int level = com.dwurdy.lifepath.skill.SkillService.progress(
+						com.dwurdy.lifepath.character.CharacterManager
+								.getCharacter(player), rule.skill()).level();
+				if (level >= gate.getValue()) {
+					return false;
+				}
+				if (tick - lifepath$lastGateDenyTick >= 60) {
+					lifepath$lastGateDenyTick = tick;
+					player.displayClientMessage(net.minecraft.network.chat.Component
+							.translatable("lifepath.forge.gated",
+									rule.skill().getPath(), gate.getValue()), true);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Blueprint slot non-empty → the craft is licensed, gate bypassed. */
+	@Unique
+	private static boolean lifepath$blueprintPresent(BlockEntity self) {
+		if (!(self instanceof net.minecraft.world.Container c)) {
+			return false;
+		}
+		Class<?> cls = self.getClass();
+		while (cls != null) {
+			try {
+				java.lang.reflect.Field slot = cls.getDeclaredField("BLUEPRINT_SLOT");
+				slot.setAccessible(true);
+				return !c.getItem(slot.getInt(null)).isEmpty();
+			} catch (NoSuchFieldException e) {
+				cls = cls.getSuperclass();
+			} catch (ReflectiveOperationException e) {
+				return false;
+			}
+		}
+		return false;
+	}
+
 	@Unique
 	private ServerPlayer lifepath$pendingOutcomePlayer;
 
 	@Unique
 	private net.minecraft.world.item.Item lifepath$pendingOutcomeItem;
+
+	@Unique
+	private static long lifepath$lastGateDenyTick = Long.MIN_VALUE;
 }
