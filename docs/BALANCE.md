@@ -145,9 +145,10 @@ plus RCON inspection — no manual steps:
 | furnace `cooked_beef` take-out, Cooking 80 | `kaleidoscope_cookery:quality=superb` + `lifepath:masterwork` |
 | brewing stand potion take-out | Brewing XP 0→0.5, diminishing tracker `lifepath:brewing|minecraft:potion` |
 
-Breadth tax (`decay.toml`): untested live — config-flagged, unit-covered in
-`SkillDecayService` tests. Crafter-block automation remains an open leak
-(no player to gate — see `docs/COMPAT.md`).
+Breadth tax live: Dev (`miner` spec), 60-day backdated decay window,
+`breadth_per_skill=5.0` — non-spec `smithing` decayed 70→64 while
+spec-exempt `mining` decayed only 40→38 (floor 30 protected). Crafter-block
+automation remains an open leak (no player to gate — see `docs/COMPAT.md`).
 
 ## Exploit audit
 
