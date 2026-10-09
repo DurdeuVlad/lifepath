@@ -54,6 +54,11 @@ report" template, include loader, version, and repro steps.
   stamping, and the `forging_quality` bias now inspect that slot too.
 - **Denial no longer NPEs** for players with no recorded progress on the
   gated skill (treated as level 0).
+- **Anvil gate fails closed.** A forge completing while its session owner
+  is offline cancels gated output instead of producing it unlicensed;
+  results merged into an existing output-slot stack are scaled by their
+  crafted delta, not the whole stack. Deny messaging is rate-limited
+  per-player instead of globally.
 - **Tier tags now cover Overgeared intermediate parts** (blades, heads,
   plates) so blueprint-licensed recipes are actually gated.
 - `debug open <player> <pos>` opens any container GUI (block-entity menus

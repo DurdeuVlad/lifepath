@@ -97,15 +97,6 @@ public record OutcomeRuleDefinition(
 				Map.copyOf(file.materialGates()), file.blueprintMinLevel());
 	}
 
-	/**
-	 * Required {@link #skill} level to forge an output carrying {@code tag},
-	 * or {@code -1} when ungated. The anti-one-man-army lever: high material
-	 * tiers are gated unless a blueprint is used (datapack-authored).
-	 */
-	public int gateLevelFor(ResourceLocation tag) {
-		return materialGates.getOrDefault(tag, -1);
-	}
-
 	/** Modifiers for a band (absent → identity). */
 	public BandModifiers forBand(RankBands.RankBand band) {
 		return bands.getOrDefault(band, BandModifiers.IDENTITY);
