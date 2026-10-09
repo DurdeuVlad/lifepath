@@ -10,6 +10,45 @@ report" template, include loader, version, and repro steps.
 
 ## [Unreleased]
 
+### Changed — anti-one-man-army economy pass
+
+- **Breadth tax on skill decay** (`decay.toml`: `breadth_enabled`,
+  `breadth_threshold` 25, `breadth_per_skill` 0.15, `breadth_cap` 1.5) —
+  each *non-specialization* skill at or above the threshold inflates this
+  skill's decay rate by 15%, capped at +150%. A player holding six
+  unrelated skills at high level pays real upkeep; a specialist's own
+  skills are exempt — the tax punishes breadth, not depth.
+- **Sharper low-skill outcome bands** across all crafting/gathering
+  skills: untrained pays 1.75× anvil cost with 30% botch chance and 0.35×
+  output (smithing), novice 1.4× / 13% / 0.5×. Experts keep their edge —
+  master/legendary cost multipliers improve (0.4× smithing) and master
+  yields rise. Doing the work without the skill now *costs* you.
+- **Quality gets real teeth via deps.** Stamped `lifepath:quality` tiers
+  are now also written onto the owning mod's quality component
+  reflectively: Overgeared `overgeared:forging_quality`
+  (crude→POOR … masterwork→MASTER — real durability/speed multipliers)
+  and Kaleidoscope Cookery `kaleidoscope_cookery:quality`
+  (crude→POOR … masterwork→SUPERB — real food-effect scaling). Absent
+  mods degrade to the lore stamp as before; no compile-time dep.
+- **Material gates on the Overgeared anvil** (NeoForge): smithing
+  `outcome_rule` gains `material_gates` — iron-tier output needs
+  Smithing 10, steel 30, diamond 50. A **blueprint in the anvil's
+  blueprint slot bypasses the level check** — blueprints become the
+  tradeable chokepoint: specialists draft, customers forge.
+- **Blueprint drafting is skilled work.** `blueprint_min_level: 20` on the
+  smithing rule — below it, the Blueprint Workbench refuses the draft,
+  so non-smiths can't self-supply the bypass.
+
+### Added
+
+- **Brewer specialization + Brewing skill** — potion take-outs from a
+  brewing stand pay Brewing XP weighted by potion strength (splash >
+  drinkable < lingering; strong/extended variants pay more, mundane /
+  water pay scraps). Brewer starts Brewing 20 / Scholarship 15 /
+  Foraging 10, aptitude A on brewing, brewing floor 30, +35% brewing XP.
+  Brewing outcomes scale like other crafting skills — crude early vials,
+  masterwork elixirs.
+
 ### Changed
 
 - **Level curve is now linear.** Each level costs `40 + 5·level` XP (was a

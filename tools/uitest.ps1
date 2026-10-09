@@ -19,6 +19,17 @@ public class U32 {
     public struct RECT { public int Left, Top, Right, Bottom; }
     [StructLayout(LayoutKind.Sequential)] public struct MOUSEINPUT { public int dx, dy, mouseData, dwFlags, time; public IntPtr ex; }
     [StructLayout(LayoutKind.Explicit)] public struct INPUT { [FieldOffset(0)] public int type; [FieldOffset(8)] public MOUSEINPUT mi; }
+    public static void Click2(int flags) {
+        INPUT[] ev = new INPUT[2];
+        ev[0].type = 0; ev[0].mi.dwFlags = flags;
+        ev[1].type = 0; ev[1].mi.dwFlags = flags << 1;
+        SendInput(2, ev, Marshal.SizeOf(typeof(INPUT)));
+    }
+    public static void Press1(int flags) {
+        INPUT[] ev = new INPUT[1];
+        ev[0].type = 0; ev[0].mi.dwFlags = flags;
+        SendInput(1, ev, Marshal.SizeOf(typeof(INPUT)));
+    }
     public static void WheelNotch(int notches) {
         int n = notches < 0 ? -notches : notches;
         INPUT[] ev = new INPUT[n];
@@ -28,6 +39,35 @@ public class U32 {
             ev[i].mi.mouseData = notches < 0 ? -120 : 120;
         }
         SendInput((uint)n, ev, Marshal.SizeOf(typeof(INPUT)));
+    }
+    [StructLayout(LayoutKind.Explicit)] public struct KEYINPUT { [FieldOffset(0)] public int type; [FieldOffset(8)] public KEYBD ki; }
+    [StructLayout(LayoutKind.Sequential)] public struct KEYBD { public short vk; public short scan; public int dwFlags; public int time; public IntPtr ex; }
+    public static void TypeText(string s) {
+        INPUT[] ev = new INPUT[s.Length * 2];
+        for (int i = 0; i < s.Length; i++) {
+            KEYINPUT kd = new KEYINPUT(); kd.type = 1;
+            kd.ki.dwFlags = 0x0004; kd.ki.scan = (short)s[i];
+            KEYINPUT ku = new KEYINPUT(); ku.type = 1;
+            ku.ki.dwFlags = 0x0004 | 0x0002; ku.ki.scan = (short)s[i];
+            ev[i * 2] = ToInput(kd); ev[i * 2 + 1] = ToInput(ku);
+        }
+        SendInput((uint)ev.Length, ev, Marshal.SizeOf(typeof(INPUT)));
+    }
+    [StructLayout(LayoutKind.Explicit)] public struct ANYINPUT { [FieldOffset(0)] public int type; [FieldOffset(8)] public KEYBD ki; }
+    static INPUT ToInput(KEYINPUT k) {
+        byte[] buf = new byte[Marshal.SizeOf(typeof(INPUT))];
+        IntPtr p = Marshal.AllocHGlobal(buf.Length);
+        Marshal.StructureToPtr(k, p, false);
+        Marshal.Copy(p, buf, 0, buf.Length);
+        Marshal.FreeHGlobal(p);
+        return ByteArrayToStructure<INPUT>(buf);
+    }
+    static T ByteArrayToStructure<T>(byte[] bytes) {
+        IntPtr p = Marshal.AllocHGlobal(bytes.Length);
+        Marshal.Copy(bytes, 0, p, bytes.Length);
+        T s = (T)Marshal.PtrToStructure(p, typeof(T));
+        Marshal.FreeHGlobal(p);
+        return s;
     }
 }
 "@
@@ -67,6 +107,15 @@ function ClickAt($x, $y) {
     [U32]::mouse_event(0x0002, 0, 0, 0, 0)
     Start-Sleep -Milliseconds 90
     [U32]::mouse_event(0x0004, 0, 0, 0, 0)
+    Start-Sleep -Milliseconds 600
+}
+
+function RClickAt($x, $y) {
+    [U32]::SetCursorPos([int]$x, [int]$y) | Out-Null
+    Start-Sleep -Milliseconds 250
+    [U32]::Press1(0x0008)   # RIGHTDOWN
+    Start-Sleep -Milliseconds 1200
+    [U32]::Press1(0x0010)   # RIGHTUP
     Start-Sleep -Milliseconds 600
 }
 
@@ -110,9 +159,12 @@ Restore
 switch ($Action) {
     "shot"   { Shot $A }
     "click"  { ClickAt $A $B }
+    "rclick" { RClickAt $A $B }
+    "look"   { [U32]::mouse_event(0x0001, [int]$A, [int]$B, 0, 0); Start-Sleep -Milliseconds 300 }
     "move"   { MoveAt $A $B }
     "key"    { PressKey $A }
     "wheel"  { Wheel $A }
+    "type"   { [U32]::TypeText($A) }
     "drag"   { DragTo $A $B $C $args[0] }
     "rect"   { Write-Output "rect $($script:rect.Left),$($script:rect.Top) $($script:rect.Right)x$($script:rect.Bottom)" }
     default  { Write-Output "usage: uitest.ps1 shot|click x y|move x y|key vk|wheel delta|rect" }

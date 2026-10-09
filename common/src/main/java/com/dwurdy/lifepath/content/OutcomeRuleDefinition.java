@@ -26,7 +26,8 @@ import net.minecraft.resources.ResourceLocation;
  *                    "failure_count_mult": 0.5, "quality_tier": "crude" },
  *     "master":    { "output_count_mult": 1.25, "quality_tier": "masterwork",
  *                    "sign_items": true }
- *   }
+ *   },
+ *   "material_gates": { "lifepath:smithing_tier_steel": 30 }
  * }
  * </pre>
  *
@@ -42,7 +43,9 @@ public record OutcomeRuleDefinition(
 		Set<ResourceLocation> subjects,
 		Set<ResourceLocation> requiredTags,
 		Set<ResourceLocation> excludedSubjects,
-		Map<RankBands.RankBand, BandModifiers> bands) {
+		Map<RankBands.RankBand, BandModifiers> bands,
+		Map<ResourceLocation, Integer> materialGates,
+		int blueprintMinLevel) {
 
 	/** Per-band output modifiers. Absent fields keep defaults (identity). */
 	public record BandModifiers(
@@ -90,7 +93,17 @@ public record OutcomeRuleDefinition(
 		}
 		return new OutcomeRuleDefinition(id, file.skill(), file.activity(),
 				Set.copyOf(file.subjects()), Set.copyOf(file.requiredTags()),
-				Set.copyOf(file.excludedSubjects()), Map.copyOf(bands));
+				Set.copyOf(file.excludedSubjects()), Map.copyOf(bands),
+				Map.copyOf(file.materialGates()), file.blueprintMinLevel());
+	}
+
+	/**
+	 * Required {@link #skill} level to forge an output carrying {@code tag},
+	 * or {@code -1} when ungated. The anti-one-man-army lever: high material
+	 * tiers are gated unless a blueprint is used (datapack-authored).
+	 */
+	public int gateLevelFor(ResourceLocation tag) {
+		return materialGates.getOrDefault(tag, -1);
 	}
 
 	/** Modifiers for a band (absent → identity). */
@@ -132,7 +145,9 @@ public record OutcomeRuleDefinition(
 			List<ResourceLocation> subjects,
 			List<ResourceLocation> requiredTags,
 			List<ResourceLocation> excludedSubjects,
-			Map<String, BandModifiers> bands) {
+			Map<String, BandModifiers> bands,
+			Map<ResourceLocation, Integer> materialGates,
+			int blueprintMinLevel) {
 
 		public static final Codec<OutcomeRuleFile> CODEC = RecordCodecBuilder.create(i -> i.group(
 				ResourceLocation.CODEC.fieldOf("skill").forGetter(OutcomeRuleFile::skill),
@@ -145,7 +160,12 @@ public record OutcomeRuleDefinition(
 				ResourceLocation.CODEC.listOf().optionalFieldOf("excluded_subjects", List.of())
 						.forGetter(OutcomeRuleFile::excludedSubjects),
 				Codec.unboundedMap(Codec.STRING, BandModifiers.CODEC)
-						.fieldOf("bands").forGetter(OutcomeRuleFile::bands))
+						.fieldOf("bands").forGetter(OutcomeRuleFile::bands),
+				Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT)
+						.optionalFieldOf("material_gates", Map.of())
+						.forGetter(OutcomeRuleFile::materialGates),
+				Codec.INT.optionalFieldOf("blueprint_min_level", -1)
+						.forGetter(OutcomeRuleFile::blueprintMinLevel))
 				.apply(i, OutcomeRuleFile::new));
 	}
 }

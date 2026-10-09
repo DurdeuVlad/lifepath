@@ -3,11 +3,11 @@
 	"activity": "lifepath:archery",
 	"bands": {
 		"untrained": {
-			"output_count_mult": 0.75,
+			"output_count_mult": 0.5,
 			"quality_tier": "poor"
 		},
 		"novice": {
-			"output_count_mult": 0.9
+			"output_count_mult": 0.8
 		},
 		"apprentice": {},
 		"skilled": {
@@ -20,12 +20,12 @@
 			"sign_items": true
 		},
 		"master": {
-			"output_count_mult": 1.4,
+			"output_count_mult": 1.5,
 			"quality_tier": "masterwork",
 			"sign_items": true
 		},
 		"legendary": {
-			"output_count_mult": 1.6,
+			"output_count_mult": 1.7,
 			"quality_tier": "masterwork",
 			"sign_items": true
 		}

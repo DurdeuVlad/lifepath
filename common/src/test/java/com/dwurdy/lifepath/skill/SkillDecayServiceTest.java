@@ -159,6 +159,75 @@ class SkillDecayServiceTest {
 		assertEquals(59.5, p.xp() / 10.0, 0.001);
 	}
 
+	private static final ResourceLocation SKILL_B = ResourceLocation.fromNamespaceAndPath("lifepath", "decaytest_b");
+
+	private static void registerSecondSkill() {
+		LifepathContent.skills().register(SKILL_B, new SkillDefinition(SKILL_B, "B",
+				SkillDefinition.Category.GATHERING, 100, Optional.of(CURVE), List.of(),
+				List.of(), Optional.empty()));
+	}
+
+	@Test
+	void breadthTaxAcceleratesNonSpecSkills() {
+		// Two un-specialized skills at 60: each counts the other → ×1.15 rate.
+		registerSecondSkill();
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atLevel(60, T0));
+		data.setSkillProgress(SKILL_B, atLevel(60, T0));
+		// 10 days × 1.15 = 11.5 decay-days in band 51–75 (0.10/day) → −1.15 level.
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(58.85, p.xp() / 10.0, 0.01);
+	}
+
+	@Test
+	void breadthTaxSparesSpecSkills() {
+		// The spec's own skills never pay the tax — depth is not punished.
+		registerSecondSkill();
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		com.dwurdy.lifepath.content.SpecializationDefinition spec =
+				new com.dwurdy.lifepath.content.SpecializationDefinition(
+						ResourceLocation.fromNamespaceAndPath("lifepath", "s"), "S", Map.of(), Map.of(),
+						Map.of(SKILL, 1.35), Map.of(), Map.of(), List.of());
+		LifepathContent.specializations().register(spec.id(), spec);
+		data.setSpecializationId(spec.id());
+		data.setSkillProgress(SKILL, atLevel(60, T0));
+		data.setSkillProgress(SKILL_B, atLevel(60, T0));
+		// SKILL is a spec skill (via xp_modifiers): tax exempt → plain 10
+		// decay-days → −1.0 level.
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(59.0, p.xp() / 10.0, 0.001);
+	}
+
+	@Test
+	void specSkillsDontCountTowardBreadth() {
+		// Only SKILL_B is a spec skill: it doesn't inflate SKILL's tax.
+		registerSecondSkill();
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		com.dwurdy.lifepath.content.SpecializationDefinition spec =
+				new com.dwurdy.lifepath.content.SpecializationDefinition(
+						ResourceLocation.fromNamespaceAndPath("lifepath", "s"), "S", Map.of(), Map.of(), Map.of(),
+						Map.of(SKILL_B, 0.6), Map.of(), List.of());
+		LifepathContent.specializations().register(spec.id(), spec);
+		data.setSpecializationId(spec.id());
+		data.setSkillProgress(SKILL, atLevel(60, T0));
+		data.setSkillProgress(SKILL_B, atLevel(60, T0));
+		// SKILL sees zero taxable skills (SKILL_B is spec-exempt) → −1.0 level.
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(59.0, p.xp() / 10.0, 0.001);
+	}
+
+	@Test
+	void lowSkillsDontCountTowardBreadth() {
+		// A high off-spec skill is taxed by other HIGH skills only —
+		// a level-20 skill doesn't count.
+		registerSecondSkill();
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atLevel(60, T0));
+		data.setSkillProgress(SKILL_B, atLevel(20, T0));
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(59.0, p.xp() / 10.0, 0.001);
+	}
+
 	@Test
 	void freshSkillAndMissingDefinitionDegradeGracefully() {
 		PlayerCharacterData data = PlayerCharacterData.createDefault();

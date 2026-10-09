@@ -1,0 +1,27 @@
+{
+	"activity": "lifepath:brewing",
+	"skill": "lifepath:brewing",
+	"player_caused_only": true,
+	"base_xp": 0.5,
+	"per_subject": {
+		"minecraft:potion": 0.5,
+		"minecraft:splash_potion": 0.7,
+		"minecraft:lingering_potion": 1.0
+	},
+	"per_tag": {
+		"lifepath:potion/strong_healing": 1.4,
+		"lifepath:potion/strong_harming": 1.4,
+		"lifepath:potion/long_strength": 1.4,
+		"lifepath:potion/strong_regeneration": 1.4,
+		"lifepath:potion/long_swiftness": 1.2,
+		"lifepath:potion/long_leaping": 1.2,
+		"lifepath:potion/fire_resistance": 1.0,
+		"lifepath:potion/water_breathing": 1.0,
+		"lifepath:potion/invisibility": 1.3,
+		"lifepath:potion/long_invisibility": 1.4,
+		"lifepath:potion/mundane": 0.3,
+		"lifepath:potion/thick": 0.3,
+		"lifepath:potion/awkward": 0.2,
+		"lifepath:potion/water": 0.1
+	}
+}

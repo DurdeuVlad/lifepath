@@ -3,11 +3,11 @@
 	"activity": "lifepath:fishing",
 	"bands": {
 		"untrained": {
-			"output_count_mult": 0.75,
+			"output_count_mult": 0.5,
 			"quality_tier": "crude"
 		},
 		"novice": {
-			"output_count_mult": 0.9,
+			"output_count_mult": 0.8,
 			"quality_tier": "poor"
 		},
 		"apprentice": {},
@@ -22,13 +22,13 @@
 			"junk_upgrade_chance": 0.25
 		},
 		"master": {
-			"output_count_mult": 1.4,
+			"output_count_mult": 1.5,
 			"quality_tier": "masterwork",
 			"sign_items": true,
 			"junk_upgrade_chance": 0.4
 		},
 		"legendary": {
-			"output_count_mult": 1.6,
+			"output_count_mult": 1.7,
 			"quality_tier": "masterwork",
 			"sign_items": true,
 			"junk_upgrade_chance": 0.6

@@ -249,6 +249,9 @@ public final class OutcomeService {
 				return new ItemLore(lines);
 			});
 		}
+		// Give the cosmetic tier real teeth via the dep's own quality
+		// component (Overgeared forging quality, KCookery food quality).
+		com.dwurdy.lifepath.compat.ExternalQualityBridge.apply(stack, quality);
 	}
 
 	private static double clamp(double value, String minKey, double minDefault,

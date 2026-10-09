@@ -150,6 +150,18 @@ public final class ActivityEvents {
 	}
 
 	/**
+	 * Brewing-stand take-out (M24) — sourceId = potion item id
+	 * ({@code minecraft:potion}/{@code splash_potion}/{@code lingering_potion});
+	 * tags carry {@code lifepath:brewed} plus {@code lifepath:potion/<id>} for
+	 * the brewed effect so xp_source data can weight strong potions higher.
+	 */
+	public static ActivityEvent brewing(ServerPlayer player, ResourceLocation potionItemId,
+			Set<ResourceLocation> tags, ActivityEvent.Cause cause) {
+		return new ActivityEvent(player, ActivityTypes.BREWING, potionItemId,
+				Set.copyOf(tags), cause, now(), Map.of());
+	}
+
+	/**
 	 * Hostile hit survived (M8-3) — sourceId/tags describe the ATTACKER's
 	 * entity type; the event's player is the victim. Cause is
 	 * {@code NON_PLAYER} — the damage was mob-caused, not player action.
