@@ -80,10 +80,15 @@ report" template, include loader, version, and repro steps.
   "passives look weird" report. Regenerated as flat two-tone semantic
   glyphs (gear, bolt, flame, moon, paw…) tinted per species group, matching
   the skill-icon style. Generator lives at `tools/icons/make_icons.py`.
-- **Milestone hover descriptions** — roadmap rows and milestone effects now
-  carry the referenced ability's description on the wire (`Entry.description`),
-  so hovering "Stone Skin I" actually says what it does instead of just
-  naming it.
+- **Milestone hover descriptions** — roadmap rows, milestone effects, and
+  "Current bonuses" rows now carry the referenced ability's description on
+  the wire (`Entry.description`), so hovering "Stone Skin I" or
+  "Fine Calibration I" actually says what it does instead of just naming it.
+- **`fabric:runClient` gets its own game dir + auto-join** — it used to share
+  `fabric/run` with `runServer`, so a running dev server held file locks that
+  made the client launch fail (`latest.log`, `.fabric/processedMods`). Now
+  `run-client/` is separate and the client auto-connects to
+  `localhost:25565` (same convention as `neoforge:runClient`).
 
 ## [1.0.0-beta.10] — 2026-10-08
 
