@@ -11,6 +11,13 @@
 		"minecraft:flint_and_steel",
 		{ "id": "overgeared:iron_arrow", "required": false },
 		{ "id": "overgeared:iron_arrow_tipped", "required": false },
-		{ "id": "overgeared:iron_arrow_lingering", "required": false }
+		{ "id": "overgeared:iron_arrow_lingering", "required": false },
+		{ "id": "overgeared:iron_arrow_head", "required": false },
+		{ "id": "overgeared:iron_axe_head", "required": false },
+		{ "id": "overgeared:iron_hoe_head", "required": false },
+		{ "id": "overgeared:iron_pickaxe_head", "required": false },
+		{ "id": "overgeared:iron_shovel_head", "required": false },
+		{ "id": "overgeared:iron_sword_blade", "required": false },
+		{ "id": "overgeared:iron_plate", "required": false }
 	]
 }

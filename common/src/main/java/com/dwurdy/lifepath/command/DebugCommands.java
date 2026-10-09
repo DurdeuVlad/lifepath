@@ -23,6 +23,7 @@ import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -56,34 +57,45 @@ public final class DebugCommands {
 			return;
 		}
 		initialized = true;
-		LifepathCommands.register(literal("debug")
+		var debug = literal("debug")
 				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
-				.executes(ctx -> usage(ctx.getSource()))
-				.then(literal("character")
-						.then(argument("player", EntityArgument.player())
-								.executes(ctx -> character(ctx.getSource(),
-										EntityArgument.getPlayer(ctx, "player")))))
-				.then(literal("ability")
-						.then(argument("player", EntityArgument.player())
-								.then(argument("ability", ResourceLocationArgument.id())
-										.executes(ctx -> ability(ctx.getSource(),
-												EntityArgument.getPlayer(ctx, "player"),
-												ResourceLocationArgument.getId(ctx, "ability"))))))
-				.then(literal("skill")
-						.then(argument("player", EntityArgument.player())
-								.then(argument("skill", ResourceLocationArgument.id())
-										.executes(ctx -> skill(ctx.getSource(),
-												EntityArgument.getPlayer(ctx, "player"),
-												ResourceLocationArgument.getId(ctx, "skill")))
-										.then(literal("set")
-												.then(argument("level",
+				.executes(ctx -> usage(ctx.getSource()));
+		debug.then(literal("character")
+				.then(argument("player", EntityArgument.player())
+						.executes(ctx -> character(ctx.getSource(),
+								EntityArgument.getPlayer(ctx, "player")))));
+		debug.then(literal("ability")
+				.then(argument("player", EntityArgument.player())
+						.then(argument("ability", ResourceLocationArgument.id())
+								.executes(ctx -> ability(ctx.getSource(),
+										EntityArgument.getPlayer(ctx, "player"),
+										ResourceLocationArgument.getId(ctx, "ability"))))));
+		debug.then(literal("skill")
+				.then(argument("player", EntityArgument.player())
+						.then(argument("skill", ResourceLocationArgument.id())
+								.executes(ctx -> skill(ctx.getSource(),
+										EntityArgument.getPlayer(ctx, "player"),
+										ResourceLocationArgument.getId(ctx, "skill")))
+								.then(literal("set")
+										.then(argument("level",
+												com.mojang.brigadier.arguments.IntegerArgumentType
+														.integer(0))
+												.executes(ctx -> skillSet(ctx.getSource(),
+														EntityArgument.getPlayer(ctx, "player"),
+														ResourceLocationArgument.getId(ctx, "skill"),
 														com.mojang.brigadier.arguments.IntegerArgumentType
-																.integer(0))
-														.executes(ctx -> skillSet(ctx.getSource(),
-																EntityArgument.getPlayer(ctx, "player"),
-																ResourceLocationArgument.getId(ctx, "skill"),
-																com.mojang.brigadier.arguments.IntegerArgumentType
-																		.getInteger(ctx, "level")))))))));
+																.getInteger(ctx, "level"))))))));
+		debug.then(literal("open")
+				.then(argument("player", EntityArgument.player())
+						.then(argument("pos", BlockPosArgument.blockPos())
+								.executes(ctx -> openContainer(ctx.getSource(),
+										EntityArgument.getPlayer(ctx, "player"),
+										BlockPosArgument.getLoadedBlockPos(ctx, "pos"))))));
+		debug.then(literal("forge")
+				.then(argument("pos", BlockPosArgument.blockPos())
+						.executes(ctx -> forgeNow(ctx.getSource(),
+								BlockPosArgument.getLoadedBlockPos(ctx, "pos")))));
+		LifepathCommands.register(debug);
 		LifepathCommands.register(literal("cooldown")
 				.requires(src -> src.hasPermission(LifepathCommands.ADMIN_PERMISSION))
 				.then(literal("clear")
@@ -240,6 +252,110 @@ public final class DebugCommands {
 			}
 		}
 		return Command.SINGLE_SUCCESS;
+	}
+
+	/**
+	 * {@code debug open <player> <pos>} — opens the block's menu for the
+	 * player without needing an in-world right-click (headless/RDP UI
+	 * automation can't inject captured-cursor clicks). Any MenuProvider
+	 * block entity works: brewing stands, furnaces, anvils.
+	 */
+	private static int openContainer(CommandSourceStack source, ServerPlayer target,
+			net.minecraft.core.BlockPos pos) {
+		// Block entity menus first (brewing stand, anvil); state-backed menus
+		// second (drafting tables and other BE-less providers).
+		var be = target.level().getBlockEntity(pos);
+		net.minecraft.world.MenuProvider provider =
+				be instanceof net.minecraft.world.MenuProvider p ? p
+						: target.level().getBlockState(pos)
+								.getMenuProvider(target.level(), pos);
+		if (provider == null) {
+			source.sendFailure(Component.literal(
+					"no menu provider at " + pos.toShortString()
+							+ (be == null ? " (no block entity)" : "")));
+			return 0;
+		}
+		// NeoForge's modded menus need the block pos in extraData — vanilla
+		// openMenu leaves it null and the client NPEs ("Network Protocol
+		// Error"). The (provider, pos) overload only exists on NeoForge's
+		// patched Player, so resolve it reflectively and fall back on Fabric.
+		java.util.OptionalInt opened;
+		try {
+			var m = target.getClass().getMethod("openMenu",
+					net.minecraft.world.MenuProvider.class,
+					net.minecraft.core.BlockPos.class);
+			opened = (java.util.OptionalInt) m.invoke(target, provider, pos);
+		} catch (NoSuchMethodException e) {
+			opened = target.openMenu(provider);
+		} catch (ReflectiveOperationException e) {
+			source.sendFailure(Component.literal("open failed: " + e.getCause()));
+			return 0;
+		}
+		java.util.OptionalInt result = opened;
+		source.sendSuccess(() -> Component.literal("opened "
+				+ provider.getDisplayName().getString() + " for "
+				+ target.getName().getString() + " (containerId="
+				+ (result.isPresent() ? result.getAsInt() : "rejected") + ")"), false);
+		return result.isPresent() ? Command.SINGLE_SUCCESS : 0;
+	}
+
+	/**
+	 * {@code debug forge <pos>} — invokes the block entity's {@code craftItem()}
+	 * reflectively (Overgeared smithing anvil or any class exposing it). Runs
+	 * through the real mixin path, so material-gate denial, XP award, and
+	 * outcome scaling all behave exactly as a finished hammer-hit sequence.
+	 */
+	private static int forgeNow(CommandSourceStack source,
+			net.minecraft.core.BlockPos pos) {
+		var be = source.getLevel().getBlockEntity(pos);
+		if (be == null) {
+			source.sendFailure(Component.literal("no block entity at " + pos.toShortString()));
+			return 0;
+		}
+		Class<?> cls = be.getClass();
+		while (cls != null) {
+			try {
+				var m = cls.getDeclaredMethod("craftItem");
+				m.setAccessible(true);
+				m.invoke(be);
+				source.sendSuccess(() -> Component.literal(
+						"craftItem invoked on " + be.getClass().getSimpleName()
+								+ " at " + pos.toShortString()), false);
+				// Diagnostics: report whether a forging recipe still matches
+				// and what the output slot holds — distinguishes "gate denied"
+				// from "recipe didn't match" without guessing.
+				Class<?> rc = be.getClass();
+				while (rc != null) {
+					try {
+						var gm = rc.getDeclaredMethod("getCurrentRecipe");
+						gm.setAccessible(true);
+						Object r = gm.invoke(be);
+						source.sendSuccess(() -> Component.literal(
+								"  currentRecipe=" + r), false);
+						break;
+					} catch (NoSuchMethodException e) {
+						rc = rc.getSuperclass();
+					} catch (ReflectiveOperationException e) {
+						source.sendSuccess(() -> Component.literal(
+								"  currentRecipe threw: " + e.getCause()), false);
+						break;
+					}
+				}
+				if (be instanceof net.minecraft.world.Container c) {
+					source.sendSuccess(() -> Component.literal(
+							"  output=" + c.getItem(10)), false);
+				}
+				return Command.SINGLE_SUCCESS;
+			} catch (NoSuchMethodException e) {
+				cls = cls.getSuperclass();
+			} catch (ReflectiveOperationException e) {
+				source.sendFailure(Component.literal("craftItem threw: " + e.getCause()));
+				return 0;
+			}
+		}
+		source.sendFailure(Component.literal(
+				be.getClass().getSimpleName() + " has no craftItem()"));
+		return 0;
 	}
 
 	private static int clearAll(CommandSourceStack source, ServerPlayer target) {

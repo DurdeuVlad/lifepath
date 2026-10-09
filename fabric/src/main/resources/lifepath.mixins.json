@@ -8,6 +8,7 @@
 		"AnvilScreenHandlerMixin",
 		"AnvilMenuCostMixin",
 		"CraftingResultSlotMixin",
+		"CraftingMenuGateMixin",
 		"FurnaceResultSlotMixin",
 		"BrewingStandSlotMixin",
 		"BlockDropOutcomeMixin",

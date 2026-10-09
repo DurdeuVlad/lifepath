@@ -2,8 +2,10 @@ param(
     [Parameter(Position=0)][string]$Action,
     [Parameter(Position=1)][string]$A = "",
     [Parameter(Position=2)][string]$B = "",
-    [Parameter(Position=3)][string]$C = ""
+    [Parameter(Position=3)][string]$C = "",
+    [switch]$NeoForge
 )
+$script:NeoForge = $NeoForge.IsPresent
 
 Add-Type @"
 using System;
@@ -24,6 +26,11 @@ public class U32 {
         ev[0].type = 0; ev[0].mi.dwFlags = flags;
         ev[1].type = 0; ev[1].mi.dwFlags = flags << 1;
         SendInput(2, ev, Marshal.SizeOf(typeof(INPUT)));
+    }
+    public static void Chord(params int[] vks) {
+        foreach (int vk in vks) { keybd_event((byte)vk, 0, 0, 0); }
+        System.Threading.Thread.Sleep(60);
+        for (int i = vks.Length - 1; i >= 0; i--) { keybd_event((byte)vks[i], 0, 2, 0); }
     }
     public static void Press1(int flags) {
         INPUT[] ev = new INPUT[1];
@@ -77,9 +84,13 @@ $script:hwnd = $null
 $script:rect = $null
 
 function FindWindow {
-    $p = Get-Process java -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like 'Minecraft* 1.21.1*' -and $_.MainWindowTitle -notlike '*NeoForge*' }
+    # Both clients title themselves "Minecraft[*] 1.21.1 ..." — NeoForge
+    # inserts "NeoForge", Fabric doesn't. -NeoForge picks explicitly.
+    $p = Get-Process java,javaw -ErrorAction SilentlyContinue | Where-Object {
+        $_.MainWindowTitle -like 'Minecraft*1.21.1*' -and
+        ($script:NeoForge -eq ($_.MainWindowTitle -like '*NeoForge*')) }
     if (-not $p) { Write-Output "NO-WINDOW"; exit 1 }
-    $script:hwnd = $p.MainWindowHandle
+    $script:hwnd = $p[0].MainWindowHandle
 }
 
 function Restore {
@@ -165,6 +176,7 @@ switch ($Action) {
     "key"    { PressKey $A }
     "wheel"  { Wheel $A }
     "type"   { [U32]::TypeText($A) }
+    "chord"  { $vks = ($A -split ',') | ForEach-Object { $s = $_.Trim(); if ($s -match '^0x') { [Convert]::ToInt32($s, 16) } else { [int]$s } }; [U32]::Chord([int[]]$vks); Start-Sleep -Milliseconds 400 }
     "drag"   { DragTo $A $B $C $args[0] }
     "rect"   { Write-Output "rect $($script:rect.Left),$($script:rect.Top) $($script:rect.Right)x$($script:rect.Bottom)" }
     default  { Write-Output "usage: uitest.ps1 shot|click x y|move x y|key vk|wheel delta|rect" }

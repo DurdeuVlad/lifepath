@@ -41,7 +41,8 @@
 	"material_gates": {
 		"lifepath:smithing_tier_iron": 10,
 		"lifepath:smithing_tier_steel": 30,
-		"lifepath:smithing_tier_diamond": 50
+		"lifepath:smithing_tier_diamond": 50,
+		"lifepath:smithing_tier_netherite": 70
 	},
 	"blueprint_min_level": 20
 }
