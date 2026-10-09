@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,6 +62,10 @@ public class SelectionScreen extends Screen {
 	 *  reserves this space. */
 	private static final int DETAILS_H = 14 + 4 * 10;
 	private static final int SCROLLBAR_W = 4;
+	/** Card body text runs smaller than the title — the "+/-" consequence
+	 *  lines carry real information and truncating them at full size hid
+	 *  most of it ("Learns smithing 35% fas…"). */
+	private static final float CARD_BODY_SCALE = 0.7f;
 
 	private Step step;
 	private int scroll;
@@ -72,6 +77,7 @@ public class SelectionScreen extends Screen {
 	/** Description of the card under the cursor this frame — consumed by the
 	 *  post-loop tooltip render so the box always lands above the grid. */
 	private @Nullable Component hoveredDesc;
+	private List<Component> hoveredDetails = List.of();
 	/** True once Confirm fired for the final outstanding step — lets
 	 *  {@link #onClose} pass while the server round-trip lands. A catalog
 	 *  refresh (accepted or denied) resets it. */
@@ -175,6 +181,7 @@ public class SelectionScreen extends Screen {
 	private void renderGrid(GuiGraphics context, List<Entry> entries, int gridLeft,
 			int gridTop, int gridBottom, int mouseX, int mouseY) {
 		hoveredDesc = null;
+		hoveredDetails = List.of();
 		context.enableScissor(0, gridTop, width, gridBottom);
 		for (int i = 0; i < entries.size(); i++) {
 			Entry e = entries.get(i);
@@ -198,32 +205,35 @@ public class SelectionScreen extends Screen {
 			context.drawString(font,
 					GuiText.fit(font, e.name(), CARD_W - 28),
 					x + 24, y + 8, available ? TEXT : DIM);
-			// Word-wrap (never mid-word) then cap at 3 rows; a clipped tail
+			// Word-wrap (never mid-word) then cap at 4 rows; a clipped tail
 			// gets "…" and the full text stays readable on hover.
 			String descText = e.description().getString();
-			List<String> desc = wrapPlain(descText, CARD_W - 10);
-			int dy = y + 22;
+			List<String> desc = wrapPlain(descText, smallWidth());
+			int dy = y + 20;
+			// Locked cards paint a status line at the card's bottom edge —
+			// a fourth body row would collide with it.
+			int maxRows = available ? 4 : 3;
 			if (descText.isEmpty()) {
 				// No description (specializations) — the colored "+/-"
 				// pros/cons ARE the card body, so the trade-off is visible
 				// before the card is even selected.
-				for (int i2 = 0; i2 < Math.min(3, e.details().size()); i2++) {
-					context.drawString(font,
+				for (int i2 = 0; i2 < Math.min(maxRows, e.details().size()); i2++) {
+					drawSmall(context,
 							GuiText.fit(font, e.details().get(i2),
-									CARD_W - 10),
+									smallWidth()),
 							x + 5, dy, available ? DIM : 0xFF606068);
-					dy += 10;
+					dy += 8;
 				}
 			} else {
-				for (int i2 = 0; i2 < Math.min(3, desc.size()); i2++) {
+				for (int i2 = 0; i2 < Math.min(maxRows, desc.size()); i2++) {
 					String row = desc.get(i2);
-					if (i2 == 2 && desc.size() > 3) {
+					if (i2 == maxRows - 1 && desc.size() > maxRows) {
 						row = font.plainSubstrByWidth(row,
-								CARD_W - 10 - font.width("…")) + "…";
+								smallWidth() - font.width("…")) + "…";
 					}
-					context.drawString(font, row, x + 5, dy,
+					drawSmall(context, row, x + 5, dy,
 							available ? DIM : 0xFF606068);
-					dy += 10;
+					dy += 8;
 				}
 			}
 			if (!available) {
@@ -232,8 +242,9 @@ public class SelectionScreen extends Screen {
 								CARD_W - 10),
 						x + 5, y + CARD_H - 11, WARN);
 			}
-			if (hovered && !descText.isEmpty()) {
+			if (hovered) {
 				hoveredDesc = e.description();
+				hoveredDetails = e.details();
 			}
 		}
 		context.disableScissor();
@@ -241,10 +252,49 @@ public class SelectionScreen extends Screen {
 		// later cards paint their icon/text over it, and the grid scissor
 		// clipped the tooltip frame (right-column hovers flip it onto
 		// neighbouring cards, which is where the bleed-through showed).
-		if (hoveredDesc != null) {
+		if (hoveredDesc != null && !hoveredDesc.getString().isEmpty()) {
 			context.renderTooltip(font, font.split(hoveredDesc, 240),
 					mouseX, mouseY);
+		} else if (!hoveredDetails.isEmpty()) {
+			// Spec cards have no description; a clipped "+/-" line would hide
+			// part of the trade-off for good — hover shows the full list.
+			context.renderTooltip(font,
+					hoveredDetails.stream()
+							.map(Component::getVisualOrderText).toList(),
+					mouseX, mouseY);
 		}
+	}
+
+	/** Text width budget for card body rows at {@link #CARD_BODY_SCALE}. */
+	private int smallWidth() {
+		return (int) ((CARD_W - 10) / CARD_BODY_SCALE);
+	}
+
+	private void drawSmall(GuiGraphics context,
+			FormattedCharSequence text, int x, int y, int color) {
+		context.pose().pushPose();
+		context.pose().translate(x, y, 0);
+		context.pose().scale(CARD_BODY_SCALE, CARD_BODY_SCALE, 1f);
+		context.drawString(font, text, 0, 0, color);
+		context.pose().popPose();
+	}
+
+	private void drawSmall(GuiGraphics context, Component text, int x, int y,
+			int color) {
+		context.pose().pushPose();
+		context.pose().translate(x, y, 0);
+		context.pose().scale(CARD_BODY_SCALE, CARD_BODY_SCALE, 1f);
+		context.drawString(font, text, 0, 0, color);
+		context.pose().popPose();
+	}
+
+	private void drawSmall(GuiGraphics context, String text, int x, int y,
+			int color) {
+		context.pose().pushPose();
+		context.pose().translate(x, y, 0);
+		context.pose().scale(CARD_BODY_SCALE, CARD_BODY_SCALE, 1f);
+		context.drawString(font, text, 0, 0, color);
+		context.pose().popPose();
 	}
 
 	/**

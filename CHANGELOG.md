@@ -89,6 +89,12 @@ report" template, include loader, version, and repro steps.
   made the client launch fail (`latest.log`, `.fabric/processedMods`). Now
   `run-client/` is separate and the client auto-connects to
   `localhost:25565` (same convention as `neoforge:runClient`).
+- **Selection card body text was clipped.** Species descriptions and the
+  green/red "+/-" specialization trade-off lines rendered at full font and
+  ellipsized inside the 150px card — most of the text was hidden. Card body
+  rows now render at 70% scale (four readable lines per card), and hovering a
+  card without a description shows the full detail list as a tooltip, so no
+  clipped line is permanently lost.
 
 ## [1.0.0-beta.10] — 2026-10-08
 
