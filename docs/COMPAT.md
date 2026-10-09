@@ -101,6 +101,12 @@ production seam, not just the Overgeared anvil:
 | Vanilla smithing table | `SmithingMenu.createResult` (TAIL clears result) — gates `smithing_transform` and trims producing tagged gear | No |
 
 Shared check: `com.dwurdy.lifepath.skill.MaterialGates.denialFor(player, stack, licensed)`.
+If the anvil's forging-session owner is offline when the craft completes,
+gated output fails closed — the level check can't run, so the craft is
+cancelled rather than produced unlicensed (`MaterialGates.isGatedOutput`).
+When a forged result merges into a matching stack already in the output
+slot, outcome scaling applies only to the crafted delta, not the whole
+stack.
 
 Live-verified on the NeoForge dev server (Overgeared 1.6.19 + Kaleidoscope
 Cookery 1.5.1 co-loaded):
