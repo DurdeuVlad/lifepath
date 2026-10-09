@@ -16,19 +16,38 @@ produce a crude partial result at `failure_count_mult`×) · `ac` anvil_cost_mul
 
 | Skill | untrained | novice | apprentice | skilled | expert | master | legendary |
 |---|---|---|---|---|---|---|---|
-| smithing | fc .20, Q crude, ac 1.25 | fc .08, Q poor, ac 1.15 | Q standard | Q fine, ac .90 | Q fine ✎, ac .75 | Q masterwork ✎, ac .50 | cm 1.10, Q mw ✎, ac .50 |
-| cooking (subjects) | cm .75, fc .25, Q crude | cm .90, fc .10, Q poor | — | Q fine | cm 1.15, Q fine ✎ | cm 1.30, Q mw ✎ | cm 1.50, Q mw ✎ |
-| engineering (subjects) | cm .75, fc .15, Q crude | cm .90, fc .05, Q poor | — | Q fine | cm 1.10, Q fine ✎ | cm 1.25, Q mw ✎ | cm 1.50, Q mw ✎ |
-| scholarship (subjects) | cm .75, fc .15, Q crude | cm .90, fc .05, Q poor | — | Q fine | cm 1.10, Q fine ✎ | cm 1.25, Q mw ✎ | cm 1.50, Q mw ✎ |
-| mining (`lifepath:minable`) | cm .60, Q crude | cm .80, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.40, Q mw ✎ | cm 1.60, Q mw ✎ |
-| woodcutting (`minecraft:logs`) | cm .60, Q crude | cm .80, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.40, Q mw ✎ | cm 1.60, Q mw ✎ |
-| foraging (`lifepath:forageable`) | cm .60, Q crude | cm .80, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.40, Q mw ✎ | cm 1.60, Q mw ✎ |
-| farming (mature crops) | cm .60, Q crude | cm .80, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.40, Q mw ✎ | cm 1.60, Q mw ✎ |
-| fishing | cm .75, Q crude | cm .90, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎, ju .25 | cm 1.40, Q mw ✎, ju .40 | cm 1.60, Q mw ✎, ju .60 |
-| hunting (`lifepath:animals`) | cm .60, Q crude | cm .80, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.40, Q mw ✎ | cm 1.60, Q mw ✎ |
-| archery (projectile kills) | cm .75, Q poor | cm .90 | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.40, Q mw ✎ | cm 1.60, Q mw ✎ |
+| smithing | fc .30, fm .35, Q crude, ac 1.75 | fc .13, fm .50, Q poor, ac 1.40 | Q standard | Q fine, ac .85 | Q fine ✎, ac .65 | Q masterwork ✎, ac .40 | cm 1.20, Q mw ✎, ac .40 |
+| cooking (subjects) | cm .50, fc .35, fm .35, Q crude | cm .80, fc .15, fm .50, Q poor | — | Q fine | cm 1.15, Q fine ✎ | cm 1.40, Q mw ✎ | cm 1.60, Q mw ✎ |
+| engineering (subjects) | cm .50, fc .25, fm .35, Q crude | cm .80, fc .10, Q poor | — | Q fine | cm 1.10, Q fine ✎ | cm 1.35, Q mw ✎ | cm 1.60, Q mw ✎ |
+| scholarship (subjects) | cm .50, fc .25, fm .35, Q crude | cm .80, fc .10, Q poor | — | Q fine | cm 1.10, Q fine ✎ | cm 1.35, Q mw ✎ | cm 1.60, Q mw ✎ |
+| brewing (potion take-out) | fc .15, fm .50, Q crude | fc .08, fm .50, Q poor | Q standard | Q fine | Q fine ✎ | Q mw ✎ | cm 1.20, Q mw ✎ |
+| mining (`lifepath:minable`) | cm .40, Q crude | cm .70, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.50, Q mw ✎ | cm 1.70, Q mw ✎ |
+| woodcutting (`minecraft:logs`) | cm .40, Q crude | cm .70, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.50, Q mw ✎ | cm 1.70, Q mw ✎ |
+| foraging (`lifepath:forageable`) | cm .40, Q crude | cm .70, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.50, Q mw ✎ | cm 1.70, Q mw ✎ |
+| farming (mature crops) | cm .40, Q crude | cm .70, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.50, Q mw ✎ | cm 1.70, Q mw ✎ |
+| fishing | cm .50, Q crude | cm .80, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎, ju .25 | cm 1.50, Q mw ✎, ju .40 | cm 1.70, Q mw ✎, ju .60 |
+| hunting (`lifepath:animals`) | cm .40, Q crude | cm .70, Q poor | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.50, Q mw ✎ | cm 1.70, Q mw ✎ |
+| archery (projectile kills) | cm .50, Q poor | cm .80 | — | cm 1.10, Q fine | cm 1.25, Q fine ✎ | cm 1.50, Q mw ✎ | cm 1.70, Q mw ✎ |
 
 `—` = identity (vanilla). `apprentice` is the designed neutral band everywhere.
+`fm` = `failure_count_mult` (fraction of inputs still produced on a botch).
+
+## Material gates + blueprint chokepoint (M26)
+
+`smithing` additionally ships `material_gates` — tier-tagged outputs refuse
+to be produced below the gate level, on every production seam (Overgeared
+anvil, vanilla crafting grid, vanilla smithing table):
+
+| Tag | Gate level | Contents |
+|---|---:|---|
+| `lifepath:smithing_tier_iron` | 10 | iron/chainmail gear, shield, shears, flint&steel, `overgeared:iron_*` parts |
+| `lifepath:smithing_tier_steel` | 30 | `overgeared:steel_*` gear + parts |
+| `lifepath:smithing_tier_diamond` | 50 | diamond gear, `overgeared:diamond_arrow*` |
+| `lifepath:smithing_tier_netherite` | 70 | netherite gear (incl. vanilla smithing-table upgrades) |
+
+Blueprint bypass: a non-empty blueprint slot on the Overgeared anvil licenses
+the craft at any level. Blueprint *creation* needs `blueprint_min_level: 20`
+(Overgeared drafting table). Verified live — see `docs/COMPAT.md`.
 
 ### Config clamps (`config/lifepath/skills.toml`)
 
@@ -104,9 +123,31 @@ Overgeared hammer-swinger. Full seam table: `docs/ATTRIBUTION.md`.
 Rows not marked live (e.g. novice/skilled/expert bands, engineering subjects)
 are covered by `OutcomeServiceTest` resolution pins — band→modifier
 mapping is deterministic; the live cells prove the transport seams.
-NeoForge: boots with all 11 rules + outcome mixins applied (live gameplay
-verified on Fabric only — NeoForge dev server rejects vanilla-protocol
-clients).
+
+## Live verification log (NeoForge dev server, Overgeared 1.6.19 + Kaleidoscope Cookery 1.5.1)
+
+M26 economy pass, verified through real GUI automation (`tools/uitest.ps1`)
+plus RCON inspection — no manual steps:
+
+| Cell | Observation |
+|---|---|
+| anvil `steel_boots`, Smithing 0 | craft denied — inputs unconsumed, no XP, "Beyond your craft" |
+| anvil `steel_boots`, Smithing 30 | produced |
+| anvil `steel_boots`, Smithing 80 | `lifepath:quality=masterwork`, `Crafted by Dev` lore, `overgeared:forging_quality=master` |
+| anvil `steel_sword_blade`, Smithing 0 + sword blueprint | produced — `crude`/`poor`, Smithing XP 0→3.0 to the worker |
+| drafting table, Smithing 0 | empty blueprint NOT consumed, no output |
+| drafting table, Smithing 20 | blueprint produced (`quality=WELL`) |
+| inventory 2×2 `flint_and_steel`, Smithing 0 | result slot cleared — uncraftable |
+| inventory 2×2 `flint_and_steel`, Smithing 10 | crafted into inventory |
+| smithing table iron-chestplate trim, Smithing 0 | denied + actionbar message |
+| smithing table netherite upgrade, Smithing 10 | denied (tier_netherite → 70) |
+| smithing table netherite upgrade, Smithing 70 | produced — `fine`+`perfect`+signed |
+| furnace `cooked_beef` take-out, Cooking 80 | `kaleidoscope_cookery:quality=superb` + `lifepath:masterwork` |
+| brewing stand potion take-out | Brewing XP 0→0.5, diminishing tracker `lifepath:brewing|minecraft:potion` |
+
+Breadth tax (`decay.toml`): untested live — config-flagged, unit-covered in
+`SkillDecayService` tests. Crafter-block automation remains an open leak
+(no player to gate — see `docs/COMPAT.md`).
 
 ## Exploit audit
 
