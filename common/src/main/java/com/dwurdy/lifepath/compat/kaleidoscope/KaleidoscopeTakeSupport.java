@@ -76,27 +76,37 @@ public final class KaleidoscopeTakeSupport {
 	}
 
 	/**
-	 * Emits the difference between two slot snapshots: for each position where
-	 * the same item shrank or vanished, the missing portion is the take-out.
+	 * Emits the difference between two slot snapshots. Comparison is a
+	 * <em>multiset</em> diff (aggregate counts per item type, not per slot) so
+	 * a take that compacts the container — an untaken item shifting slots —
+	 * can't register as phantom take-out XP.
 	 */
 	public static void emitDelta(LivingEntity taker, List<ItemStack> before,
 			List<ItemStack> after) {
 		if (!(taker instanceof Player player)) {
 			return;
 		}
-		int size = Math.max(before.size(), after.size());
-		for (int i = 0; i < size; i++) {
-			ItemStack b = i < before.size() ? before.get(i) : ItemStack.EMPTY;
-			ItemStack a = i < after.size() ? after.get(i) : ItemStack.EMPTY;
+		List<ItemStack> remaining = new ArrayList<>(after);
+		for (ItemStack b : before) {
 			if (b.isEmpty()) {
 				continue;
 			}
-			int removed = a.isEmpty() || !ItemStack.isSameItemSameComponents(b, a)
-					? b.getCount()
-					: b.getCount() - a.getCount();
-			if (removed > 0) {
+			int unaccounted = b.getCount();
+			for (int i = 0; i < remaining.size() && unaccounted > 0; i++) {
+				ItemStack a = remaining.get(i);
+				if (!a.isEmpty() && ItemStack.isSameItemSameComponents(b, a)) {
+					int consumed = Math.min(a.getCount(), unaccounted);
+					unaccounted -= consumed;
+					if (consumed >= a.getCount()) {
+						remaining.remove(i--);
+					} else {
+						a.shrink(consumed);
+					}
+				}
+			}
+			if (unaccounted > 0) {
 				ItemStack taken = b.copy();
-				taken.setCount(removed);
+				taken.setCount(unaccounted);
 				VanillaGameplayProducers.onCraftOutput(player, taken);
 			}
 		}
