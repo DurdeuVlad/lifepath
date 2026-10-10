@@ -18,6 +18,36 @@
 		{ "id": "overgeared:iron_pickaxe_head", "required": false },
 		{ "id": "overgeared:iron_shovel_head", "required": false },
 		{ "id": "overgeared:iron_sword_blade", "required": false },
-		{ "id": "overgeared:iron_plate", "required": false }
-	]
+		{ "id": "overgeared:iron_plate", "required": false },
+
+		{ "id": "magistuarmory:iron_ahlspiess", "required": false },
+		{ "id": "magistuarmory:iron_bastardsword", "required": false },
+		{ "id": "magistuarmory:iron_buckler", "required": false },
+		{ "id": "magistuarmory:iron_chainmorgenstern", "required": false },
+		{ "id": "magistuarmory:iron_chivalrylance", "required": false },
+		{ "id": "magistuarmory:iron_claymore", "required": false },
+		{ "id": "magistuarmory:iron_concavehalberd", "required": false },
+		{ "id": "magistuarmory:iron_ellipticalshield", "required": false },
+		{ "id": "magistuarmory:iron_estoc", "required": false },
+		{ "id": "magistuarmory:iron_flamebladedsword", "required": false },
+		{ "id": "magistuarmory:iron_guisarme", "required": false },
+		{ "id": "magistuarmory:iron_heatershield", "required": false },
+		{ "id": "magistuarmory:iron_heavymace", "required": false },
+		{ "id": "magistuarmory:iron_heavywarhammer", "required": false },
+		{ "id": "magistuarmory:iron_katzbalger", "required": false },
+		{ "id": "magistuarmory:iron_kiteshield", "required": false },
+		{ "id": "magistuarmory:iron_lochaberaxe", "required": false },
+		{ "id": "magistuarmory:iron_lucernhammer", "required": false },
+		{ "id": "magistuarmory:iron_morgenstern", "required": false },
+		{ "id": "magistuarmory:iron_pavese", "required": false },
+		{ "id": "magistuarmory:iron_pike", "required": false },
+		{ "id": "magistuarmory:iron_ranseur", "required": false },
+		{ "id": "magistuarmory:iron_rondache", "required": false },
+		{ "id": "magistuarmory:iron_roundshield", "required": false },
+		{ "id": "magistuarmory:iron_shortsword", "required": false },
+		{ "id": "magistuarmory:iron_stylet", "required": false },
+		{ "id": "magistuarmory:iron_target", "required": false },
+		{ "id": "magistuarmory:iron_tartsche", "required": false },
+		{ "id": "magistuarmory:iron_zweihander", "required": false }
+]
 }
