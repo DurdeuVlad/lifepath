@@ -34,6 +34,28 @@ report" template, include loader, version, and repro steps.
 - **Undead coverage**: `lifepath:undead` now includes `#minecraft:undead` and
   `#minecraft:skeletons` tag refs so any mod contributing to the vanilla tags
   (e.g. Block Factory's Bosses) counts for undead slaying.
+- **Domain power on the milestone curve** (vanilla viability): milestones
+  Lv30+ now grant activity-relevant attributes, keeping Lv≈25 near vanilla
+  parity and scaling experts into powerhouse territory — mining/woodcutting
+  `player.block_break_speed` (+0.92 at Lv100), foraging half-ramp, farming
+  `player.block_interaction_range`, fishing `generic.luck`, athletics
+  `movement_speed`, defence `armor` + `max_health`, hunting `attack_damage`,
+  engineering `player.block_interaction_range`. Output-side domains
+  (cooking/smithing/brewing/scholarship) already scale through outcome bands.
+- **RightClickHarvest seam** (`RightClickHarvestBridge`, NeoForge,
+  mod-presence gated): RCH harvests crops without breaking the block, so
+  every right-click harvest paid zero Farming XP. Subscribes reflectively to
+  `AfterHarvest` → `onExternalHarvest`; farmable-gated, automation-excluded.
+- **Engineering grows by building**: placing `lifepath:engineering_blocks`
+  members (Create machines/rails/contraptions) emits the crafting activity
+  for the placed block id, paying `xp_source/engineering` per_subject rates.
+  Machine/contraption output still pays nothing (FakePlayer-gated).
+- **Spartan Weaponry coverage**: 154 `spartan_weaponry_unofficial` weapons
+  mapped into material tiers (bronze folded into iron tier) so crafted and
+  overgeared-forged spartan gear hits material gates.
+- **Skipped by design**: armory/arsenal/weaponmaster (class-themed RPG sets
+  with no material tiers — not gateable), realmrpg_skeletons (decorative
+  blocks, no living entities), KC millstone (mob-bound automation).
 
 ### Changed — anti-one-man-army economy pass
 

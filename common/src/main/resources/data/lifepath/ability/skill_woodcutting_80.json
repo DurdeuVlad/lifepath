@@ -15,6 +15,13 @@
 			"effect": "minecraft:haste",
 			"duration": 120,
 			"amplifier": 1
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.block_break_speed",
+			"operation": "add_value",
+			"value": 0.12,
+			"duration_ticks": 120
 		}
 	],
 	"conditions": {
