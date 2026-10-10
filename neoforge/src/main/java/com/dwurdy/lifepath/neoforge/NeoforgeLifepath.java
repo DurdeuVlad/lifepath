@@ -22,6 +22,9 @@ public final class NeoforgeLifepath {
 		var platform = new NeoforgePlatform(modBus);
 		Platform.init(platform);
 		LifepathMod.init();
+		if (net.neoforged.fml.ModList.get().isLoaded("rightclickharvest")) {
+			RightClickHarvestBridge.register();
+		}
 		if (FMLEnvironment.dist == Dist.CLIENT) {
 			ClientPlatform.init(new NeoforgeClientPlatform(modBus, platform));
 			com.dwurdy.lifepath.client.LifepathClient.init();

@@ -167,3 +167,20 @@ oil pot, enamel basin, bamboo tray. KC also rolls its own quality on cookware
 output — where the taken stack is the BE's internal stack instance, outcome
 stamps reach the player's item; where KC hands out a copy, only XP applies
 (unverified residual, same class as the FD take path).
+
+## RightClickHarvest + Create (M27)
+
+**RightClickHarvest** harvests crops without a block break, so neither the
+break seam nor `click_harvest` sees it. `RightClickHarvestBridge`
+(NeoForge, mod-presence gated in `NeoforgeLifepath`) subscribes reflectively
+to `RightClickHarvestNeoForgeEvents$AfterHarvest` and re-emits through
+`VanillaGameplayProducers.onExternalHarvest` — farmable-tag gated,
+automation-excluded.
+
+**Create**: machine-driven actors are NeoForge `FakePlayer` subclasses —
+`isAutomation` already excludes deployers/drills/crafters from every seam, so
+contraption output pays nothing by construction (pack decision: no AFK XP).
+Engineering instead grows by *building*: placing a
+`lifepath:engineering_blocks` member emits the crafting activity for that
+block id and pays `xp_source/engineering` per_subject rates; identical-place
+spam decays through diminishing returns.
