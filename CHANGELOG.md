@@ -10,6 +10,31 @@ report" template, include loader, version, and repro steps.
 
 ## [Unreleased]
 
+### Added — Rustic Craft pack integration pass (M27)
+
+- **Kaleidoscope Cookery deep integration**: five new take-out seams on the
+  NeoForge `requiredMods`-gated `lifepath.compat.kaleidoscope` mixin config —
+  wok (`takeOutProduct`), stockpot (`takeOutProduct`), steamer (`takeFood`),
+  chopping board (`onTakeOut`), and shawarma spit (`onTakeCookedItem`). Every
+  take is attributed to the taker and resolved through the cooking datapack,
+  so KC dishes now pay Cooking XP and roll lifepath quality like FD meals.
+  Mob-driven stations (millstone) intentionally emit nothing.
+- **Pack-wide datapack coverage**: `lifepath:cookable_foods` now spans
+  `#c:foods`/`#c:drinks`, `#kaleidoscope_cookery:meals`/`:feasts`,
+  `#butchery:cooked_*`, `#brewinandchewin:fermented_drinks`, and explicit
+  Romanian Delight / Cook's Collection / Cultural Delights dishes;
+  `xp_source/cooking` adds feast-tier XP multipliers; `diet/herbivore` and
+  `diet/blood` recognize pack meals (`#c:foods/raw_meats`, blood stew, raw
+  offal); `undead_foods` covers KC dark cuisine; `item_weight` gains generic
+  `#c:ingots/nuggets/raw_materials/gems/ores/dusts` entries.
+- **Gate coverage for Epic Knights: Magistu's Armory** — 29 weapons per tier
+  added to `smithing_tier_iron/steel/diamond/netherite/copper`, closing the
+  bypass where pack-forged EK weapons (via `overgeared_epic_knights` casts or
+  vanilla crafting) dodged material gates.
+- **Undead coverage**: `lifepath:undead` now includes `#minecraft:undead` and
+  `#minecraft:skeletons` tag refs so any mod contributing to the vanilla tags
+  (e.g. Block Factory's Bosses) counts for undead slaying.
+
 ### Changed — anti-one-man-army economy pass
 
 - **Breadth tax on skill decay** (`decay.toml`: `breadth_enabled`,

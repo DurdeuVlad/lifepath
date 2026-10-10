@@ -14,6 +14,8 @@
 		"minecraft:skeleton_horse",
 		"minecraft:wither",
 		"minecraft:phantom",
-		"minecraft:zoglin"
+		"minecraft:zoglin",
+		{ "id": "#minecraft:undead", "required": false },
+		{ "id": "#minecraft:skeletons", "required": false }
 	]
 }

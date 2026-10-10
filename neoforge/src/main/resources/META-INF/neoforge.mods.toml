@@ -24,6 +24,9 @@ issueTrackerURL="https://github.com/DurdeuVlad/lifepath/issues"
 [[mixins]]
 	config="lifepath.compat.farmersdelight.mixins.json"
 	requiredMods=["farmersdelight"]
+[[mixins]]
+	config="lifepath.compat.kaleidoscope.mixins.json"
+	requiredMods=["kaleidoscope_cookery"]
 
 [[dependencies.lifepath]]
 	modId="neoforge"

@@ -9,6 +9,36 @@
 		{ "id": "overgeared:copper_helmet", "required": false },
 		{ "id": "overgeared:copper_chestplate", "required": false },
 		{ "id": "overgeared:copper_leggings", "required": false },
-		{ "id": "overgeared:copper_boots", "required": false }
-	]
+		{ "id": "overgeared:copper_boots", "required": false },
+
+		{ "id": "magistuarmory:copper_ahlspiess", "required": false },
+		{ "id": "magistuarmory:copper_bastardsword", "required": false },
+		{ "id": "magistuarmory:copper_buckler", "required": false },
+		{ "id": "magistuarmory:copper_chainmorgenstern", "required": false },
+		{ "id": "magistuarmory:copper_chivalrylance", "required": false },
+		{ "id": "magistuarmory:copper_claymore", "required": false },
+		{ "id": "magistuarmory:copper_concavehalberd", "required": false },
+		{ "id": "magistuarmory:copper_ellipticalshield", "required": false },
+		{ "id": "magistuarmory:copper_estoc", "required": false },
+		{ "id": "magistuarmory:copper_flamebladedsword", "required": false },
+		{ "id": "magistuarmory:copper_guisarme", "required": false },
+		{ "id": "magistuarmory:copper_heatershield", "required": false },
+		{ "id": "magistuarmory:copper_heavymace", "required": false },
+		{ "id": "magistuarmory:copper_heavywarhammer", "required": false },
+		{ "id": "magistuarmory:copper_katzbalger", "required": false },
+		{ "id": "magistuarmory:copper_kiteshield", "required": false },
+		{ "id": "magistuarmory:copper_lochaberaxe", "required": false },
+		{ "id": "magistuarmory:copper_lucernhammer", "required": false },
+		{ "id": "magistuarmory:copper_morgenstern", "required": false },
+		{ "id": "magistuarmory:copper_pavese", "required": false },
+		{ "id": "magistuarmory:copper_pike", "required": false },
+		{ "id": "magistuarmory:copper_ranseur", "required": false },
+		{ "id": "magistuarmory:copper_rondache", "required": false },
+		{ "id": "magistuarmory:copper_roundshield", "required": false },
+		{ "id": "magistuarmory:copper_shortsword", "required": false },
+		{ "id": "magistuarmory:copper_stylet", "required": false },
+		{ "id": "magistuarmory:copper_target", "required": false },
+		{ "id": "magistuarmory:copper_tartsche", "required": false },
+		{ "id": "magistuarmory:copper_zweihander", "required": false }
+]
 }

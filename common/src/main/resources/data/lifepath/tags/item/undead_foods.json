@@ -3,6 +3,12 @@
 	"values": [
 		"minecraft:rotten_flesh",
 		"minecraft:spider_eye",
-		"minecraft:suspicious_stew"
+		"minecraft:suspicious_stew",
+		{ "id": "#c:foods/raw_meats", "required": false },
+		{ "id": "kaleidoscope_cookery:suspicious_stir_fry", "required": false },
+		{ "id": "kaleidoscope_cookery:dark_cuisine", "required": false },
+		{ "id": "kaleidoscope_cookery:caterpillar", "required": false },
+		{ "id": "kaleidoscope_cookery:fried_caterpillar", "required": false },
+		{ "id": "kaleidoscope_cookery:fondant_spider_eye", "required": false }
 	]
 }
