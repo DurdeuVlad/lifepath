@@ -18,6 +18,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -70,6 +71,9 @@ public final class VanillaGameplayProducers {
 			TagKey.create(Registries.BLOCK, LifepathMod.id("harvestable"));
 	private static final TagKey<net.minecraft.world.level.block.Block> CLICK_HARVEST =
 			TagKey.create(Registries.BLOCK, LifepathMod.id("click_harvest"));
+
+	private static final TagKey<Block> ENGINEERING_BLOCKS =
+			TagKey.create(Registries.BLOCK, LifepathMod.id("engineering_blocks"));
 	private static final ResourceLocation TAG_PLANTED = LifepathMod.id("planted");
 	private static final ResourceLocation TAG_HARVESTED = LifepathMod.id("harvested");
 	private static final ResourceLocation TAG_MATURE = LifepathMod.id("mature");
@@ -223,6 +227,17 @@ public final class VanillaGameplayProducers {
 			ActivityDispatcher.publish(new ActivityEvent(player, ActivityTypes.FARMING,
 					blockId, Set.copyOf(tags), ActivityEvent.Cause.PLAYER,
 					System.currentTimeMillis(), Map.of("mature", "false")));
+		}
+		// Engineering grows by building (M27): placing tagged machinery pays
+		// xp_source/engineering by block-id subject; machine output itself pays
+		// nothing (automation is FakePlayer-gated everywhere else).
+		if (placedState.is(ENGINEERING_BLOCKS)) {
+			Set<ResourceLocation> tags = placedState.getTags()
+					.map(TagKey::location).collect(Collectors.toUnmodifiableSet());
+			ResourceLocation blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(placedState.getBlock());
+			ActivityDispatcher.publish(new ActivityEvent(player, ActivityTypes.CRAFTING,
+					blockId, tags, ActivityEvent.Cause.PLAYER,
+					System.currentTimeMillis(), Map.of("placed", "true")));
 		}
 	}
 
@@ -508,6 +523,22 @@ public final class VanillaGameplayProducers {
 				consumer.accept(stack);
 			}
 		};
+	}
+
+	/**
+	 * External harvest event from a compat bridge (e.g. RightClickHarvest's
+	 * NeoForge {@code AfterHarvest}). The mod only fires on a successful
+	 * mature harvest, so maturity is not re-checked; the caller passes the
+	 * harvested block's default state for tag resolution. Farmable-gated so
+	 * non-crop right-click interactions can never pay farming XP.
+	 */
+	public static void onExternalHarvest(
+			net.minecraft.world.entity.player.Player player, BlockState harvested) {
+		if (!(player instanceof ServerPlayer serverPlayer) || isAutomation(player)
+				|| !isFarmable(harvested)) {
+			return;
+		}
+		publishHarvest(serverPlayer, harvested);
 	}
 
 	private static void publishHarvest(ServerPlayer player, BlockState state) {

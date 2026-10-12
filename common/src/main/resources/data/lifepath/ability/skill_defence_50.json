@@ -16,6 +16,20 @@
 			"operation": "add_value",
 			"value": 0.06,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.armor",
+			"operation": "add_value",
+			"value": 0.4,
+			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.max_health",
+			"operation": "add_value",
+			"value": 0.8,
+			"duration_ticks": 120
 		}
 	]
 }

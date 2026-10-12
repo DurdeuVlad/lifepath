@@ -31,6 +31,18 @@
 		"farmersdelight:melon_juice",
 		"farmersdelight:apple_cider",
 		"farmersdelight:melon_popsicle",
-		"farmersdelight:glow_berry_custard"
+		"farmersdelight:glow_berry_custard",
+		"kaleidoscope_cookery:bamboo_tube_rice",
+		"kaleidoscope_cookery:sticky_rice_cake",
+		"kaleidoscope_cookery:tomato",
+		"romaniansdelight:mamaliga",
+		"romaniansdelight:boiled_corn",
+		"cooksrecipes:rustic_loaf",
+		"cooksrecipes:lemonade",
+		"cooksrecipes:lemon_muffin",
+		"cooksrecipes:chocolate_muffin",
+		"culturalrecipes:avocado_toast",
+		"culturalrecipes:elote",
+		"culturalrecipes:tortilla_chips"
 	]
 }

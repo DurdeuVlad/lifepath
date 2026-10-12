@@ -152,7 +152,9 @@ Per-band modifiers (all optional, absent = identity):
   `custom_data` + lore; Overgeared forges map it onto native
   `ForgingQuality`. `"standard"` = explicit vanilla baseline (no stamp).
 - `sign_items` — adds `lifepath:crafter` data + "Crafted by" lore.
-- `anvil_cost_mult` (0–4) — scales the vanilla anvil XP-level cost.
+- `anvil_cost_mult` (0–4) — scales the vanilla anvil XP-level cost of
+  *repairs only* (result restores durability on the left input: material
+  repair or same-item merge). Renames and enchant combines pay full price.
 - `junk_upgrade_chance` (0–1) — fishing only: chance a `lifepath:fishing_junk`
   catch is replaced by a rolled `#minecraft:fishes` pick.
 

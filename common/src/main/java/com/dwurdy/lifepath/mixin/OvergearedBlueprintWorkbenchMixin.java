@@ -16,7 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * the smithing level the outcome rule asks for
  * ({@code blueprint_min_level}). Blueprints are the licensed bypass for the
  * forge-time material gates — if anyone could draft their own, the gate would
- * be dead, so creation itself is skilled work.
+ * be dead, so creation itself is skilled work. Only rules that define
+ * {@code material_gates} participate: {@code blueprint_min_level} licenses
+ * bypassing that rule's own gates, so it is meaningless (and ignored) on a
+ * gate-less rule. The drafted blueprint is generic — the menu exposes only a
+ * {@code ToolType}, no output item — so when several gated rules set a
+ * minimum, every requirement applies: a universal license needs universal
+ * qualification (fail-closed).
  *
  * <p>NeoForge-only via {@code lifepath.compat.overgeared.mixins.json}; the
  * menu keeps no player field, so the player is recovered from the registered
@@ -36,7 +42,10 @@ public abstract class OvergearedBlueprintWorkbenchMixin {
 		}
 		for (var rule : LifepathContent.outcomeRules().all().values()) {
 			int min = rule.blueprintMinLevel();
-			if (min < 0) {
+			// blueprint_min_level licenses a bypass for that rule's own
+			// material gates — a rule without gates has nothing to license,
+			// so a stray value there must not block drafting.
+			if (min < 0 || rule.materialGates().isEmpty()) {
 				continue;
 			}
 			var progress = com.dwurdy.lifepath.skill.SkillService.progress(

@@ -76,5 +76,11 @@
 	"farmersdelight:shepherds_pie_block": 2.5,
 	"farmersdelight:rice_roll_medley_block": 2.0,
 	"farmersdelight:apple_pie": 1.5,
-	"farmersdelight:chocolate_pie": 1.5
+	"farmersdelight:chocolate_pie": 1.5,
+	"#c:ingots": 2.0,
+	"#c:nuggets": 0.3,
+	"#c:raw_materials": 2.0,
+	"#c:gems": 1.0,
+	"#c:ores": 3.0,
+	"#c:dusts": 1.0
 }

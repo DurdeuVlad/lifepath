@@ -10,6 +10,59 @@ report" template, include loader, version, and repro steps.
 
 ## [Unreleased]
 
+### Added — Rustic Craft pack integration pass (M27)
+
+- **Kaleidoscope Cookery deep integration**: five new take-out seams on the
+  NeoForge `requiredMods`-gated `lifepath.compat.kaleidoscope` mixin config —
+  wok (`takeOutProduct`), stockpot (`takeOutProduct`), steamer (`takeFood`),
+  chopping board (`onTakeOut`), and shawarma spit (`onTakeCookedItem`). Every
+  take is attributed to the taker and resolved through the cooking datapack,
+  so KC dishes now pay Cooking XP and roll lifepath quality like FD meals.
+  Mob-driven stations (millstone) intentionally emit nothing.
+- **Pack-wide datapack coverage**: `lifepath:cookable_foods` now spans
+  `#c:foods`/`#c:drinks`, `#kaleidoscope_cookery:meals`/`:feasts`,
+  `#butchery:cooked_*`, `#brewinandchewin:fermented_drinks`, and explicit
+  Romanian Delight / Cook's Collection / Cultural Delights dishes;
+  `xp_source/cooking` adds feast-tier XP multipliers; `diet/herbivore` and
+  `diet/blood` recognize pack meals (`#c:foods/raw_meats`, blood stew, raw
+  offal); `undead_foods` covers KC dark cuisine; `item_weight` gains generic
+  `#c:ingots/nuggets/raw_materials/gems/ores/dusts` entries.
+- **Gate coverage for Epic Knights: Magistu's Armory** — 29 weapons per tier
+  added to `smithing_tier_iron/steel/diamond/netherite/copper`, closing the
+  bypass where pack-forged EK weapons (via `overgeared_epic_knights` casts or
+  vanilla crafting) dodged material gates.
+- **Undead coverage**: `lifepath:undead` now includes `#minecraft:undead` and
+  `#minecraft:skeletons` tag refs so any mod contributing to the vanilla tags
+  (e.g. Block Factory's Bosses) counts for undead slaying.
+- **Domain power on the milestone curve** (vanilla viability): milestones
+  Lv30+ now grant activity-relevant attributes, keeping Lv≈25 near vanilla
+  parity and scaling experts into powerhouse territory — mining/woodcutting
+  `player.block_break_speed` (+0.92 at Lv100), foraging half-ramp, farming
+  `player.block_interaction_range`, fishing `generic.luck`, athletics
+  `movement_speed`, defence `armor` + `max_health`, hunting `attack_damage`,
+  engineering `player.block_interaction_range`. Output-side domains
+  (cooking/smithing/brewing/scholarship) already scale through outcome bands.
+- **RightClickHarvest seam** (`RightClickHarvestBridge`, NeoForge,
+  mod-presence gated): RCH harvests crops without breaking the block, so
+  every right-click harvest paid zero Farming XP. Subscribes reflectively to
+  `AfterHarvest` → `onExternalHarvest`; farmable-gated, automation-excluded.
+- **Engineering grows by building**: placing `lifepath:engineering_blocks`
+  members (Create machines/rails/contraptions) emits the crafting activity
+  for the placed block id, paying `xp_source/engineering` per_subject rates.
+  Machine/contraption output still pays nothing (FakePlayer-gated).
+- **Spartan Weaponry coverage**: 154 `spartan_weaponry_unofficial` weapons
+  mapped into material tiers (bronze folded into iron tier) so crafted and
+  overgeared-forged spartan gear hits material gates.
+- **Skipped by design**: armory/arsenal/weaponmaster (class-themed RPG sets
+  with no material tiers — not gateable), realmrpg_skeletons (decorative
+  blocks, no living entities), KC millstone (mob-bound automation).
+- **Smith-scaled anvil repairs** (community request): `anvil_cost_mult` now
+  applies to *repairs only* — detected as the left input returning with
+  restored durability, so material repairs and same-item merges scale while
+  renames and enchant combines pay vanilla price. Retuned curve: untrained
+  3.0× (very expensive), apprentice 1.0× parity at ~Lv25, master/legendary
+  0.30×/0.25× flooring common repairs at 1–2 XP levels.
+
 ### Changed — anti-one-man-army economy pass
 
 - **Breadth tax on skill decay** (`decay.toml`: `breadth_enabled`,
@@ -19,10 +72,11 @@ report" template, include loader, version, and repro steps.
   unrelated skills at high level pays real upkeep; a specialist's own
   skills are exempt — the tax punishes breadth, not depth.
 - **Sharper low-skill outcome bands** across all crafting/gathering
-  skills: untrained pays 1.75× anvil cost with 30% botch chance and 0.35×
-  output (smithing), novice 1.4× / 13% / 0.5×. Experts keep their edge —
-  master/legendary cost multipliers improve (0.4× smithing) and master
-  yields rise. Doing the work without the skill now *costs* you.
+  skills: untrained pays 3.0× anvil repair cost with 30% botch chance and
+  0.35× output (smithing), novice 2.0× / 13% / 0.5×. Experts keep their
+  edge — master/legendary repair multipliers fall to 0.30×/0.25×, landing
+  common repairs at 1–2 levels, and master yields rise. Doing the work
+  without the skill now *costs* you.
 - **Quality gets real teeth via deps.** Stamped `lifepath:quality` tiers
   are now also written onto the owning mod's quality component
   reflectively: Overgeared `overgeared:forging_quality`
@@ -54,6 +108,11 @@ report" template, include loader, version, and repro steps.
   stamping, and the `forging_quality` bias now inspect that slot too.
 - **Denial no longer NPEs** for players with no recorded progress on the
   gated skill (treated as level 0).
+- **Anvil gate fails closed.** A forge completing while its session owner
+  is offline cancels gated output instead of producing it unlicensed;
+  results merged into an existing output-slot stack are scaled by their
+  crafted delta, not the whole stack. Deny messaging is rate-limited
+  per-player instead of globally.
 - **Tier tags now cover Overgeared intermediate parts** (blades, heads,
   plates) so blueprint-licensed recipes are actually gated.
 - `debug open <player> <pos>` opens any container GUI (block-entity menus

@@ -101,6 +101,12 @@ production seam, not just the Overgeared anvil:
 | Vanilla smithing table | `SmithingMenu.createResult` (TAIL clears result) — gates `smithing_transform` and trims producing tagged gear | No |
 
 Shared check: `com.dwurdy.lifepath.skill.MaterialGates.denialFor(player, stack, licensed)`.
+If the anvil's forging-session owner is offline when the craft completes,
+gated output fails closed — the level check can't run, so the craft is
+cancelled rather than produced unlicensed (`MaterialGates.isGatedOutput`).
+When a forged result merges into a matching stack already in the output
+slot, outcome scaling applies only to the crafted delta, not the whole
+stack.
 
 Live-verified on the NeoForge dev server (Overgeared 1.6.19 + Kaleidoscope
 Cookery 1.5.1 co-loaded):
@@ -127,3 +133,54 @@ this is mostly moot (vanilla gear recipes are wiped to air), but on Fabric a
 Crafter can mass-produce tier-tagged gear such as iron tools. Closing it
 requires a design decision — whether automated crafting should check the
 *owner* of the placer — and is deliberately out of scope for M26.
+
+## Station take-out seams (FD / Kaleidoscope)
+
+Block-entity cooking stations produce output outside the recipe/result-slot
+paths, so each gets a dedicated `requiredMods`-gated mixin that fires the
+crafting activity for the stack actually taken. Attribution is always the
+*taker*, and non-player takers (dispensers, mobs) earn nothing.
+
+| Station | Seam (verified vs bytecode) | Result source |
+|---|---|---|
+| Farmer's Delight cooking pot | `CookingPotResultSlot.onTake` (FD 1.2.9) | slot stack |
+| Farmer's Delight skillet | `SkilletBlockEntity` take path | stored stack |
+| KC wok (cooking pot) | `PotBlockEntity.takeOutProduct` (KC 1.5.1) | `getResult()` snapshot at HEAD |
+| KC stockpot | `StockpotBlockEntity.takeOutProduct` | `getResult()` snapshot at HEAD |
+| KC steamer | `SteamerBlockEntity.takeFood` | `getItems()` before/after delta |
+| KC chopping board | `ChoppingBoardBlockEntity.onTakeOut` | `getCurrentCutStack()` snapshot |
+| KC shawarma spit | `ShawarmaSpitBlockEntity.onTakeCookedItem` | `getOutputs()` handler delta |
+
+`requiredMods`-gated configs: `lifepath.compat.farmersdelight.mixins.json`,
+`lifepath.compat.kaleidoscope.mixins.json` (`requiredMods=["kaleidoscope_cookery"]`).
+All KC member access is reflective — a KC update that renames internals
+degrades to a debug log, never a crash.
+
+Coverage is decided by the datapack, not the seam: KC dishes flow through
+`#kaleidoscope_cookery:meals`/`:feasts` in `lifepath:cookable_foods`, so every
+tagged dish pays `xp_source/cooking` XP and resolves outcome bands (including
+the `kaleidoscope_cookery:quality` stamp via `ExternalQualityBridge`).
+
+**Not hooked:** KC millstone (mob-bound by design — `millstone_bindable`
+animals turn it; machine output earns `NON_PLAYER`/nothing), teapot pouring,
+oil pot, enamel basin, bamboo tray. KC also rolls its own quality on cookware
+output — where the taken stack is the BE's internal stack instance, outcome
+stamps reach the player's item; where KC hands out a copy, only XP applies
+(unverified residual, same class as the FD take path).
+
+## RightClickHarvest + Create (M27)
+
+**RightClickHarvest** harvests crops without a block break, so neither the
+break seam nor `click_harvest` sees it. `RightClickHarvestBridge`
+(NeoForge, mod-presence gated in `NeoforgeLifepath`) subscribes reflectively
+to `RightClickHarvestNeoForgeEvents$AfterHarvest` and re-emits through
+`VanillaGameplayProducers.onExternalHarvest` — farmable-tag gated,
+automation-excluded.
+
+**Create**: machine-driven actors are NeoForge `FakePlayer` subclasses —
+`isAutomation` already excludes deployers/drills/crafters from every seam, so
+contraption output pays nothing by construction (pack decision: no AFK XP).
+Engineering instead grows by *building*: placing a
+`lifepath:engineering_blocks` member emits the crafting activity for that
+block id and pays `xp_source/engineering` per_subject rates; identical-place
+spam decays through diminishing returns.

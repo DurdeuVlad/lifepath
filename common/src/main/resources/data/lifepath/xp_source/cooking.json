@@ -16,7 +16,20 @@
 		"farmersdelight:pasta_with_meatballs": 0.9,
 		"farmersdelight:steak_and_potatoes": 1.0,
 		"farmersdelight:apple_pie": 1.0,
-		"farmersdelight:chocolate_pie": 1.0
+		"farmersdelight:chocolate_pie": 1.0,
+		"kaleidoscope_cookery:buddha_jumps_over_the_wall": 1.4,
+		"kaleidoscope_cookery:pan_seared_knight_steak": 1.2,
+		"kaleidoscope_cookery:stargazy_pie": 1.1,
+		"kaleidoscope_cookery:dongpo_pork": 1.1,
+		"kaleidoscope_cookery:braised_beef": 1.0,
+		"romaniansdelight:sarmale": 1.1,
+		"romaniansdelight:ciorba_burta": 1.0,
+		"romaniansdelight:ciorba_radauti": 1.0,
+		"romaniansdelight:mamaliga": 0.7,
+		"cooksrecipes:fish_and_chips": 0.9,
+		"cooksrecipes:rustic_loaf": 0.7,
+		"culturalrecipes:beef_burrito": 1.0,
+		"culturalrecipes:spicy_curry": 1.1
 	},
 	"required_tags": [
 		"lifepath:cookable_foods"

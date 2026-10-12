@@ -16,6 +16,13 @@
 			"operation": "add_value",
 			"value": 1.5,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.movement_speed",
+			"operation": "add_multiplied_base",
+			"value": 0.01,
+			"duration_ticks": 120
 		}
 	]
 }
