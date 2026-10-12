@@ -56,6 +56,12 @@ report" template, include loader, version, and repro steps.
 - **Skipped by design**: armory/arsenal/weaponmaster (class-themed RPG sets
   with no material tiers — not gateable), realmrpg_skeletons (decorative
   blocks, no living entities), KC millstone (mob-bound automation).
+- **Smith-scaled anvil repairs** (community request): `anvil_cost_mult` now
+  applies to *repairs only* — detected as the left input returning with
+  restored durability, so material repairs and same-item merges scale while
+  renames and enchant combines pay vanilla price. Retuned curve: untrained
+  3.0× (very expensive), apprentice 1.0× parity at ~Lv25, master/legendary
+  0.30×/0.25× flooring common repairs at 1–2 XP levels.
 
 ### Changed — anti-one-man-army economy pass
 
@@ -66,10 +72,11 @@ report" template, include loader, version, and repro steps.
   unrelated skills at high level pays real upkeep; a specialist's own
   skills are exempt — the tax punishes breadth, not depth.
 - **Sharper low-skill outcome bands** across all crafting/gathering
-  skills: untrained pays 1.75× anvil cost with 30% botch chance and 0.35×
-  output (smithing), novice 1.4× / 13% / 0.5×. Experts keep their edge —
-  master/legendary cost multipliers improve (0.4× smithing) and master
-  yields rise. Doing the work without the skill now *costs* you.
+  skills: untrained pays 3.0× anvil repair cost with 30% botch chance and
+  0.35× output (smithing), novice 2.0× / 13% / 0.5×. Experts keep their
+  edge — master/legendary repair multipliers fall to 0.30×/0.25×, landing
+  common repairs at 1–2 levels, and master yields rise. Doing the work
+  without the skill now *costs* you.
 - **Quality gets real teeth via deps.** Stamped `lifepath:quality` tiers
   are now also written onto the owning mod's quality component
   reflectively: Overgeared `overgeared:forging_quality`

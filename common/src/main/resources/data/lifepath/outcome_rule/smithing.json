@@ -6,36 +6,37 @@
 			"failure_chance": 0.3,
 			"failure_count_mult": 0.35,
 			"quality_tier": "crude",
-			"anvil_cost_mult": 1.75
+			"anvil_cost_mult": 3.0
 		},
 		"novice": {
 			"failure_chance": 0.13,
 			"failure_count_mult": 0.5,
 			"quality_tier": "poor",
-			"anvil_cost_mult": 1.4
+			"anvil_cost_mult": 2.0
 		},
 		"apprentice": {
-			"quality_tier": "standard"
+			"quality_tier": "standard",
+			"anvil_cost_mult": 1.0
 		},
 		"skilled": {
 			"quality_tier": "fine",
-			"anvil_cost_mult": 0.85
+			"anvil_cost_mult": 0.7
 		},
 		"expert": {
 			"quality_tier": "fine",
 			"sign_items": true,
-			"anvil_cost_mult": 0.65
+			"anvil_cost_mult": 0.45
 		},
 		"master": {
 			"quality_tier": "masterwork",
 			"sign_items": true,
-			"anvil_cost_mult": 0.4
+			"anvil_cost_mult": 0.3
 		},
 		"legendary": {
 			"quality_tier": "masterwork",
 			"sign_items": true,
 			"output_count_mult": 1.2,
-			"anvil_cost_mult": 0.4
+			"anvil_cost_mult": 0.25
 		}
 	},
 	"material_gates": {

@@ -16,7 +16,7 @@ produce a crude partial result at `failure_count_mult`×) · `ac` anvil_cost_mul
 
 | Skill | untrained | novice | apprentice | skilled | expert | master | legendary |
 |---|---|---|---|---|---|---|---|
-| smithing | fc .30, fm .35, Q crude, ac 1.75 | fc .13, fm .50, Q poor, ac 1.40 | Q standard | Q fine, ac .85 | Q fine ✎, ac .65 | Q masterwork ✎, ac .40 | cm 1.20, Q mw ✎, ac .40 |
+| smithing | fc .30, fm .35, Q crude, ac 3.00 | fc .13, fm .50, Q poor, ac 2.00 | Q standard, ac 1.00 | Q fine, ac .70 | Q fine ✎, ac .45 | Q masterwork ✎, ac .30 | cm 1.20, Q mw ✎, ac .25 |
 | cooking (subjects) | cm .50, fc .35, fm .35, Q crude | cm .80, fc .15, fm .50, Q poor | — | Q fine | cm 1.15, Q fine ✎ | cm 1.40, Q mw ✎ | cm 1.60, Q mw ✎ |
 | engineering (subjects) | cm .50, fc .25, fm .35, Q crude | cm .80, fc .10, Q poor | — | Q fine | cm 1.10, Q fine ✎ | cm 1.35, Q mw ✎ | cm 1.60, Q mw ✎ |
 | scholarship (subjects) | cm .50, fc .25, fm .35, Q crude | cm .80, fc .10, Q poor | — | Q fine | cm 1.10, Q fine ✎ | cm 1.35, Q mw ✎ | cm 1.60, Q mw ✎ |
@@ -31,6 +31,12 @@ produce a crude partial result at `failure_count_mult`×) · `ac` anvil_cost_mul
 
 `—` = identity (vanilla). `apprentice` is the designed neutral band everywhere.
 `fm` = `failure_count_mult` (fraction of inputs still produced on a botch).
+
+`ac` applies to anvil **repairs only** (material repair or same-item merge —
+detected by restored durability on the result). The curve is deliberately
+front-loaded: untrained ×3.00 makes early repairs painful, apprentice is
+parity (~Lv25 anchor), and master/legendary floors common repairs at 1–2
+levels. Renames and enchant combines are never scaled.
 
 ## Material gates + blueprint chokepoint (M26)
 
