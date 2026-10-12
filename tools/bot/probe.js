@@ -40,6 +40,10 @@ bot._client.on("action_bar", (p) => {
 	try { console.log("ACTIONBAR " + JSON.stringify(p.text || p).slice(0, 200)); }
 	catch { console.log("ACTIONBAR <unparseable>"); }
 });
+bot._client.on("craft_progress_bar", (p) => {
+	// Window property — anvil prop 0 = synced XP-level cost shown to client.
+	console.log("WINPROP w" + p.windowId + " prop" + p.property + "=" + p.value);
+});
 bot._client.on("packet", (data, meta) => {
 	if (/chat|action|title|text/i.test(meta.name))
 		console.log("PKT " + meta.name + " " + JSON.stringify(data).slice(0, 160));
