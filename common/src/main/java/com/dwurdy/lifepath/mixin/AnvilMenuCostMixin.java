@@ -25,11 +25,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Skill-scaled anvil XP cost (#192): after vanilla {@code createResult}
+ * Skill-scaled anvil XP cost (#192, M28): after vanilla {@code createResult}
  * computes {@code cost}, the smithing outcome rule's {@code anvil_cost_mult}
  * for the player's band scales it. Server-side only — the synced DataSlot
  * propagates the discounted value to the client display, so the number the
  * player sees is the number they pay.
+ *
+ * <p>Only <em>repairs</em> scale: the result must be the same item as the
+ * left input with strictly less damage (material repair or same-item merge).
+ * Renames and enchant combines keep vanilla cost — smithing discounts are
+ * for the forge fantasy, not bookkeeping.
  */
 @Mixin(AnvilMenu.class)
 public abstract class AnvilMenuCostMixin extends ItemCombinerMenu {
@@ -50,7 +55,7 @@ public abstract class AnvilMenuCostMixin extends ItemCombinerMenu {
 			return;
 		}
 		ItemStack result = this.resultSlots.getItem(0);
-		if (result.isEmpty()) {
+		if (result.isEmpty() || !lifepath$isRepair(result)) {
 			return;
 		}
 		Set<ResourceLocation> tags = result.getTags()
@@ -64,5 +69,15 @@ public abstract class AnvilMenuCostMixin extends ItemCombinerMenu {
 			return;
 		}
 		this.cost.set(Math.max(1, (int) Math.round(vanilla * mult)));
+	}
+
+	/** Repair = the same item came out with restored durability. Rename-only
+	 * and enchant-combine results keep the left input's damage value, so they
+	 * never match; an item+item merge that only swaps enchantments on an
+	 * undamaged item likewise stays full-price. */
+	private boolean lifepath$isRepair(ItemStack result) {
+		ItemStack left = this.inputSlots.getItem(0);
+		return !left.isEmpty() && result.is(left.getItem())
+				&& result.getDamageValue() < left.getDamageValue();
 	}
 }
