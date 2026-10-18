@@ -1,0 +1,14 @@
+{
+	"skill": "lifepath:hunting",
+	"use": {
+		"lifepath:hunting_gear_tier_basic": 10,
+		"lifepath:hunting_gear_tier_field": 30,
+		"lifepath:hunting_gear_tier_veteran": 50,
+		"lifepath:hunting_gear_tier_trophy": 70
+	},
+	"attack": {
+		"lifepath:hunting_weapon_tier_iron": 10,
+		"lifepath:hunting_weapon_tier_steel": 30,
+		"lifepath:hunting_weapon_tier_trophy": 60
+	}
+}

@@ -1,0 +1,9 @@
+{
+	"replace": false,
+	"values": [
+		"potionbundles:potion_bundle",
+		"potionbundles:splash_potion_bundle",
+		"potionbundles:lingering_potion_bundle",
+		"brewinandchewin:heating_cask"
+	]
+}

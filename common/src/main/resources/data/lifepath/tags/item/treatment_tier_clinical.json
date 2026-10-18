@@ -1,0 +1,8 @@
+{
+	"replace": false,
+	"values": [
+		"firstaid:painkillers",
+		"firstaid:morphine",
+		"firstaid:morphine_injector"
+	]
+}

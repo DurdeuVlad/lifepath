@@ -1,0 +1,14 @@
+{
+	"replace": false,
+	"values": [
+		"create:track",
+		"create:track_signal",
+		"create:track_station",
+		"create:track_observer",
+		"create:controller_rail",
+		"create:railway_casing",
+		"create:schematicannon",
+		"create:wand_of_symmetry",
+		"create:schematic_table"
+	]
+}

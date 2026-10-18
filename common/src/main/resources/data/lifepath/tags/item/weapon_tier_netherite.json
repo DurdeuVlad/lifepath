@@ -1,0 +1,19 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:netherite_sword",
+		"minecraft:netherite_axe",
+		"#simplyswords:netherite_gear",
+		"magistuarmory:netherite_ahlspiess",
+		"magistuarmory:netherite_bastardsword",
+		"magistuarmory:netherite_claymore",
+		"magistuarmory:netherite_estoc",
+		"magistuarmory:netherite_flamebladedsword",
+		"magistuarmory:netherite_heavymace",
+		"magistuarmory:netherite_katzbalger",
+		"magistuarmory:netherite_morgenstern",
+		"magistuarmory:netherite_pike",
+		"magistuarmory:netherite_shortsword",
+		"magistuarmory:netherite_zweihander"
+	]
+}

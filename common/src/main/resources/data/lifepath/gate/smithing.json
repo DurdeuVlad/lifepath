@@ -1,0 +1,10 @@
+{
+	"skill": "lifepath:smithing",
+	"use": {
+		"lifepath:smithing_tool_tier_basic": 10,
+		"lifepath:smithing_tool_tier_table": 20,
+		"lifepath:smithing_tool_tier_forge": 30,
+		"lifepath:smithing_tool_tier_blueprint": 50,
+		"lifepath:smithing_tool_tier_master": 70
+	}
+}

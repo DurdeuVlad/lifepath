@@ -1,0 +1,10 @@
+{
+	"skill": "lifepath:brewing",
+	"use": {
+		"lifepath:brewing_tier_basic": 10,
+		"lifepath:brewing_tier_kettle": 30,
+		"lifepath:brewing_tier_advanced": 50,
+		"lifepath:brewing_tier_master": 60,
+		"lifepath:brewing_tier_apex": 80
+	}
+}

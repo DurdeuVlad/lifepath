@@ -1,0 +1,17 @@
+{
+	"replace": false,
+	"values": [
+		"archers:crystal_shortbow",
+		"archers:crystal_longbow",
+		"archers:royal_longbow",
+		"archers:netherite_shortbow",
+		"archers:netherite_longbow",
+		"archers:netherite_rapid_crossbow",
+		"archers:netherite_heavy_crossbow",
+		"spartan_weaponry_unofficial:longbow_diamond_strengthened",
+		"spartan_weaponry_unofficial:longbow_netherite_strengthened",
+		"spartan_weaponry_unofficial:heavy_crossbow_diamond_strengthened",
+		"spartan_weaponry_unofficial:heavy_crossbow_netherite_strengthened",
+		"minecraft:trident"
+	]
+}

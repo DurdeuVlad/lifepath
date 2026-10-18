@@ -1,0 +1,15 @@
+{
+	"skill": "lifepath:farming",
+	"break": {
+		"lifepath:exotic_crop_tier_uncommon": 30,
+		"lifepath:exotic_crop_tier_rare": 50,
+		"lifepath:exotic_crop_tier_apex": 60
+	},
+	"use": {
+		"lifepath:hoe_tier_stone": 10,
+		"lifepath:hoe_tier_iron": 20,
+		"lifepath:hoe_tier_steel": 30,
+		"lifepath:hoe_tier_diamond": 40,
+		"lifepath:hoe_tier_netherite": 60
+	}
+}

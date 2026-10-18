@@ -4,8 +4,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.dwurdy.lifepath.ability.AbilityEngine;
 import com.dwurdy.lifepath.character.CharacterManager;
+import com.dwurdy.lifepath.skill.SkillGates;
 import com.dwurdy.lifepath.species.DietService;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
@@ -76,6 +80,31 @@ public abstract class PlayerEntityMixin {
 		if (landed && (Object) this instanceof ServerPlayer player) {
 			AbilityEngine.onDamageDealt(player, victim, source, amount);
 		}
+	}
+
+	/**
+	 * M29 feeble-weapon gate: wraps the {@code getAttributeValue} invokes
+	 * inside {@link Player#attack}. Two exist — {@code ATTACK_DAMAGE} before
+	 * the {@code hurt} call and {@code SWEEPING_DAMAGE_RATIO} in the sweep
+	 * branch — only the ATTACK_DAMAGE read is clamped: a skill-denied held
+	 * weapon collapses base damage to {@link SkillGates#FEEBLE_DAMAGE_CAP}
+	 * (sweep scales off it naturally). Server-side only.
+	 */
+	@WrapOperation(method = "attack", at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/world/entity/player/Player;getAttributeValue(Lnet/minecraft/core/Holder;)D"))
+	private double lifepath$feebleWeapon(Player self,
+			Holder<Attribute> attribute, Operation<Double> original) {
+		double damage = original.call(self, attribute);
+		if (attribute == Attributes.ATTACK_DAMAGE
+				&& (Object) this instanceof ServerPlayer player) {
+			SkillGates.Denial denial = SkillGates.denialForAttack(player,
+					player.getMainHandItem());
+			if (denial != null) {
+				SkillGates.notifyDenied(player, denial);
+				return Math.min(damage, SkillGates.FEEBLE_DAMAGE_CAP);
+			}
+		}
+		return damage;
 	}
 
 	@WrapOperation(method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;", at = @At(value = "INVOKE",

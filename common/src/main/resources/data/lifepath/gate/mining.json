@@ -1,0 +1,13 @@
+{
+	"skill": "lifepath:mining",
+	"break": {
+		"lifepath:ore_tier_common": 10,
+		"lifepath:ore_tier_iron": 20,
+		"lifepath:ore_tier_gold": 30,
+		"lifepath:ore_tier_dust": 40,
+		"lifepath:ore_tier_diamond": 50,
+		"lifepath:ore_tier_emerald": 60,
+		"lifepath:ore_tier_dense": 70,
+		"lifepath:ore_tier_ancient": 80
+	}
+}

@@ -75,6 +75,7 @@ tags_item = load(DATA / "tags/item")
 tags_block = load(DATA / "tags/block")
 tags_entity = load(DATA / "tags/entity_type")
 all_tags = {**tags_item, **tags_block, **tags_entity}
+gates = load(DATA / "gate")
 unlock = load(DATA / "unlock")
 morph = load(DATA / "morph_form")
 attunement = load(DATA / "attunement")
@@ -155,6 +156,41 @@ for pool_name, pool in (("xp_source", xp_sources), ("outcome_rule", outcomes)):
             check_tag(t, rid)
         for t in (x.get("per_tag") or {}):
             check_tag(t, rid)
+
+# ---- gates: skill unlock gates per action ----
+GATE_ACTION_POOLS = {"break": tags_block, "use": tags_item,
+                     "attack": tags_item, "interact": tags_entity}
+GATE_ACTION_DIR = {"break": "block", "use": "item",
+                   "attack": "item", "interact": "entity_type"}
+for rid, g in gates.items():
+    sk = g.get("skill")
+    if sk:
+        check_ref(sk, skills, "skill", rid)
+    else:
+        errors.append(f"gate {rid} missing 'skill'")
+    has_entries = False
+    for action, pool in GATE_ACTION_POOLS.items():
+        amap = g.get(action)
+        if amap is None:
+            continue
+        if not isinstance(amap, dict):
+            errors.append(f"gate {rid}.{action} must be a tag->level map")
+            continue
+        for tag, lvl in amap.items():
+            has_entries = True
+            if not isinstance(lvl, int) or not 1 <= lvl <= 100:
+                errors.append(f"gate {rid}.{action}[{tag}] level {lvl!r} not 1..100")
+            if tag in pool:
+                continue
+            if tag.startswith("lifepath:"):
+                errors.append(f"gate {rid}.{action} ref {tag} missing from "
+                              f"tags/{GATE_ACTION_DIR[action]}/")
+            elif tag.startswith("minecraft:") or tag.startswith("c:"):
+                warnings.append(f"gate {rid}.{action} external tag {tag} — resolved at runtime")
+            else:
+                warnings.append(f"gate {rid}.{action} foreign tag {tag} — requires that mod at runtime")
+    if not has_entries:
+        errors.append(f"gate {rid} has no action entries")
 
 # ---- abilities ----
 for rid, a in abilities.items():

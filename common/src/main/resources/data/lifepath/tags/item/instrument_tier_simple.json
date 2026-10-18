@@ -1,0 +1,9 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:jukebox",
+		"immersive_melodies:triangle",
+		"immersive_melodies:tiny_drum",
+		"immersive_melodies:flute"
+	]
+}

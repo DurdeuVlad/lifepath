@@ -1,0 +1,8 @@
+{
+	"replace": false,
+	"values": [
+		"bioforge:microscope",
+		"bioforge:viral_scanner",
+		"bioforge:area_contamination_scanner"
+	]
+}

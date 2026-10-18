@@ -1,0 +1,11 @@
+{
+	"replace": false,
+	"values": [
+		"farmersdelight:cooking_pot",
+		"kaleidoscope_cookery:pot",
+		"kaleidoscope_cookery:stockpot",
+		"kaleidoscope_cookery:kitchen_shovel",
+		"kaleidoscope_cookery:teapot",
+		"kaleidoscope_cookery:oil_pot"
+	]
+}

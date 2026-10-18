@@ -1,0 +1,11 @@
+{
+	"skill": "lifepath:cooking",
+	"use": {
+		"lifepath:cooking_tier_basic": 10,
+		"lifepath:cooking_tier_iron": 20,
+		"lifepath:cooking_tier_gold": 30,
+		"lifepath:cooking_tier_kitchen": 40,
+		"lifepath:cooking_tier_diamond": 60,
+		"lifepath:cooking_tier_master": 80
+	}
+}

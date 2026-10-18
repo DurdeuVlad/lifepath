@@ -1,0 +1,20 @@
+{
+	"replace": false,
+	"values": [
+		"productivefarming:hops",
+		"productivefarming:tea",
+		"productivefarming:vanilla",
+		"productivefarming:gooseberry",
+		"productivefarming:cloudberry",
+		"productivefarming:huckleberry",
+		"productivefarming:lingoberry",
+		"productivefarming:goji_berry",
+		"productivefarming:goji_berry_leaves",
+		"productivefarming:concord_grape",
+		"productivefarming:concord_grape_leaves",
+		"productivefarming:red_grape",
+		"productivefarming:red_grape_leaves",
+		"productivefarming:green_grape",
+		"productivefarming:green_grape_leaves"
+	]
+}

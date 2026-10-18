@@ -1,0 +1,17 @@
+{
+	"replace": false,
+	"values": [
+		"bards_rpg:netherite_lute",
+		"bards_rpg:netherite_lyre",
+		"bards_rpg:netherite_harp_crossbow",
+		"bards_rpg:diamond_harp_crossbow",
+		"bards_rpg:elder_guardian_lyre",
+		"bards_rpg:ender_dragon_lute",
+		"bards_rpg:unique_lute_0",
+		"bards_rpg:unique_lute_1",
+		"bards_rpg:unique_lyre_0",
+		"bards_rpg:unique_lyre_1",
+		"bards_rpg:unique_harp_crossbow_0",
+		"bards_rpg:unique_harp_crossbow_1"
+	]
+}

@@ -1,0 +1,8 @@
+{
+	"skill": "lifepath:diagnosis",
+	"use": {
+		"lifepath:diagnosis_tier_field": 20,
+		"lifepath:diagnosis_tier_lab": 50,
+		"lifepath:diagnosis_tier_ward": 70
+	}
+}

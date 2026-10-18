@@ -1,0 +1,17 @@
+{
+	"skill": "lifepath:defence",
+	"use": {
+		"lifepath:shield_tier_basic": 20,
+		"lifepath:shield_tier_knight": 40,
+		"lifepath:shield_tier_netherite": 60
+	},
+	"attack": {
+		"lifepath:weapon_tier_stone": 10,
+		"lifepath:weapon_tier_iron": 20,
+		"lifepath:weapon_tier_steel": 30,
+		"lifepath:weapon_tier_diamond": 40,
+		"lifepath:weapon_tier_runic": 50,
+		"lifepath:weapon_tier_netherite": 60,
+		"lifepath:weapon_tier_legendary": 70
+	}
+}

@@ -1,0 +1,8 @@
+{
+	"skill": "lifepath:music",
+	"use": {
+		"lifepath:instrument_tier_simple": 10,
+		"lifepath:instrument_tier_stage": 40,
+		"lifepath:instrument_tier_grand": 70
+	}
+}

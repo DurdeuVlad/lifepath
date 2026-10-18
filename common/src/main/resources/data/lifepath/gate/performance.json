@@ -1,0 +1,12 @@
+{
+	"skill": "lifepath:performance",
+	"use": {
+		"lifepath:performance_tier_busker": 20,
+		"lifepath:performance_tier_stage": 50,
+		"lifepath:performance_tier_legend": 70
+	},
+	"attack": {
+		"lifepath:performance_weapon_tier_duelist": 20,
+		"lifepath:performance_weapon_tier_master": 60
+	}
+}

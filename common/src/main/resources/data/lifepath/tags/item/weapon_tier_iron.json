@@ -1,0 +1,28 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:iron_sword",
+		"minecraft:iron_axe",
+		"#simplyswords:iron_gear",
+		"magistuarmory:iron_ahlspiess",
+		"magistuarmory:iron_bastardsword",
+		"magistuarmory:iron_chainmorgenstern",
+		"magistuarmory:iron_chivalrylance",
+		"magistuarmory:iron_claymore",
+		"magistuarmory:iron_concavehalberd",
+		"magistuarmory:iron_estoc",
+		"magistuarmory:iron_flamebladedsword",
+		"magistuarmory:iron_guisarme",
+		"magistuarmory:iron_heavymace",
+		"magistuarmory:iron_heavywarhammer",
+		"magistuarmory:iron_katzbalger",
+		"magistuarmory:iron_lochaberaxe",
+		"magistuarmory:iron_lucernhammer",
+		"magistuarmory:iron_morgenstern",
+		"magistuarmory:iron_pike",
+		"magistuarmory:iron_ranseur",
+		"magistuarmory:iron_shortsword",
+		"magistuarmory:iron_stylet",
+		"magistuarmory:iron_zweihander"
+	]
+}

@@ -1,0 +1,11 @@
+{
+	"skill": "lifepath:foraging",
+	"break": {
+		"lifepath:forage_tier_uncommon": 30,
+		"lifepath:forage_tier_rare": 50,
+		"lifepath:forage_tier_mythic": 70
+	},
+	"use": {
+		"lifepath:forage_tool_tier": 30
+	}
+}

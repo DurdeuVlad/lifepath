@@ -1,0 +1,11 @@
+{
+	"skill": "lifepath:construction",
+	"use": {
+		"lifepath:wand_tier_basic": 10,
+		"lifepath:wand_tier_iron": 30,
+		"lifepath:construction_tier_refined": 40,
+		"lifepath:wand_tier_diamond": 50,
+		"lifepath:wand_tier_infinite": 70,
+		"lifepath:construction_tier_premium": 70
+	}
+}

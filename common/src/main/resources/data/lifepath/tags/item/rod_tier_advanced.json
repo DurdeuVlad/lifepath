@@ -1,0 +1,12 @@
+{
+	"replace": false,
+	"values": [
+		"riverfishing:spinning_rod",
+		"riverfishing:sea_spin_rod",
+		"riverfishing:winter_rod",
+		"riverfishing:seine_net",
+		"riverfishing:bait_trap",
+		"riverfishing:tackle_box_small",
+		"riverfishing:tackle_box_medium"
+	]
+}

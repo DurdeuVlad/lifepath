@@ -1,0 +1,9 @@
+{
+	"replace": false,
+	"values": [
+		"constructionwand:diamond_wand",
+		"constructionwand:core_angel",
+		"constructionwand:core_destruction",
+		"constructionwand:core_exchange"
+	]
+}

@@ -1,0 +1,25 @@
+{
+	"replace": false,
+	"values": [
+		"hexalia:wild_mandrake",
+		"hexalia:wild_sunfire_tomato",
+		"hexalia:dreamshroom",
+		"hexalia:ghost_fern",
+		"hexalia:witchweed",
+		"hexalia:lotus_flower",
+		"hexalia:astrylis",
+		"hexalia:lourdes",
+		"hexalia:windsong",
+		"hexalia:morphora",
+		"hexalia:aegiflora",
+		"hexalia:withered_aegiflora",
+		"hexalia:grimshade",
+		"hexalia:begonia",
+		"hexalia:dahlia",
+		"hexalia:lavender",
+		"minecraft:wither_rose",
+		"minecraft:torchflower",
+		"minecraft:pitcher_plant",
+		"minecraft:spore_blossom"
+	]
+}

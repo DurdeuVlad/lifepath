@@ -1,0 +1,13 @@
+{
+	"skill": "lifepath:woodcutting",
+	"break": {
+		"lifepath:exotic_log": 60
+	},
+	"use": {
+		"lifepath:axe_tier_stone": 10,
+		"lifepath:axe_tier_iron": 20,
+		"lifepath:axe_tier_steel": 30,
+		"lifepath:axe_tier_diamond": 40,
+		"lifepath:axe_tier_netherite": 60
+	}
+}

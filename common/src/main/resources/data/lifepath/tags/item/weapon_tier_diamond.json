@@ -1,0 +1,19 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:diamond_sword",
+		"minecraft:diamond_axe",
+		"#simplyswords:diamond_gear",
+		"magistuarmory:diamond_ahlspiess",
+		"magistuarmory:diamond_bastardsword",
+		"magistuarmory:diamond_claymore",
+		"magistuarmory:diamond_estoc",
+		"magistuarmory:diamond_flamebladedsword",
+		"magistuarmory:diamond_heavymace",
+		"magistuarmory:diamond_katzbalger",
+		"magistuarmory:diamond_morgenstern",
+		"magistuarmory:diamond_pike",
+		"magistuarmory:diamond_shortsword",
+		"magistuarmory:diamond_zweihander"
+	]
+}

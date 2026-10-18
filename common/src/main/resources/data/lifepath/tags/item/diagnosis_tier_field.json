@@ -1,0 +1,10 @@
+{
+	"replace": false,
+	"values": [
+		"bioforge:stethoscope",
+		"bioforge:otoscope",
+		"bioforge:clipboard",
+		"bioforge:syringe",
+		"bioforge:blood_slide"
+	]
+}

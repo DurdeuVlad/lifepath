@@ -86,6 +86,9 @@ public final class LifepathContent {
 	/** M22: outcome-scaling rules — rank-band → output modifiers per skill. */
 	private static final ContentRegistry<com.dwurdy.lifepath.content.OutcomeRuleDefinition>
 			OUTCOME_RULES = new ContentRegistry<>(LifepathMod.id("outcome_rule"));
+	/** Skill-unlock gates: per-skill action gates, tag id → minimum level. */
+	private static final ContentRegistry<com.dwurdy.lifepath.content.GateDefinition>
+			GATES = new ContentRegistry<>(LifepathMod.id("gate"));
 
 	/** A cross-reference a loaded file made to content no registry resolved (recorded for M7-5 validation). */
 	public record UnresolvedReference(String domain, ResourceLocation source, ResourceLocation ref, String targetDomain) {
@@ -178,6 +181,12 @@ public final class LifepathContent {
 				manager -> loadDomain(manager, "outcome_rule",
 						com.dwurdy.lifepath.content.OutcomeRuleDefinition.OutcomeRuleFile.CODEC,
 						LifepathContent::decodeOutcomeRule, OUTCOME_RULES));
+		// Skill-unlock gates: refs skills — same decode-time skill check as
+		// outcome_rule (a gate for a missing skill is a typo, not compat).
+		ReloadManager.registerData(LifepathMod.id("gate"),
+				manager -> loadDomain(manager, "gate",
+						com.dwurdy.lifepath.content.GateDefinition.GateFile.CODEC,
+						LifepathContent::decodeGate, GATES));
 		ReloadManager.registerData(LifepathMod.id("content_validation"),
 				manager -> validateAll());
 		CharacterPersistence.setContentIndex(LifepathContent::exists);
@@ -197,6 +206,10 @@ public final class LifepathContent {
 
 	public static ContentRegistry<com.dwurdy.lifepath.content.OutcomeRuleDefinition> outcomeRules() {
 		return OUTCOME_RULES;
+	}
+
+	public static ContentRegistry<com.dwurdy.lifepath.content.GateDefinition> gates() {
+		return GATES;
 	}
 
 	public static ContentRegistry<LevelCurveDefinition> levelCurves() {
@@ -267,6 +280,7 @@ public final class LifepathContent {
 			case "unlock" -> UNLOCKS.contains(id);
 			case "morph_form" -> MORPH_FORMS.contains(id);
 			case "outcome_rule" -> OUTCOME_RULES.contains(id);
+			case "gate" -> GATES.contains(id);
 			// M9-4: unlocks[] holds gated CONTENT ids (species today), not def
 			// ids — an entry is known iff it names gated content directly or a
 			// surviving def still grants it.
@@ -373,6 +387,23 @@ public final class LifepathContent {
 				com.dwurdy.lifepath.content.OutcomeRuleDefinition.fromFile(id, file);
 		if (!SKILLS.contains(def.skill())) {
 			throw new IllegalArgumentException("outcome_rule " + id
+					+ " invalid — skill " + def.skill() + " has no skill definition");
+		}
+		return def;
+	}
+
+	/**
+	 * Gate decode: the {@code skill} ref must resolve — a gate for a
+	 * missing skill is always a typo, never forward-compat (the same rule
+	 * {@link #decodeOutcomeRule} enforces).
+	 */
+	public static com.dwurdy.lifepath.content.GateDefinition decodeGate(
+			ResourceLocation id,
+			com.dwurdy.lifepath.content.GateDefinition.GateFile file) {
+		com.dwurdy.lifepath.content.GateDefinition def =
+				com.dwurdy.lifepath.content.GateDefinition.fromFile(id, file);
+		if (!SKILLS.contains(def.skill())) {
+			throw new IllegalArgumentException("gate " + id
 					+ " invalid — skill " + def.skill() + " has no skill definition");
 		}
 		return def;

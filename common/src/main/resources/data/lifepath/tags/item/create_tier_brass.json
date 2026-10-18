@@ -1,0 +1,15 @@
+{
+	"replace": false,
+	"values": [
+		"create:brass_hand",
+		"create:extendo_grip",
+		"create:mechanical_arm",
+		"create:linked_controller",
+		"create:rotation_speed_controller",
+		"create:brass_casing",
+		"create:crafting_blueprint",
+		"create:empty_schematic",
+		"create:schematic",
+		"create:schematic_and_quill"
+	]
+}

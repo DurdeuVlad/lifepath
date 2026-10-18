@@ -1,0 +1,11 @@
+{
+	"replace": false,
+	"values": [
+		"wildhunt:heavy_bowgun_iron",
+		"wildhunt:kennel_post",
+		"wildhunt:feeding_trough",
+		"wildhunt:meal_station",
+		"wildhunt:research_board",
+		"wildhunt:herb_patch"
+	]
+}

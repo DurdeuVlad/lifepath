@@ -1,0 +1,9 @@
+{
+	"replace": false,
+	"values": [
+		"overgeared:smithing_anvil",
+		"overgeared:iron_tongs",
+		"overgeared:alloy_furnace",
+		"minecraft:anvil"
+	]
+}

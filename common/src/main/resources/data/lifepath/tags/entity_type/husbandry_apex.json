@@ -1,0 +1,17 @@
+{
+	"replace": false,
+	"values": [
+		"naturalist:elephant",
+		"naturalist:giraffe",
+		"naturalist:hippo",
+		"naturalist:rhino",
+		"naturalist:lion",
+		"naturalist:tiger",
+		"naturalist:bear",
+		"naturalist:black_bear",
+		"naturalist:mammoth",
+		"naturalist:alligator",
+		"naturalist:komodo_dragon",
+		"naturalist:vulture"
+	]
+}

@@ -1,0 +1,8 @@
+{
+	"replace": false,
+	"values": [
+		"bards_rpg:bard_spell_book",
+		"bards_rpg:wooden_lute",
+		"bards_rpg:golden_lyre"
+	]
+}

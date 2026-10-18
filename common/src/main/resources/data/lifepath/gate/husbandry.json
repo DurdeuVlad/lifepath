@@ -1,0 +1,11 @@
+{
+	"skill": "lifepath:husbandry",
+	"use": {
+		"lifepath:husbandry_tool_tier_basic": 10,
+		"lifepath:husbandry_tool_tier_care": 30
+	},
+	"interact": {
+		"lifepath:husbandry_exotic": 30,
+		"lifepath:husbandry_apex": 60
+	}
+}

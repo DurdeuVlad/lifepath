@@ -1,0 +1,9 @@
+{
+	"replace": false,
+	"values": [
+		"riverfishing:surf_rod",
+		"riverfishing:trolling_rod",
+		"riverfishing:tackle_box_large",
+		"riverfishing:tackle_box_huge"
+	]
+}

@@ -1,0 +1,9 @@
+{
+	"replace": false,
+	"values": [
+		"wildhunt:hunter_compass",
+		"wildhunt:hunters_notebook",
+		"wildhunt:pitfall_trap",
+		"wildlore:field_journal"
+	]
+}

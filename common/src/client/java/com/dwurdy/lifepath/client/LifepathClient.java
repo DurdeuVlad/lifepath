@@ -29,6 +29,12 @@ public final class LifepathClient {
 		var clientPlatform = ClientPlatform.get();
 		LifepathMod.LOGGER.info("Lifepath client initializing (version {})", LifepathMod.modVersion());
 
+		// M29: let skill gates resolve levels client-side (dig-speed
+		// prediction) — the synced snapshot is advisory; the server
+		// re-checks every enforcement path.
+		com.dwurdy.lifepath.skill.SkillGates
+				.setClientCharacterSource(ClientCharacterState::snapshot);
+
 		clientPlatform.onS2C(
 				com.dwurdy.lifepath.network.s2c.HighlightEntitiesPayload.ID,
 				(payload, client) -> client.execute(() ->

@@ -1,0 +1,11 @@
+{
+	"replace": false,
+	"values": [
+		"overgeared:drafting_table",
+		"overgeared:blueprint",
+		"overgeared:empty_blueprint",
+		"overgeared:steel_tongs",
+		"overgeared:casting_furnace",
+		"overgeared:nether_tool_cast"
+	]
+}

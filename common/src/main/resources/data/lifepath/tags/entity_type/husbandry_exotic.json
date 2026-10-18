@@ -1,0 +1,18 @@
+{
+	"replace": false,
+	"values": [
+		"naturalist:deer",
+		"naturalist:boar",
+		"naturalist:duck",
+		"naturalist:turkey",
+		"naturalist:capybara",
+		"naturalist:tortoise",
+		"naturalist:ostrich",
+		"naturalist:zebra",
+		"naturalist:snake",
+		"naturalist:lizard",
+		"naturalist:mole",
+		"naturalist:hedgehog",
+		"naturalist:rat"
+	]
+}

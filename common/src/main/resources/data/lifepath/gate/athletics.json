@@ -1,0 +1,7 @@
+{
+	"skill": "lifepath:athletics",
+	"use": {
+		"lifepath:athletics_tier_wind": 40,
+		"lifepath:athletics_tier_sky": 80
+	}
+}

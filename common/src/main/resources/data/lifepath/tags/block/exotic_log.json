@@ -1,0 +1,13 @@
+{
+	"replace": false,
+	"values": [
+		"timber_tales:hollow_oak_log",
+		"timber_tales:hollow_spruce_log",
+		"timber_tales:hollow_birch_log",
+		"timber_tales:hollow_jungle_log",
+		"timber_tales:hollow_acacia_log",
+		"timber_tales:hollow_dark_oak_log",
+		"timber_tales:hollow_mangrove_log",
+		"timber_tales:hollow_cherry_log"
+	]
+}

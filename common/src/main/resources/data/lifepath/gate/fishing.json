@@ -1,0 +1,9 @@
+{
+	"skill": "lifepath:fishing",
+	"use": {
+		"lifepath:rod_tier_basic": 10,
+		"lifepath:rod_tier_simple": 20,
+		"lifepath:rod_tier_advanced": 40,
+		"lifepath:rod_tier_master": 60
+	}
+}

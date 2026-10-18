@@ -1,0 +1,7 @@
+{
+	"replace": false,
+	"values": [
+		"firstaid:defibrillator",
+		"firstaid:adrenaline_injector"
+	]
+}
