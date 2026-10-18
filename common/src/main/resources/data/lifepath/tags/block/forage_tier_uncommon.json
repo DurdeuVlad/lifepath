@@ -1,14 +1,41 @@
 {
 	"replace": false,
 	"values": [
-		"hexalia:chillberry_bush",
-		"hexalia:galeberries_vine",
-		"hexalia:saltsprout",
-		"hexalia:siren_kelp",
-		"hexalia:nightshade_bush",
-		"hexalia:pale_mushroom",
-		"hexalia:mandrake_crop",
-		"hexalia:rabbage_crop",
-		"hexalia:sunfire_tomato_crop"
+		{
+			"id": "hexalia:chillberry_bush",
+			"required": false
+		},
+		{
+			"id": "hexalia:galeberries_vine",
+			"required": false
+		},
+		{
+			"id": "hexalia:saltsprout",
+			"required": false
+		},
+		{
+			"id": "hexalia:siren_kelp",
+			"required": false
+		},
+		{
+			"id": "hexalia:nightshade_bush",
+			"required": false
+		},
+		{
+			"id": "hexalia:pale_mushroom",
+			"required": false
+		},
+		{
+			"id": "hexalia:mandrake_crop",
+			"required": false
+		},
+		{
+			"id": "hexalia:rabbage_crop",
+			"required": false
+		},
+		{
+			"id": "hexalia:sunfire_tomato_crop",
+			"required": false
+		}
 	]
 }

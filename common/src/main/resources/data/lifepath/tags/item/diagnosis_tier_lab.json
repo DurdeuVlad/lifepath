@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"bioforge:microscope",
-		"bioforge:viral_scanner",
-		"bioforge:area_contamination_scanner"
+		{
+			"id": "bioforge:microscope",
+			"required": false
+		},
+		{
+			"id": "bioforge:viral_scanner",
+			"required": false
+		},
+		{
+			"id": "bioforge:area_contamination_scanner",
+			"required": false
+		}
 	]
 }

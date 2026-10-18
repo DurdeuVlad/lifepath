@@ -1,9 +1,18 @@
 {
 	"replace": false,
 	"values": [
-		"overgeared:smithing_anvil",
-		"overgeared:iron_tongs",
-		"overgeared:alloy_furnace",
+		{
+			"id": "overgeared:smithing_anvil",
+			"required": false
+		},
+		{
+			"id": "overgeared:iron_tongs",
+			"required": false
+		},
+		{
+			"id": "overgeared:alloy_furnace",
+			"required": false
+		},
 		"minecraft:anvil"
 	]
 }

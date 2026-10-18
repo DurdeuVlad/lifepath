@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"alchimiae:boiler",
-		"alchimiae:iron_mortar_and_pestle",
-		"alchimiae:gold_mortar_and_pestle",
-		"brewinandchewin:keg"
+		{
+			"id": "alchimiae:boiler",
+			"required": false
+		},
+		{
+			"id": "alchimiae:iron_mortar_and_pestle",
+			"required": false
+		},
+		{
+			"id": "alchimiae:gold_mortar_and_pestle",
+			"required": false
+		},
+		{
+			"id": "brewinandchewin:keg",
+			"required": false
+		}
 	]
 }

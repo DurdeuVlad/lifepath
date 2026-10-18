@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"constructionwand:netherite_wand",
-		"constructionwand:infinity_wand",
-		"constructionwand:void_sack"
+		{
+			"id": "constructionwand:netherite_wand",
+			"required": false
+		},
+		{
+			"id": "constructionwand:infinity_wand",
+			"required": false
+		},
+		{
+			"id": "constructionwand:void_sack",
+			"required": false
+		}
 	]
 }

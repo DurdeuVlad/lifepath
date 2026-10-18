@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"bards_rpg:diamond_lute",
-		"bards_rpg:diamond_lyre",
-		"bards_rpg:harp_crossbow",
-		"bards_rpg:music_stand"
+		{
+			"id": "bards_rpg:diamond_lute",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:diamond_lyre",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:harp_crossbow",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:music_stand",
+			"required": false
+		}
 	]
 }

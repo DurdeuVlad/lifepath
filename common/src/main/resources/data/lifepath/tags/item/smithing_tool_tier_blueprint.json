@@ -1,11 +1,29 @@
 {
 	"replace": false,
 	"values": [
-		"overgeared:drafting_table",
-		"overgeared:blueprint",
-		"overgeared:empty_blueprint",
-		"overgeared:steel_tongs",
-		"overgeared:casting_furnace",
-		"overgeared:nether_tool_cast"
+		{
+			"id": "overgeared:drafting_table",
+			"required": false
+		},
+		{
+			"id": "overgeared:blueprint",
+			"required": false
+		},
+		{
+			"id": "overgeared:empty_blueprint",
+			"required": false
+		},
+		{
+			"id": "overgeared:steel_tongs",
+			"required": false
+		},
+		{
+			"id": "overgeared:casting_furnace",
+			"required": false
+		},
+		{
+			"id": "overgeared:nether_tool_cast",
+			"required": false
+		}
 	]
 }

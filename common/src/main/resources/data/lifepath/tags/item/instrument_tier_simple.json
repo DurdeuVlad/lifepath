@@ -2,8 +2,17 @@
 	"replace": false,
 	"values": [
 		"minecraft:jukebox",
-		"immersive_melodies:triangle",
-		"immersive_melodies:tiny_drum",
-		"immersive_melodies:flute"
+		{
+			"id": "immersive_melodies:triangle",
+			"required": false
+		},
+		{
+			"id": "immersive_melodies:tiny_drum",
+			"required": false
+		},
+		{
+			"id": "immersive_melodies:flute",
+			"required": false
+		}
 	]
 }

@@ -1,20 +1,65 @@
 {
 	"replace": false,
 	"values": [
-		"productivefarming:hops",
-		"productivefarming:tea",
-		"productivefarming:vanilla",
-		"productivefarming:gooseberry",
-		"productivefarming:cloudberry",
-		"productivefarming:huckleberry",
-		"productivefarming:lingoberry",
-		"productivefarming:goji_berry",
-		"productivefarming:goji_berry_leaves",
-		"productivefarming:concord_grape",
-		"productivefarming:concord_grape_leaves",
-		"productivefarming:red_grape",
-		"productivefarming:red_grape_leaves",
-		"productivefarming:green_grape",
-		"productivefarming:green_grape_leaves"
+		{
+			"id": "productivefarming:hops",
+			"required": false
+		},
+		{
+			"id": "productivefarming:tea",
+			"required": false
+		},
+		{
+			"id": "productivefarming:vanilla",
+			"required": false
+		},
+		{
+			"id": "productivefarming:gooseberry",
+			"required": false
+		},
+		{
+			"id": "productivefarming:cloudberry",
+			"required": false
+		},
+		{
+			"id": "productivefarming:huckleberry",
+			"required": false
+		},
+		{
+			"id": "productivefarming:lingoberry",
+			"required": false
+		},
+		{
+			"id": "productivefarming:goji_berry",
+			"required": false
+		},
+		{
+			"id": "productivefarming:goji_berry_leaves",
+			"required": false
+		},
+		{
+			"id": "productivefarming:concord_grape",
+			"required": false
+		},
+		{
+			"id": "productivefarming:concord_grape_leaves",
+			"required": false
+		},
+		{
+			"id": "productivefarming:red_grape",
+			"required": false
+		},
+		{
+			"id": "productivefarming:red_grape_leaves",
+			"required": false
+		},
+		{
+			"id": "productivefarming:green_grape",
+			"required": false
+		},
+		{
+			"id": "productivefarming:green_grape_leaves",
+			"required": false
+		}
 	]
 }

@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"hexalia:celestial_bloom",
-		"hexalia:withered_celestial_bloom",
-		"hexalia:spirit_bloom"
+		{
+			"id": "hexalia:celestial_bloom",
+			"required": false
+		},
+		{
+			"id": "hexalia:withered_celestial_bloom",
+			"required": false
+		},
+		{
+			"id": "hexalia:spirit_bloom",
+			"required": false
+		}
 	]
 }

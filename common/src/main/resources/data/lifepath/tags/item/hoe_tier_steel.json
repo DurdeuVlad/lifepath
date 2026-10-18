@@ -1,6 +1,9 @@
 {
 	"replace": false,
 	"values": [
-		"overgeared:steel_hoe"
+		{
+			"id": "overgeared:steel_hoe",
+			"required": false
+		}
 	]
 }

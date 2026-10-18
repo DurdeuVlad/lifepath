@@ -1,18 +1,57 @@
 {
 	"replace": false,
 	"values": [
-		"naturalist:deer",
-		"naturalist:boar",
-		"naturalist:duck",
-		"naturalist:turkey",
-		"naturalist:capybara",
-		"naturalist:tortoise",
-		"naturalist:ostrich",
-		"naturalist:zebra",
-		"naturalist:snake",
-		"naturalist:lizard",
-		"naturalist:mole",
-		"naturalist:hedgehog",
-		"naturalist:rat"
+		{
+			"id": "naturalist:deer",
+			"required": false
+		},
+		{
+			"id": "naturalist:boar",
+			"required": false
+		},
+		{
+			"id": "naturalist:duck",
+			"required": false
+		},
+		{
+			"id": "naturalist:turkey",
+			"required": false
+		},
+		{
+			"id": "naturalist:capybara",
+			"required": false
+		},
+		{
+			"id": "naturalist:tortoise",
+			"required": false
+		},
+		{
+			"id": "naturalist:ostrich",
+			"required": false
+		},
+		{
+			"id": "naturalist:zebra",
+			"required": false
+		},
+		{
+			"id": "naturalist:snake",
+			"required": false
+		},
+		{
+			"id": "naturalist:lizard",
+			"required": false
+		},
+		{
+			"id": "naturalist:mole",
+			"required": false
+		},
+		{
+			"id": "naturalist:hedgehog",
+			"required": false
+		},
+		{
+			"id": "naturalist:rat",
+			"required": false
+		}
 	]
 }

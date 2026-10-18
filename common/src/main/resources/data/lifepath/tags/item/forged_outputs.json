@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"#lifepath:smithing_tools",
-		{ "id": "overgeared:tool_cast", "required": false },
-		{ "id": "overgeared:weapon_cast", "required": false },
-		{ "id": "#c:forged/steel", "required": false }
+		{
+			"id": "#lifepath:smithing_tools",
+			"required": false
+		},
+		{
+			"id": "overgeared:tool_cast",
+			"required": false
+		},
+		{
+			"id": "overgeared:weapon_cast",
+			"required": false
+		},
+		{
+			"id": "#c:forged/steel",
+			"required": false
+		}
 	]
 }

@@ -1,10 +1,25 @@
 {
 	"replace": false,
 	"values": [
-		"bioforge:stethoscope",
-		"bioforge:otoscope",
-		"bioforge:clipboard",
-		"bioforge:syringe",
-		"bioforge:blood_slide"
+		{
+			"id": "bioforge:stethoscope",
+			"required": false
+		},
+		{
+			"id": "bioforge:otoscope",
+			"required": false
+		},
+		{
+			"id": "bioforge:clipboard",
+			"required": false
+		},
+		{
+			"id": "bioforge:syringe",
+			"required": false
+		},
+		{
+			"id": "bioforge:blood_slide",
+			"required": false
+		}
 	]
 }

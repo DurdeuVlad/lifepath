@@ -1,10 +1,25 @@
 {
 	"replace": false,
 	"values": [
-		"farmersdelight:flint_knife",
-		"farmersdelight:stove",
-		"farmersdelight:cutting_board",
-		"kaleidoscope_cookery:stove",
-		"kaleidoscope_cookery:chopping_board"
+		{
+			"id": "farmersdelight:flint_knife",
+			"required": false
+		},
+		{
+			"id": "farmersdelight:stove",
+			"required": false
+		},
+		{
+			"id": "farmersdelight:cutting_board",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:stove",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:chopping_board",
+			"required": false
+		}
 	]
 }

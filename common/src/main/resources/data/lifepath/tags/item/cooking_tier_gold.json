@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"farmersdelight:golden_knife",
-		"kaleidoscope_cookery:gold_kitchen_knife"
+		{
+			"id": "farmersdelight:golden_knife",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:gold_kitchen_knife",
+			"required": false
+		}
 	]
 }

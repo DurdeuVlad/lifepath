@@ -3,6 +3,9 @@
 	"values": [
 		"minecraft:stone_axe",
 		"minecraft:golden_axe",
-		"overgeared:copper_axe"
+		{
+			"id": "overgeared:copper_axe",
+			"required": false
+		}
 	]
 }

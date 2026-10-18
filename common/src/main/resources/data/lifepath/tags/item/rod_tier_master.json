@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"riverfishing:surf_rod",
-		"riverfishing:trolling_rod",
-		"riverfishing:tackle_box_large",
-		"riverfishing:tackle_box_huge"
+		{
+			"id": "riverfishing:surf_rod",
+			"required": false
+		},
+		{
+			"id": "riverfishing:trolling_rod",
+			"required": false
+		},
+		{
+			"id": "riverfishing:tackle_box_large",
+			"required": false
+		},
+		{
+			"id": "riverfishing:tackle_box_huge",
+			"required": false
+		}
 	]
 }

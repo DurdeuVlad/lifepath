@@ -1,12 +1,33 @@
 {
 	"replace": false,
 	"values": [
-		"riverfishing:spinning_rod",
-		"riverfishing:sea_spin_rod",
-		"riverfishing:winter_rod",
-		"riverfishing:seine_net",
-		"riverfishing:bait_trap",
-		"riverfishing:tackle_box_small",
-		"riverfishing:tackle_box_medium"
+		{
+			"id": "riverfishing:spinning_rod",
+			"required": false
+		},
+		{
+			"id": "riverfishing:sea_spin_rod",
+			"required": false
+		},
+		{
+			"id": "riverfishing:winter_rod",
+			"required": false
+		},
+		{
+			"id": "riverfishing:seine_net",
+			"required": false
+		},
+		{
+			"id": "riverfishing:bait_trap",
+			"required": false
+		},
+		{
+			"id": "riverfishing:tackle_box_small",
+			"required": false
+		},
+		{
+			"id": "riverfishing:tackle_box_medium",
+			"required": false
+		}
 	]
 }

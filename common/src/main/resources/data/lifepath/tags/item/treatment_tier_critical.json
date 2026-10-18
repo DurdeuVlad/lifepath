@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"firstaid:defibrillator",
-		"firstaid:adrenaline_injector"
+		{
+			"id": "firstaid:defibrillator",
+			"required": false
+		},
+		{
+			"id": "firstaid:adrenaline_injector",
+			"required": false
+		}
 	]
 }

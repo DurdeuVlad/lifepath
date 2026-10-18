@@ -1,11 +1,29 @@
 {
 	"replace": false,
 	"values": [
-		"wildhunt:heavy_bowgun_steel",
-		"wildhunt:tranq_bomb",
-		"wildhunt:hunting_horn_skarn",
-		"wildhunt:vargrim_collar",
-		"wildhunt:vargrim_whistle",
-		"wildhunt:vargrim_saddle"
+		{
+			"id": "wildhunt:heavy_bowgun_steel",
+			"required": false
+		},
+		{
+			"id": "wildhunt:tranq_bomb",
+			"required": false
+		},
+		{
+			"id": "wildhunt:hunting_horn_skarn",
+			"required": false
+		},
+		{
+			"id": "wildhunt:vargrim_collar",
+			"required": false
+		},
+		{
+			"id": "wildhunt:vargrim_whistle",
+			"required": false
+		},
+		{
+			"id": "wildhunt:vargrim_saddle",
+			"required": false
+		}
 	]
 }

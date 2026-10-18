@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"magistuarmory:steel_buckler",
-		"magistuarmory:steel_heatershield",
-		"magistuarmory:steel_ellipticalshield"
+		{
+			"id": "magistuarmory:steel_buckler",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_heatershield",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_ellipticalshield",
+			"required": false
+		}
 	]
 }

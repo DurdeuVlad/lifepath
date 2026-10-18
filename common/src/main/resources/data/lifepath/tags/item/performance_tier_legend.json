@@ -1,17 +1,53 @@
 {
 	"replace": false,
 	"values": [
-		"bards_rpg:netherite_lute",
-		"bards_rpg:netherite_lyre",
-		"bards_rpg:netherite_harp_crossbow",
-		"bards_rpg:diamond_harp_crossbow",
-		"bards_rpg:elder_guardian_lyre",
-		"bards_rpg:ender_dragon_lute",
-		"bards_rpg:unique_lute_0",
-		"bards_rpg:unique_lute_1",
-		"bards_rpg:unique_lyre_0",
-		"bards_rpg:unique_lyre_1",
-		"bards_rpg:unique_harp_crossbow_0",
-		"bards_rpg:unique_harp_crossbow_1"
+		{
+			"id": "bards_rpg:netherite_lute",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:netherite_lyre",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:netherite_harp_crossbow",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:diamond_harp_crossbow",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:elder_guardian_lyre",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:ender_dragon_lute",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:unique_lute_0",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:unique_lute_1",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:unique_lyre_0",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:unique_lyre_1",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:unique_harp_crossbow_0",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:unique_harp_crossbow_1",
+			"required": false
+		}
 	]
 }

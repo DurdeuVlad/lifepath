@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"wildhunt:dual_blades_steel",
-		"wildhunt:great_sword_steel"
+		{
+			"id": "wildhunt:dual_blades_steel",
+			"required": false
+		},
+		{
+			"id": "wildhunt:great_sword_steel",
+			"required": false
+		}
 	]
 }

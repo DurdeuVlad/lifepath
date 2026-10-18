@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"overgeared:tier_a_smithing_anvil",
-		"overgeared:tier_b_smithing_anvil",
-		"overgeared:nether_alloy_furnace"
+		{
+			"id": "overgeared:tier_a_smithing_anvil",
+			"required": false
+		},
+		{
+			"id": "overgeared:tier_b_smithing_anvil",
+			"required": false
+		},
+		{
+			"id": "overgeared:nether_alloy_furnace",
+			"required": false
+		}
 	]
 }

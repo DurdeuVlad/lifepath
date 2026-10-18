@@ -1,22 +1,70 @@
 {
 	"replace": false,
 	"values": [
-		"hexalia:wild_mandrake",
-		"hexalia:wild_sunfire_tomato",
-		"hexalia:dreamshroom",
-		"hexalia:ghost_fern",
-		"hexalia:witchweed",
-		"hexalia:lotus_flower",
-		"hexalia:astrylis",
-		"hexalia:lourdes",
-		"hexalia:windsong",
-		"hexalia:morphora",
-		"hexalia:aegiflora",
-		"hexalia:withered_aegiflora",
-		"hexalia:grimshade",
-		"hexalia:begonia",
-		"hexalia:dahlia",
-		"hexalia:lavender",
+		{
+			"id": "hexalia:wild_mandrake",
+			"required": false
+		},
+		{
+			"id": "hexalia:wild_sunfire_tomato",
+			"required": false
+		},
+		{
+			"id": "hexalia:dreamshroom",
+			"required": false
+		},
+		{
+			"id": "hexalia:ghost_fern",
+			"required": false
+		},
+		{
+			"id": "hexalia:witchweed",
+			"required": false
+		},
+		{
+			"id": "hexalia:lotus_flower",
+			"required": false
+		},
+		{
+			"id": "hexalia:astrylis",
+			"required": false
+		},
+		{
+			"id": "hexalia:lourdes",
+			"required": false
+		},
+		{
+			"id": "hexalia:windsong",
+			"required": false
+		},
+		{
+			"id": "hexalia:morphora",
+			"required": false
+		},
+		{
+			"id": "hexalia:aegiflora",
+			"required": false
+		},
+		{
+			"id": "hexalia:withered_aegiflora",
+			"required": false
+		},
+		{
+			"id": "hexalia:grimshade",
+			"required": false
+		},
+		{
+			"id": "hexalia:begonia",
+			"required": false
+		},
+		{
+			"id": "hexalia:dahlia",
+			"required": false
+		},
+		{
+			"id": "hexalia:lavender",
+			"required": false
+		},
 		"minecraft:wither_rose",
 		"minecraft:torchflower",
 		"minecraft:pitcher_plant",

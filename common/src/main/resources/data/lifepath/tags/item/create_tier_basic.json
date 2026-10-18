@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"create:wrench",
-		"create:goggles",
-		"create:hand_crank",
-		"create:speedometer"
+		{
+			"id": "create:wrench",
+			"required": false
+		},
+		{
+			"id": "create:goggles",
+			"required": false
+		},
+		{
+			"id": "create:hand_crank",
+			"required": false
+		},
+		{
+			"id": "create:speedometer",
+			"required": false
+		}
 	]
 }

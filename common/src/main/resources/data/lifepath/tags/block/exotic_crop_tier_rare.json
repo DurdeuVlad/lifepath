@@ -1,13 +1,37 @@
 {
 	"replace": false,
 	"values": [
-		"productivefarming:golden_raspberry",
-		"productivefarming:sungold_tomato",
-		"productivefarming:miracle_berry",
-		"productivefarming:cotton_candy_grape",
-		"productivefarming:cotton_candy_grape_leaves",
-		"productivefarming:sugar_pearl_corn",
-		"productivefarming:red_mushroom_growth",
-		"productivefarming:brown_mushroom_growth"
+		{
+			"id": "productivefarming:golden_raspberry",
+			"required": false
+		},
+		{
+			"id": "productivefarming:sungold_tomato",
+			"required": false
+		},
+		{
+			"id": "productivefarming:miracle_berry",
+			"required": false
+		},
+		{
+			"id": "productivefarming:cotton_candy_grape",
+			"required": false
+		},
+		{
+			"id": "productivefarming:cotton_candy_grape_leaves",
+			"required": false
+		},
+		{
+			"id": "productivefarming:sugar_pearl_corn",
+			"required": false
+		},
+		{
+			"id": "productivefarming:red_mushroom_growth",
+			"required": false
+		},
+		{
+			"id": "productivefarming:brown_mushroom_growth",
+			"required": false
+		}
 	]
 }

@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"farmersdelight:netherite_knife",
-		"kaleidoscope_cookery:netherite_kitchen_knife",
-		"kaleidoscope_cookery:eight_immortals_table",
-		"kaleidoscope_cookery:transmutation_lunch_bag"
+		{
+			"id": "farmersdelight:netherite_knife",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:netherite_kitchen_knife",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:eight_immortals_table",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:transmutation_lunch_bag",
+			"required": false
+		}
 	]
 }

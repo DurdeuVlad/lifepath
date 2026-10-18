@@ -1,13 +1,37 @@
 {
 	"replace": false,
 	"values": [
-		"bards_rpg:diamond_rapier",
-		"bards_rpg:netherite_rapier",
-		"bards_rpg:unique_rapier_0",
-		"bards_rpg:unique_rapier_1",
-		"bards_rpg:wither_rapier",
-		"bards_rpg:glacial_rapier",
-		"bards_rpg:elder_guardian_rapier",
-		"bards_rpg:ender_dragon_rapier"
+		{
+			"id": "bards_rpg:diamond_rapier",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:netherite_rapier",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:unique_rapier_0",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:unique_rapier_1",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:wither_rapier",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:glacial_rapier",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:elder_guardian_rapier",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:ender_dragon_rapier",
+			"required": false
+		}
 	]
 }

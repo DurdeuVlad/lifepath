@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"constructionwand:wood_wand",
-		"constructionwand:stone_wand"
+		{
+			"id": "constructionwand:wood_wand",
+			"required": false
+		},
+		{
+			"id": "constructionwand:stone_wand",
+			"required": false
+		}
 	]
 }

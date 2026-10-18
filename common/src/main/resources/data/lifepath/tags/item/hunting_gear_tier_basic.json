@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"wildhunt:hunter_compass",
-		"wildhunt:hunters_notebook",
-		"wildhunt:pitfall_trap",
-		"wildlore:field_journal"
+		{
+			"id": "wildhunt:hunter_compass",
+			"required": false
+		},
+		{
+			"id": "wildhunt:hunters_notebook",
+			"required": false
+		},
+		{
+			"id": "wildhunt:pitfall_trap",
+			"required": false
+		},
+		{
+			"id": "wildlore:field_journal",
+			"required": false
+		}
 	]
 }

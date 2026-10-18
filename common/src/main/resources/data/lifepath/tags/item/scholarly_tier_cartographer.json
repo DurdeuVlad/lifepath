@@ -1,7 +1,10 @@
 {
 	"replace": false,
 	"values": [
-		"map_atlases:atlas",
+		{
+			"id": "map_atlases:atlas",
+			"required": false
+		},
 		"minecraft:spyglass",
 		"minecraft:cartography_table",
 		"minecraft:lectern"

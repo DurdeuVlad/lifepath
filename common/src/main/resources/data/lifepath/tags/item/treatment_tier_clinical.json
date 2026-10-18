@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"firstaid:painkillers",
-		"firstaid:morphine",
-		"firstaid:morphine_injector"
+		{
+			"id": "firstaid:painkillers",
+			"required": false
+		},
+		{
+			"id": "firstaid:morphine",
+			"required": false
+		},
+		{
+			"id": "firstaid:morphine_injector",
+			"required": false
+		}
 	]
 }

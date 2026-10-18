@@ -258,7 +258,13 @@ public final class CharacterManager {
 	}
 
 	private static void flushDirty(MinecraftServer server) {
-		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+		// getPlayerList() is null when shutdown fires before full init (e.g.
+		// a failed port bind) — nothing to flush then.
+		var players = server.getPlayerList();
+		if (players == null) {
+			return;
+		}
+		for (ServerPlayer player : players.getPlayers()) {
 			if (DIRTY.contains(player.getUUID())) {
 				saveCharacter(player);
 			}

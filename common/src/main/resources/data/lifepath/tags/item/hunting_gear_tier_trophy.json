@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"wildhunt:heavy_bowgun_ashfang",
-		"wildhunt:heavy_bowgun_ashfang_plus",
-		"wildhunt:light_bowgun_ashfang",
-		"wildhunt:bow_maegroth"
+		{
+			"id": "wildhunt:heavy_bowgun_ashfang",
+			"required": false
+		},
+		{
+			"id": "wildhunt:heavy_bowgun_ashfang_plus",
+			"required": false
+		},
+		{
+			"id": "wildhunt:light_bowgun_ashfang",
+			"required": false
+		},
+		{
+			"id": "wildhunt:bow_maegroth",
+			"required": false
+		}
 	]
 }

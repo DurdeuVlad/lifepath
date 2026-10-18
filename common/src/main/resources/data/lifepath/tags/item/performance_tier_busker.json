@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"bards_rpg:bard_spell_book",
-		"bards_rpg:wooden_lute",
-		"bards_rpg:golden_lyre"
+		{
+			"id": "bards_rpg:bard_spell_book",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:wooden_lute",
+			"required": false
+		},
+		{
+			"id": "bards_rpg:golden_lyre",
+			"required": false
+		}
 	]
 }

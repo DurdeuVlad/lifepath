@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"productivefarming:black_truffle_growth",
-		"productivefarming:oyster_mushroom_growth"
+		{
+			"id": "productivefarming:black_truffle_growth",
+			"required": false
+		},
+		{
+			"id": "productivefarming:oyster_mushroom_growth",
+			"required": false
+		}
 	]
 }

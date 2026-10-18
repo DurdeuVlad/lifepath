@@ -1,11 +1,29 @@
 {
 	"replace": false,
 	"values": [
-		"immersive_melodies:lute",
-		"immersive_melodies:trumpet",
-		"immersive_melodies:vielle",
-		"immersive_melodies:didgeridoo",
-		"immersive_melodies:bagpipe",
-		"immersive_melodies:handpan"
+		{
+			"id": "immersive_melodies:lute",
+			"required": false
+		},
+		{
+			"id": "immersive_melodies:trumpet",
+			"required": false
+		},
+		{
+			"id": "immersive_melodies:vielle",
+			"required": false
+		},
+		{
+			"id": "immersive_melodies:didgeridoo",
+			"required": false
+		},
+		{
+			"id": "immersive_melodies:bagpipe",
+			"required": false
+		},
+		{
+			"id": "immersive_melodies:handpan",
+			"required": false
+		}
 	]
 }

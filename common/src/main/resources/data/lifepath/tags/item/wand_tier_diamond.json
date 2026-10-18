@@ -1,9 +1,21 @@
 {
 	"replace": false,
 	"values": [
-		"constructionwand:diamond_wand",
-		"constructionwand:core_angel",
-		"constructionwand:core_destruction",
-		"constructionwand:core_exchange"
+		{
+			"id": "constructionwand:diamond_wand",
+			"required": false
+		},
+		{
+			"id": "constructionwand:core_angel",
+			"required": false
+		},
+		{
+			"id": "constructionwand:core_destruction",
+			"required": false
+		},
+		{
+			"id": "constructionwand:core_exchange",
+			"required": false
+		}
 	]
 }

@@ -1,11 +1,29 @@
 {
 	"replace": false,
 	"values": [
-		"wildhunt:heavy_bowgun_iron",
-		"wildhunt:kennel_post",
-		"wildhunt:feeding_trough",
-		"wildhunt:meal_station",
-		"wildhunt:research_board",
-		"wildhunt:herb_patch"
+		{
+			"id": "wildhunt:heavy_bowgun_iron",
+			"required": false
+		},
+		{
+			"id": "wildhunt:kennel_post",
+			"required": false
+		},
+		{
+			"id": "wildhunt:feeding_trough",
+			"required": false
+		},
+		{
+			"id": "wildhunt:meal_station",
+			"required": false
+		},
+		{
+			"id": "wildhunt:research_board",
+			"required": false
+		},
+		{
+			"id": "wildhunt:herb_patch",
+			"required": false
+		}
 	]
 }

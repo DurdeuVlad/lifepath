@@ -1,17 +1,53 @@
 {
 	"replace": false,
 	"values": [
-		"overgeared:steel_sword",
-		"overgeared:steel_axe",
-		"#simplyswords:gold_gear",
-		"magistuarmory:steel_ahlspiess",
-		"magistuarmory:steel_bastardsword",
-		"magistuarmory:steel_chainmorgenstern",
-		"magistuarmory:steel_chivalrylance",
-		"magistuarmory:steel_claymore",
-		"magistuarmory:steel_concavehalberd",
-		"magistuarmory:steel_estoc",
-		"magistuarmory:steel_flamebladedsword",
-		"magistuarmory:steel_guisarme"
+		{
+			"id": "overgeared:steel_sword",
+			"required": false
+		},
+		{
+			"id": "overgeared:steel_axe",
+			"required": false
+		},
+		{
+			"id": "#simplyswords:gold_gear",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_ahlspiess",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_bastardsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_chainmorgenstern",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_chivalrylance",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_claymore",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_concavehalberd",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_estoc",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_flamebladedsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:steel_guisarme",
+			"required": false
+		}
 	]
 }

@@ -3,17 +3,53 @@
 	"values": [
 		"minecraft:netherite_sword",
 		"minecraft:netherite_axe",
-		"#simplyswords:netherite_gear",
-		"magistuarmory:netherite_ahlspiess",
-		"magistuarmory:netherite_bastardsword",
-		"magistuarmory:netherite_claymore",
-		"magistuarmory:netherite_estoc",
-		"magistuarmory:netherite_flamebladedsword",
-		"magistuarmory:netherite_heavymace",
-		"magistuarmory:netherite_katzbalger",
-		"magistuarmory:netherite_morgenstern",
-		"magistuarmory:netherite_pike",
-		"magistuarmory:netherite_shortsword",
-		"magistuarmory:netherite_zweihander"
+		{
+			"id": "#simplyswords:netherite_gear",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_ahlspiess",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_bastardsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_claymore",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_estoc",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_flamebladedsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_heavymace",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_katzbalger",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_morgenstern",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_pike",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_shortsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_zweihander",
+			"required": false
+		}
 	]
 }

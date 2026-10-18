@@ -3,26 +3,89 @@
 	"values": [
 		"minecraft:iron_sword",
 		"minecraft:iron_axe",
-		"#simplyswords:iron_gear",
-		"magistuarmory:iron_ahlspiess",
-		"magistuarmory:iron_bastardsword",
-		"magistuarmory:iron_chainmorgenstern",
-		"magistuarmory:iron_chivalrylance",
-		"magistuarmory:iron_claymore",
-		"magistuarmory:iron_concavehalberd",
-		"magistuarmory:iron_estoc",
-		"magistuarmory:iron_flamebladedsword",
-		"magistuarmory:iron_guisarme",
-		"magistuarmory:iron_heavymace",
-		"magistuarmory:iron_heavywarhammer",
-		"magistuarmory:iron_katzbalger",
-		"magistuarmory:iron_lochaberaxe",
-		"magistuarmory:iron_lucernhammer",
-		"magistuarmory:iron_morgenstern",
-		"magistuarmory:iron_pike",
-		"magistuarmory:iron_ranseur",
-		"magistuarmory:iron_shortsword",
-		"magistuarmory:iron_stylet",
-		"magistuarmory:iron_zweihander"
+		{
+			"id": "#simplyswords:iron_gear",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_ahlspiess",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_bastardsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_chainmorgenstern",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_chivalrylance",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_claymore",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_concavehalberd",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_estoc",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_flamebladedsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_guisarme",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_heavymace",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_heavywarhammer",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_katzbalger",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_lochaberaxe",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_lucernhammer",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_morgenstern",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_pike",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_ranseur",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_shortsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_stylet",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:iron_zweihander",
+			"required": false
+		}
 	]
 }

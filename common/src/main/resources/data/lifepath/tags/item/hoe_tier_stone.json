@@ -3,6 +3,9 @@
 	"values": [
 		"minecraft:stone_hoe",
 		"minecraft:golden_hoe",
-		"overgeared:copper_hoe"
+		{
+			"id": "overgeared:copper_hoe",
+			"required": false
+		}
 	]
 }

@@ -1,10 +1,25 @@
 {
 	"replace": false,
 	"values": [
-		"overgeared:smithing_hammer",
-		"overgeared:copper_smithing_hammer",
-		"overgeared:stone_anvil",
-		"overgeared:wooden_tongs",
-		"overgeared:clay_tool_cast"
+		{
+			"id": "overgeared:smithing_hammer",
+			"required": false
+		},
+		{
+			"id": "overgeared:copper_smithing_hammer",
+			"required": false
+		},
+		{
+			"id": "overgeared:stone_anvil",
+			"required": false
+		},
+		{
+			"id": "overgeared:wooden_tongs",
+			"required": false
+		},
+		{
+			"id": "overgeared:clay_tool_cast",
+			"required": false
+		}
 	]
 }

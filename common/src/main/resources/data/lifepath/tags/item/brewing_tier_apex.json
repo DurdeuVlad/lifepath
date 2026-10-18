@@ -1,6 +1,9 @@
 {
 	"replace": false,
 	"values": [
-		"alchimiae:netherite_mortar_and_pestle"
+		{
+			"id": "alchimiae:netherite_mortar_and_pestle",
+			"required": false
+		}
 	]
 }

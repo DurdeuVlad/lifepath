@@ -5,6 +5,10 @@ import com.dwurdy.lifepath.compat.kaleidoscope.KaleidoscopeTakeSupport;
 import java.util.Optional;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,8 +25,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * {@code FluidUtils.fillItem}, which hands the filled container to the entity
  * and returns {@code true}. The produced stack is predicted at HEAD by
  * replaying {@code fillItem}'s simulate pass (probe copy → simulated transfer
- * → {@code getContainer()}), all reflectively since common has no NeoForge
- * types. Attributed to the taker; non-players earn nothing.
+ * → {@code getContainer()}). Lives in the neoforge source set for direct
+ * fluid-capability types; the mod's own {@code getFluid()} stays reflective
+ * since kaleidoscopetavern is not a compile dependency. Attributed to the
+ * taker; non-players earn nothing.
  */
 @Pseudo
 @Mixin(targets = "com.github.ysbbbbbb.kaleidoscopetavern.blockentity.brew.PressingTubBlockEntity",
@@ -51,37 +57,32 @@ public abstract class KaleidoscopeTavernPressingTubMixin {
 
 	/**
 	 * Replays {@code FluidUtils.fillItem}'s simulated pass on a probe copy of
-	 * the held container: {@code FluidUtil.getFluidHandler(probe)}, a
-	 * non-committing {@code tryFluidTransfer(probeHandler, tank, 1000, false)}
-	 * out of the tub's {@code getFluid()} tank, then
-	 * {@code IFluidHandlerItem.getContainer()} — the stack the taker receives.
-	 * Any reflective failure degrades to {@link ItemStack#EMPTY}.
+	 * the held container: {@link FluidUtil#getFluidHandler}, a non-committing
+	 * {@link FluidUtil#tryFluidTransfer} out of the tub's {@code getFluid()}
+	 * tank (reflective — mod class), then {@link IFluidHandlerItem#getContainer}
+	 * — the stack the taker receives. Any failure degrades to
+	 * {@link ItemStack#EMPTY}.
 	 */
 	@Unique
 	private ItemStack lifepath$predictFill(ItemStack container) {
 		try {
 			ItemStack probe = container.copyWithCount(1);
-			Class<?> fluidUtil = Class.forName("net.neoforged.neoforge.fluids.FluidUtil");
-			Object handler = fluidUtil.getMethod("getFluidHandler", ItemStack.class)
-					.invoke(null, probe);
-			if (!(handler instanceof Optional<?> opt) || opt.isEmpty()) {
+			Optional<IFluidHandlerItem> opt = FluidUtil.getFluidHandler(probe);
+			if (opt.isEmpty()) {
 				return ItemStack.EMPTY;
 			}
-			Object itemHandler = opt.get();
+			IFluidHandlerItem itemHandler = opt.get();
 			Object tank = getClass().getMethod("getFluid").invoke(this);
-			Class<?> iFluidHandler = Class
-					.forName("net.neoforged.neoforge.fluids.capability.IFluidHandler");
-			Object moved = fluidUtil.getMethod("tryFluidTransfer", iFluidHandler,
-					iFluidHandler, int.class, boolean.class)
-					.invoke(null, itemHandler, tank, LIFEPATH_PRESSING_TUB_FILL_AMOUNT, false);
-			if (moved == null || Boolean.TRUE
-					.equals(moved.getClass().getMethod("isEmpty").invoke(moved))) {
+			if (!(tank instanceof IFluidHandler source)) {
 				return ItemStack.EMPTY;
 			}
-			Class<?> iFluidHandlerItem = Class.forName(
-					"net.neoforged.neoforge.fluids.capability.IFluidHandlerItem");
-			Object filled = iFluidHandlerItem.getMethod("getContainer").invoke(itemHandler);
-			return filled instanceof ItemStack stack ? stack : ItemStack.EMPTY;
+			FluidStack moved = FluidUtil.tryFluidTransfer(itemHandler, source,
+					LIFEPATH_PRESSING_TUB_FILL_AMOUNT, false);
+			if (moved == null || moved.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+			ItemStack filled = itemHandler.getContainer();
+			return filled == null ? ItemStack.EMPTY : filled;
 		} catch (ReflectiveOperationException | ClassCastException e) {
 			LifepathMod.LOGGER.debug("Tavern pressing-tub fill prediction failed: {}",
 					e.toString());

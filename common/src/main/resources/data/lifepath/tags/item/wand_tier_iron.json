@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"constructionwand:iron_wand",
-		"constructionwand:gold_wand"
+		{
+			"id": "constructionwand:iron_wand",
+			"required": false
+		},
+		{
+			"id": "constructionwand:gold_wand",
+			"required": false
+		}
 	]
 }

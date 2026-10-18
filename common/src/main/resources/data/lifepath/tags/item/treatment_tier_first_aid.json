@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"firstaid:plaster",
-		"firstaid:bandage"
+		{
+			"id": "firstaid:plaster",
+			"required": false
+		},
+		{
+			"id": "firstaid:bandage",
+			"required": false
+		}
 	]
 }

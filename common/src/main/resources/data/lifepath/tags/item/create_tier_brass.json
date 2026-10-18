@@ -1,15 +1,45 @@
 {
 	"replace": false,
 	"values": [
-		"create:brass_hand",
-		"create:extendo_grip",
-		"create:mechanical_arm",
-		"create:linked_controller",
-		"create:rotation_speed_controller",
-		"create:brass_casing",
-		"create:crafting_blueprint",
-		"create:empty_schematic",
-		"create:schematic",
-		"create:schematic_and_quill"
+		{
+			"id": "create:brass_hand",
+			"required": false
+		},
+		{
+			"id": "create:extendo_grip",
+			"required": false
+		},
+		{
+			"id": "create:mechanical_arm",
+			"required": false
+		},
+		{
+			"id": "create:linked_controller",
+			"required": false
+		},
+		{
+			"id": "create:rotation_speed_controller",
+			"required": false
+		},
+		{
+			"id": "create:brass_casing",
+			"required": false
+		},
+		{
+			"id": "create:crafting_blueprint",
+			"required": false
+		},
+		{
+			"id": "create:empty_schematic",
+			"required": false
+		},
+		{
+			"id": "create:schematic",
+			"required": false
+		},
+		{
+			"id": "create:schematic_and_quill",
+			"required": false
+		}
 	]
 }

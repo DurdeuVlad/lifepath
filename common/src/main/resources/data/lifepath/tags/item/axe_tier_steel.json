@@ -1,6 +1,9 @@
 {
 	"replace": false,
 	"values": [
-		"overgeared:steel_axe"
+		{
+			"id": "overgeared:steel_axe",
+			"required": false
+		}
 	]
 }

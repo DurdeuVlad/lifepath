@@ -1,6 +1,9 @@
 {
 	"replace": false,
 	"values": [
-		"bioforge:ceiling_viral_scanner"
+		{
+			"id": "bioforge:ceiling_viral_scanner",
+			"required": false
+		}
 	]
 }

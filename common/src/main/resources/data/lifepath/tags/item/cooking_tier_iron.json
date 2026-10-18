@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"farmersdelight:iron_knife",
-		"farmersdelight:skillet",
-		"kaleidoscope_cookery:iron_kitchen_knife"
+		{
+			"id": "farmersdelight:iron_knife",
+			"required": false
+		},
+		{
+			"id": "farmersdelight:skillet",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:iron_kitchen_knife",
+			"required": false
+		}
 	]
 }

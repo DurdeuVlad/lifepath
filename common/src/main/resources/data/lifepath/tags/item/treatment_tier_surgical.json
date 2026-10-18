@@ -1,6 +1,9 @@
 {
 	"replace": false,
 	"values": [
-		"bioforge:bone_saw"
+		{
+			"id": "bioforge:bone_saw",
+			"required": false
+		}
 	]
 }

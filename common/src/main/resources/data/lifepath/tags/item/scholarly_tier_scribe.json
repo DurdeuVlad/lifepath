@@ -3,6 +3,6 @@
 	"values": [
 		"minecraft:writable_book",
 		"minecraft:map",
-		"minecraft:empty_map"
+		"minecraft:filled_map"
 	]
 }

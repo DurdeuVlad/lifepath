@@ -1,14 +1,41 @@
 {
 	"replace": false,
 	"values": [
-		"create:track",
-		"create:track_signal",
-		"create:track_station",
-		"create:track_observer",
-		"create:controller_rail",
-		"create:railway_casing",
-		"create:schematicannon",
-		"create:wand_of_symmetry",
-		"create:schematic_table"
+		{
+			"id": "create:track",
+			"required": false
+		},
+		{
+			"id": "create:track_signal",
+			"required": false
+		},
+		{
+			"id": "create:track_station",
+			"required": false
+		},
+		{
+			"id": "create:track_observer",
+			"required": false
+		},
+		{
+			"id": "create:controller_rail",
+			"required": false
+		},
+		{
+			"id": "create:railway_casing",
+			"required": false
+		},
+		{
+			"id": "create:schematicannon",
+			"required": false
+		},
+		{
+			"id": "create:wand_of_symmetry",
+			"required": false
+		},
+		{
+			"id": "create:schematic_table",
+			"required": false
+		}
 	]
 }

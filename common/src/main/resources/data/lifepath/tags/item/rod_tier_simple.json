@@ -1,8 +1,17 @@
 {
 	"replace": false,
 	"values": [
-		"riverfishing:stick_rod",
-		"riverfishing:bamboo_rod",
-		"riverfishing:ultralight_rod"
+		{
+			"id": "riverfishing:stick_rod",
+			"required": false
+		},
+		{
+			"id": "riverfishing:bamboo_rod",
+			"required": false
+		},
+		{
+			"id": "riverfishing:ultralight_rod",
+			"required": false
+		}
 	]
 }

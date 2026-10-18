@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"alchimiae:alembic",
-		"alchimiae:diamond_mortar_and_pestle"
+		{
+			"id": "alchimiae:alembic",
+			"required": false
+		},
+		{
+			"id": "alchimiae:diamond_mortar_and_pestle",
+			"required": false
+		}
 	]
 }

@@ -1,15 +1,45 @@
 {
 	"replace": false,
 	"values": [
-		"wildhunt:dual_blades_skarn",
-		"wildhunt:dual_blades_vorrath",
-		"wildhunt:dual_blades_ashfang",
-		"wildhunt:dual_blades_ashfang_plus",
-		"wildhunt:great_sword_ashfang",
-		"wildhunt:great_sword_ashfang_plus",
-		"wildhunt:kharzul_blade",
-		"wildhunt:vorrath_chainblade",
-		"wildhunt:long_sword_vorrath",
-		"wildhunt:insect_glaive_vorrath"
+		{
+			"id": "wildhunt:dual_blades_skarn",
+			"required": false
+		},
+		{
+			"id": "wildhunt:dual_blades_vorrath",
+			"required": false
+		},
+		{
+			"id": "wildhunt:dual_blades_ashfang",
+			"required": false
+		},
+		{
+			"id": "wildhunt:dual_blades_ashfang_plus",
+			"required": false
+		},
+		{
+			"id": "wildhunt:great_sword_ashfang",
+			"required": false
+		},
+		{
+			"id": "wildhunt:great_sword_ashfang_plus",
+			"required": false
+		},
+		{
+			"id": "wildhunt:kharzul_blade",
+			"required": false
+		},
+		{
+			"id": "wildhunt:vorrath_chainblade",
+			"required": false
+		},
+		{
+			"id": "wildhunt:long_sword_vorrath",
+			"required": false
+		},
+		{
+			"id": "wildhunt:insect_glaive_vorrath",
+			"required": false
+		}
 	]
 }

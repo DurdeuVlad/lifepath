@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"immersive_melodies:piano",
-		"immersive_melodies:ender_bass"
+		{
+			"id": "immersive_melodies:piano",
+			"required": false
+		},
+		{
+			"id": "immersive_melodies:ender_bass",
+			"required": false
+		}
 	]
 }

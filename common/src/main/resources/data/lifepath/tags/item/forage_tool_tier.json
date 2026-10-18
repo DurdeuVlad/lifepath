@@ -1,7 +1,13 @@
 {
 	"replace": false,
 	"values": [
-		"hexalia:briar_sickle",
-		"hexalia:athame"
+		{
+			"id": "hexalia:briar_sickle",
+			"required": false
+		},
+		{
+			"id": "hexalia:athame",
+			"required": false
+		}
 	]
 }

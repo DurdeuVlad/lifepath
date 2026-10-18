@@ -2,6 +2,9 @@
 	"replace": false,
 	"values": [
 		"minecraft:brewing_stand",
-		"alchimiae:stone_mortar_and_pestle"
+		{
+			"id": "alchimiae:stone_mortar_and_pestle",
+			"required": false
+		}
 	]
 }

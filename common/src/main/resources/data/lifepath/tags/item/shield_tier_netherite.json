@@ -1,14 +1,41 @@
 {
 	"replace": false,
 	"values": [
-		"magistuarmory:netherite_buckler",
-		"magistuarmory:netherite_heatershield",
-		"magistuarmory:netherite_ellipticalshield",
-		"magistuarmory:netherite_kiteshield",
-		"magistuarmory:netherite_roundshield",
-		"magistuarmory:netherite_pavese",
-		"magistuarmory:netherite_rondache",
-		"magistuarmory:netherite_tartsche",
-		"magistuarmory:netherite_target"
+		{
+			"id": "magistuarmory:netherite_buckler",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_heatershield",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_ellipticalshield",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_kiteshield",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_roundshield",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_pavese",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_rondache",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_tartsche",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:netherite_target",
+			"required": false
+		}
 	]
 }

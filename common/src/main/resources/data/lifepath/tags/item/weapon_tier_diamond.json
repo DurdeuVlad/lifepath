@@ -3,17 +3,53 @@
 	"values": [
 		"minecraft:diamond_sword",
 		"minecraft:diamond_axe",
-		"#simplyswords:diamond_gear",
-		"magistuarmory:diamond_ahlspiess",
-		"magistuarmory:diamond_bastardsword",
-		"magistuarmory:diamond_claymore",
-		"magistuarmory:diamond_estoc",
-		"magistuarmory:diamond_flamebladedsword",
-		"magistuarmory:diamond_heavymace",
-		"magistuarmory:diamond_katzbalger",
-		"magistuarmory:diamond_morgenstern",
-		"magistuarmory:diamond_pike",
-		"magistuarmory:diamond_shortsword",
-		"magistuarmory:diamond_zweihander"
+		{
+			"id": "#simplyswords:diamond_gear",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_ahlspiess",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_bastardsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_claymore",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_estoc",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_flamebladedsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_heavymace",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_katzbalger",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_morgenstern",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_pike",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_shortsword",
+			"required": false
+		},
+		{
+			"id": "magistuarmory:diamond_zweihander",
+			"required": false
+		}
 	]
 }

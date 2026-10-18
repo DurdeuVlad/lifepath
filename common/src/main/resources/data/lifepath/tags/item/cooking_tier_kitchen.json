@@ -1,11 +1,29 @@
 {
 	"replace": false,
 	"values": [
-		"farmersdelight:cooking_pot",
-		"kaleidoscope_cookery:pot",
-		"kaleidoscope_cookery:stockpot",
-		"kaleidoscope_cookery:kitchen_shovel",
-		"kaleidoscope_cookery:teapot",
-		"kaleidoscope_cookery:oil_pot"
+		{
+			"id": "farmersdelight:cooking_pot",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:pot",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:stockpot",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:kitchen_shovel",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:teapot",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:oil_pot",
+			"required": false
+		}
 	]
 }
