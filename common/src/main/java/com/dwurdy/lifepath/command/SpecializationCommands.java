@@ -9,6 +9,7 @@ import com.dwurdy.lifepath.character.CharacterManager;
 import com.dwurdy.lifepath.character.PlayerCharacterData;
 import com.dwurdy.lifepath.content.SpecializationDefinition;
 import com.dwurdy.lifepath.registry.LifepathContent;
+import com.dwurdy.lifepath.selection.SelectionService;
 import com.dwurdy.lifepath.specialization.SpecializationService;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -25,8 +26,12 @@ import net.minecraft.server.level.ServerPlayer;
  *   <li>{@code get <player>} — show the current specialization and its key fields.</li>
  *   <li>{@code set <player> <id>} — apply the spec: sets the id, raises
  *       starting levels (never lowers), applies aptitude overrides and
- *       protected floors (all raise-only). There is no clear/un-apply path —
- *       baked grants are irrevocable short of {@code character reset}.</li>
+ *       protected floors (all raise-only).</li>
+ *   <li>{@code clear <player>} — nulls the spec id and re-pushes the
+ *       selection catalog, re-opening the once-ever picker. Grants already
+ *       applied by a previous spec stay baked (levels/aptitudes/floors are
+ *       not revoked) — un-applying them is {@code character reset}
+ *       territory.</li>
  * </ul>
  */
 public final class SpecializationCommands {
@@ -58,12 +63,17 @@ public final class SpecializationCommands {
 										})
 										.executes(ctx -> set(ctx.getSource(),
 												EntityArgument.getPlayer(ctx, "player"),
-												ResourceLocationArgument.getId(ctx, "id")))))));
+												ResourceLocationArgument.getId(ctx, "id"))))))
+				.then(literal("clear")
+						.then(argument("player", EntityArgument.player())
+								.executes(ctx -> clear(ctx.getSource(),
+										EntityArgument.getPlayer(ctx, "player"))))));
 	}
 
 	private static int usage(CommandSourceStack source) {
 		source.sendSuccess(() -> Component.literal(
-				"usage: /lifepath specialization get <player> | set <player> <id>"), false);
+				"usage: /lifepath specialization get <player> | set <player> <id>"
+						+ " | clear <player>"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
@@ -103,6 +113,36 @@ public final class SpecializationCommands {
 		// duplicate literal here.
 		source.sendSuccess(() -> Component.literal("set " + target.getName().getString()
 				+ " specialization to " + specId), true);
+		return Command.SINGLE_SUCCESS;
+	}
+
+	/**
+	 * Un-picks the specialization WITHOUT un-applying it: the id goes null so
+	 * the once-ever picker re-opens (the re-pushed catalog sees
+	 * {@code specializationId == null} and offers every spec as AVAILABLE),
+	 * but starting levels/aptitudes/floors a previous spec granted are baked
+	 * into the character and stay — the feedback says so explicitly because
+	 * that asymmetry is the documented product behavior.
+	 */
+	private static int clear(CommandSourceStack source, ServerPlayer target) {
+		PlayerCharacterData data = CharacterManager.getCharacter(target);
+		ResourceLocation previous = data.specializationId();
+		if (previous == null) {
+			source.sendSuccess(() -> Component.literal(
+					target.getName().getString() + " has no specialization to clear"), false);
+			return Command.SINGLE_SUCCESS;
+		}
+		data.setSpecializationId(null);
+		CharacterManager.markDirty(target);
+		CharacterManager.saveCharacter(target);
+		CharacterManager.syncCharacter(target);
+		SelectionService.pushCatalog(target);
+		LifepathMod.LOGGER.info("admin action: {} cleared {} ({}) specialization (was {})",
+				source.getTextName(), target.getName().getString(), target.getUUID(), previous);
+		source.sendSuccess(() -> Component.literal("cleared " + target.getName().getString()
+				+ " specialization (was " + previous + ") — picker re-opened;"
+				+ " granted levels/aptitudes/floors stay baked (grants are not revoked)"),
+				true);
 		return Command.SINGLE_SUCCESS;
 	}
 

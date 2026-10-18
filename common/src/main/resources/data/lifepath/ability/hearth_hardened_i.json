@@ -1,0 +1,29 @@
+{
+	"display_name": "Hearth-Hardened I",
+	"description": "Years over open flame: near a cooking fire the heat rolls off you like steam off a plate.",
+	"icon": "minecraft:textures/item/campfire.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#lifepath:heat_sources",
+				"radius": 6
+			}
+		]
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:fire_resistance",
+			"duration": 80,
+			"amplifier": 0
+		}
+	]
+}

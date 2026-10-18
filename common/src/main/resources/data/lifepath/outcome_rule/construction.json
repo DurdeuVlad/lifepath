@@ -1,0 +1,38 @@
+{
+	"skill": "lifepath:construction",
+	"activity": "lifepath:crafting",
+	"required_tags": [
+		"lifepath:furniture"
+	],
+	"bands": {
+		"untrained": {
+			"failure_chance": 0.15,
+			"failure_count_mult": 0.5,
+			"quality_tier": "crude"
+		},
+		"novice": {
+			"failure_chance": 0.08,
+			"failure_count_mult": 0.5,
+			"quality_tier": "poor"
+		},
+		"apprentice": {
+			"quality_tier": "standard"
+		},
+		"skilled": {
+			"quality_tier": "fine"
+		},
+		"expert": {
+			"quality_tier": "fine",
+			"sign_items": true
+		},
+		"master": {
+			"quality_tier": "masterwork",
+			"sign_items": true
+		},
+		"legendary": {
+			"quality_tier": "masterwork",
+			"sign_items": true,
+			"output_count_mult": 1.2
+		}
+	}
+}

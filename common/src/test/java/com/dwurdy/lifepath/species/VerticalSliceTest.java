@@ -169,9 +169,10 @@ class VerticalSliceTest {
 				"phoenix", "phantom", "celestial"))
 			assertTrue(LifepathContent.species().contains(LifepathMod.id(s)),
 					"missing species " + s);
-		for (String s : List.of("miner", "farmer", "blacksmith", "fisherman",
-				"lumberjack", "hunter", "engineer", "herbalist", "cook",
-				"explorer", "laborer", "scholar"))
+		for (String s : List.of("alchemist", "bard", "blacksmith", "builder",
+				"cook", "engineer", "farmer", "fisherman", "forester",
+				"herbalist", "medic", "miner", "rancher", "scholar",
+				"soldier", "tavernkeep", "wanderer"))
 			assertTrue(LifepathContent.specializations().contains(LifepathMod.id(s)),
 					"missing specialization " + s);
 		for (String s : List.of("mining", "farming", "smithing", "fishing",

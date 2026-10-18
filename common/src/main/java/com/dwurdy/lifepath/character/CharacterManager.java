@@ -132,6 +132,27 @@ public final class CharacterManager {
 			entry.owner = player;
 			return entry;
 		});
+		// Offline half of `/lifepath character resetall`: a marker in world
+		// saved data means this player's persisted data predates the wipe —
+		// reset BEFORE decay/sync so the login lands on fresh defaults and
+		// the join catalog push (SelectionService, registered after this
+		// hook) re-arms the pickers. The marker is consumed only AFTER the
+		// reset is durably saved — consuming first would silently lose the
+		// deferred wipe if saveCharacter threw or the JVM died between.
+		var server = player.getServer();
+		if (server != null) {
+			var pending = com.dwurdy.lifepath.character.persistence
+					.PendingResetsData.get(server);
+			if (pending.isPending(player.getUUID())) {
+				PlayerCharacterData data = getCharacter(player);
+				data.reset();
+				markDirty(player);
+				saveCharacter(player);
+				pending.consume(player.getUUID());
+				LifepathMod.LOGGER.info("consumed pending reset for {} ({})",
+						player.getName().getString(), player.getUUID());
+			}
+		}
 		// Lazy decay trigger (M3-3): offline elapsed time is charged once here —
 		// deterministic because the window anchors on persisted timestamps.
 		if (com.dwurdy.lifepath.perf.PerfCounters.time("decay.login_batch",

@@ -1,0 +1,21 @@
+{
+	"display_name": "Steeled Liver III",
+	"description": "A practiced tolerance for what goes down wrong. (-15% burn time)",
+	"icon": "minecraft:textures/item/brewing_stand.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.burning_time",
+			"operation": "add_multiplied_base",
+			"value": -0.15,
+			"duration_ticks": 120
+		}
+	]
+}

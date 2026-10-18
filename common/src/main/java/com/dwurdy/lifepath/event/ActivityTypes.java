@@ -23,4 +23,14 @@ public final class ActivityTypes {
 	public static final ResourceLocation DEFENCE = ResourceLocation.fromNamespaceAndPath("lifepath", "defence");
 	/** Potion take-outs from a brewing stand (M24 Brewer). */
 	public static final ResourceLocation BREWING = ResourceLocation.fromNamespaceAndPath("lifepath", "brewing");
+	/** Animal care: feed/breed/birth/milk/shear/groom interactions. */
+	public static final ResourceLocation HUSBANDRY = ResourceLocation.fromNamespaceAndPath("lifepath", "husbandry");
+	/** Song/spell performance — SpellEngine SPELL_CAST completions. */
+	public static final ResourceLocation PERFORMANCE = ResourceLocation.fromNamespaceAndPath("lifepath", "performance");
+	/** Instrument play — melody starts (Immersive Melodies when present). */
+	public static final ResourceLocation MUSIC = ResourceLocation.fromNamespaceAndPath("lifepath", "music");
+	/** Medical diagnosis — reserved; emitters arrive with Medic mod intake. */
+	public static final ResourceLocation DIAGNOSIS = ResourceLocation.fromNamespaceAndPath("lifepath", "diagnosis");
+	/** Medical treatment — reserved; emitters arrive with Medic mod intake. */
+	public static final ResourceLocation TREATMENT = ResourceLocation.fromNamespaceAndPath("lifepath", "treatment");
 }

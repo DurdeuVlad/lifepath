@@ -3,6 +3,31 @@
 	"values": [
 		"#minecraft:leaves",
 		"#minecraft:flowers",
-		"#minecraft:saplings"
+		"#minecraft:saplings",
+		{ "id": "kaleidoscope_flora:absolution", "required": false },
+		{ "id": "kaleidoscope_flora:as_you_wish", "required": false },
+		{ "id": "kaleidoscope_flora:autumn_serenade", "required": false },
+		{ "id": "kaleidoscope_flora:breath_of_ancients", "required": false },
+		{ "id": "kaleidoscope_flora:coronation", "required": false },
+		{ "id": "kaleidoscope_flora:crimson_heartbeat", "required": false },
+		{ "id": "kaleidoscope_flora:echo_of_the_end", "required": false },
+		{ "id": "kaleidoscope_flora:fire_waltz", "required": false },
+		{ "id": "kaleidoscope_flora:first_bloom", "required": false },
+		{ "id": "kaleidoscope_flora:fleeting_bloom", "required": false },
+		{ "id": "kaleidoscope_flora:fleurs_du_mal", "required": false },
+		{ "id": "kaleidoscope_flora:hanami_tale", "required": false },
+		{ "id": "kaleidoscope_flora:loves_me_not", "required": false },
+		{ "id": "kaleidoscope_flora:lullaby", "required": false },
+		{ "id": "kaleidoscope_flora:may_kiss", "required": false },
+		{ "id": "kaleidoscope_flora:prussian_leap", "required": false },
+		{ "id": "kaleidoscope_flora:rosy_stride", "required": false },
+		{ "id": "kaleidoscope_flora:spring_waltz", "required": false },
+		{ "id": "kaleidoscope_flora:springtime_stroll", "required": false },
+		{ "id": "kaleidoscope_flora:tender_thorns", "required": false },
+		{ "id": "kaleidoscope_flora:the_gaze", "required": false },
+		{ "id": "kaleidoscope_flora:the_sunward", "required": false },
+		{ "id": "kaleidoscope_flora:the_unnoticed", "required": false },
+		{ "id": "kaleidoscope_flora:vernal_awakening", "required": false },
+		{ "id": "kaleidoscope_flora:when_the_wind_rises", "required": false }
 	]
 }

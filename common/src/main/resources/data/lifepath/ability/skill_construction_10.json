@@ -1,0 +1,21 @@
+{
+	"display_name": "Surveyor's Reach I",
+	"description": "Plumb lines extend where you will them. (+0.3 block reach)",
+	"icon": "minecraft:textures/item/brick.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.block_interaction_range",
+			"operation": "add_value",
+			"value": 0.3,
+			"duration_ticks": 120
+		}
+	]
+}

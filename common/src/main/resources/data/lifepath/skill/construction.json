@@ -1,0 +1,87 @@
+{
+	"display_name": "Construction",
+	"icon": "minecraft:textures/item/brick.png",
+	"description": "Raising structures \u2014 framing, masonry, finishing.",
+	"improve_hint": "Place structural and decorative blocks.",
+	"category": "crafting",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 10,
+			"description_key": "lifepath.skill.construction.milestone.10",
+			"effects": [
+				"lifepath:skill_construction_10"
+			]
+		},
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.construction.milestone.20",
+			"effects": [
+				"lifepath:skill_construction_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.construction.milestone.30",
+			"effects": [
+				"lifepath:skill_construction_30"
+			]
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.construction.milestone.40",
+			"effects": [
+				"lifepath:skill_construction_40"
+			]
+		},
+		{
+			"level": 50,
+			"description_key": "lifepath.skill.construction.milestone.50",
+			"effects": [
+				"lifepath:skill_construction_50"
+			]
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.construction.milestone.60",
+			"effects": [
+				"lifepath:skill_construction_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.construction.milestone.70",
+			"effects": [
+				"lifepath:skill_construction_70"
+			]
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.construction.milestone.80",
+			"effects": [
+				"lifepath:skill_construction_80"
+			]
+		},
+		{
+			"level": 90,
+			"description_key": "lifepath.skill.construction.milestone.90",
+			"effects": [
+				"lifepath:skill_construction_90"
+			]
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.construction.milestone.95",
+			"effects": [
+				"lifepath:skill_construction_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.construction.milestone.100",
+			"effects": [
+				"lifepath:skill_construction_100"
+			]
+		}
+	]
+}

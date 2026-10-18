@@ -22,12 +22,13 @@
 	"protected_floors": {
 		"lifepath:cooking": 30
 	},
+	"signature": [
+		"lifepath:hearth_hardened_i"
+	],
 	"strengths": [
 		"Learns cooking 35% faster",
 		"Cooking can't decay below Lv30",
 		"Also trains farming and fishing"
 	],
-	"weaknesses": [
-		"No signature ability"
-	]
+	"weaknesses": []
 }

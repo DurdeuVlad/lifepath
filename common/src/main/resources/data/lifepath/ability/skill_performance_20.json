@@ -1,0 +1,21 @@
+{
+	"display_name": "Shadow Step I",
+	"description": "Exits and entrances nobody catches. (+5% sneak speed)",
+	"icon": "minecraft:textures/item/feather.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.sneaking_speed",
+			"operation": "add_multiplied_base",
+			"value": 0.05,
+			"duration_ticks": 120
+		}
+	]
+}

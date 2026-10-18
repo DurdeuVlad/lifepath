@@ -1,0 +1,10 @@
+{
+	"replace": false,
+	"values": [
+		{ "id": "alchimiae:mash", "required": false },
+		{ "id": "alchimiae:concentrate", "required": false },
+		{ "id": "alchimiae:potion", "required": false },
+		{ "id": "alchimiae:splash_potion", "required": false },
+		{ "id": "alchimiae:lingering_potion", "required": false }
+	]
+}

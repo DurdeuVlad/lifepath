@@ -1,0 +1,21 @@
+{
+	"display_name": "Combat Medic III",
+	"description": "You keep yourself breathing so you can keep them breathing. (+3 health)",
+	"icon": "minecraft:textures/item/golden_apple.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.max_health",
+			"operation": "add_value",
+			"value": 3,
+			"duration_ticks": 120
+		}
+	]
+}

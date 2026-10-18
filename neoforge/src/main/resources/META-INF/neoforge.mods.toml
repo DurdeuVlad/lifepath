@@ -27,6 +27,103 @@ issueTrackerURL="https://github.com/DurdeuVlad/lifepath/issues"
 [[mixins]]
 	config="lifepath.compat.kaleidoscope.mixins.json"
 	requiredMods=["kaleidoscope_cookery"]
+[[mixins]]
+	config="lifepath.compat.kaleidoscopetavern.mixins.json"
+	requiredMods=["kaleidoscope_tavern"]
+[[mixins]]
+	config="lifepath.compat.brewinandchewin.mixins.json"
+	requiredMods=["brewinandchewin"]
+[[mixins]]
+	config="lifepath.compat.vinery.mixins.json"
+	requiredMods=["vinery"]
+[[mixins]]
+	config="lifepath.compat.hexalia.mixins.json"
+	requiredMods=["hexalia"]
+[[mixins]]
+	config="lifepath.compat.cookscollection.mixins.json"
+	requiredMods=["cookscollection"]
+[[mixins]]
+	config="lifepath.compat.create.mixins.json"
+	requiredMods=["create"]
+# Steam 'n' Rails rides Create — keep the config next to its parent seam
+[[mixins]]
+	config="lifepath.compat.railways.mixins.json"
+	requiredMods=["railways"]
+[[mixins]]
+	config="lifepath.compat.animalhusbandry.mixins.json"
+	requiredMods=["animalhusbandry"]
+[[mixins]]
+	config="lifepath.compat.wildlore.mixins.json"
+	requiredMods=["wildlore"]
+[[mixins]]
+	config="lifepath.compat.timbertales.mixins.json"
+	requiredMods=["timber_tales"]
+[[mixins]]
+	config="lifepath.compat.riverfishing.mixins.json"
+	requiredMods=["riverfishing"]
+[[mixins]]
+	config="lifepath.compat.immersivemelodies.mixins.json"
+	requiredMods=["immersive_melodies"]
+[[mixins]]
+	config="lifepath.compat.firstaid.mixins.json"
+	requiredMods=["firstaid"]
+[[mixins]]
+	config="lifepath.compat.bioforge.mixins.json"
+	requiredMods=["bioforge"]
+[[mixins]]
+	config="lifepath.compat.butchery.mixins.json"
+	requiredMods=["butchery"]
+[[mixins]]
+	config="lifepath.compat.woodworks.mixins.json"
+	requiredMods=["woodworks"]
+[[mixins]]
+	config="lifepath.compat.potionbundles.mixins.json"
+	requiredMods=["potionbundles"]
+[[mixins]]
+	config="lifepath.compat.scholar.mixins.json"
+	requiredMods=["scholar"]
+[[mixins]]
+	config="lifepath.compat.map_atlases.mixins.json"
+	requiredMods=["map_atlases"]
+[[mixins]]
+	config="lifepath.compat.zetter.mixins.json"
+	requiredMods=["zetter"]
+[[mixins]]
+	config="lifepath.compat.esquissemod.mixins.json"
+	requiredMods=["esquissemod"]
+[[mixins]]
+	config="lifepath.compat.hearthandharvest.mixins.json"
+	requiredMods=["hearthandharvest"]
+[[mixins]]
+	config="lifepath.compat.productivefarming.mixins.json"
+	requiredMods=["productivefarming"]
+[[mixins]]
+	config="lifepath.compat.naturalist.mixins.json"
+	requiredMods=["naturalist"]
+[[mixins]]
+	config="lifepath.compat.icys_better_horses.mixins.json"
+	requiredMods=["icys_better_horses"]
+[[mixins]]
+	config="lifepath.compat.trotting_wagons.mixins.json"
+	requiredMods=["trotting_wagons"]
+[[mixins]]
+	config="lifepath.compat.createhorsepower.mixins.json"
+	requiredMods=["createhorsepower"]
+[[mixins]]
+	config="lifepath.compat.farmersrespite.mixins.json"
+	requiredMods=["farmersrespite"]
+[[mixins]]
+	config="lifepath.compat.kaleidoscope_bloodwine.mixins.json"
+	requiredMods=["kaleidoscope_bloodwine"]
+[[mixins]]
+	config="lifepath.compat.romaniansdelight.mixins.json"
+	requiredMods=["romaniansdelight"]
+[[mixins]]
+	config="lifepath.compat.tobacconistmod.mixins.json"
+	requiredMods=["tobacconistmod"]
+[[mixins]]
+	config="lifepath.compat.chipped.mixins.json"
+	requiredMods=["chipped"]
 
 [[dependencies.lifepath]]
 	modId="neoforge"

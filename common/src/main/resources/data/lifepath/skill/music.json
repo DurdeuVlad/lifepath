@@ -1,0 +1,87 @@
+{
+	"display_name": "Music",
+	"icon": "minecraft:textures/item/music_disc_cat.png",
+	"description": "Instruments, song, and melody.",
+	"improve_hint": "Play instruments and perform songs.",
+	"category": "knowledge",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 10,
+			"description_key": "lifepath.skill.music.milestone.10",
+			"effects": [
+				"lifepath:skill_music_10"
+			]
+		},
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.music.milestone.20",
+			"effects": [
+				"lifepath:skill_music_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.music.milestone.30",
+			"effects": [
+				"lifepath:skill_music_30"
+			]
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.music.milestone.40",
+			"effects": [
+				"lifepath:skill_music_40"
+			]
+		},
+		{
+			"level": 50,
+			"description_key": "lifepath.skill.music.milestone.50",
+			"effects": [
+				"lifepath:skill_music_50"
+			]
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.music.milestone.60",
+			"effects": [
+				"lifepath:skill_music_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.music.milestone.70",
+			"effects": [
+				"lifepath:skill_music_70"
+			]
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.music.milestone.80",
+			"effects": [
+				"lifepath:skill_music_80"
+			]
+		},
+		{
+			"level": 90,
+			"description_key": "lifepath.skill.music.milestone.90",
+			"effects": [
+				"lifepath:skill_music_90"
+			]
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.music.milestone.95",
+			"effects": [
+				"lifepath:skill_music_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.music.milestone.100",
+			"effects": [
+				"lifepath:skill_music_100"
+			]
+		}
+	]
+}

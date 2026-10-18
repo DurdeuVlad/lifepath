@@ -3,6 +3,12 @@
 	"skill": "lifepath:engineering",
 	"player_caused_only": true,
 	"base_xp": 0.05,
+	"per_tag": {
+		"lifepath:assembled": 1.5,
+		"lifepath:masonry": 0.25,
+		"lifepath:furniture": 0.25,
+		"lifepath:sawmilled": 0.2
+	},
 	"per_subject": {
 		"create:shaft": 0.2,
 		"create:cogwheel": 0.3,

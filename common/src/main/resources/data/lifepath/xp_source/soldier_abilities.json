@@ -1,0 +1,9 @@
+{
+	"activity": "lifepath:combat",
+	"skill": "lifepath:defence",
+	"player_caused_only": true,
+	"base_xp": 0.5,
+	"required_tags": [
+		"lifepath:unique_ability"
+	]
+}

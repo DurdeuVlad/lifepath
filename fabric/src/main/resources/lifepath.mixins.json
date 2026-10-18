@@ -31,7 +31,18 @@
 		"PlayerAdvancementTrackerMixin",
 		"ServerPlayerMixin",
 		"ItemMixin",
-		"ItemUtilsMixin"
+		"ItemUtilsMixin",
+		"ItemStackMixin",
+		"AnimalMixin",
+		"AbstractHorseMixin",
+		"CowMixin",
+		"GoatMixin",
+		"SheepMixin",
+		"ShearsItemMixin",
+		"MushroomCowMixin",
+		"TamableAnimalMixin",
+		"BucketablePickupMixin",
+		"BreedGoalAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -92,6 +92,32 @@ class PlayerCharacterDataCodecTest {
 		assertEquals(1727000000000L, decoded.morph().lastMorphMs());
 	}
 
+	/**
+	 * Admin reset restores fresh defaults across every field — including the
+	 * morph state that the live-entity cleanup paths key off of. Covers the
+	 * data half of {@code /lifepath character reset[all]}.
+	 */
+	@Test
+	void resetRestoresFreshDefaults() {
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSpeciesId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_species"));
+		data.setSpecializationId(ResourceLocation.fromNamespaceAndPath("lifepath", "test_spec"));
+		data.setSkillProgress(ResourceLocation.fromNamespaceAndPath("lifepath", "s"),
+				new SkillProgress(1.0, 1, 1, 0, Aptitude.A, 7L));
+		data.setMorph(new PlayerCharacterData.MorphState(
+				ResourceLocation.fromNamespaceAndPath("lifepath", "fox"), true, 1727000000000L));
+		data.setDataVersion(1);
+
+		data.reset();
+
+		assertEquals(PlayerCharacterData.createDefault(), data);
+		assertNull(data.morph());
+		assertNull(data.speciesId());
+		assertNull(data.specializationId());
+		assertTrue(data.skills().isEmpty());
+		assertEquals(LifepathMod.DATA_VERSION, data.dataVersion());
+	}
+
 	@Test
 	void morphFieldOptionalInDecode() {
 		// A morph record with only form_id decodes with inactive/epoch-0 defaults.

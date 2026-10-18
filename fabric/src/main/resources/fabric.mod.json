@@ -23,6 +23,7 @@
 			"com.dwurdy.lifepath.fabric.client.FabricLifepathClient"
 		],
 		"lifepath:adapter": [
+			"com.dwurdy.lifepath.compat.drinks.DrinksRepublishAdapter",
 			"com.dwurdy.lifepath.compat.overgeared.OvergearedCompat"
 		]
 	},

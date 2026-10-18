@@ -74,7 +74,10 @@ public final class VanillaGameplayProducers {
 
 	private static final TagKey<Block> ENGINEERING_BLOCKS =
 			TagKey.create(Registries.BLOCK, LifepathMod.id("engineering_blocks"));
+	private static final TagKey<Block> CONSTRUCTION_BLOCKS =
+			TagKey.create(Registries.BLOCK, LifepathMod.id("construction_blocks"));
 	private static final ResourceLocation TAG_PLANTED = LifepathMod.id("planted");
+	private static final ResourceLocation TAG_BUILT = LifepathMod.id("built");
 	private static final ResourceLocation TAG_HARVESTED = LifepathMod.id("harvested");
 	private static final ResourceLocation TAG_MATURE = LifepathMod.id("mature");
 	private static boolean initialized;
@@ -210,6 +213,14 @@ public final class VanillaGameplayProducers {
 		if (isFarmable(state) && isMature(state)) {
 			publishHarvest(serverPlayer, state, blockId, blockTags);
 		}
+
+		// Banded vein-mining: connected same-block ores break with the vein,
+		// capped by mining level. Extra drops flow through Block.getDrops →
+		// BlockDropOutcomeMixin → mining band yield scaling.
+		if (world instanceof ServerLevel serverLevel) {
+			VeinMiner.onBlockBroken(serverPlayer, serverLevel, pos, state,
+					wasPlayerPlaced);
+		}
 	}
 
 	/** Called by {@code mixin.BlockItemMixin} after a successful block placement. */
@@ -230,10 +241,14 @@ public final class VanillaGameplayProducers {
 		}
 		// Engineering grows by building (M27): placing tagged machinery pays
 		// xp_source/engineering by block-id subject; machine output itself pays
-		// nothing (automation is FakePlayer-gated everywhere else).
-		if (placedState.is(ENGINEERING_BLOCKS)) {
+		// nothing (automation is FakePlayer-gated everywhere else). The same
+		// placement emit covers construction_blocks (Builder): the event
+		// carries the block's real tags plus lifepath:built, so each xp_source
+		// self-filters on its own required tag.
+		if (placedState.is(ENGINEERING_BLOCKS) || placedState.is(CONSTRUCTION_BLOCKS)) {
 			Set<ResourceLocation> tags = placedState.getTags()
-					.map(TagKey::location).collect(Collectors.toUnmodifiableSet());
+					.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
+			tags.add(TAG_BUILT);
 			ResourceLocation blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(placedState.getBlock());
 			ActivityDispatcher.publish(new ActivityEvent(player, ActivityTypes.CRAFTING,
 					blockId, tags, ActivityEvent.Cause.PLAYER,
@@ -304,10 +319,48 @@ public final class VanillaGameplayProducers {
 				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
 		tags.add(workstationId);
 		tags.add(com.dwurdy.lifepath.LifepathMod.id("smithing_workstations"));
+		ResourceLocation itemId =
+				net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.getItem());
 		com.dwurdy.lifepath.skill.OutcomeService.apply(serverPlayer,
-				com.dwurdy.lifepath.event.ActivityTypes.SMITHING,
-				net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(output.getItem()),
-				tags, output);
+				com.dwurdy.lifepath.event.ActivityTypes.SMITHING, itemId, tags, output);
+		if (output.is(SCHOLARLY)) {
+			// Scholarly outputs (e.g. anvil enchanted-book combines) also pay
+			// scholarship through the crafting activity — smithing outcome
+			// still owns quality/count so no second OutcomeService.apply.
+			ActivityDispatcher.publish(com.dwurdy.lifepath.event.ActivityEvents.crafting(
+					serverPlayer, itemId, tags,
+					Map.of("count", Integer.toString(output.getCount())),
+					ActivityEvent.Cause.PLAYER));
+		}
+	}
+
+	private static final TagKey<net.minecraft.world.item.Item> SCHOLARLY =
+			TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+					LifepathMod.id("scholarly"));
+
+	/**
+	 * Alchimiae boiler concentrate take-out ({@code BoilerBlockEntity} result
+	 * slot → brewing activity). Unlike {@link #onBrewingOutput} there is no
+	 * POTION_CONTENTS gate — boiler outputs are intermediate reagents
+	 * ({@code alchimiae:concentrate}). Emits {@code lifepath:alchimiae_stage}
+	 * so xp_source data can distinguish stage items from finished potions.
+	 */
+	public static void onAlchemyStage(net.minecraft.world.entity.player.Player player,
+			net.minecraft.world.item.ItemStack output) {
+		if (!(player instanceof ServerPlayer serverPlayer) || isAutomation(player)
+				|| output.isEmpty()) {
+			return;
+		}
+		Set<ResourceLocation> itemTags = output.getTags()
+				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
+		itemTags.add(LifepathMod.id("alchimiae_stage"));
+		ResourceLocation itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM
+				.getKey(output.getItem());
+		ActivityDispatcher.publish(com.dwurdy.lifepath.event.ActivityEvents.brewing(
+				serverPlayer, itemId, itemTags, ActivityEvent.Cause.PLAYER));
+		com.dwurdy.lifepath.skill.OutcomeService.apply(serverPlayer,
+				com.dwurdy.lifepath.event.ActivityTypes.BREWING, itemId,
+				itemTags, output);
 	}
 
 	/**
@@ -539,6 +592,31 @@ public final class VanillaGameplayProducers {
 			return;
 		}
 		publishHarvest(serverPlayer, harvested);
+	}
+
+	/**
+	 * Compat planting event — foreign planting paths that never run
+	 * {@code BlockItem.place} (Productive Farming's seed-bag
+	 * {@code setBlockAndUpdate} loop, HH's trellis {@code applyPlant},
+	 * PF's composter mushroom side-plant). The caller has already
+	 * established that the act is a planting, so the farmable tag gate does
+	 * not apply; the position is still recorded so a later break can't pay
+	 * re-mine mining XP.
+	 */
+	public static void onCompatPlanted(ServerPlayer player, ServerLevel world,
+			BlockPos pos, BlockState planted) {
+		if (isAutomation(player)) {
+			return;
+		}
+		PlacedBlockTracker.record(world, pos);
+		Set<ResourceLocation> tags = planted.getTags()
+				.map(TagKey::location).collect(Collectors.toCollection(HashSet::new));
+		tags.add(TAG_PLANTED);
+		ResourceLocation blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK
+				.getKey(planted.getBlock());
+		ActivityDispatcher.publish(new ActivityEvent(player, ActivityTypes.FARMING,
+				blockId, Set.copyOf(tags), ActivityEvent.Cause.PLAYER,
+				System.currentTimeMillis(), Map.of("mature", "false")));
 	}
 
 	private static void publishHarvest(ServerPlayer player, BlockState state) {

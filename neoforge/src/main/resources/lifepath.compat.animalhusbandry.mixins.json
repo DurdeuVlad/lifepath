@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.dwurdy.lifepath.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"AnimalHusbandryCompatMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

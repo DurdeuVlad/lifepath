@@ -1,0 +1,87 @@
+{
+	"display_name": "Diagnosis",
+	"icon": "minecraft:textures/item/book.png",
+	"description": "Reading symptoms and identifying ailments.",
+	"improve_hint": "Examine patients and assess their conditions.",
+	"category": "knowledge",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 10,
+			"description_key": "lifepath.skill.diagnosis.milestone.10",
+			"effects": [
+				"lifepath:skill_diagnosis_10"
+			]
+		},
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.diagnosis.milestone.20",
+			"effects": [
+				"lifepath:skill_diagnosis_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.diagnosis.milestone.30",
+			"effects": [
+				"lifepath:skill_diagnosis_30"
+			]
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.diagnosis.milestone.40",
+			"effects": [
+				"lifepath:skill_diagnosis_40"
+			]
+		},
+		{
+			"level": 50,
+			"description_key": "lifepath.skill.diagnosis.milestone.50",
+			"effects": [
+				"lifepath:skill_diagnosis_50"
+			]
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.diagnosis.milestone.60",
+			"effects": [
+				"lifepath:skill_diagnosis_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.diagnosis.milestone.70",
+			"effects": [
+				"lifepath:skill_diagnosis_70"
+			]
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.diagnosis.milestone.80",
+			"effects": [
+				"lifepath:skill_diagnosis_80"
+			]
+		},
+		{
+			"level": 90,
+			"description_key": "lifepath.skill.diagnosis.milestone.90",
+			"effects": [
+				"lifepath:skill_diagnosis_90"
+			]
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.diagnosis.milestone.95",
+			"effects": [
+				"lifepath:skill_diagnosis_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.diagnosis.milestone.100",
+			"effects": [
+				"lifepath:skill_diagnosis_100"
+			]
+		}
+	]
+}

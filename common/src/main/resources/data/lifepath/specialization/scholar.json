@@ -18,11 +18,13 @@
 	"protected_floors": {
 		"lifepath:scholarship": 30
 	},
+	"signature": [
+		"lifepath:arcane_sight_i"
+	],
 	"strengths": [
 		"Learns scholarship 35% faster",
-		"Scholarship can't decay below Lv30"
+		"Scholarship can't decay below Lv30",
+		"Enchanted books and enchanting tables count as scholarly crafts"
 	],
-	"weaknesses": [
-		"No signature ability"
-	]
+	"weaknesses": []
 }

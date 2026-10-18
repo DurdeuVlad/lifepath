@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.dwurdy.lifepath.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"CreateBlockBreakingMovementMixin",
+		"CreateDriverAssembleMixin",
+		"CreateHarvesterMovementMixin",
+		"CreateMinecartContraptionMixin",
+		"CreateStationAssembleMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

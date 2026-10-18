@@ -1,0 +1,16 @@
+{
+	"activity": "lifepath:crafting",
+	"skill": "lifepath:brewing",
+	"player_caused_only": true,
+	"base_xp": 0.4,
+	"required_tags": [
+		"lifepath:alchemy_stages"
+	],
+	"per_subject": {
+		"alchimiae:mash": 0.6,
+		"alchimiae:concentrate": 0.8,
+		"alchimiae:potion": 1.0,
+		"alchimiae:splash_potion": 1.0,
+		"alchimiae:lingering_potion": 1.2
+	}
+}

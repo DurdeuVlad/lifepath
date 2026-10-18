@@ -1,0 +1,21 @@
+{
+	"display_name": "Steady Tempo II",
+	"description": "Your hands keep time in a fight too. (+4% attack speed)",
+	"icon": "minecraft:textures/item/music_disc_cat.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.attack_speed",
+			"operation": "add_multiplied_base",
+			"value": 0.04,
+			"duration_ticks": 120
+		}
+	]
+}

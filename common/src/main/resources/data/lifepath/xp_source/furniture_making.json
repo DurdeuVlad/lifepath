@@ -1,0 +1,9 @@
+{
+	"activity": "lifepath:crafting",
+	"skill": "lifepath:construction",
+	"player_caused_only": true,
+	"required_tags": [
+		"lifepath:furniture"
+	],
+	"base_xp": 0.8
+}

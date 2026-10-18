@@ -1,0 +1,31 @@
+{
+	"display_name": "Tavernkeep",
+	"icon": "minecraft:textures/item/honey_bottle.png",
+	"starting_skills": {
+		"lifepath:cooking": 20,
+		"lifepath:brewing": 15
+	},
+	"aptitudes": {
+		"lifepath:cooking": "a",
+		"lifepath:brewing": "b"
+	},
+	"xp_modifiers": {
+		"lifepath:cooking": 1.35,
+		"lifepath:brewing": 1.2
+	},
+	"decay_modifiers": {
+		"lifepath:cooking": 0.3,
+		"lifepath:brewing": 0.5
+	},
+	"protected_floors": {
+		"lifepath:cooking": 30
+	},
+	"strengths": [
+		"Learns cooking 35% faster",
+		"Cooking can't decay below Lv30",
+		"Also trains brewing"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
+}

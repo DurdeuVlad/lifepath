@@ -2,6 +2,7 @@
 	"replace": false,
 	"values": [
 		"minecraft:cocoa",
-		"minecraft:nether_wart"
+		"minecraft:nether_wart",
+		{ "id": "productivefarming:clam", "required": false }
 	]
 }

@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.dwurdy.lifepath.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"BrewinChewinKegBlockMixin",
+		"BrewinChewinKegEmiFermentMixin",
+		"BrewinChewinKegEmiPourMixin",
+		"BrewinChewinKegJeiTransferMixin",
+		"BrewinChewinKegPlaceRecipeMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

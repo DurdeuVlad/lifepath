@@ -6,7 +6,30 @@
 	"per_subject": {
 		"minecraft:writable_book": 0.8,
 		"minecraft:bookshelf": 0.6,
-		"minecraft:lectern": 0.8
+		"minecraft:lectern": 0.8,
+		"minecraft:enchanted_book": 1.0,
+		"minecraft:enchanting_table": 1.0,
+		"map_atlases:atlas": 1.0,
+		"map_atlases:atlas_overworld": 1.0,
+		"map_atlases:atlas_overworld_locked": 1.0,
+		"map_atlases:atlas_nether": 1.0,
+		"map_atlases:atlas_nether_locked": 1.0,
+		"map_atlases:atlas_end": 1.0,
+		"map_atlases:atlas_end_locked": 1.0,
+		"map_atlases:atlas_aether": 1.0,
+		"map_atlases:atlas_aether_locked": 1.0,
+		"map_atlases:atlas_betweenlands": 1.0,
+		"map_atlases:atlas_betweenlands_locked": 1.0,
+		"map_atlases:atlas_blue_skies": 1.0,
+		"map_atlases:atlas_blue_skies_locked": 1.0,
+		"map_atlases:atlas_generic": 1.0,
+		"map_atlases:atlas_generic_locked": 1.0,
+		"map_atlases:atlas_tropics": 1.0,
+		"map_atlases:atlas_tropics_locked": 1.0,
+		"map_atlases:atlas_twilight_forest": 1.0,
+		"map_atlases:atlas_twilight_forest_locked": 1.0,
+		"map_atlases:atlas_the_bumblezone": 1.0,
+		"map_atlases:atlas_the_bumblezone_locked": 1.0
 	},
 	"required_tags": [
 		"lifepath:scholarly"

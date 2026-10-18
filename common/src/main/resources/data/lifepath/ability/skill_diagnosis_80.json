@@ -1,0 +1,21 @@
+{
+	"display_name": "Bedside Focus IV",
+	"description": "The symptom you needed turns up on time. (+2 Luck)",
+	"icon": "minecraft:textures/item/book.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.luck",
+			"operation": "add_value",
+			"value": 2,
+			"duration_ticks": 120
+		}
+	]
+}

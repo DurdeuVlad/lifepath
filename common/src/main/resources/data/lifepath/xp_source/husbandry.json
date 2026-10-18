@@ -1,0 +1,28 @@
+{
+	"activity": "lifepath:husbandry",
+	"skill": "lifepath:husbandry",
+	"player_caused_only": true,
+	"required_tags": ["lifepath:animals"],
+	"base_xp": 0.3,
+	"per_subject": {
+		"minecraft:cow": 0.5,
+		"minecraft:mooshroom": 0.5,
+		"minecraft:sheep": 0.5,
+		"minecraft:goat": 0.5,
+		"minecraft:pig": 0.4,
+		"minecraft:chicken": 0.3,
+		"minecraft:rabbit": 0.3,
+		"minecraft:llama": 0.5,
+		"minecraft:horse": 0.6,
+		"minecraft:donkey": 0.6,
+		"minecraft:mule": 0.6
+	},
+	"per_tag": {
+		"lifepath:bred": 1.0,
+		"lifepath:born": 0.8,
+		"lifepath:milked": 0.5,
+		"lifepath:sheared": 0.5,
+		"lifepath:cared": 0.4,
+		"lifepath:fed": 0.2
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"activity": "lifepath:crafting",
+	"skill": "lifepath:construction",
+	"player_caused_only": true,
+	"required_tags": [
+		"lifepath:construction_blocks"
+	],
+	"base_xp": 0.05,
+	"per_tag": {
+		"lifepath:construction_tier_premium": 1.5,
+		"lifepath:construction_tier_refined": 1.2,
+		"lifepath:built": 1.0
+	}
+}

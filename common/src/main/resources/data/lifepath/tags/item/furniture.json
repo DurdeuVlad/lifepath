@@ -1,0 +1,26 @@
+{
+	"replace": false,
+	"values": [
+		{ "id": "#handcrafted:chairs", "required": false },
+		{ "id": "#handcrafted:benches", "required": false },
+		{ "id": "#handcrafted:wooden_benches", "required": false },
+		{ "id": "#handcrafted:metal_benches", "required": false },
+		{ "id": "#handcrafted:dining_benches", "required": false },
+		{ "id": "#handcrafted:couches", "required": false },
+		{ "id": "#handcrafted:tables", "required": false },
+		{ "id": "#handcrafted:side_tables", "required": false },
+		{ "id": "#handcrafted:desks", "required": false },
+		{ "id": "#handcrafted:nightstands", "required": false },
+		{ "id": "#handcrafted:cupboards", "required": false },
+		{ "id": "#handcrafted:drawers", "required": false },
+		{ "id": "#handcrafted:shelves", "required": false },
+		{ "id": "#handcrafted:counters", "required": false },
+		{ "id": "#handcrafted:chests", "required": false },
+		{ "id": "#handcrafted:fancy_beds", "required": false },
+		{ "id": "#handcrafted:crockery", "required": false },
+		{ "id": "#handcrafted:cups", "required": false },
+		{ "id": "#handcrafted:plates", "required": false },
+		{ "id": "#handcrafted:bowls", "required": false },
+		{ "id": "#handcrafted:trophies", "required": false }
+	]
+}

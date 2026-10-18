@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.dwurdy.lifepath.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"HearthHarvestCropMixin",
+		"HearthHarvestMilkingMixin",
+		"HearthHarvestPluckingMixin",
+		"HearthHarvestTrellisMixin",
+		"HearthHarvestCaskMixin",
+		"HearthHarvestBasinMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

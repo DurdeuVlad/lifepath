@@ -1,0 +1,21 @@
+{
+	"display_name": "Brewer's Nose IV",
+	"description": "You can smell a batch turning before it does. (+4 Luck)",
+	"icon": "minecraft:textures/item/brewing_stand.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.luck",
+			"operation": "add_value",
+			"value": 4,
+			"duration_ticks": 120
+		}
+	]
+}

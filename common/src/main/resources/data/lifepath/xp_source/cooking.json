@@ -29,7 +29,17 @@
 		"cooksrecipes:fish_and_chips": 0.9,
 		"cooksrecipes:rustic_loaf": 0.7,
 		"culturalrecipes:beef_burrito": 1.0,
-		"culturalrecipes:spicy_curry": 1.1
+		"culturalrecipes:spicy_curry": 1.1,
+		"kaleidoscope_hodgepodge:porcelain_plate": 0.5,
+		"kaleidoscope_hodgepodge:large_porcelain_plate": 0.5,
+		"kaleidoscope_hodgepodge:median_porcelain_plate": 0.5,
+		"kaleidoscope_hodgepodge:porcelain_soup_bowl": 0.5,
+		"kaleidoscope_hodgepodge:wooden_plate": 0.4,
+		"kaleidoscope_hodgepodge:tea_tray": 0.5,
+		"kaleidoscope_hodgepodge:bamboo_display_tray": 0.5,
+		"kaleidoscope_hodgepodge:lunch_box": 0.6,
+		"kaleidoscope_hodgepodge:wrapping_bag": 0.4,
+		"kaleidoscope_hodgepodge:hodgepodge_recipe": 0.5
 	},
 	"required_tags": [
 		"lifepath:cookable_foods"

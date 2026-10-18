@@ -312,6 +312,9 @@ public final class LifepathMod {
 		// M7-1: adapters arrive via the lifepath:adapter entrypoint seam —
 		// core never names an external mod (grep-clean compat boundary).
 		com.dwurdy.lifepath.compat.ExternalAdapterRegistry.init();
+		// SpellEngine SPELL_CAST → performance activity; reflective bridge,
+		// inert when spell_engine is absent (RPG-series bard casts).
+		com.dwurdy.lifepath.compat.spellengine.SpellEngineCastBridge.init();
 	}
 
 	public static ResourceLocation id(String path) {

@@ -6,6 +6,7 @@
 	"per_tag": {
 		"lifepath:fishing_treasure": 2.5,
 		"lifepath:fishing_junk": 0.15,
-		"minecraft:fishes": 0.6
+		"minecraft:fishes": 0.6,
+		"riverfishing:fishes": 0.8
 	}
 }

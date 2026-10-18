@@ -5,7 +5,13 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"OvergearedAnvilMixin",
-		"OvergearedBlueprintWorkbenchMixin"
+		"OvergearedBlueprintWorkbenchMixin",
+		"OvergearedKnappingResultSlotMixin",
+		"OvergearedKnappingMenuMixin",
+		"OvergearedFletchingResultSlotMixin",
+		"OvergearedFletchingMenuMixin",
+		"OvergearedAlloySmelterResultSlotMixin",
+		"OvergearedNetherAlloySmelterResultSlotMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0

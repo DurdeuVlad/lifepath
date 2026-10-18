@@ -1,0 +1,6 @@
+{
+	"activity": "lifepath:diagnosis",
+	"skill": "lifepath:diagnosis",
+	"player_caused_only": true,
+	"base_xp": 0.3
+}

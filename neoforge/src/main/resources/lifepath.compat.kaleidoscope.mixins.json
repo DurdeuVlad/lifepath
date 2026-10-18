@@ -7,6 +7,7 @@
 		"KaleidoscopeChoppingBoardMixin",
 		"KaleidoscopePotMixin",
 		"KaleidoscopeShawarmaSpitMixin",
+		"KaleidoscopeStationGateMixin",
 		"KaleidoscopeSteamerMixin",
 		"KaleidoscopeStockpotMixin"
 	],

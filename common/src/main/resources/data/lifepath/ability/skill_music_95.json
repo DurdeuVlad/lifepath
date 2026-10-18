@@ -1,0 +1,21 @@
+{
+	"display_name": "Lucky Refrain V",
+	"description": "The right note lands on its own. (+6 Luck)",
+	"icon": "minecraft:textures/item/music_disc_cat.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.luck",
+			"operation": "add_value",
+			"value": 6,
+			"duration_ticks": 120
+		}
+	]
+}

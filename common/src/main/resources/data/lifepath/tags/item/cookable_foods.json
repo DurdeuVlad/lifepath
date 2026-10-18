@@ -61,6 +61,16 @@
 		{ "id": "culturalrecipes:poached_eggplants", "required": false },
 		{ "id": "culturalrecipes:midori_roll", "required": false },
 		{ "id": "culturalrecipes:tortilla_chips", "required": false },
-		{ "id": "culturalrecipes:eggplant_parmesan_block", "required": false }
+		{ "id": "culturalrecipes:eggplant_parmesan_block", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:porcelain_plate", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:large_porcelain_plate", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:median_porcelain_plate", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:porcelain_soup_bowl", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:wooden_plate", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:tea_tray", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:bamboo_display_tray", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:lunch_box", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:wrapping_bag", "required": false },
+		{ "id": "kaleidoscope_hodgepodge:hodgepodge_recipe", "required": false }
 	]
 }

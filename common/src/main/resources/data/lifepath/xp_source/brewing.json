@@ -6,7 +6,11 @@
 	"per_subject": {
 		"minecraft:potion": 0.5,
 		"minecraft:splash_potion": 0.7,
-		"minecraft:lingering_potion": 1.0
+		"minecraft:lingering_potion": 1.0,
+		"alchimiae:potion": 0.6,
+		"alchimiae:splash_potion": 0.8,
+		"alchimiae:lingering_potion": 1.1,
+		"alchimiae:concentrate": 0.8
 	},
 	"per_tag": {
 		"lifepath:potion/strong_healing": 1.4,

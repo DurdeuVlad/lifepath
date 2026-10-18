@@ -1,0 +1,31 @@
+{
+	"display_name": "Builder",
+	"icon": "minecraft:textures/block/oak_planks.png",
+	"starting_skills": {
+		"lifepath:construction": 20,
+		"lifepath:engineering": 10
+	},
+	"aptitudes": {
+		"lifepath:construction": "a",
+		"lifepath:engineering": "c"
+	},
+	"xp_modifiers": {
+		"lifepath:construction": 1.35,
+		"lifepath:engineering": 1.1
+	},
+	"decay_modifiers": {
+		"lifepath:construction": 0.3,
+		"lifepath:engineering": 0.6
+	},
+	"protected_floors": {
+		"lifepath:construction": 30
+	},
+	"strengths": [
+		"Learns construction 35% faster",
+		"Construction can't decay below Lv30",
+		"Also trains engineering"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
+}

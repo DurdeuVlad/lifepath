@@ -1,0 +1,6 @@
+{
+	"activity": "lifepath:treatment",
+	"skill": "lifepath:treatment",
+	"player_caused_only": true,
+	"base_xp": 0.3
+}

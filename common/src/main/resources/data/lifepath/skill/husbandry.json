@@ -1,0 +1,87 @@
+{
+	"display_name": "Husbandry",
+	"icon": "minecraft:textures/item/milk_bucket.png",
+	"description": "Breeding, feeding, and caring for livestock.",
+	"improve_hint": "Care for livestock: feed, breed, groom, milk, and shear them.",
+	"category": "gathering",
+	"max_level": 100,
+	"milestones": [
+		{
+			"level": 10,
+			"description_key": "lifepath.skill.husbandry.milestone.10",
+			"effects": [
+				"lifepath:skill_husbandry_10"
+			]
+		},
+		{
+			"level": 20,
+			"description_key": "lifepath.skill.husbandry.milestone.20",
+			"effects": [
+				"lifepath:skill_husbandry_20"
+			]
+		},
+		{
+			"level": 30,
+			"description_key": "lifepath.skill.husbandry.milestone.30",
+			"effects": [
+				"lifepath:skill_husbandry_30"
+			]
+		},
+		{
+			"level": 40,
+			"description_key": "lifepath.skill.husbandry.milestone.40",
+			"effects": [
+				"lifepath:skill_husbandry_40"
+			]
+		},
+		{
+			"level": 50,
+			"description_key": "lifepath.skill.husbandry.milestone.50",
+			"effects": [
+				"lifepath:skill_husbandry_50"
+			]
+		},
+		{
+			"level": 60,
+			"description_key": "lifepath.skill.husbandry.milestone.60",
+			"effects": [
+				"lifepath:skill_husbandry_60"
+			]
+		},
+		{
+			"level": 70,
+			"description_key": "lifepath.skill.husbandry.milestone.70",
+			"effects": [
+				"lifepath:skill_husbandry_70"
+			]
+		},
+		{
+			"level": 80,
+			"description_key": "lifepath.skill.husbandry.milestone.80",
+			"effects": [
+				"lifepath:skill_husbandry_80"
+			]
+		},
+		{
+			"level": 90,
+			"description_key": "lifepath.skill.husbandry.milestone.90",
+			"effects": [
+				"lifepath:skill_husbandry_90"
+			]
+		},
+		{
+			"level": 95,
+			"description_key": "lifepath.skill.husbandry.milestone.95",
+			"effects": [
+				"lifepath:skill_husbandry_95"
+			]
+		},
+		{
+			"level": 100,
+			"description_key": "lifepath.skill.husbandry.milestone.100",
+			"effects": [
+				"lifepath:skill_husbandry_100"
+			]
+		}
+	]
+}

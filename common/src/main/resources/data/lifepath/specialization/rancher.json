@@ -1,0 +1,31 @@
+{
+	"display_name": "Rancher",
+	"icon": "minecraft:textures/item/saddle.png",
+	"starting_skills": {
+		"lifepath:husbandry": 20,
+		"lifepath:farming": 10
+	},
+	"aptitudes": {
+		"lifepath:husbandry": "a",
+		"lifepath:farming": "b"
+	},
+	"xp_modifiers": {
+		"lifepath:husbandry": 1.35,
+		"lifepath:farming": 1.1
+	},
+	"decay_modifiers": {
+		"lifepath:husbandry": 0.3,
+		"lifepath:farming": 0.2
+	},
+	"protected_floors": {
+		"lifepath:husbandry": 30
+	},
+	"strengths": [
+		"Learns husbandry 35% faster",
+		"Husbandry can't decay below Lv30",
+		"Also trains farming"
+	],
+	"weaknesses": [
+		"No signature ability"
+	]
+}

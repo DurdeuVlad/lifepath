@@ -95,7 +95,10 @@ public final class OvergearedCompat implements ExternalActivityAdapter {
 			return;
 		}
 		ResourceLocation output = event.sourceId();
-		boolean forged = output.getNamespace().equals(MOD_ID)
+		// Prefix match mirrors FurnaceResultSlotMixin's widening: addon
+		// namespaces (overgearedspartan, overgeared_epic_knights) emit
+		// crafting events there and must translate here too.
+		boolean forged = output.getNamespace().startsWith(MOD_ID)
 				|| event.tags().contains(LifepathMod.id("forged_outputs"));
 		if (!forged) {
 			return;
