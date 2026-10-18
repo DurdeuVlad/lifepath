@@ -28,7 +28,7 @@ class ShippedGateDefinitionsTest {
 	private static final Path TAG_ROOT = Path.of("src/main/resources/data/lifepath/tags");
 
 	private static final Map<String, String> ACTION_TAG_DIR = Map.of(
-			"break", "block", "use", "item", "attack", "item", "interact", "entity_type");
+			"break", "block", "use", "item", "equip", "item", "attack", "item", "interact", "entity_type");
 
 	private static GateDefinition.GateFile decode(Path file) {
 		return GateDefinition.GateFile.CODEC
@@ -105,6 +105,7 @@ class ShippedGateDefinitionsTest {
 						case "break" -> parsed.breakGates();
 						case "use" -> parsed.useGates();
 						case "attack" -> parsed.attackGates();
+						case "equip" -> parsed.equipGates();
 						default -> parsed.interactGates();
 					};
 					for (ResourceLocation tag : map.keySet()) {

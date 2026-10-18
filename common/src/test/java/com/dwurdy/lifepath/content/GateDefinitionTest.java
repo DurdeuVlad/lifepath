@@ -23,6 +23,7 @@ class GateDefinitionTest {
 		assertTrue(file.useGates().isEmpty());
 		assertTrue(file.attackGates().isEmpty());
 		assertTrue(file.interactGates().isEmpty());
+		assertTrue(file.equipGates().isEmpty());
 	}
 
 	@Test
@@ -34,7 +35,8 @@ class GateDefinitionTest {
 							"break": {"lifepath:ore_tier_iron": 20},
 							"use": {"lifepath:weapon_tier_iron": 20, "minecraft:shield": 10},
 							"attack": {"lifepath:weapon_tier_diamond": 40},
-							"interact": {"lifepath:husbandry_exotic": 30}
+							"interact": {"lifepath:husbandry_exotic": 30},
+							"equip": {"lifepath:armor_tier_diamond": 50}
 						}
 						""")).result().orElseThrow();
 
@@ -45,6 +47,8 @@ class GateDefinitionTest {
 				.get(ResourceLocation.fromNamespaceAndPath("lifepath", "weapon_tier_diamond")));
 		assertEquals(30, file.interactGates()
 				.get(ResourceLocation.fromNamespaceAndPath("lifepath", "husbandry_exotic")));
+		assertEquals(50, file.equipGates()
+				.get(ResourceLocation.fromNamespaceAndPath("lifepath", "armor_tier_diamond")));
 	}
 
 	@Test

@@ -35,3 +35,4 @@ fabric/run-client/
 fabric-server.log
 release/
 tools/bot/*.log
+tools/__pycache__/

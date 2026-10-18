@@ -158,9 +158,9 @@ for pool_name, pool in (("xp_source", xp_sources), ("outcome_rule", outcomes)):
             check_tag(t, rid)
 
 # ---- gates: skill unlock gates per action ----
-GATE_ACTION_POOLS = {"break": tags_block, "use": tags_item,
+GATE_ACTION_POOLS = {"break": tags_block, "use": tags_item, "equip": tags_item,
                      "attack": tags_item, "interact": tags_entity}
-GATE_ACTION_DIR = {"break": "block", "use": "item",
+GATE_ACTION_DIR = {"break": "block", "use": "item", "equip": "item",
                    "attack": "item", "interact": "entity_type"}
 for rid, g in gates.items():
     sk = g.get("skill")

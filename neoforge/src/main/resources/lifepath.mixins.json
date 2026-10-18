@@ -32,6 +32,7 @@
 		"PlayerGameModeGateMixin",
 		"PlayerDigSpeedMixin",
 		"PlayerInteractGateMixin",
+		"ArmorSlotGateMixin",
 		"ItemMixin",
 		"ItemUtilsMixin",
 		"ItemStackMixin",

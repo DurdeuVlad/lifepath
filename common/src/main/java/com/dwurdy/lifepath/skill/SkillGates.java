@@ -99,6 +99,16 @@ public final class SkillGates {
 								.is(TagKey.create(Registries.ENTITY_TYPE, tag)));
 	}
 
+	/** The first {@code equip} gate this stack fails, or {@code null} when
+	 * slot placement is allowed. Right-click-equip is a separate path —
+	 * datapacks should also list armour tags under {@code use}. */
+	@Nullable
+	public static Denial denialForEquip(@Nullable Player player, @Nullable ItemStack stack) {
+		return stack == null || stack.isEmpty() ? null
+				: scan(player, "equip", GateDefinition::equipGates,
+						tag -> stack.is(TagKey.create(Registries.ITEM, tag)));
+	}
+
 	/**
 	 * First-match-wins scan over every registered gate file's {@code map}:
 	 * the first tag the target matches resolves the player's level in that

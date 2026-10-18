@@ -3,7 +3,12 @@
 	"use": {
 		"lifepath:shield_tier_basic": 20,
 		"lifepath:shield_tier_knight": 40,
-		"lifepath:shield_tier_netherite": 60
+		"lifepath:shield_tier_netherite": 60,
+		"lifepath:armor_tier_light": 10,
+		"lifepath:armor_tier_mail": 20,
+		"lifepath:armor_tier_plate": 30,
+		"lifepath:armor_tier_diamond": 50,
+		"lifepath:armor_tier_netherite": 60
 	},
 	"attack": {
 		"lifepath:weapon_tier_stone": 10,
@@ -13,5 +18,12 @@
 		"lifepath:weapon_tier_runic": 50,
 		"lifepath:weapon_tier_netherite": 60,
 		"lifepath:weapon_tier_legendary": 70
+	},
+	"equip": {
+		"lifepath:armor_tier_light": 10,
+		"lifepath:armor_tier_mail": 20,
+		"lifepath:armor_tier_plate": 30,
+		"lifepath:armor_tier_diamond": 50,
+		"lifepath:armor_tier_netherite": 60
 	}
 }
