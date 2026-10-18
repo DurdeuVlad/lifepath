@@ -8,7 +8,15 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
-## [Unreleased]
+## [1.0.0-beta.11] — 2026-10-18
+
+Skill-unlock gates (M29) + Rustic Craft profession-pack integration (M27).
+
+Progression is now about *access*, not just output: every skill unlocks real
+capabilities each ten-level band — ore tiers slow-mine below level (never
+block), weapon damage clamps to fists, held-item use / entity interaction /
+armour-equip deny cleanly — while all 17 professions route their flagship
+mod's gameplay into LifePath XP and outcome quality through soft-dep bridges.
 
 ### Added — Skill-unlock gates (M29)
 
