@@ -10,6 +10,47 @@ report" template, include loader, version, and repro steps.
 
 ## [Unreleased]
 
+### Added — Skill-unlock gates (M29)
+
+- **Per-10-level capability gates for all 21 skills.** New datapack domain
+  `data/lifepath/gate/*.json` — `{skill, break/use/attack/interact/equip:
+  {tag: min_level}}` — with five enforcement seams: `getDestroySpeed`
+  ×0.35 slow-mine (never blocks), `Player.attack` damage clamps (incl.
+  enchanted damage and `getAttackDamageBonus` — mace/special bonuses
+  can't bypass), `useItem`/`useItemOn` denial that wraps only the item
+  call so block-native interactions (doors, chests) still work,
+  `interactOn`/`interactAt` entity gates, and `ArmorSlot.mayPlace`
+  equip gates for armour/elytra.
+- **Gate matrix**: ore tiers for mining (coal 10 → ancient debris 80),
+  weapon/armour/shield tiers for defence, bow→masterwork for archery,
+  wand tiers + premium blocks for construction, Create tiers for
+  engineering, instruments for music/performance, medical kit for
+  treatment/diagnosis, exotic species for husbandry, and tiered
+  tools/stations for the rest — ~140 new item/block/entity tags.
+- **Server-authoritative with client preview**: `SkillGates` resolves
+  against synced `ClientCharacterState`; creative/spectator and
+  unresolvable state fail open; denies are rate-limited actionbar hints
+  (`lifepath.gate.denied`).
+
+### Fixed
+
+- Optional-mod tag entries now use `{"id","required":false}` — absent
+  mods degrade gracefully instead of failing the entire tag file and
+  silently ungating shared vanilla entries (vanilla tag-loader semantics;
+  found on a real dedicated-server boot).
+- Six NeoForge-only compat mixins moved from `common/` to `neoforge/` —
+  fixes `verifyNoFabricImports` (common must never reference loader APIs);
+  PressingTub now uses direct fluid-capability types.
+- `CharacterManager.flushDirty` null-guards `getPlayerList()` so an early
+  shutdown (e.g. failed port bind) no longer NPEs in the STOPPING handler.
+- `minecraft:empty_map` corrected to `map`/`filled_map` in
+  `scholarly_tier_scribe` (empty_map isn't a 1.21.1 item id).
+- Breadth tax: `breadth_per_skill` 0.15 → 0.20; new
+  `breadth_generalist_discount` (0.5) — generalist specs (wanderer) pay
+  half the tax instead of full, keeping flexibility meaningful without
+  enabling free one-man-armies.
+- Crossbow gate tier 30 → 20; First Aid plaster/bandage 20 → 10.
+
 ### Added — Rustic Craft pack integration pass (M27)
 
 - **Kaleidoscope Cookery deep integration**: five new take-out seams on the
