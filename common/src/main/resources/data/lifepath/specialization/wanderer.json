@@ -4,9 +4,11 @@
 	"starting_skills": {},
 	"aptitudes": {},
 	"strengths": [
-		"No fixed path: train every skill freely"
+		"No fixed path: train every skill freely",
+		"Breadth tax halved: wide training decays slower for you"
 	],
 	"weaknesses": [
-		"No head start, no aptitude boost, no protected floor"
+		"No head start, no aptitude boost, no protected floor",
+		"Every skill still pays some breadth tax — no deep exemption"
 	]
 }

@@ -2,7 +2,7 @@
 	"skill": "lifepath:archery",
 	"use": {
 		"lifepath:bow_tier_basic": 10,
-		"lifepath:bow_tier_improved": 30,
+		"lifepath:bow_tier_improved": 20,
 		"lifepath:bow_tier_heavy": 40,
 		"lifepath:bow_tier_martial": 50,
 		"lifepath:bow_tier_masterwork": 70

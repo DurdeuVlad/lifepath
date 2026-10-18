@@ -169,14 +169,14 @@ class SkillDecayServiceTest {
 
 	@Test
 	void breadthTaxAcceleratesNonSpecSkills() {
-		// Two un-specialized skills at 60: each counts the other → ×1.15 rate.
+		// Two un-specialized skills at 60: each counts the other → ×1.20 rate.
 		registerSecondSkill();
 		PlayerCharacterData data = PlayerCharacterData.createDefault();
 		data.setSkillProgress(SKILL, atLevel(60, T0));
 		data.setSkillProgress(SKILL_B, atLevel(60, T0));
-		// 10 days × 1.15 = 11.5 decay-days in band 51–75 (0.10/day) → −1.15 level.
+		// 10 days × 1.20 = 12 decay-days in band 51–75 (0.10/day) → −1.2 level.
 		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
-		assertEquals(58.85, p.xp() / 10.0, 0.01);
+		assertEquals(58.8, p.xp() / 10.0, 0.01);
 	}
 
 	@Test
@@ -214,6 +214,26 @@ class SkillDecayServiceTest {
 		// SKILL sees zero taxable skills (SKILL_B is spec-exempt) → −1.0 level.
 		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
 		assertEquals(59.0, p.xp() / 10.0, 0.001);
+	}
+
+	@Test
+	void generalistSpecPaysDiscountedBreadthTax() {
+		// A spec that claims no skill tables (wanderer) pays the breadth
+		// tax at the generalist discount — flexibility is its trade, not
+		// a free pass. Discount 0.5: ×1.20 → ×1.10 effective.
+		registerSecondSkill();
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		com.dwurdy.lifepath.content.SpecializationDefinition spec =
+				new com.dwurdy.lifepath.content.SpecializationDefinition(
+						ResourceLocation.fromNamespaceAndPath("lifepath", "wanderer"), "W",
+						Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), List.of());
+		LifepathContent.specializations().register(spec.id(), spec);
+		data.setSpecializationId(spec.id());
+		data.setSkillProgress(SKILL, atLevel(60, T0));
+		data.setSkillProgress(SKILL_B, atLevel(60, T0));
+		// 10 days × 1.10 = 11 decay-days in band 51–75 (0.10/day) → −1.1.
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(58.9, p.xp() / 10.0, 0.001);
 	}
 
 	@Test

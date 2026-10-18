@@ -221,7 +221,10 @@ public final class SkillDecayService {
 	 * adds {@code breadth_per_skill} to this decay pass's rate, capped at
 	 * {@code 1 + breadth_cap}. A one-man-army carrying six skills at 80
 	 * decays them all meaningfully faster; a specialist's own skills are
-	 * exempt so the tax punishes breadth, not depth.
+	 * exempt so the tax punishes breadth, not depth. A generalist spec
+	 * (claims no skill tables — wanderer) still pays, but at {@code
+	 * breadth_generalist_discount} off: flexibility is its trade, not a
+	 * free pass — one-man armies are the thing being priced out.
 	 */
 	private static double breadthMultiplier(PlayerCharacterData data,
 			ResourceLocation selfId) {
@@ -243,7 +246,11 @@ public final class SkillDecayService {
 			}
 			count++;
 		}
-		return 1.0 + Math.min(breadthCap(), count * breadthPerSkill());
+		double tax = Math.min(breadthCap(), count * breadthPerSkill());
+		if (SpecializationService.isGeneralist(specId)) {
+			tax *= 1.0 - Math.min(1.0, Math.max(0.0, generalistDiscount()));
+		}
+		return 1.0 + tax;
 	}
 
 	// ---- config (decay.toml) ----
@@ -269,7 +276,12 @@ public final class SkillDecayService {
 	}
 
 	public static double breadthPerSkill() {
-		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "breadth_per_skill", 0.15)).doubleValue();
+		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "breadth_per_skill", 0.20)).doubleValue();
+	}
+
+	/** Generalist-spec discount on the breadth tax (wanderer pays half). */
+	public static double generalistDiscount() {
+		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "breadth_generalist_discount", 0.5)).doubleValue();
 	}
 
 	public static double breadthCap() {

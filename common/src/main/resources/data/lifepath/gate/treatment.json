@@ -1,7 +1,7 @@
 {
 	"skill": "lifepath:treatment",
 	"use": {
-		"lifepath:treatment_tier_first_aid": 20,
+		"lifepath:treatment_tier_first_aid": 10,
 		"lifepath:treatment_tier_clinical": 50,
 		"lifepath:treatment_tier_surgical": 60,
 		"lifepath:treatment_tier_critical": 80

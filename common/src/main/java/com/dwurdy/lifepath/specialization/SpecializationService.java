@@ -140,4 +140,19 @@ public final class SpecializationService {
 				|| def.decayModifiers().containsKey(skillId)
 				|| def.protectedFloors().containsKey(skillId);
 	}
+
+	/**
+	 * True when the specialization claims NO skill-specific tables — a
+	 * generalist spec (wanderer) for which every skill is effectively "in
+	 * spec". Generalists are exempt from the decay breadth tax: breadth is
+	 * their specialization.
+	 */
+	public static boolean isGeneralist(@Nullable ResourceLocation specId) {
+		SpecializationDefinition def = specId == null ? null
+				: LifepathContent.specializations().get(specId);
+		return def != null
+				&& def.startingSkills().isEmpty() && def.aptitudes().isEmpty()
+				&& def.xpModifiers().isEmpty() && def.decayModifiers().isEmpty()
+				&& def.protectedFloors().isEmpty();
+	}
 }
