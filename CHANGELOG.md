@@ -10,54 +10,63 @@ report" template, include loader, version, and repro steps.
 
 ## [1.0.0-beta.11] — 2026-10-18
 
-Skill-unlock gates (M29) + Rustic Craft profession-pack integration (M27).
+Skill now shapes what you're **allowed to use**, not just how well you
+perform. Every one of the 21 skills unlocks real capabilities at each
+ten-level band — and every profession's flagship mod feeds the skill it
+belongs to. The miner digs deeper veins, the soldier earns the right to
+draw steel, the scholar handles the maps; nobody skips the ladder.
 
-Progression is now about *access*, not just output: every skill unlocks real
-capabilities each ten-level band — ore tiers slow-mine below level (never
-block), weapon damage clamps to fists, held-item use / entity interaction /
-armour-equip deny cleanly — while all 17 professions route their flagship
-mod's gameplay into LifePath XP and outcome quality through soft-dep bridges.
+### Added — Skill-unlock gates
 
-### Added — Skill-unlock gates (M29)
+- **Capability unlocks every 10 levels, all 21 skills.** Skills gate real
+  access through data-driven `data/lifepath/gate/*.json` files and new
+  tier tags: mining gates ore tiers (coal at 10 → ancient debris at 80),
+  defence gates weapon/armour/shield tiers, archery gates bow tiers,
+  construction gates wand tiers and premium blocks, engineering gates
+  Create component tiers, and every other skill gets its own ladder —
+  instruments, medical kits, exotic animals, brewing stations, rods,
+  scholarly tools.
+- **Gates are honest, not walls.** Underlevelled ores *slow-mine* at
+  35% speed — everyone can still mine, it just respects experience.
+  Underlevelled weapons swing but hit like fists (enchant bonuses and
+  special attack bonuses included — a mace can't cheat the cap).
+  Underlevelled held items refuse to activate; underlevelled entity
+  interactions and armour/elytra equip are denied. A rate-limited
+  actionbar hint tells you what level unlocks it.
+- **Denials are surgical.** Holding a gated axe doesn't lock you out of
+  doors, chests, or buttons — only the item's own use is refused.
+  Creative and spectator players are never gated, and if a character
+  can't be resolved the gate fails open rather than deadlocking play.
 
-- **Per-10-level capability gates for all 21 skills.** New datapack domain
-  `data/lifepath/gate/*.json` — `{skill, break/use/attack/interact/equip:
-  {tag: min_level}}` — with five enforcement seams: `getDestroySpeed`
-  ×0.35 slow-mine (never blocks), `Player.attack` damage clamps (incl.
-  enchanted damage and `getAttackDamageBonus` — mace/special bonuses
-  can't bypass), `useItem`/`useItemOn` denial that wraps only the item
-  call so block-native interactions (doors, chests) still work,
-  `interactOn`/`interactAt` entity gates, and `ArmorSlot.mayPlace`
-  equip gates for armour/elytra.
-- **Gate matrix**: ore tiers for mining (coal 10 → ancient debris 80),
-  weapon/armour/shield tiers for defence, bow→masterwork for archery,
-  wand tiers + premium blocks for construction, Create tiers for
-  engineering, instruments for music/performance, medical kit for
-  treatment/diagnosis, exotic species for husbandry, and tiered
-  tools/stations for the rest — ~140 new item/block/entity tags.
-- **Server-authoritative with client preview**: `SkillGates` resolves
-  against synced `ClientCharacterState`; creative/spectator and
-  unresolvable state fail open; denies are rate-limited actionbar hints
-  (`lifepath.gate.denied`).
+### Changed — decay & gate tiers
+
+- **Breadth tax is stiffer**: `breadth_per_skill` 0.15 → 0.20, so holding
+  many high-level off-spec skills decays meaningfully faster.
+- **Generalist specs pay half the breadth tax** (new
+  `breadth_generalist_discount`, default 0.5) — Wanderer keeps its
+  flexibility edge without becoming a free one-man army.
+- **Vanilla crossbow unlocks at archery 20** (was 30 — it sits next to
+  the bow, not the heavy crossbows).
+- **First Aid plaster & bandage unlock at treatment 10** (was 20) —
+  basic self-care shouldn't be a mid-level privilege.
 
 ### Fixed
 
-- Optional-mod tag entries now use `{"id","required":false}` — absent
-  mods degrade gracefully instead of failing the entire tag file and
-  silently ungating shared vanilla entries (vanilla tag-loader semantics;
-  found on a real dedicated-server boot).
-- Six NeoForge-only compat mixins moved from `common/` to `neoforge/` —
-  fixes `verifyNoFabricImports` (common must never reference loader APIs);
-  PressingTub now uses direct fluid-capability types.
-- `CharacterManager.flushDirty` null-guards `getPlayerList()` so an early
-  shutdown (e.g. failed port bind) no longer NPEs in the STOPPING handler.
-- `minecraft:empty_map` corrected to `map`/`filled_map` in
-  `scholarly_tier_scribe` (empty_map isn't a 1.21.1 item id).
-- Breadth tax: `breadth_per_skill` 0.15 → 0.20; new
-  `breadth_generalist_discount` (0.5) — generalist specs (wanderer) pay
-  half the tax instead of full, keeping flexibility meaningful without
-  enabling free one-man-armies.
-- Crossbow gate tier 30 → 20; First Aid plaster/bandage 20 → 10.
+- **Missing optional mods no longer break skill gates.** Tag entries
+  pointing at optional-mod content were being rejected wholesale by the
+  vanilla tag loader — with e.g. Hexalia absent, the *entire* tag
+  (including its vanilla entries) failed to load, leaving those items
+  ungated. 386 entries across 79 tag files are now optional. Verified on
+  a real dedicated-server boot.
+- **Schema tier list fix**: the scholar "scribe" tier referenced
+  `minecraft:empty_map`, which doesn't exist as a 1.21.1 item id — the
+  empty/filled maps are `minecraft:map` and `minecraft:filled_map`.
+- **Early server shutdown no longer crashes** — a server that dies
+  before finishing init (e.g. a port bind failure) used to hit an NPE
+  in the character save flush on its way down.
+- **Build guard restored**: NeoForge-only compat mixins no longer live
+  in the shared `common/` source set — they're NeoForge-only code in
+  the NeoForge source set, satisfying the no-loader-imports check.
 
 ### Added — Rustic Craft pack integration pass (M27)
 
