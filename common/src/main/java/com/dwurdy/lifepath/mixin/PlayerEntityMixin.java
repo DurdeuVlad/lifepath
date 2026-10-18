@@ -107,6 +107,48 @@ public abstract class PlayerEntityMixin {
 		return damage;
 	}
 
+	/**
+	 * M29 feeble-weapon gate, enchant half: the clamp above only caps the
+	 * {@code ATTACK_DAMAGE} attribute — Sharpness/Smite would still add
+	 * their bonus through {@code getEnchantedDamage}, letting a gated
+	 * weapon hit far above fist level. A denied weapon gets no enchant
+	 * adjustment at all (the unmodified base is returned).
+	 */
+	/**
+	 * M29 feeble-weapon gate, item-bonus half: the mace's fall-distance
+	 * smash (and any modded {@code getAttackDamageBonus} override) runs
+	 * after the attribute clamp and adds its bonus unclamped — a gated
+	 * mace would still one-shot. Denied weapons get no item bonus.
+	 */
+	@WrapOperation(method = "attack", at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
+	private float lifepath$feebleItemBonus(net.minecraft.world.item.Item item,
+			net.minecraft.world.entity.Entity victim, float damage,
+			net.minecraft.world.damagesource.DamageSource source,
+			Operation<Float> original) {
+		if ((Object) this instanceof ServerPlayer player
+				&& SkillGates.denialForAttack(player,
+						player.getMainHandItem()) != null) {
+			return 0.0f;
+		}
+		return original.call(item, victim, damage, source);
+	}
+
+	@WrapOperation(method = "attack", at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
+	private float lifepath$feebleEnchants(Player self,
+			net.minecraft.world.entity.Entity victim, float damage,
+			net.minecraft.world.damagesource.DamageSource source,
+			Operation<Float> original) {
+		float adjusted = original.call(self, victim, damage, source);
+		if ((Object) this instanceof ServerPlayer player
+				&& SkillGates.denialForAttack(player,
+						player.getMainHandItem()) != null) {
+			return damage;
+		}
+		return adjusted;
+	}
+
 	@WrapOperation(method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/world/food/FoodData;eat(Lnet/minecraft/world/food/FoodProperties;)V"))
 	private void lifepath$dietGate(net.minecraft.world.food.FoodData manager,

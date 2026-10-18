@@ -16,9 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * villager trading, breeding, saddling, minecart chests; FAIL
  * short-circuits before the entity's own interact logic. The held stack's
  * {@code use} gate is checked first — item-on-entity paths (lead on an
- * animal, bandage on a player) never pass through {@code useItem}, so
- * without it a gated item would apply freely here. Server-side only
- * ({@link ServerPlayer}) — the client side falls through to prediction.
+ * animal, bandage on a player) never pass through {@code useItem}, and
+ * unlike the block seam they can't be split: {@code entity.interact} IS
+ * the funnel that applies the item (leash, feed, saddle), so the gate
+ * must refuse the whole touch. Deliberate consequence: a gated item in
+ * hand refuses every entity interaction — switch to a free hand to trade.
+ * Server-side only ({@link ServerPlayer}) — the client falls through to
+ * prediction.
  */
 @Mixin(Player.class)
 public abstract class PlayerInteractGateMixin {

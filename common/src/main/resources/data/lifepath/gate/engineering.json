@@ -4,5 +4,10 @@
 		"lifepath:create_tier_basic": 10,
 		"lifepath:create_tier_brass": 40,
 		"lifepath:create_tier_rail": 70
+	},
+	"equip": {
+		"lifepath:create_tier_basic": 10,
+		"lifepath:create_tier_brass": 40,
+		"lifepath:create_tier_rail": 70
 	}
 }

@@ -33,6 +33,7 @@
 		"PlayerDigSpeedMixin",
 		"PlayerInteractGateMixin",
 		"ArmorSlotGateMixin",
+		"EntityInteractAtGateMixin",
 		"ItemMixin",
 		"ItemUtilsMixin",
 		"ItemStackMixin",

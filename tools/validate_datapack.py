@@ -168,6 +168,9 @@ for rid, g in gates.items():
         check_ref(sk, skills, "skill", rid)
     else:
         errors.append(f"gate {rid} missing 'skill'")
+    for key in g:
+        if key not in GATE_ACTION_POOLS and key != "skill":
+            warnings.append(f"gate {rid} unknown key '{key}' — silently ignored by codec")
     has_entries = False
     for action, pool in GATE_ACTION_POOLS.items():
         amap = g.get(action)

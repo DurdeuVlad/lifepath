@@ -51,9 +51,18 @@ public record GateDefinition(
 					"gate " + id + " declares no action gates — it can never match");
 		}
 		return new GateDefinition(id, file.skill(),
-				Map.copyOf(file.breakGates()), Map.copyOf(file.useGates()),
-				Map.copyOf(file.attackGates()), Map.copyOf(file.interactGates()),
-				Map.copyOf(file.equipGates()));
+				ordered(file.breakGates()), ordered(file.useGates()),
+				ordered(file.attackGates()), ordered(file.interactGates()),
+				ordered(file.equipGates()));
+	}
+
+	/** Unmodifiable but order-preserving — first-match-wins resolution must
+	 * see the JSON's declared entry order, not {@code Map.copyOf}'s salted
+	 * iteration order, or overlapping tags resolve per-launch. */
+	private static Map<ResourceLocation, Integer> ordered(
+			Map<ResourceLocation, Integer> map) {
+		return java.util.Collections.unmodifiableMap(
+				new java.util.LinkedHashMap<>(map));
 	}
 
 	/** JSON shape of {@code data/<ns>/gate/<name>.json} (id excluded). */
