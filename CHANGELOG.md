@@ -8,6 +8,67 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
+## [Unreleased]
+
+Mastery now pays rent. Every ten-level milestone grants a real signature
+perk on top of its passive training, level 100 keeps a bank of XP that
+absorbs decay before your level slips, and the last bypasses in the gate
+system are closed. Scholars get their enchanting-service mods wired in,
+and the forester's TimberTales integration is code-complete.
+
+### Added — Milestone signature perks
+
+- **Every milestone grants a signature perk.** All 21 skills' 10-level
+  milestones (10 through 100) now carry a concrete situational effect in
+  addition to the existing passive attribute boosts — conditional
+  abilities expressed through the ability engine (effects under the right
+  conditions, utility attributes, resource interactions). The passive
+  track is unchanged; the perk is the memorable part.
+
+### Added — Level-100 XP bank
+
+- **Surplus XP defends level 100.** Awards earned at max level now bank
+  above the level threshold instead of vanishing. When decay comes for a
+  capped skill, it spends the bank at the curve's price for the levels it
+  would remove — the level only starts falling once the bank is empty.
+  Practice keeps you sharp *and* stocked. Tunable via
+  `max_level_xp_buffer` / `max_level_xp_buffer_drain` in `decay.toml`.
+
+### Added — Scholar enchanting-service integrations
+
+- **Enchanting Infuser, Enchantment Library, XP Storage** content joins
+  the scholarship track: their stations and books are tagged `scholarly`,
+  crafting them pays scholarship XP at fitting multipliers, and the
+  enchanting stations sit behind the new `scholarly_tier_arcana` use-gate
+  at level 40. All entries are optional — absent jars degrade gracefully.
+  Enchant-completion XP (use-time, not craft-time) awaits the mod jars.
+
+### Changed — TimberTales code-complete
+
+- **Hollow logs are real logs now.** TimberTales' hollow log blocks join
+  `minecraft:logs` (block and item tags), so chopping them pays
+  woodcutting XP, matches outcome rules, and counts for log-nearby
+  ability checks — plus a `lifepath:exotic_log` XP premium for the
+  level-60 tier. The tree-fell bridge now respects the placed-block
+  re-mine guard like vanilla breaks. Integration is code-complete
+  pending the pack's NeoForge upgrade.
+
+### Fixed — Gates and config
+
+- **Dispensers can't dress you in gear you haven't earned.** A dispenser
+  facing you could force-equip gated armour or an elytra past the equip
+  gate; it now respects your level and leaves the item inside on denial.
+- **Breadth-tax config actually works.** `breadth_enabled`,
+  `breadth_threshold`, `breadth_per_skill`, `breadth_cap`, and
+  `breadth_generalist_discount` were read but never declared in the
+  `decay.toml` spec — values set there were silently ignored. Declared
+  now; tuning applies.
+
+### Localization
+
+- **Romanian translation synced.** `lifepath.gate.denied` and the gate
+  messaging now render in `ro_ro`.
+
 ## [1.0.0-beta.11] — 2026-10-18
 
 Skill now shapes what you're **allowed to use**, not just how well you

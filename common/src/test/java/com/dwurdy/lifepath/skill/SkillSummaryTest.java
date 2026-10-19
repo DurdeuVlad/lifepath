@@ -135,8 +135,8 @@ class SkillSummaryTest {
 		assertEquals(LevelCurves.xpForLevel(LevelCurves.DEFAULT_ID, 10),
 				c.details().roadmap().get(0).xpTotal(), 0.001);
 		for (SkillCard.MilestoneRow row : c.details().roadmap()) {
-			assertEquals(1, row.effects().size(),
-					"each shipped milestone grants one ability");
+			assertEquals(2, row.effects().size(),
+					"each shipped milestone grants its passive ability + signature perk");
 			assertTrue(row.descKey().startsWith("lifepath.skill.mining.milestone"));
 		}
 		// Band thresholds arrive even though the test never loads outcome rules.
