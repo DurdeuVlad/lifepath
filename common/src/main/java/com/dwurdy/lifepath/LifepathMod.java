@@ -161,6 +161,19 @@ public final class LifepathMod {
 						"Multiplier on the XP price decay charges the banked surplus"
 								+ " (2.0 drains the bank twice as fast). Must stay"
 								+ " positive — 0 would grant permanent immunity.")
+				.define("breadth_enabled", true,
+						"Master switch for the breadth tax: skills at or above"
+								+ " breadth_threshold raise decay on your OTHER"
+								+ " non-specialization skills.")
+				.define("breadth_threshold", 25, v -> v >= 0 && v <= 100,
+						"Skills at or above this level count toward the breadth tax.")
+				.define("breadth_per_skill", 0.20, v -> v >= 0 && v <= 100,
+						"Decay-rate surcharge per qualifying non-specialization skill.")
+				.define("breadth_cap", 1.5, v -> v >= 0 && v <= 100,
+						"Maximum total surcharge the breadth tax can add.")
+				.define("breadth_generalist_discount", 0.5, v -> v >= 0 && v < 1,
+						"Fraction of the breadth tax a generalist specialization"
+								+ " (one claiming no skill tables) is forgiven.")
 				.build());
 		LifepathConfig.define(id("abilities"), ConfigSpec.builder()
 				.define("enabled", true,
