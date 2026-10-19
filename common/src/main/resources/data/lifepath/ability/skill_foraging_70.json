@@ -1,6 +1,6 @@
 {
 	"display_name": "Quiet Tread IV",
-	"description": "Milestone reward for reaching foraging level 70.",
+	"description": "Milestone reward for reaching foraging level 70. Perk: Bushwhacker IV — speed II while pushing through vegetation.",
 	"icon": "skill/foraging",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,20 @@
 			"operation": "add_value",
 			"value": 0.05,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:inside_block",
+				"block": "#lifepath:vegetation"
+			}
+		]
+	}
 }

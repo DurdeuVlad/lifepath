@@ -1,6 +1,6 @@
 {
 	"display_name": "Steeled Liver IV",
-	"description": "A practiced tolerance for what goes down wrong. (-20% burn time)",
+	"description": "A practiced tolerance for what goes down wrong. (-20% burn time) Perk: Ever-Full — the hunger effect is purged as it lands.",
 	"icon": "minecraft:textures/item/brewing_stand.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,10 @@
 			"operation": "add_multiplied_base",
 			"value": -0.2,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:remove_effect",
+			"effect": "minecraft:hunger"
 		}
 	]
 }

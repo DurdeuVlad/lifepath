@@ -1,6 +1,6 @@
 {
 	"display_name": "Lucky Refrain I",
-	"description": "The right note lands on its own. (+1 Luck)",
+	"description": "The right note lands on its own. (+1 Luck) Perk: Encore I — regeneration I with a villager audience close.",
 	"icon": "minecraft:textures/item/music_disc_cat.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,26 @@
 			"operation": "add_value",
 			"value": 1,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:regeneration",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"any": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "minecraft:villager",
+				"radius": 8
+			},
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "minecraft:wandering_trader",
+				"radius": 8
+			}
+		]
+	}
 }

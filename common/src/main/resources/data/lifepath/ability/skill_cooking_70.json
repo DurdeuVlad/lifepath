@@ -1,6 +1,6 @@
 {
 	"display_name": "Calloused Hands IV",
-	"description": "Milestone reward for reaching cooking level 70.",
+	"description": "Milestone reward for reaching cooking level 70. Perk: Pantry Snack IV — nibbles restore 2 hunger while you run low.",
 	"icon": "skill/cooking",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,20 @@
 			"operation": "add_multiplied_base",
 			"value": -0.2,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:feed",
+			"nutrition": 2,
+			"saturation_modifier": 0.5
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:food_level",
+				"op": "lt",
+				"value": 12
+			}
+		]
+	}
 }

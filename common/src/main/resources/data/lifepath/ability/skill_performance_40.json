@@ -1,6 +1,6 @@
 {
 	"display_name": "Shadow Step II",
-	"description": "Exits and entrances nobody catches. (+10% sneak speed)",
+	"description": "Exits and entrances nobody catches. (+10% sneak speed) Perk: Dark Acrobat — jump boost I under dim light.",
 	"icon": "minecraft:textures/item/feather.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_multiplied_base",
 			"value": 0.1,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:jump_boost",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:light_level",
+				"op": "lt",
+				"value": 4
+			}
+		]
+	}
 }

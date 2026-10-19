@@ -1,6 +1,6 @@
 {
 	"display_name": "Bedside Focus I",
-	"description": "The symptom you needed turns up on time. (+0.5 Luck)",
+	"description": "The symptom you needed turns up on time. (+0.5 Luck) Perk: Clear Eyes — blindness is purged as it lands.",
 	"icon": "minecraft:textures/item/book.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,10 @@
 			"operation": "add_value",
 			"value": 0.5,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:remove_effect",
+			"effect": "minecraft:blindness"
 		}
 	]
 }

@@ -1,6 +1,6 @@
 {
 	"display_name": "Quick Draw III",
-	"description": "Milestone reward for reaching archery level 50.",
+	"description": "Milestone reward for reaching archery level 50. Perk: Fight-or-Flight III — speed II while bloodied, bow in hand.",
 	"icon": "skill/archery",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,33 @@
 			"operation": "add_multiplied_base",
 			"value": 0.06,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:health_threshold",
+				"op": "lt",
+				"value": 16
+			}
+		],
+		"any": [
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:bow",
+				"slot": "mainhand"
+			},
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:crossbow",
+				"slot": "mainhand"
+			}
+		]
+	}
 }

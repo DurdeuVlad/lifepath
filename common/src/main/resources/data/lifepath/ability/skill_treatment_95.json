@@ -1,6 +1,6 @@
 {
 	"display_name": "Steady Hands V",
-	"description": "Nothing shakes a stitch mid-pull. (+0.1 knockback resist)",
+	"description": "Nothing shakes a stitch mid-pull. (+0.1 knockback resist) Perk: Panacea — all curable afflictions are purged as they land.",
 	"icon": "minecraft:textures/item/golden_apple.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,10 @@
 			"operation": "add_value",
 			"value": 0.1,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:remove_effect",
+			"effect": "#lifepath:nature_purifiable"
 		}
 	]
 }

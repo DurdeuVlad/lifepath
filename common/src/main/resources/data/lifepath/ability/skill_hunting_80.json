@@ -1,6 +1,6 @@
 {
 	"display_name": "Hunter's Eye IV",
-	"description": "Years on the trail sharpen every strike. (+2.0 attack damage)",
+	"description": "Years on the trail sharpen every strike. (+2.0 attack damage) Perk: Ambush IV — +0.5 sneaking speed.",
 	"icon": "skill/hunting",
 	"trigger": {
 		"type": "passive",
@@ -15,6 +15,13 @@
 			"attribute": "minecraft:generic.attack_damage",
 			"operation": "add_value",
 			"value": 2.0,
+			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.sneaking_speed",
+			"operation": "add_value",
+			"value": 0.5,
 			"duration_ticks": 120
 		}
 	]

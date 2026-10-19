@@ -1,6 +1,6 @@
 {
 	"display_name": "Calloused Hands II",
-	"description": "Milestone reward for reaching cooking level 30.",
+	"description": "Milestone reward for reaching cooking level 30. Perk: Pantry Snack II — nibbles restore 1 hunger while you run low.",
 	"icon": "skill/cooking",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,20 @@
 			"operation": "add_multiplied_base",
 			"value": -0.1,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:feed",
+			"nutrition": 1,
+			"saturation_modifier": 0.3
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:food_level",
+				"op": "lt",
+				"value": 10
+			}
+		]
+	}
 }

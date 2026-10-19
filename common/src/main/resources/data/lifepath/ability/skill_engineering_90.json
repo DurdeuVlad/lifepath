@@ -1,6 +1,6 @@
 {
 	"display_name": "Fine Calibration V",
-	"description": "Milestone reward for reaching engineering level 90.",
+	"description": "Milestone reward for reaching engineering level 90. Perk: Lever Arm V — +1.25 entity interaction range.",
 	"icon": "skill/engineering",
 	"trigger": {
 		"type": "passive",
@@ -22,6 +22,13 @@
 			"attribute": "minecraft:player.block_interaction_range",
 			"operation": "add_value",
 			"value": 0.18,
+			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.entity_interaction_range",
+			"operation": "add_value",
+			"value": 1.25,
 			"duration_ticks": 120
 		}
 	]

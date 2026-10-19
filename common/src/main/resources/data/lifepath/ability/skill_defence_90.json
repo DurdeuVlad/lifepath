@@ -1,6 +1,6 @@
 {
 	"display_name": "Immovable V",
-	"description": "Milestone reward for reaching defence level 90.",
+	"description": "Milestone reward for reaching defence level 90. Perk: Blast Drills V — +0.75 explosion knockback resistance.",
 	"icon": "skill/defence",
 	"trigger": {
 		"type": "passive",
@@ -29,6 +29,13 @@
 			"attribute": "minecraft:generic.max_health",
 			"operation": "add_value",
 			"value": 1.6,
+			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.explosion_knockback_resistance",
+			"operation": "add_value",
+			"value": 0.75,
 			"duration_ticks": 120
 		}
 	]

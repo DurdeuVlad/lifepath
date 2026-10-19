@@ -1,6 +1,6 @@
 {
 	"display_name": "Tide Reader III",
-	"description": "You read the water's patience. (+3 Luck near open water)",
+	"description": "You read the water's patience. (+3 Luck near open water) Perk: Slipstream II — dolphin's grace II near open water.",
 	"icon": "skill/fishing",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,12 @@
 			"operation": "add_value",
 			"value": 3,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:dolphins_grace",
+			"duration": 120,
+			"amplifier": 1
 		}
 	],
 	"conditions": {

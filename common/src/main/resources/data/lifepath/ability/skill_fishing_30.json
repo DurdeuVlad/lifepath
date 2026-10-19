@@ -1,6 +1,6 @@
 {
 	"display_name": "Riverborn II",
-	"description": "Milestone reward for reaching fishing level 30.",
+	"description": "Milestone reward for reaching fishing level 30. Perk: Second Gills — water breathing while submerged.",
 	"icon": "skill/fishing",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,19 @@
 			"operation": "add_value",
 			"value": 0.1,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:water_breathing",
+			"duration": 160,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:submerged"
+			}
+		]
+	}
 }

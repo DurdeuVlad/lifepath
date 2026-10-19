@@ -1,6 +1,6 @@
 {
 	"display_name": "Calloused Hands III",
-	"description": "Milestone reward for reaching cooking level 50.",
+	"description": "Milestone reward for reaching cooking level 50. Perk: Hearty Rations — a real bite restores 2 hunger while you run low.",
 	"icon": "skill/cooking",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,20 @@
 			"operation": "add_multiplied_base",
 			"value": -0.15,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:feed",
+			"nutrition": 2,
+			"saturation_modifier": 0.4
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:food_level",
+				"op": "lt",
+				"value": 10
+			}
+		]
+	}
 }

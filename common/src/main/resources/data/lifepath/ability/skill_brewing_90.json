@@ -1,6 +1,6 @@
 {
 	"display_name": "Steeled Liver V",
-	"description": "A practiced tolerance for what goes down wrong. (-25% burn time)",
+	"description": "A practiced tolerance for what goes down wrong. (-25% burn time) Perk: Liquid Courage II — resistance I while well fed.",
 	"icon": "minecraft:textures/item/brewing_stand.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_multiplied_base",
 			"value": -0.25,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:food_level",
+				"op": "gte",
+				"value": 18
+			}
+		]
+	}
 }

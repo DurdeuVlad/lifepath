@@ -1,6 +1,6 @@
 {
 	"display_name": "Stage Athlete V",
-	"description": "Years of stagecraft in the legs. (+10% move speed)",
+	"description": "Years of stagecraft in the legs. (+10% move speed) Perk: Showtime IV — speed II under bright light.",
 	"icon": "minecraft:textures/item/feather.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_multiplied_base",
 			"value": 0.1,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:light_level",
+				"op": "gte",
+				"value": 12
+			}
+		]
+	}
 }

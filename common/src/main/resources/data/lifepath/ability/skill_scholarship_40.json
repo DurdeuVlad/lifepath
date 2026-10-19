@@ -1,6 +1,6 @@
 {
 	"display_name": "Lucky Insight II",
-	"description": "The right book at the right time becomes its own luck. (+1 luck)",
+	"description": "The right book at the right time becomes its own luck. (+1 luck) Perk: Ivory Tower — resistance I in a library.",
 	"icon": "skill/scholarship",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,31 @@
 			"operation": "add_value",
 			"value": 1,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"any": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:bookshelf",
+				"radius": 4
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:chiseled_bookshelf",
+				"radius": 4
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:enchanting_table",
+				"radius": 4
+			}
+		]
+	}
 }

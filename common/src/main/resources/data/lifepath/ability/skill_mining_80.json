@@ -1,6 +1,6 @@
 {
 	"display_name": "Delver's Grip IV",
-	"description": "Trained hands work stone and ore measurably faster. (+18% block break speed)",
+	"description": "Trained hands work stone and ore measurably faster. (+18% block break speed) Perk: Slagwalker — fire resistance beside lava.",
 	"icon": "skill/mining",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_multiplied_base",
 			"value": 0.18,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:fire_resistance",
+			"duration": 140,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:lava",
+				"radius": 4
+			}
+		]
+	}
 }

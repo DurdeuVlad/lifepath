@@ -1,6 +1,6 @@
 {
 	"display_name": "Herdsman's Call I",
-	"description": "Stock answers you from farther off. (+0.15 animal reach)",
+	"description": "Stock answers you from farther off. (+0.15 animal reach) Perk: Shepherd's Pace I — speed I among your animals.",
 	"icon": "minecraft:textures/item/milk_bucket.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_value",
 			"value": 0.15,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "#lifepath:animals",
+				"radius": 6
+			}
+		]
+	}
 }

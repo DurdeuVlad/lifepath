@@ -1,6 +1,6 @@
 {
 	"display_name": "Shadow Step III",
-	"description": "Exits and entrances nobody catches. (+15% sneak speed)",
+	"description": "Exits and entrances nobody catches. (+15% sneak speed) Perk: Shadow Glide II — speed II under dim light.",
 	"icon": "minecraft:textures/item/feather.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_multiplied_base",
 			"value": 0.15,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:light_level",
+				"op": "lt",
+				"value": 4
+			}
+		]
+	}
 }

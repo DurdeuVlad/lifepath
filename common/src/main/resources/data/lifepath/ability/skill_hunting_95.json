@@ -1,6 +1,6 @@
 {
 	"display_name": "Hunter's Eye V",
-	"description": "Years on the trail sharpen every strike. (+2.5 attack damage)",
+	"description": "Years on the trail sharpen every strike. (+2.5 attack damage) Perk: Blood Scent II — strength I while prey animals are near.",
 	"icon": "skill/hunting",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_value",
 			"value": 2.5,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "#lifepath:animals",
+				"radius": 12
+			}
+		]
+	}
 }

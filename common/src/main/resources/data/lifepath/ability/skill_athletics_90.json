@@ -1,6 +1,6 @@
 {
 	"display_name": "Hardy Frame V",
-	"description": "Milestone reward for reaching athletics level 90.",
+	"description": "Milestone reward for reaching athletics level 90. Perk: Hurdler V — +0.8 step height.",
 	"icon": "skill/athletics",
 	"trigger": {
 		"type": "passive",
@@ -22,6 +22,13 @@
 			"attribute": "minecraft:generic.movement_speed",
 			"operation": "add_multiplied_base",
 			"value": 0.018,
+			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.step_height",
+			"operation": "add_value",
+			"value": 0.8,
 			"duration_ticks": 120
 		}
 	]

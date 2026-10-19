@@ -1,6 +1,6 @@
 {
 	"display_name": "Stone Skin III",
-	"description": "Seasoned bruises harden into armor of their own. (+3 armor)",
+	"description": "Seasoned bruises harden into armor of their own. (+3 armor) Perk: Second Wind III — resistance I below 12 health.",
 	"icon": "skill/defence",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,21 @@
 			"operation": "add_value",
 			"value": 1.0,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:health_threshold",
+				"op": "lt",
+				"value": 12
+			}
+		]
+	}
 }

@@ -1,6 +1,6 @@
 {
 	"display_name": "Smith's Polish IV",
-	"description": "Gear you maintain holds its edge better. (+2 armor toughness)",
+	"description": "Gear you maintain holds its edge better. (+2 armor toughness) Perk: Hellforged Plating — resistance I in the Nether.",
 	"icon": "skill/smithing",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,20 @@
 			"operation": "add_value",
 			"value": 2,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:dimension",
+				"id": "minecraft:the_nether"
+			}
+		]
+	}
 }

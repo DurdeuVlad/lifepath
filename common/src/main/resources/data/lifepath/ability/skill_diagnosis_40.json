@@ -1,6 +1,6 @@
 {
 	"display_name": "Bedside Focus II",
-	"description": "The symptom you needed turns up on time. (+1 Luck)",
+	"description": "The symptom you needed turns up on time. (+1 Luck) Perk: Optic Adaptation — darkness is purged as it lands.",
 	"icon": "minecraft:textures/item/book.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,10 @@
 			"operation": "add_value",
 			"value": 1,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:remove_effect",
+			"effect": "minecraft:darkness"
 		}
 	]
 }

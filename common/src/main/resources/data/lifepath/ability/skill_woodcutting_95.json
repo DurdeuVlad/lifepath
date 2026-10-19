@@ -1,6 +1,6 @@
 {
 	"display_name": "Timber Rhythm V",
-	"description": "Among timber your axe finds its own tempo. (Haste 5 near logs)",
+	"description": "Among timber your axe finds its own tempo. (Haste 5 near logs) Perk: Midas Timber — luck III near timber.",
 	"icon": "skill/woodcutting",
 	"trigger": {
 		"type": "passive",
@@ -22,6 +22,12 @@
 			"operation": "add_value",
 			"value": 0.16,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:luck",
+			"duration": 120,
+			"amplifier": 2
 		}
 	],
 	"conditions": {

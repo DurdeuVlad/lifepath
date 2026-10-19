@@ -1,6 +1,6 @@
 {
 	"display_name": "Stage Athlete IV",
-	"description": "Years of stagecraft in the legs. (+8% move speed)",
+	"description": "Years of stagecraft in the legs. (+8% move speed) Perk: Grand Jete — jump boost II under bright light.",
 	"icon": "minecraft:textures/item/feather.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_multiplied_base",
 			"value": 0.08,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:jump_boost",
+			"duration": 120,
+			"amplifier": 1
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:light_level",
+				"op": "gte",
+				"value": 12
+			}
+		]
+	}
 }

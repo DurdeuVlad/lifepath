@@ -1,6 +1,6 @@
 {
 	"display_name": "Sun-Toughened III",
-	"description": "Milestone reward for reaching farming level 50.",
+	"description": "Milestone reward for reaching farming level 50. Perk: Earth's Bounty — regeneration I amid crops.",
 	"icon": "skill/farming",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,21 @@
 			"operation": "add_value",
 			"value": 0.12,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:regeneration",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:crops",
+				"radius": 5
+			}
+		]
+	}
 }

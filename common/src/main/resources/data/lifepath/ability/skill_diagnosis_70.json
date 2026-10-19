@@ -1,6 +1,6 @@
 {
 	"display_name": "Clinical Eye IV",
-	"description": "You read a patient before you touch them. (+0.6 exam reach)",
+	"description": "You read a patient before you touch them. (+0.6 exam reach) Perk: Pathogen Sense IV — speed II while the undead are near.",
 	"icon": "minecraft:textures/item/book.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_value",
 			"value": 0.6,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "#lifepath:undead",
+				"radius": 12
+			}
+		]
+	}
 }

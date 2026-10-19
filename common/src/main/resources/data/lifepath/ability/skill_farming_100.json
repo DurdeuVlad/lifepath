@@ -1,6 +1,6 @@
 {
 	"display_name": "Sun-Toughened VI",
-	"description": "Milestone reward for reaching farming level 100.",
+	"description": "Milestone reward for reaching farming level 100. Perk: Demeter's Blessing — the crop underfoot drinks four growth pulses.",
 	"icon": "skill/farming",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,19 @@
 			"operation": "add_value",
 			"value": 0.24,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:grow_blocks",
+			"growth_rolls": 4
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:crops",
+				"radius": 6
+			}
+		]
+	}
 }

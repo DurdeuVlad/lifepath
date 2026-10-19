@@ -1,6 +1,6 @@
 {
 	"display_name": "Deepstone Frame VI",
-	"description": "Milestone reward for reaching mining level 100.",
+	"description": "Milestone reward for reaching mining level 100. Perk: Deepstone Avatar — resistance I below the deepslate line (Y0).",
 	"icon": "skill/mining",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,21 @@
 			"operation": "add_value",
 			"value": 0.2,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:y_level",
+				"op": "lte",
+				"value": 0
+			}
+		]
+	}
 }

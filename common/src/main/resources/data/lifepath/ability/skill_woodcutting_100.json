@@ -1,6 +1,6 @@
 {
 	"display_name": "Cleaving Swing VI",
-	"description": "Milestone reward for reaching woodcutting level 100.",
+	"description": "Milestone reward for reaching woodcutting level 100. Perk: Crown-Leap — jump boost III beneath the leaves.",
 	"icon": "skill/woodcutting",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,21 @@
 			"operation": "add_value",
 			"value": 0.2,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:jump_boost",
+			"duration": 120,
+			"amplifier": 2
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:leaves",
+				"radius": 6
+			}
+		]
+	}
 }

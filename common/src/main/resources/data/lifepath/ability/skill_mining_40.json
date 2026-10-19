@@ -1,6 +1,6 @@
 {
 	"display_name": "Delver's Grip II",
-	"description": "Trained hands work stone and ore measurably faster. (+8% block break speed)",
+	"description": "Trained hands work stone and ore measurably faster. (+8% block break speed) Perk: Delver's Sight — night vision in the dark deeps (below Y48, light under 4).",
 	"icon": "skill/mining",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,26 @@
 			"operation": "add_multiplied_base",
 			"value": 0.08,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:night_vision",
+			"duration": 300,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:light_level",
+				"op": "lt",
+				"value": 4
+			},
+			{
+				"type": "lifepath:y_level",
+				"op": "lte",
+				"value": 48
+			}
+		]
+	}
 }

@@ -1,6 +1,6 @@
 {
 	"display_name": "Smith's Strength I",
-	"description": "Milestone reward for reaching smithing level 10.",
+	"description": "Milestone reward for reaching smithing level 10. Perk: Tempered Skin I — fire resistance near forge heat.",
 	"icon": "skill/smithing",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_value",
 			"value": 0.5,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:fire_resistance",
+			"duration": 100,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#lifepath:heat_sources",
+				"radius": 4
+			}
+		]
+	}
 }

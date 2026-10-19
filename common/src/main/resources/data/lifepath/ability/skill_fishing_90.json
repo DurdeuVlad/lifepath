@@ -1,6 +1,6 @@
 {
 	"display_name": "Riverborn V",
-	"description": "Milestone reward for reaching fishing level 90.",
+	"description": "Milestone reward for reaching fishing level 90. Perk: Riverstride — water at your feet briefly freezes while you wade.",
 	"icon": "skill/fishing",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,20 @@
 			"operation": "add_value",
 			"value": 0.4,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:freeze_water",
+			"temporary": true
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:not",
+				"condition": {
+					"type": "lifepath:submerged"
+				}
+			}
+		]
+	}
 }

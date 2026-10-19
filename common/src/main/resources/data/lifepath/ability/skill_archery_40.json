@@ -1,6 +1,6 @@
 {
 	"display_name": "Swift Stance II",
-	"description": "A practiced draw keeps you light on your feet. (+4% movement speed)",
+	"description": "A practiced draw keeps you light on your feet. (+4% movement speed) Perk: High Sun Kiting — speed II in daylight under open sky, bow in hand.",
 	"icon": "skill/archery",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,34 @@
 			"operation": "add_multiplied_base",
 			"value": 0.04,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:exposed_to_sky"
+			},
+			{
+				"type": "lifepath:daylight"
+			}
+		],
+		"any": [
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:bow",
+				"slot": "mainhand"
+			},
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:crossbow",
+				"slot": "mainhand"
+			}
+		]
+	}
 }

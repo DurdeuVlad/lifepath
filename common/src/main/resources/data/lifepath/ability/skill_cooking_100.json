@@ -1,6 +1,6 @@
 {
 	"display_name": "Calloused Hands VI",
-	"description": "Milestone reward for reaching cooking level 100.",
+	"description": "Milestone reward for reaching cooking level 100. Perk: Ambrosia — a steady feast restores 3 hunger while you run low.",
 	"icon": "skill/cooking",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,20 @@
 			"operation": "add_multiplied_base",
 			"value": -0.3,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:feed",
+			"nutrition": 3,
+			"saturation_modifier": 0.6
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:food_level",
+				"op": "lt",
+				"value": 14
+			}
+		]
+	}
 }

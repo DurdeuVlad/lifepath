@@ -1,6 +1,6 @@
 {
 	"display_name": "Bedside Focus IV",
-	"description": "The symptom you needed turns up on time. (+2 Luck)",
+	"description": "The symptom you needed turns up on time. (+2 Luck) Perk: Anatomical Precision — strength I while the undead are near.",
 	"icon": "minecraft:textures/item/book.png",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_value",
 			"value": 2,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "#lifepath:undead",
+				"radius": 8
+			}
+		]
+	}
 }

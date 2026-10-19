@@ -1,6 +1,6 @@
 {
 	"display_name": "Scholar's Focus II",
-	"description": "Milestone reward for reaching scholarship level 30.",
+	"description": "Milestone reward for reaching scholarship level 30. Perk: Sabbatical II — regeneration I in a library.",
 	"icon": "skill/scholarship",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,31 @@
 			"operation": "add_value",
 			"value": 0.3,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:regeneration",
+			"duration": 120,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"any": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:bookshelf",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:chiseled_bookshelf",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:enchanting_table",
+				"radius": 5
+			}
+		]
+	}
 }

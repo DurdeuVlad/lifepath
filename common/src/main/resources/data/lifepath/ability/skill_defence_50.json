@@ -1,6 +1,6 @@
 {
 	"display_name": "Immovable III",
-	"description": "Milestone reward for reaching defence level 50.",
+	"description": "Milestone reward for reaching defence level 50. Perk: Blast Drills III — +0.45 explosion knockback resistance.",
 	"icon": "skill/defence",
 	"trigger": {
 		"type": "passive",
@@ -29,6 +29,13 @@
 			"attribute": "minecraft:generic.max_health",
 			"operation": "add_value",
 			"value": 0.8,
+			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.explosion_knockback_resistance",
+			"operation": "add_value",
+			"value": 0.45,
 			"duration_ticks": 120
 		}
 	]

@@ -1,6 +1,6 @@
 {
 	"display_name": "Quick Draw VI",
-	"description": "Milestone reward for reaching archery level 100.",
+	"description": "Milestone reward for reaching archery level 100. Perk: Rain of Arrows — strength II while the storm falls on you, bow in hand.",
 	"icon": "skill/archery",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,32 @@
 			"operation": "add_multiplied_base",
 			"value": 0.12,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 120,
+			"amplifier": 1
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:in_precipitation",
+				"state": "any"
+			}
+		],
+		"any": [
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:bow",
+				"slot": "mainhand"
+			},
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:crossbow",
+				"slot": "mainhand"
+			}
+		]
+	}
 }

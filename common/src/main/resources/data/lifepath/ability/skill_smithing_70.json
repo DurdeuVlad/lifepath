@@ -1,6 +1,6 @@
 {
 	"display_name": "Smith's Strength IV",
-	"description": "Milestone reward for reaching smithing level 70.",
+	"description": "Milestone reward for reaching smithing level 70. Perk: Tempered Skin IV — fire resistance near forge heat.",
 	"icon": "skill/smithing",
 	"trigger": {
 		"type": "passive",
@@ -16,6 +16,21 @@
 			"operation": "add_value",
 			"value": 2,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:fire_resistance",
+			"duration": 160,
+			"amplifier": 0
 		}
-	]
+	],
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#lifepath:heat_sources",
+				"radius": 6
+			}
+		]
+	}
 }

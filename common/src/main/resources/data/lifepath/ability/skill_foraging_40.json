@@ -1,6 +1,6 @@
 {
 	"display_name": "Gatherer's Sense II",
-	"description": "The forest shows its shelves to those who look. (+2 Luck in forests)",
+	"description": "The forest shows its shelves to those who look. (+2 Luck in forests) Perk: Forest Fortune II — luck I among the trees.",
 	"icon": "skill/foraging",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,12 @@
 			"operation": "add_value",
 			"value": 0.02,
 			"duration_ticks": 120
+		},
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:luck",
+			"duration": 160,
+			"amplifier": 0
 		}
 	],
 	"conditions": {
