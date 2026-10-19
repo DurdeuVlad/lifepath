@@ -1,0 +1,37 @@
+{
+	"replace": false,
+	"values": [
+		{
+			"id": "timber_tales:hollow_oak_log",
+			"required": false
+		},
+		{
+			"id": "timber_tales:hollow_spruce_log",
+			"required": false
+		},
+		{
+			"id": "timber_tales:hollow_birch_log",
+			"required": false
+		},
+		{
+			"id": "timber_tales:hollow_jungle_log",
+			"required": false
+		},
+		{
+			"id": "timber_tales:hollow_acacia_log",
+			"required": false
+		},
+		{
+			"id": "timber_tales:hollow_dark_oak_log",
+			"required": false
+		},
+		{
+			"id": "timber_tales:hollow_mangrove_log",
+			"required": false
+		},
+		{
+			"id": "timber_tales:hollow_cherry_log",
+			"required": false
+		}
+	]
+}
