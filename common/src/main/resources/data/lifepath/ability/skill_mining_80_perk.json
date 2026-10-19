@@ -1,0 +1,29 @@
+{
+	"display_name": "Slagwalker",
+	"description": "Fire resistance beside lava.",
+	"icon": "skill/mining",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:lava",
+				"radius": 4
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:fire_resistance",
+			"duration": 140,
+			"amplifier": 0
+		}
+	]
+}

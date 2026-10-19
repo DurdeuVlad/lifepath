@@ -1,0 +1,29 @@
+{
+	"display_name": "Canopy Step IV",
+	"description": "Jump boost II beneath the leaves.",
+	"icon": "skill/woodcutting",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:leaves",
+				"radius": 6
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:jump_boost",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

@@ -1,0 +1,29 @@
+{
+	"display_name": "Shadow Meld I",
+	"description": "Invisibility under dim light.",
+	"icon": "minecraft:textures/item/feather.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:light_level",
+				"op": "lt",
+				"value": 4
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:invisibility",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

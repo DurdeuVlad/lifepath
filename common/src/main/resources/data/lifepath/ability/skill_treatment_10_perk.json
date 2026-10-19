@@ -1,0 +1,29 @@
+{
+	"display_name": "Self-Triage I",
+	"description": "Regeneration I below 12 health.",
+	"icon": "minecraft:textures/item/golden_apple.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:health_threshold",
+				"op": "lt",
+				"value": 12
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:regeneration",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

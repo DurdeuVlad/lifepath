@@ -1,0 +1,29 @@
+{
+	"display_name": "Pathogen Sense II",
+	"description": "Speed I while the undead are near.",
+	"icon": "minecraft:textures/item/book.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "#lifepath:undead",
+				"radius": 10
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

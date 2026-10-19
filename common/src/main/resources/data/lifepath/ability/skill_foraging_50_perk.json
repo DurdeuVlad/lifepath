@@ -1,0 +1,28 @@
+{
+	"display_name": "Bushwhacker III",
+	"description": "Speed II while pushing through vegetation.",
+	"icon": "skill/foraging",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:inside_block",
+				"block": "#lifepath:vegetation"
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

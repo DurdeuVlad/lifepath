@@ -1,0 +1,28 @@
+{
+	"display_name": "Netherforged Avatar",
+	"description": "Strength II in the Nether.",
+	"icon": "skill/smithing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:dimension",
+				"id": "minecraft:the_nether"
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

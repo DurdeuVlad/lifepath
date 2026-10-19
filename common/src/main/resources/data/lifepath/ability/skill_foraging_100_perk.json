@@ -1,0 +1,28 @@
+{
+	"display_name": "Wildwood Crown",
+	"description": "Resistance I beneath the boughs.",
+	"icon": "skill/foraging",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:biome_tag",
+				"tag": "#minecraft:is_forest"
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

@@ -1,0 +1,54 @@
+{
+	"display_name": "In the Zone I",
+	"description": "Speed I amid working machinery.",
+	"icon": "skill/engineering",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"any": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:dispenser",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:dropper",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:observer",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:piston",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:sticky_piston",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:hopper",
+				"radius": 5
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

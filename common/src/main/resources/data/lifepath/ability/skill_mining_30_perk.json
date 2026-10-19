@@ -1,0 +1,21 @@
+{
+	"display_name": "Sump Rat II",
+	"description": "+0.3 submerged mining speed.",
+	"icon": "skill/mining",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:player.submerged_mining_speed",
+			"operation": "add_value",
+			"value": 0.3,
+			"duration_ticks": 120
+		}
+	]
+}

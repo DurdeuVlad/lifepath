@@ -10,77 +10,88 @@
 			"level": 10,
 			"description_key": "lifepath.skill.scholarship.milestone.10",
 			"effects": [
-				"lifepath:skill_scholarship_10"
+				"lifepath:skill_scholarship_10",
+				"lifepath:skill_scholarship_10_perk"
 			]
 		},
 		{
 			"level": 20,
 			"description_key": "lifepath.skill.scholarship.milestone.20",
 			"effects": [
-				"lifepath:skill_scholarship_20"
+				"lifepath:skill_scholarship_20",
+				"lifepath:skill_scholarship_20_perk"
 			]
 		},
 		{
 			"level": 30,
 			"description_key": "lifepath.skill.scholarship.milestone.30",
 			"effects": [
-				"lifepath:skill_scholarship_30"
+				"lifepath:skill_scholarship_30",
+				"lifepath:skill_scholarship_30_perk"
 			]
 		},
 		{
 			"level": 40,
 			"description_key": "lifepath.skill.scholarship.milestone.40",
 			"effects": [
-				"lifepath:skill_scholarship_40"
+				"lifepath:skill_scholarship_40",
+				"lifepath:skill_scholarship_40_perk"
 			]
 		},
 		{
 			"level": 50,
 			"description_key": "lifepath.skill.scholarship.milestone.50",
 			"effects": [
-				"lifepath:skill_scholarship_50"
+				"lifepath:skill_scholarship_50",
+				"lifepath:skill_scholarship_50_perk"
 			]
 		},
 		{
 			"level": 60,
 			"description_key": "lifepath.skill.scholarship.milestone.60",
 			"effects": [
-				"lifepath:skill_scholarship_60"
+				"lifepath:skill_scholarship_60",
+				"lifepath:skill_scholarship_60_perk"
 			]
 		},
 		{
 			"level": 70,
 			"description_key": "lifepath.skill.scholarship.milestone.70",
 			"effects": [
-				"lifepath:skill_scholarship_70"
+				"lifepath:skill_scholarship_70",
+				"lifepath:skill_scholarship_70_perk"
 			]
 		},
 		{
 			"level": 80,
 			"description_key": "lifepath.skill.scholarship.milestone.80",
 			"effects": [
-				"lifepath:skill_scholarship_80"
+				"lifepath:skill_scholarship_80",
+				"lifepath:skill_scholarship_80_perk"
 			]
 		},
 		{
 			"level": 90,
 			"description_key": "lifepath.skill.scholarship.milestone.90",
 			"effects": [
-				"lifepath:skill_scholarship_90"
+				"lifepath:skill_scholarship_90",
+				"lifepath:skill_scholarship_90_perk"
 			]
 		},
 		{
 			"level": 95,
 			"description_key": "lifepath.skill.scholarship.milestone.95",
 			"effects": [
-				"lifepath:skill_scholarship_95"
+				"lifepath:skill_scholarship_95",
+				"lifepath:skill_scholarship_95_perk"
 			]
 		},
 		{
 			"level": 100,
 			"description_key": "lifepath.skill.scholarship.milestone.100",
 			"effects": [
-				"lifepath:skill_scholarship_100"
+				"lifepath:skill_scholarship_100",
+				"lifepath:skill_scholarship_100_perk"
 			]
 		}
 	]

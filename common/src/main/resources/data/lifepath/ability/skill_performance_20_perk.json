@@ -1,0 +1,29 @@
+{
+	"display_name": "Shadow Glide I",
+	"description": "Speed I under dim light.",
+	"icon": "minecraft:textures/item/feather.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:light_level",
+				"op": "lt",
+				"value": 4
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

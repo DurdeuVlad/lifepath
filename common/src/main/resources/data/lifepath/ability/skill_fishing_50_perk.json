@@ -1,0 +1,21 @@
+{
+	"display_name": "Half-Lung II",
+	"description": "+0.5 oxygen bonus.",
+	"icon": "skill/fishing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.oxygen_bonus",
+			"operation": "add_value",
+			"value": 0.5,
+			"duration_ticks": 120
+		}
+	]
+}

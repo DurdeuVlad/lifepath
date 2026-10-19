@@ -1,0 +1,29 @@
+{
+	"display_name": "Orchard Eye II",
+	"description": "Luck II near timber.",
+	"icon": "skill/woodcutting",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:logs",
+				"radius": 6
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:luck",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

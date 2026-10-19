@@ -1,0 +1,18 @@
+{
+	"display_name": "Bloodletting",
+	"description": "Wither is purged as it lands.",
+	"icon": "minecraft:textures/item/golden_apple.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:remove_effect",
+			"effect": "minecraft:wither"
+		}
+	]
+}

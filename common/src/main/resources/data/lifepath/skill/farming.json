@@ -10,77 +10,88 @@
 			"level": 10,
 			"description_key": "lifepath.skill.farming.milestone.10",
 			"effects": [
-				"lifepath:skill_farming_10"
+				"lifepath:skill_farming_10",
+				"lifepath:skill_farming_10_perk"
 			]
 		},
 		{
 			"level": 20,
 			"description_key": "lifepath.skill.farming.milestone.20",
 			"effects": [
-				"lifepath:skill_farming_20"
+				"lifepath:skill_farming_20",
+				"lifepath:skill_farming_20_perk"
 			]
 		},
 		{
 			"level": 30,
 			"description_key": "lifepath.skill.farming.milestone.30",
 			"effects": [
-				"lifepath:skill_farming_30"
+				"lifepath:skill_farming_30",
+				"lifepath:skill_farming_30_perk"
 			]
 		},
 		{
 			"level": 40,
 			"description_key": "lifepath.skill.farming.milestone.40",
 			"effects": [
-				"lifepath:skill_farming_40"
+				"lifepath:skill_farming_40",
+				"lifepath:skill_farming_40_perk"
 			]
 		},
 		{
 			"level": 50,
 			"description_key": "lifepath.skill.farming.milestone.50",
 			"effects": [
-				"lifepath:skill_farming_50"
+				"lifepath:skill_farming_50",
+				"lifepath:skill_farming_50_perk"
 			]
 		},
 		{
 			"level": 60,
 			"description_key": "lifepath.skill.farming.milestone.60",
 			"effects": [
-				"lifepath:skill_farming_60"
+				"lifepath:skill_farming_60",
+				"lifepath:skill_farming_60_perk"
 			]
 		},
 		{
 			"level": 70,
 			"description_key": "lifepath.skill.farming.milestone.70",
 			"effects": [
-				"lifepath:skill_farming_70"
+				"lifepath:skill_farming_70",
+				"lifepath:skill_farming_70_perk"
 			]
 		},
 		{
 			"level": 80,
 			"description_key": "lifepath.skill.farming.milestone.80",
 			"effects": [
-				"lifepath:skill_farming_80"
+				"lifepath:skill_farming_80",
+				"lifepath:skill_farming_80_perk"
 			]
 		},
 		{
 			"level": 90,
 			"description_key": "lifepath.skill.farming.milestone.90",
 			"effects": [
-				"lifepath:skill_farming_90"
+				"lifepath:skill_farming_90",
+				"lifepath:skill_farming_90_perk"
 			]
 		},
 		{
 			"level": 95,
 			"description_key": "lifepath.skill.farming.milestone.95",
 			"effects": [
-				"lifepath:skill_farming_95"
+				"lifepath:skill_farming_95",
+				"lifepath:skill_farming_95_perk"
 			]
 		},
 		{
 			"level": 100,
 			"description_key": "lifepath.skill.farming.milestone.100",
 			"effects": [
-				"lifepath:skill_farming_100"
+				"lifepath:skill_farming_100",
+				"lifepath:skill_farming_100_perk"
 			]
 		}
 	]

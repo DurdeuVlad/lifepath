@@ -1,0 +1,29 @@
+{
+	"display_name": "Anvil Chorus I",
+	"description": "Haste I at the smithing station.",
+	"icon": "skill/smithing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#lifepath:smithing_workstations",
+				"radius": 4
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:haste",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

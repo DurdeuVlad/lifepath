@@ -1,0 +1,29 @@
+{
+	"display_name": "On-Site Stride IV",
+	"description": "Speed II among construction blocks.",
+	"icon": "minecraft:textures/item/brick.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#lifepath:construction_blocks",
+				"radius": 7
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

@@ -10,77 +10,88 @@
 			"level": 10,
 			"description_key": "lifepath.skill.husbandry.milestone.10",
 			"effects": [
-				"lifepath:skill_husbandry_10"
+				"lifepath:skill_husbandry_10",
+				"lifepath:skill_husbandry_10_perk"
 			]
 		},
 		{
 			"level": 20,
 			"description_key": "lifepath.skill.husbandry.milestone.20",
 			"effects": [
-				"lifepath:skill_husbandry_20"
+				"lifepath:skill_husbandry_20",
+				"lifepath:skill_husbandry_20_perk"
 			]
 		},
 		{
 			"level": 30,
 			"description_key": "lifepath.skill.husbandry.milestone.30",
 			"effects": [
-				"lifepath:skill_husbandry_30"
+				"lifepath:skill_husbandry_30",
+				"lifepath:skill_husbandry_30_perk"
 			]
 		},
 		{
 			"level": 40,
 			"description_key": "lifepath.skill.husbandry.milestone.40",
 			"effects": [
-				"lifepath:skill_husbandry_40"
+				"lifepath:skill_husbandry_40",
+				"lifepath:skill_husbandry_40_perk"
 			]
 		},
 		{
 			"level": 50,
 			"description_key": "lifepath.skill.husbandry.milestone.50",
 			"effects": [
-				"lifepath:skill_husbandry_50"
+				"lifepath:skill_husbandry_50",
+				"lifepath:skill_husbandry_50_perk"
 			]
 		},
 		{
 			"level": 60,
 			"description_key": "lifepath.skill.husbandry.milestone.60",
 			"effects": [
-				"lifepath:skill_husbandry_60"
+				"lifepath:skill_husbandry_60",
+				"lifepath:skill_husbandry_60_perk"
 			]
 		},
 		{
 			"level": 70,
 			"description_key": "lifepath.skill.husbandry.milestone.70",
 			"effects": [
-				"lifepath:skill_husbandry_70"
+				"lifepath:skill_husbandry_70",
+				"lifepath:skill_husbandry_70_perk"
 			]
 		},
 		{
 			"level": 80,
 			"description_key": "lifepath.skill.husbandry.milestone.80",
 			"effects": [
-				"lifepath:skill_husbandry_80"
+				"lifepath:skill_husbandry_80",
+				"lifepath:skill_husbandry_80_perk"
 			]
 		},
 		{
 			"level": 90,
 			"description_key": "lifepath.skill.husbandry.milestone.90",
 			"effects": [
-				"lifepath:skill_husbandry_90"
+				"lifepath:skill_husbandry_90",
+				"lifepath:skill_husbandry_90_perk"
 			]
 		},
 		{
 			"level": 95,
 			"description_key": "lifepath.skill.husbandry.milestone.95",
 			"effects": [
-				"lifepath:skill_husbandry_95"
+				"lifepath:skill_husbandry_95",
+				"lifepath:skill_husbandry_95_perk"
 			]
 		},
 		{
 			"level": 100,
 			"description_key": "lifepath.skill.husbandry.milestone.100",
 			"effects": [
-				"lifepath:skill_husbandry_100"
+				"lifepath:skill_husbandry_100",
+				"lifepath:skill_husbandry_100_perk"
 			]
 		}
 	]
