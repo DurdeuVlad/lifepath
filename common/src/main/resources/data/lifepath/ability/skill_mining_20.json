@@ -1,6 +1,6 @@
 {
 	"display_name": "Delver's Grip I",
-	"description": "Trained hands work stone and ore measurably faster. (+4% block break speed) Perk: Torchblood — haste I in the dark.",
+	"description": "Trained hands work stone and ore measurably faster. (+4% block break speed)",
 	"icon": "skill/mining",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": 0.04,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:haste",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:light_level",
-				"op": "lt",
-				"value": 4
-			}
-		]
-	}
+	]
 }

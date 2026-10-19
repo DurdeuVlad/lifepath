@@ -1,6 +1,6 @@
 {
 	"display_name": "Green Thumb II",
-	"description": "Standing in your fields, fortune tilts your way. (+2 Luck amid crops) Perk: Gardener's Step II — the crop underfoot drinks two growth pulses.",
+	"description": "Standing in your fields, fortune tilts your way. (+2 Luck amid crops)",
 	"icon": "skill/farming",
 	"trigger": {
 		"type": "passive",
@@ -23,10 +23,6 @@
 			"operation": "add_value",
 			"value": 0.1,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:grow_blocks",
-			"growth_rolls": 2
 		}
 	],
 	"conditions": {

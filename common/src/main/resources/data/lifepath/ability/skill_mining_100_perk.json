@@ -1,0 +1,29 @@
+{
+	"display_name": "Deepstone Avatar",
+	"description": "Resistance I below the deepslate line (Y0).",
+	"icon": "skill/mining",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:y_level",
+				"op": "lte",
+				"value": 0
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

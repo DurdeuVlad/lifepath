@@ -1,6 +1,6 @@
 {
 	"display_name": "Shadow Step V",
-	"description": "Exits and entrances nobody catches. (+25% sneak speed) Perk: Shadow Meld II — lasting invisibility under dim light.",
+	"description": "Exits and entrances nobody catches. (+25% sneak speed)",
 	"icon": "minecraft:textures/item/feather.png",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": 0.25,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:invisibility",
-			"duration": 200,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:light_level",
-				"op": "lt",
-				"value": 4
-			}
-		]
-	}
+	]
 }

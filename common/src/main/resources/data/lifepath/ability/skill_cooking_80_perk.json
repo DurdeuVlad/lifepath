@@ -1,0 +1,29 @@
+{
+	"display_name": "Sugar Rush IV",
+	"description": "Speed II while well fed.",
+	"icon": "skill/cooking",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:food_level",
+				"op": "gte",
+				"value": 16
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

@@ -1,0 +1,34 @@
+{
+	"display_name": "Crowd Work IV",
+	"description": "Speed II with a villager audience close.",
+	"icon": "minecraft:textures/item/music_disc_cat.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"any": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "minecraft:villager",
+				"radius": 9
+			},
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "minecraft:wandering_trader",
+				"radius": 9
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

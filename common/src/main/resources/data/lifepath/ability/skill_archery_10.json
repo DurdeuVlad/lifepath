@@ -1,6 +1,6 @@
 {
 	"display_name": "Quick Draw I",
-	"description": "Milestone reward for reaching archery level 10. Perk: Fight-or-Flight I — speed I while bloodied, bow in hand.",
+	"description": "Milestone reward for reaching archery level 10.",
 	"icon": "skill/archery",
 	"trigger": {
 		"type": "passive",
@@ -16,33 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": 0.02,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:health_threshold",
-				"op": "lt",
-				"value": 14
-			}
-		],
-		"any": [
-			{
-				"type": "lifepath:equipment_contains",
-				"item": "minecraft:bow",
-				"slot": "mainhand"
-			},
-			{
-				"type": "lifepath:equipment_contains",
-				"item": "minecraft:crossbow",
-				"slot": "mainhand"
-			}
-		]
-	}
+	]
 }

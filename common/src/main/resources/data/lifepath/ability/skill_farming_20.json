@@ -1,6 +1,6 @@
 {
 	"display_name": "Green Thumb I",
-	"description": "Standing in your fields, fortune tilts your way. (+1 Luck amid crops) Perk: Gardener's Step I — the crop underfoot drinks a growth pulse.",
+	"description": "Standing in your fields, fortune tilts your way. (+1 Luck amid crops)",
 	"icon": "skill/farming",
 	"trigger": {
 		"type": "passive",
@@ -16,10 +16,6 @@
 			"operation": "add_value",
 			"value": 1,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:grow_blocks",
-			"growth_rolls": 1
 		}
 	],
 	"conditions": {

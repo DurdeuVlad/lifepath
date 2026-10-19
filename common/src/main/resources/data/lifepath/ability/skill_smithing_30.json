@@ -1,6 +1,6 @@
 {
 	"display_name": "Smith's Strength II",
-	"description": "Milestone reward for reaching smithing level 30. Perk: Tempered Skin II — fire resistance near forge heat.",
+	"description": "Milestone reward for reaching smithing level 30.",
 	"icon": "skill/smithing",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 1,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:fire_resistance",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "#lifepath:heat_sources",
-				"radius": 4
-			}
-		]
-	}
+	]
 }

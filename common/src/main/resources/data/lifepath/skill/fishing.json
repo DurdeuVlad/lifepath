@@ -10,77 +10,88 @@
 			"level": 10,
 			"description_key": "lifepath.skill.fishing.milestone.10",
 			"effects": [
-				"lifepath:skill_fishing_10"
+				"lifepath:skill_fishing_10",
+				"lifepath:skill_fishing_10_perk"
 			]
 		},
 		{
 			"level": 20,
 			"description_key": "lifepath.skill.fishing.milestone.20",
 			"effects": [
-				"lifepath:skill_fishing_20"
+				"lifepath:skill_fishing_20",
+				"lifepath:skill_fishing_20_perk"
 			]
 		},
 		{
 			"level": 30,
 			"description_key": "lifepath.skill.fishing.milestone.30",
 			"effects": [
-				"lifepath:skill_fishing_30"
+				"lifepath:skill_fishing_30",
+				"lifepath:skill_fishing_30_perk"
 			]
 		},
 		{
 			"level": 40,
 			"description_key": "lifepath.skill.fishing.milestone.40",
 			"effects": [
-				"lifepath:skill_fishing_40"
+				"lifepath:skill_fishing_40",
+				"lifepath:skill_fishing_40_perk"
 			]
 		},
 		{
 			"level": 50,
 			"description_key": "lifepath.skill.fishing.milestone.50",
 			"effects": [
-				"lifepath:skill_fishing_50"
+				"lifepath:skill_fishing_50",
+				"lifepath:skill_fishing_50_perk"
 			]
 		},
 		{
 			"level": 60,
 			"description_key": "lifepath.skill.fishing.milestone.60",
 			"effects": [
-				"lifepath:skill_fishing_60"
+				"lifepath:skill_fishing_60",
+				"lifepath:skill_fishing_60_perk"
 			]
 		},
 		{
 			"level": 70,
 			"description_key": "lifepath.skill.fishing.milestone.70",
 			"effects": [
-				"lifepath:skill_fishing_70"
+				"lifepath:skill_fishing_70",
+				"lifepath:skill_fishing_70_perk"
 			]
 		},
 		{
 			"level": 80,
 			"description_key": "lifepath.skill.fishing.milestone.80",
 			"effects": [
-				"lifepath:skill_fishing_80"
+				"lifepath:skill_fishing_80",
+				"lifepath:skill_fishing_80_perk"
 			]
 		},
 		{
 			"level": 90,
 			"description_key": "lifepath.skill.fishing.milestone.90",
 			"effects": [
-				"lifepath:skill_fishing_90"
+				"lifepath:skill_fishing_90",
+				"lifepath:skill_fishing_90_perk"
 			]
 		},
 		{
 			"level": 95,
 			"description_key": "lifepath.skill.fishing.milestone.95",
 			"effects": [
-				"lifepath:skill_fishing_95"
+				"lifepath:skill_fishing_95",
+				"lifepath:skill_fishing_95_perk"
 			]
 		},
 		{
 			"level": 100,
 			"description_key": "lifepath.skill.fishing.milestone.100",
 			"effects": [
-				"lifepath:skill_fishing_100"
+				"lifepath:skill_fishing_100",
+				"lifepath:skill_fishing_100_perk"
 			]
 		}
 	]

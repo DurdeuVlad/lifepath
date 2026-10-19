@@ -1,0 +1,40 @@
+{
+	"display_name": "Storm Shafts",
+	"description": "Strength I while the storm falls on you, bow in hand.",
+	"icon": "skill/archery",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:in_precipitation",
+				"state": "any"
+			}
+		],
+		"any": [
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:bow",
+				"slot": "mainhand"
+			},
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:crossbow",
+				"slot": "mainhand"
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

@@ -1,0 +1,28 @@
+{
+	"display_name": "Riverstride",
+	"description": "Water at your feet briefly freezes while you wade.",
+	"icon": "skill/fishing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:not",
+				"condition": {
+					"type": "lifepath:submerged"
+				}
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:freeze_water",
+			"temporary": true
+		}
+	]
+}

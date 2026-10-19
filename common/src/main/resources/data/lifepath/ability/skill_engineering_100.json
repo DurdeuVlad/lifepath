@@ -1,6 +1,6 @@
 {
 	"display_name": "Fine Calibration VI",
-	"description": "Milestone reward for reaching engineering level 100. Perk: Telescopic Arm — +1.5 entity interaction range.",
+	"description": "Milestone reward for reaching engineering level 100.",
 	"icon": "skill/engineering",
 	"trigger": {
 		"type": "passive",
@@ -22,13 +22,6 @@
 			"attribute": "minecraft:player.block_interaction_range",
 			"operation": "add_value",
 			"value": 0.22,
-			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:modify_attribute",
-			"attribute": "minecraft:player.entity_interaction_range",
-			"operation": "add_value",
-			"value": 1.5,
 			"duration_ticks": 120
 		}
 	]

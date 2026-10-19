@@ -1,6 +1,6 @@
 {
 	"display_name": "Stone Skin V",
-	"description": "Seasoned bruises harden into armor of their own. (+5 armor) Perk: Second Wind V — resistance II below 10 health.",
+	"description": "Seasoned bruises harden into armor of their own. (+5 armor)",
 	"icon": "skill/defence",
 	"trigger": {
 		"type": "passive",
@@ -23,21 +23,6 @@
 			"operation": "add_value",
 			"value": 1.8,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:resistance",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:health_threshold",
-				"op": "lt",
-				"value": 10
-			}
-		]
-	}
+	]
 }

@@ -1,6 +1,6 @@
 {
 	"display_name": "Deepstone Frame V",
-	"description": "Milestone reward for reaching mining level 90. Perk: Sump Rat V — +0.6 submerged mining speed.",
+	"description": "Milestone reward for reaching mining level 90.",
 	"icon": "skill/mining",
 	"trigger": {
 		"type": "passive",
@@ -22,13 +22,6 @@
 			"attribute": "minecraft:player.block_break_speed",
 			"operation": "add_value",
 			"value": 0.14,
-			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:modify_attribute",
-			"attribute": "minecraft:player.submerged_mining_speed",
-			"operation": "add_value",
-			"value": 0.6,
 			"duration_ticks": 120
 		}
 	]

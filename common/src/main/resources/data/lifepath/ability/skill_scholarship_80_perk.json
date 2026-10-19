@@ -1,0 +1,39 @@
+{
+	"display_name": "Knowledge is Power",
+	"description": "Strength I in a library.",
+	"icon": "skill/scholarship",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"any": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:bookshelf",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:chiseled_bookshelf",
+				"radius": 5
+			},
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:enchanting_table",
+				"radius": 5
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:strength",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

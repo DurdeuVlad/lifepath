@@ -1,6 +1,6 @@
 {
 	"display_name": "Timber Rhythm IV",
-	"description": "Among timber your axe finds its own tempo. (Haste 4 near logs) Perk: Ripsaw Rhythm II — haste III near timber.",
+	"description": "Among timber your axe finds its own tempo. (Haste 4 near logs)",
 	"icon": "skill/woodcutting",
 	"trigger": {
 		"type": "passive",
@@ -22,12 +22,6 @@
 			"operation": "add_value",
 			"value": 0.12,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:haste",
-			"duration": 120,
-			"amplifier": 2
 		}
 	],
 	"conditions": {

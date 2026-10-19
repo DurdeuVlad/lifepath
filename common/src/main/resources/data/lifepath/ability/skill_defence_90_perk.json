@@ -1,0 +1,21 @@
+{
+	"display_name": "Blast Drills V",
+	"description": "+0.75 explosion knockback resistance.",
+	"icon": "skill/defence",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.explosion_knockback_resistance",
+			"operation": "add_value",
+			"value": 0.75,
+			"duration_ticks": 120
+		}
+	]
+}

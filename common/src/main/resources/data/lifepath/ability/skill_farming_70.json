@@ -1,6 +1,6 @@
 {
 	"display_name": "Sun-Toughened IV",
-	"description": "Milestone reward for reaching farming level 70. Perk: Among the Rows III — speed II amid crops.",
+	"description": "Milestone reward for reaching farming level 70.",
 	"icon": "skill/farming",
 	"trigger": {
 		"type": "passive",
@@ -23,21 +23,6 @@
 			"operation": "add_value",
 			"value": 0.16,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "#minecraft:crops",
-				"radius": 5
-			}
-		]
-	}
+	]
 }

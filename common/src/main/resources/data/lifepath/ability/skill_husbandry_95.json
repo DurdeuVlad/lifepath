@@ -1,6 +1,6 @@
 {
 	"display_name": "Gentle Hands V",
-	"description": "Calm animals give more. (+6 Luck) Perk: Barnyard Comfort V — regeneration II among your animals.",
+	"description": "Calm animals give more. (+6 Luck)",
 	"icon": "minecraft:textures/item/milk_bucket.png",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 6,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:regeneration",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:entity_nearby",
-				"entity": "#lifepath:animals",
-				"radius": 10
-			}
-		]
-	}
+	]
 }

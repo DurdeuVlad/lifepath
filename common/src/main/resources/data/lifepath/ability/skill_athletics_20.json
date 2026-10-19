@@ -1,6 +1,6 @@
 {
 	"display_name": "Sure-Footed I",
-	"description": "You land like you've done this a thousand times. (-10% fall damage) Perk: Spring-Heeled I — constant jump boost I.",
+	"description": "You land like you've done this a thousand times. (-10% fall damage)",
 	"icon": "skill/athletics",
 	"trigger": {
 		"type": "passive",
@@ -16,12 +16,6 @@
 			"operation": "add_value",
 			"value": -0.1,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:jump_boost",
-			"duration": 120,
-			"amplifier": 0
 		}
 	]
 }

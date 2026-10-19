@@ -1,6 +1,6 @@
 {
 	"display_name": "Well-Nourished IV",
-	"description": "Good food keeps a body whole. (+4 max health) Perk: Sugar Rush IV — speed II while well fed.",
+	"description": "Good food keeps a body whole. (+4 max health)",
 	"icon": "skill/cooking",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 4,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:food_level",
-				"op": "gte",
-				"value": 16
-			}
-		]
-	}
+	]
 }

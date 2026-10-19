@@ -1,6 +1,6 @@
 {
 	"display_name": "Engineer's Reach II",
-	"description": "You know machines — and how far your wrench reaches. (+0.5 block interaction range) Perk: In the Zone II — speed I amid working machinery.",
+	"description": "You know machines — and how far your wrench reaches. (+0.5 block interaction range)",
 	"icon": "skill/engineering",
 	"trigger": {
 		"type": "passive",
@@ -16,46 +16,6 @@
 			"operation": "add_value",
 			"value": 0.5,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"any": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:dispenser",
-				"radius": 6
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:dropper",
-				"radius": 6
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:observer",
-				"radius": 6
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:piston",
-				"radius": 6
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:sticky_piston",
-				"radius": 6
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:hopper",
-				"radius": 6
-			}
-		]
-	}
+	]
 }

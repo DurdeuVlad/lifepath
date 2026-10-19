@@ -1,6 +1,6 @@
 {
 	"display_name": "Quiet Tread V",
-	"description": "Milestone reward for reaching foraging level 90. Perk: Bushwhacker V — speed II while pushing through vegetation.",
+	"description": "Milestone reward for reaching foraging level 90.",
 	"icon": "skill/foraging",
 	"trigger": {
 		"type": "passive",
@@ -23,20 +23,6 @@
 			"operation": "add_value",
 			"value": 0.07,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:inside_block",
-				"block": "#lifepath:vegetation"
-			}
-		]
-	}
+	]
 }

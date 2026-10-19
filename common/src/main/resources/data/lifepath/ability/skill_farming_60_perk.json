@@ -1,0 +1,27 @@
+{
+	"display_name": "Gardener's Step III",
+	"description": "The crop underfoot drinks two growth pulses.",
+	"icon": "skill/farming",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#minecraft:crops",
+				"radius": 5
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:grow_blocks",
+			"growth_rolls": 2
+		}
+	]
+}

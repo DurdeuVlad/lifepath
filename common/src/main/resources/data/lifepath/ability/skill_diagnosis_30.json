@@ -1,6 +1,6 @@
 {
 	"display_name": "Clinical Eye II",
-	"description": "You read a patient before you touch them. (+0.3 exam reach) Perk: Pathogen Sense II — speed I while the undead are near.",
+	"description": "You read a patient before you touch them. (+0.3 exam reach)",
 	"icon": "minecraft:textures/item/book.png",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 0.3,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:entity_nearby",
-				"entity": "#lifepath:undead",
-				"radius": 10
-			}
-		]
-	}
+	]
 }

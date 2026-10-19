@@ -1,6 +1,6 @@
 {
 	"display_name": "Scaffold Legs V",
-	"description": "You drop off scaffolding like you own it. (+3 safe fall) Perk: Steeplejack V — jump boost II while exposed high up.",
+	"description": "You drop off scaffolding like you own it. (+3 safe fall)",
 	"icon": "minecraft:textures/item/brick.png",
 	"trigger": {
 		"type": "passive",
@@ -16,24 +16,6 @@
 			"operation": "add_value",
 			"value": 3,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:jump_boost",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:exposed_to_sky"
-			},
-			{
-				"type": "lifepath:y_level",
-				"op": "gte",
-				"value": 88
-			}
-		]
-	}
+	]
 }

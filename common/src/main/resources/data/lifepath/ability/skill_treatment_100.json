@@ -1,6 +1,6 @@
 {
 	"display_name": "Combat Medic VI",
-	"description": "You keep yourself breathing so you can keep them breathing. (+6 health) Perk: Trauma Surgeon — regeneration III below 14 health.",
+	"description": "You keep yourself breathing so you can keep them breathing. (+6 health)",
 	"icon": "minecraft:textures/item/golden_apple.png",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 6,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:regeneration",
-			"duration": 120,
-			"amplifier": 2
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:health_threshold",
-				"op": "lt",
-				"value": 14
-			}
-		]
-	}
+	]
 }

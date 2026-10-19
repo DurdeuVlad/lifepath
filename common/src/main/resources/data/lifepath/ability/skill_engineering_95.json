@@ -1,6 +1,6 @@
 {
 	"display_name": "Engineer's Reach V",
-	"description": "You know machines — and how far your wrench reaches. (+1.5 block interaction range) Perk: Overclock — speed II amid working machinery.",
+	"description": "You know machines — and how far your wrench reaches. (+1.5 block interaction range)",
 	"icon": "skill/engineering",
 	"trigger": {
 		"type": "passive",
@@ -16,46 +16,6 @@
 			"operation": "add_value",
 			"value": 1.5,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"any": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:dispenser",
-				"radius": 7
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:dropper",
-				"radius": 7
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:observer",
-				"radius": 7
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:piston",
-				"radius": 7
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:sticky_piston",
-				"radius": 7
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:hopper",
-				"radius": 7
-			}
-		]
-	}
+	]
 }

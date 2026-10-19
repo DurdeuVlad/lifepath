@@ -1,6 +1,6 @@
 {
 	"display_name": "Steady Tempo IV",
-	"description": "Your hands keep time in a fight too. (+8% attack speed) Perk: Crowd Work IV — speed II with a villager audience close.",
+	"description": "Your hands keep time in a fight too. (+8% attack speed)",
 	"icon": "minecraft:textures/item/music_disc_cat.png",
 	"trigger": {
 		"type": "passive",
@@ -16,26 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": 0.08,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"any": [
-			{
-				"type": "lifepath:entity_nearby",
-				"entity": "minecraft:villager",
-				"radius": 9
-			},
-			{
-				"type": "lifepath:entity_nearby",
-				"entity": "minecraft:wandering_trader",
-				"radius": 9
-			}
-		]
-	}
+	]
 }

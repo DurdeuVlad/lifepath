@@ -1,6 +1,6 @@
 {
 	"display_name": "Fine Calibration I",
-	"description": "Milestone reward for reaching engineering level 10. Perk: Lever Arm I — +0.25 entity interaction range.",
+	"description": "Milestone reward for reaching engineering level 10.",
 	"icon": "skill/engineering",
 	"trigger": {
 		"type": "passive",
@@ -15,13 +15,6 @@
 			"attribute": "minecraft:player.mining_efficiency",
 			"operation": "add_value",
 			"value": 1,
-			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:modify_attribute",
-			"attribute": "minecraft:player.entity_interaction_range",
-			"operation": "add_value",
-			"value": 0.25,
 			"duration_ticks": 120
 		}
 	]

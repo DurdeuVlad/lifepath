@@ -1,6 +1,6 @@
 {
 	"display_name": "Steady Tempo VI",
-	"description": "Your hands keep time in a fight too. (+12% attack speed) Perk: Beloved — constant hero of the village.",
+	"description": "Your hands keep time in a fight too. (+12% attack speed)",
 	"icon": "minecraft:textures/item/music_disc_cat.png",
 	"trigger": {
 		"type": "passive",
@@ -16,12 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": 0.12,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:hero_of_the_village",
-			"duration": 120,
-			"amplifier": 0
 		}
 	]
 }

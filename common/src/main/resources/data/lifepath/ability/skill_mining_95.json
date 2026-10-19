@@ -1,6 +1,6 @@
 {
 	"display_name": "Delver's Grip V",
-	"description": "Trained hands work stone and ore measurably faster. (+25% block break speed) Perk: Ore Frenzy — haste II near valuable ore.",
+	"description": "Trained hands work stone and ore measurably faster. (+25% block break speed)",
 	"icon": "skill/mining",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": 0.25,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:haste",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "#lifepath:valuable_ores",
-				"radius": 6
-			}
-		]
-	}
+	]
 }

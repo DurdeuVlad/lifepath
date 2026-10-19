@@ -1,6 +1,6 @@
 {
 	"display_name": "Brewer's Nose III",
-	"description": "You can smell a batch turning before it does. (+3 Luck) Perk: Stillhouse Step III — speed II near your brewing stand.",
+	"description": "You can smell a batch turning before it does. (+3 Luck)",
 	"icon": "minecraft:textures/item/brewing_stand.png",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 3,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:brewing_stand",
-				"radius": 6
-			}
-		]
-	}
+	]
 }

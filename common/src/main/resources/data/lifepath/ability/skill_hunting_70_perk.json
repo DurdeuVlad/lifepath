@@ -1,0 +1,27 @@
+{
+	"display_name": "Prowl III",
+	"description": "Speed II at night.",
+	"icon": "skill/hunting",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:night"
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

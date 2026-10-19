@@ -1,0 +1,41 @@
+{
+	"display_name": "Fight-or-Flight IV",
+	"description": "Speed II while bloodied, bow in hand.",
+	"icon": "skill/archery",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:health_threshold",
+				"op": "lt",
+				"value": 16
+			}
+		],
+		"any": [
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:bow",
+				"slot": "mainhand"
+			},
+			{
+				"type": "lifepath:equipment_contains",
+				"item": "minecraft:crossbow",
+				"slot": "mainhand"
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

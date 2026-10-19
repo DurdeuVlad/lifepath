@@ -1,6 +1,6 @@
 {
 	"display_name": "Clinical Eye VI",
-	"description": "You read a patient before you touch them. (+0.9 exam reach) Perk: Reaper's Anatomy — strength II while the undead are near.",
+	"description": "You read a patient before you touch them. (+0.9 exam reach)",
 	"icon": "minecraft:textures/item/book.png",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 0.9,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:strength",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:entity_nearby",
-				"entity": "#lifepath:undead",
-				"radius": 14
-			}
-		]
-	}
+	]
 }

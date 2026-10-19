@@ -1,6 +1,6 @@
 {
 	"display_name": "Crippling Blow I",
-	"description": "Milestone reward for reaching hunting level 10. Perk: Prowl I — speed I at night.",
+	"description": "Milestone reward for reaching hunting level 10.",
 	"icon": "skill/hunting",
 	"trigger": {
 		"type": "passive",
@@ -16,19 +16,6 @@
 			"operation": "add_value",
 			"value": 0.1,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:night"
-			}
-		]
-	}
+	]
 }

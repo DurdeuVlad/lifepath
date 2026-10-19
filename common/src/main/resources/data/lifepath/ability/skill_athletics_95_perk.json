@@ -1,0 +1,20 @@
+{
+	"display_name": "Moonstep",
+	"description": "Constant jump boost III.",
+	"icon": "skill/athletics",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:jump_boost",
+			"duration": 120,
+			"amplifier": 2
+		}
+	]
+}

@@ -1,6 +1,6 @@
 {
 	"display_name": "Riverborn III",
-	"description": "Milestone reward for reaching fishing level 50. Perk: Half-Lung II — +0.5 oxygen bonus.",
+	"description": "Milestone reward for reaching fishing level 50.",
 	"icon": "skill/fishing",
 	"trigger": {
 		"type": "passive",
@@ -22,13 +22,6 @@
 			"attribute": "minecraft:generic.luck",
 			"operation": "add_value",
 			"value": 0.2,
-			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:modify_attribute",
-			"attribute": "minecraft:generic.oxygen_bonus",
-			"operation": "add_value",
-			"value": 0.5,
 			"duration_ticks": 120
 		}
 	]

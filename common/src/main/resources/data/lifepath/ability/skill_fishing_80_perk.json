@@ -1,0 +1,29 @@
+{
+	"display_name": "River King's Blood",
+	"description": "Conduit power near open water.",
+	"icon": "skill/fishing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:water",
+				"radius": 6
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:conduit_power",
+			"duration": 200,
+			"amplifier": 0
+		}
+	]
+}

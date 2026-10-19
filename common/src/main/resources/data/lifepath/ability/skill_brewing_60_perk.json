@@ -1,0 +1,29 @@
+{
+	"display_name": "Stillhouse Step III",
+	"description": "Speed II near your brewing stand.",
+	"icon": "minecraft:textures/item/brewing_stand.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "minecraft:brewing_stand",
+				"radius": 6
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

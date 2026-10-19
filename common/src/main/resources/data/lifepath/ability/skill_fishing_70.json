@@ -1,6 +1,6 @@
 {
 	"display_name": "Riverborn IV",
-	"description": "Milestone reward for reaching fishing level 70. Perk: Deep Gills — lasting water breathing while submerged.",
+	"description": "Milestone reward for reaching fishing level 70.",
 	"icon": "skill/fishing",
 	"trigger": {
 		"type": "passive",
@@ -23,19 +23,6 @@
 			"operation": "add_value",
 			"value": 0.3,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:water_breathing",
-			"duration": 300,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:submerged"
-			}
-		]
-	}
+	]
 }

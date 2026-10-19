@@ -1,0 +1,34 @@
+{
+	"display_name": "Delver's Sight",
+	"description": "Night vision in the dark deeps (below Y48, light under 4).",
+	"icon": "skill/mining",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:light_level",
+				"op": "lt",
+				"value": 4
+			},
+			{
+				"type": "lifepath:y_level",
+				"op": "lte",
+				"value": 48
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:night_vision",
+			"duration": 300,
+			"amplifier": 0
+		}
+	]
+}

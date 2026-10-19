@@ -1,6 +1,6 @@
 {
 	"display_name": "Crippling Blow V",
-	"description": "Milestone reward for reaching hunting level 90. Perk: Moon Fang — strength I at night.",
+	"description": "Milestone reward for reaching hunting level 90.",
 	"icon": "skill/hunting",
 	"trigger": {
 		"type": "passive",
@@ -23,19 +23,6 @@
 			"operation": "add_value",
 			"value": 0.4,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:strength",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:night"
-			}
-		]
-	}
+	]
 }

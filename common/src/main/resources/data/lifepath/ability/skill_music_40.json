@@ -1,6 +1,6 @@
 {
 	"display_name": "Lucky Refrain II",
-	"description": "The right note lands on its own. (+2 Luck) Perk: Stage Presence I — resistance I with a villager audience close.",
+	"description": "The right note lands on its own. (+2 Luck)",
 	"icon": "minecraft:textures/item/music_disc_cat.png",
 	"trigger": {
 		"type": "passive",
@@ -16,26 +16,6 @@
 			"operation": "add_value",
 			"value": 2,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:resistance",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"any": [
-			{
-				"type": "lifepath:entity_nearby",
-				"entity": "minecraft:villager",
-				"radius": 8
-			},
-			{
-				"type": "lifepath:entity_nearby",
-				"entity": "minecraft:wandering_trader",
-				"radius": 8
-			}
-		]
-	}
+	]
 }

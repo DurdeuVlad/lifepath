@@ -1,6 +1,6 @@
 {
 	"display_name": "Hardy Frame IV",
-	"description": "Milestone reward for reaching athletics level 70. Perk: Hurdler IV — +0.7 step height.",
+	"description": "Milestone reward for reaching athletics level 70.",
 	"icon": "skill/athletics",
 	"trigger": {
 		"type": "passive",
@@ -22,13 +22,6 @@
 			"attribute": "minecraft:generic.movement_speed",
 			"operation": "add_multiplied_base",
 			"value": 0.014,
-			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:modify_attribute",
-			"attribute": "minecraft:generic.step_height",
-			"operation": "add_value",
-			"value": 0.7,
 			"duration_ticks": 120
 		}
 	]

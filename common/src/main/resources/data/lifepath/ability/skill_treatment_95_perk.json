@@ -1,0 +1,18 @@
+{
+	"display_name": "Panacea",
+	"description": "All curable afflictions are purged as they land.",
+	"icon": "minecraft:textures/item/golden_apple.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"actions": [
+		{
+			"type": "lifepath:remove_effect",
+			"effect": "#lifepath:nature_purifiable"
+		}
+	]
+}

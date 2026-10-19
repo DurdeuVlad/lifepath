@@ -1,0 +1,27 @@
+{
+	"display_name": "Second Gills",
+	"description": "Water breathing while submerged.",
+	"icon": "skill/fishing",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:submerged"
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:water_breathing",
+			"duration": 160,
+			"amplifier": 0
+		}
+	]
+}

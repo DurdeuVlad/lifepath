@@ -1,6 +1,6 @@
 {
 	"display_name": "Scholar's Focus V",
-	"description": "Milestone reward for reaching scholarship level 90. Perk: Field Notes II — speed II doing daylight fieldwork.",
+	"description": "Milestone reward for reaching scholarship level 90.",
 	"icon": "skill/scholarship",
 	"trigger": {
 		"type": "passive",
@@ -16,22 +16,6 @@
 			"operation": "add_value",
 			"value": 0.75,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:daylight"
-			},
-			{
-				"type": "lifepath:exposed_to_sky"
-			}
-		]
-	}
+	]
 }

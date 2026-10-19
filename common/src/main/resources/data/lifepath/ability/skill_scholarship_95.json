@@ -1,6 +1,6 @@
 {
 	"display_name": "Lucky Insight V",
-	"description": "The right book at the right time becomes its own luck. (+3 luck) Perk: Mind Palace — absorption I in a library.",
+	"description": "The right book at the right time becomes its own luck. (+3 luck)",
 	"icon": "skill/scholarship",
 	"trigger": {
 		"type": "passive",
@@ -16,31 +16,6 @@
 			"operation": "add_value",
 			"value": 3,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:absorption",
-			"duration": 160,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"any": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:bookshelf",
-				"radius": 6
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:chiseled_bookshelf",
-				"radius": 6
-			},
-			{
-				"type": "lifepath:block_nearby",
-				"block": "minecraft:enchanting_table",
-				"radius": 6
-			}
-		]
-	}
+	]
 }

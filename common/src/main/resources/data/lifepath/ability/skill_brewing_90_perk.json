@@ -1,0 +1,29 @@
+{
+	"display_name": "Liquid Courage II",
+	"description": "Resistance I while well fed.",
+	"icon": "minecraft:textures/item/brewing_stand.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:food_level",
+				"op": "gte",
+				"value": 18
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

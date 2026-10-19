@@ -1,6 +1,6 @@
 {
 	"display_name": "Smith's Polish V",
-	"description": "Gear you maintain holds its edge better. (+3 armor toughness) Perk: Anvil Chorus IV — haste II at the smithing station.",
+	"description": "Gear you maintain holds its edge better. (+3 armor toughness)",
 	"icon": "skill/smithing",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 3,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:haste",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "#lifepath:smithing_workstations",
-				"radius": 6
-			}
-		]
-	}
+	]
 }

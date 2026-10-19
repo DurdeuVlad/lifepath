@@ -1,6 +1,6 @@
 {
 	"display_name": "Stone Skin IV",
-	"description": "Seasoned bruises harden into armor of their own. (+4 armor) Perk: Second Wind IV — resistance II below 8 health.",
+	"description": "Seasoned bruises harden into armor of their own. (+4 armor)",
 	"icon": "skill/defence",
 	"trigger": {
 		"type": "passive",
@@ -23,21 +23,6 @@
 			"operation": "add_value",
 			"value": 1.4,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:resistance",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:health_threshold",
-				"op": "lt",
-				"value": 8
-			}
-		]
-	}
+	]
 }

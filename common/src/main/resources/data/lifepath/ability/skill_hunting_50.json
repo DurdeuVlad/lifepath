@@ -1,6 +1,6 @@
 {
 	"display_name": "Crippling Blow III",
-	"description": "Milestone reward for reaching hunting level 50. Perk: Blood Scent I — strength I while prey animals are near.",
+	"description": "Milestone reward for reaching hunting level 50.",
 	"icon": "skill/hunting",
 	"trigger": {
 		"type": "passive",
@@ -23,21 +23,6 @@
 			"operation": "add_value",
 			"value": 0.2,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:strength",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:entity_nearby",
-				"entity": "#lifepath:animals",
-				"radius": 8
-			}
-		]
-	}
+	]
 }

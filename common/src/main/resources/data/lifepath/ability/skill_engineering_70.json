@@ -1,6 +1,6 @@
 {
 	"display_name": "Fine Calibration IV",
-	"description": "Milestone reward for reaching engineering level 70. Perk: Lever Arm IV — +1.0 entity interaction range.",
+	"description": "Milestone reward for reaching engineering level 70.",
 	"icon": "skill/engineering",
 	"trigger": {
 		"type": "passive",
@@ -22,13 +22,6 @@
 			"attribute": "minecraft:player.block_interaction_range",
 			"operation": "add_value",
 			"value": 0.14,
-			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:modify_attribute",
-			"attribute": "minecraft:player.entity_interaction_range",
-			"operation": "add_value",
-			"value": 1.0,
 			"duration_ticks": 120
 		}
 	]

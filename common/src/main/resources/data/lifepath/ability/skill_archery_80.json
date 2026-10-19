@@ -1,6 +1,6 @@
 {
 	"display_name": "Swift Stance IV",
-	"description": "A practiced draw keeps you light on your feet. (+8% movement speed) Perk: Field Runner — speed II under open sky, bow in hand.",
+	"description": "A practiced draw keeps you light on your feet. (+8% movement speed)",
 	"icon": "skill/archery",
 	"trigger": {
 		"type": "passive",
@@ -16,31 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": 0.08,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:exposed_to_sky"
-			}
-		],
-		"any": [
-			{
-				"type": "lifepath:equipment_contains",
-				"item": "minecraft:bow",
-				"slot": "mainhand"
-			},
-			{
-				"type": "lifepath:equipment_contains",
-				"item": "minecraft:crossbow",
-				"slot": "mainhand"
-			}
-		]
-	}
+	]
 }

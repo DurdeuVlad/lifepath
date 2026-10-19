@@ -1,6 +1,6 @@
 {
 	"display_name": "Cleaving Swing II",
-	"description": "Milestone reward for reaching woodcutting level 30. Perk: Canopy Sprint — speed I beneath the leaves.",
+	"description": "Milestone reward for reaching woodcutting level 30.",
 	"icon": "skill/woodcutting",
 	"trigger": {
 		"type": "passive",
@@ -23,21 +23,6 @@
 			"operation": "add_value",
 			"value": 0.02,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "#minecraft:leaves",
-				"radius": 4
-			}
-		]
-	}
+	]
 }

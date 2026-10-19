@@ -1,6 +1,6 @@
 {
 	"display_name": "Immovable VI",
-	"description": "Milestone reward for reaching defence level 100. Perk: Unbreakable — resistance III below 8 health.",
+	"description": "Milestone reward for reaching defence level 100.",
 	"icon": "skill/defence",
 	"trigger": {
 		"type": "passive",
@@ -30,21 +30,6 @@
 			"operation": "add_value",
 			"value": 2.0,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:resistance",
-			"duration": 120,
-			"amplifier": 2
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:health_threshold",
-				"op": "lt",
-				"value": 8
-			}
-		]
-	}
+	]
 }

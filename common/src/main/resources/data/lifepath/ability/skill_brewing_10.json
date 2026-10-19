@@ -1,6 +1,6 @@
 {
 	"display_name": "Steeled Liver I",
-	"description": "A practiced tolerance for what goes down wrong. (-5% burn time) Perk: Hair of the Dog — nausea is purged as it lands.",
+	"description": "A practiced tolerance for what goes down wrong. (-5% burn time)",
 	"icon": "minecraft:textures/item/brewing_stand.png",
 	"trigger": {
 		"type": "passive",
@@ -16,10 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": -0.05,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:remove_effect",
-			"effect": "minecraft:nausea"
 		}
 	]
 }

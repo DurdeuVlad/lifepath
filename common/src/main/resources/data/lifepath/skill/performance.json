@@ -1,7 +1,7 @@
 {
 	"display_name": "Performance",
 	"icon": "minecraft:textures/item/feather.png",
-	"description": "Stagecraft \u2014 commanding a room, a crowd, a tavern.",
+	"description": "Stagecraft — commanding a room, a crowd, a tavern.",
 	"improve_hint": "Perform for an audience.",
 	"category": "physical",
 	"max_level": 100,
@@ -10,77 +10,88 @@
 			"level": 10,
 			"description_key": "lifepath.skill.performance.milestone.10",
 			"effects": [
-				"lifepath:skill_performance_10"
+				"lifepath:skill_performance_10",
+				"lifepath:skill_performance_10_perk"
 			]
 		},
 		{
 			"level": 20,
 			"description_key": "lifepath.skill.performance.milestone.20",
 			"effects": [
-				"lifepath:skill_performance_20"
+				"lifepath:skill_performance_20",
+				"lifepath:skill_performance_20_perk"
 			]
 		},
 		{
 			"level": 30,
 			"description_key": "lifepath.skill.performance.milestone.30",
 			"effects": [
-				"lifepath:skill_performance_30"
+				"lifepath:skill_performance_30",
+				"lifepath:skill_performance_30_perk"
 			]
 		},
 		{
 			"level": 40,
 			"description_key": "lifepath.skill.performance.milestone.40",
 			"effects": [
-				"lifepath:skill_performance_40"
+				"lifepath:skill_performance_40",
+				"lifepath:skill_performance_40_perk"
 			]
 		},
 		{
 			"level": 50,
 			"description_key": "lifepath.skill.performance.milestone.50",
 			"effects": [
-				"lifepath:skill_performance_50"
+				"lifepath:skill_performance_50",
+				"lifepath:skill_performance_50_perk"
 			]
 		},
 		{
 			"level": 60,
 			"description_key": "lifepath.skill.performance.milestone.60",
 			"effects": [
-				"lifepath:skill_performance_60"
+				"lifepath:skill_performance_60",
+				"lifepath:skill_performance_60_perk"
 			]
 		},
 		{
 			"level": 70,
 			"description_key": "lifepath.skill.performance.milestone.70",
 			"effects": [
-				"lifepath:skill_performance_70"
+				"lifepath:skill_performance_70",
+				"lifepath:skill_performance_70_perk"
 			]
 		},
 		{
 			"level": 80,
 			"description_key": "lifepath.skill.performance.milestone.80",
 			"effects": [
-				"lifepath:skill_performance_80"
+				"lifepath:skill_performance_80",
+				"lifepath:skill_performance_80_perk"
 			]
 		},
 		{
 			"level": 90,
 			"description_key": "lifepath.skill.performance.milestone.90",
 			"effects": [
-				"lifepath:skill_performance_90"
+				"lifepath:skill_performance_90",
+				"lifepath:skill_performance_90_perk"
 			]
 		},
 		{
 			"level": 95,
 			"description_key": "lifepath.skill.performance.milestone.95",
 			"effects": [
-				"lifepath:skill_performance_95"
+				"lifepath:skill_performance_95",
+				"lifepath:skill_performance_95_perk"
 			]
 		},
 		{
 			"level": 100,
 			"description_key": "lifepath.skill.performance.milestone.100",
 			"effects": [
-				"lifepath:skill_performance_100"
+				"lifepath:skill_performance_100",
+				"lifepath:skill_performance_100_perk"
 			]
 		}
 	]

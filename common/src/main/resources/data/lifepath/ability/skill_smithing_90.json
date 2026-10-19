@@ -1,6 +1,6 @@
 {
 	"display_name": "Smith's Strength V",
-	"description": "Milestone reward for reaching smithing level 90. Perk: Tempered Skin V — fire resistance near forge heat.",
+	"description": "Milestone reward for reaching smithing level 90.",
 	"icon": "skill/smithing",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 2.5,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:fire_resistance",
-			"duration": 200,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "#lifepath:heat_sources",
-				"radius": 6
-			}
-		]
-	}
+	]
 }

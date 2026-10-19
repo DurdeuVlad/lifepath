@@ -1,0 +1,28 @@
+{
+	"display_name": "Pantry Snack I",
+	"description": "Nibbles restore 1 hunger while you run low.",
+	"icon": "skill/cooking",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:food_level",
+				"op": "lt",
+				"value": 8
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:feed",
+			"nutrition": 1,
+			"saturation_modifier": 0.2
+		}
+	]
+}

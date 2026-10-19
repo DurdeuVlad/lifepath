@@ -1,0 +1,29 @@
+{
+	"display_name": "Protector of the Herd",
+	"description": "Resistance I among your animals.",
+	"icon": "minecraft:textures/item/milk_bucket.png",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:entity_nearby",
+				"entity": "#lifepath:animals",
+				"radius": 10
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:resistance",
+			"duration": 120,
+			"amplifier": 0
+		}
+	]
+}

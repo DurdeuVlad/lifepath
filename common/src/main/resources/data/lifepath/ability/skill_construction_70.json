@@ -1,6 +1,6 @@
 {
 	"display_name": "Surveyor's Reach IV",
-	"description": "Plumb lines extend where you will them. (+1.2 block reach) Perk: On-Site Stride IV — speed II among construction blocks.",
+	"description": "Plumb lines extend where you will them. (+1.2 block reach)",
 	"icon": "minecraft:textures/item/brick.png",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 1.2,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:speed",
-			"duration": 120,
-			"amplifier": 1
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "#lifepath:construction_blocks",
-				"radius": 7
-			}
-		]
-	}
+	]
 }

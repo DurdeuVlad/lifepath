@@ -1,0 +1,29 @@
+{
+	"display_name": "Ore Frenzy",
+	"description": "Haste II near valuable ore.",
+	"icon": "skill/mining",
+	"trigger": {
+		"type": "passive",
+		"interval_ticks": 40
+	},
+	"target": {
+		"type": "lifepath:self"
+	},
+	"conditions": {
+		"all": [
+			{
+				"type": "lifepath:block_nearby",
+				"block": "#lifepath:valuable_ores",
+				"radius": 6
+			}
+		]
+	},
+	"actions": [
+		{
+			"type": "lifepath:apply_effect",
+			"effect": "minecraft:haste",
+			"duration": 120,
+			"amplifier": 1
+		}
+	]
+}

@@ -1,6 +1,6 @@
 {
 	"display_name": "Cleaving Swing I",
-	"description": "Milestone reward for reaching woodcutting level 10. Perk: Canopy Step I — jump boost I beneath the leaves.",
+	"description": "Milestone reward for reaching woodcutting level 10.",
 	"icon": "skill/woodcutting",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_value",
 			"value": 0.05,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:jump_boost",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:block_nearby",
-				"block": "#minecraft:leaves",
-				"radius": 4
-			}
-		]
-	}
+	]
 }

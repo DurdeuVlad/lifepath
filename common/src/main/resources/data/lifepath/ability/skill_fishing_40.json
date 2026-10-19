@@ -1,6 +1,6 @@
 {
 	"display_name": "Tide Reader II",
-	"description": "You read the water's patience. (+2 Luck near open water) Perk: Tidecaller's Charm I — luck of the sea I near open water.",
+	"description": "You read the water's patience. (+2 Luck near open water)",
 	"icon": "skill/fishing",
 	"trigger": {
 		"type": "passive",
@@ -16,12 +16,6 @@
 			"operation": "add_value",
 			"value": 2,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:luck_of_the_sea",
-			"duration": 120,
-			"amplifier": 0
 		}
 	],
 	"conditions": {

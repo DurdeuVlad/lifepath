@@ -1,6 +1,6 @@
 {
 	"display_name": "Timber Rhythm III",
-	"description": "Among timber your axe finds its own tempo. (Haste 3 near logs) Perk: Orchard Eye II — luck II near timber.",
+	"description": "Among timber your axe finds its own tempo. (Haste 3 near logs)",
 	"icon": "skill/woodcutting",
 	"trigger": {
 		"type": "passive",
@@ -22,12 +22,6 @@
 			"operation": "add_value",
 			"value": 0.08,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:luck",
-			"duration": 120,
-			"amplifier": 1
 		}
 	],
 	"conditions": {

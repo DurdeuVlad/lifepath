@@ -1,6 +1,6 @@
 {
 	"display_name": "Steady Hands I",
-	"description": "Nothing shakes a stitch mid-pull. (+0.02 knockback resist) Perk: Adrenal Surge — slowness is purged as it lands.",
+	"description": "Nothing shakes a stitch mid-pull. (+0.02 knockback resist)",
 	"icon": "minecraft:textures/item/golden_apple.png",
 	"trigger": {
 		"type": "passive",
@@ -16,10 +16,6 @@
 			"operation": "add_value",
 			"value": 0.02,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:remove_effect",
-			"effect": "minecraft:slowness"
 		}
 	]
 }

@@ -1,6 +1,6 @@
 {
 	"display_name": "Stage Athlete VI",
-	"description": "Years of stagecraft in the legs. (+12% move speed) Perk: Phantom of the Stage — lasting invisibility under dim light.",
+	"description": "Years of stagecraft in the legs. (+12% move speed)",
 	"icon": "minecraft:textures/item/feather.png",
 	"trigger": {
 		"type": "passive",
@@ -16,21 +16,6 @@
 			"operation": "add_multiplied_base",
 			"value": 0.12,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:invisibility",
-			"duration": 300,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:light_level",
-				"op": "lt",
-				"value": 6
-			}
-		]
-	}
+	]
 }

@@ -1,6 +1,6 @@
 {
 	"display_name": "Quiet Tread VI",
-	"description": "Milestone reward for reaching foraging level 100. Perk: Wildwood Crown — resistance I beneath the boughs.",
+	"description": "Milestone reward for reaching foraging level 100.",
 	"icon": "skill/foraging",
 	"trigger": {
 		"type": "passive",
@@ -23,20 +23,6 @@
 			"operation": "add_value",
 			"value": 0.1,
 			"duration_ticks": 120
-		},
-		{
-			"type": "lifepath:apply_effect",
-			"effect": "minecraft:resistance",
-			"duration": 120,
-			"amplifier": 0
 		}
-	],
-	"conditions": {
-		"all": [
-			{
-				"type": "lifepath:biome_tag",
-				"tag": "#minecraft:is_forest"
-			}
-		]
-	}
+	]
 }
