@@ -1,0 +1,37 @@
+{
+	"replace": false,
+	"values": [
+		{
+			"id": "enchantinginfuser:enchanting_infuser",
+			"required": false
+		},
+		{
+			"id": "enchantinginfuser:advanced_enchanting_infuser",
+			"required": false
+		},
+		{
+			"id": "enchantmentlibrary:library_tier1",
+			"required": false
+		},
+		{
+			"id": "enchantmentlibrary:library_tier2",
+			"required": false
+		},
+		{
+			"id": "enchantmentlibrary:library_tier3",
+			"required": false
+		},
+		{
+			"id": "xp_storage:xp_book",
+			"required": false
+		},
+		{
+			"id": "xp_storage:xp_book2",
+			"required": false
+		},
+		{
+			"id": "xp_storage:xp_book3",
+			"required": false
+		}
+	]
+}

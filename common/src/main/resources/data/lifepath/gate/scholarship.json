@@ -3,6 +3,7 @@
 	"use": {
 		"lifepath:scholarly_tier_scribe": 10,
 		"lifepath:scholarly_tier_cartographer": 20,
-		"lifepath:scholarly_tier_sage": 40
+		"lifepath:scholarly_tier_sage": 40,
+		"lifepath:scholarly_tier_arcana": 40
 	}
 }
