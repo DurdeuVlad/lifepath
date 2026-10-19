@@ -8,7 +8,7 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
-## [Unreleased]
+## [1.0.0-beta.12] — 2026-10-19
 
 Mastery now pays rent. Every ten-level milestone grants a real signature
 perk on top of its passive training, level 100 keeps a bank of XP that
