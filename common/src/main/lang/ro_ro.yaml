@@ -39,7 +39,7 @@ lifepath.ability.amphibian_slick_swimmer.description: "Apa te poartă repede și
 lifepath.ability.amphibian_slick_swimmer.name: "Înotător Agil"
 lifepath.ability.amphibian_tidal_mend.description: "Canalizează apa în care stai să-ți închidă rănile. (coborâre 180s)"
 lifepath.ability.amphibian_tidal_mend.name: "Vindecare de Fluviu"
-lifepath.ability.anima_beast_soothe.description: "Un cuvânt liniștitor — creaturile din jur sunt vindecatе. (coborâre 60s)"
+lifepath.ability.anima_beast_soothe.description: "Un cuvânt liniștitor — creaturile din jur sunt vindecate. (coborâre 60s)"
 lifepath.ability.anima_beast_soothe.name: "Calmare a Fiarelor"
 lifepath.ability.anima_hollow_bones.description: "Oasele goale zboară departe — și se rup repede. Damage-ul primit e mai mare."
 lifepath.ability.anima_hollow_bones.name: "Oase Tubulare"
