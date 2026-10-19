@@ -152,6 +152,15 @@ public final class LifepathMod {
 						"Upper bound of decay band 5 (top).")
 				.define("band_5_rate", 0.35, v -> v >= 0 && v <= 100,
 						"Levels lost per real day inside band 5 (91–100).")
+				.define("max_level_xp_buffer", true,
+						"XP banked above the max-level threshold absorbs decay"
+								+ " before the level drops: decay charges the bank the"
+								+ " curve price of the levels it would remove. The"
+								+ " surplus only delays level loss — no immunity.")
+				.define("max_level_xp_buffer_drain", 1.0, v -> v > 0 && v <= 100,
+						"Multiplier on the XP price decay charges the banked surplus"
+								+ " (2.0 drains the bank twice as fast). Must stay"
+								+ " positive — 0 would grant permanent immunity.")
 				.build());
 		LifepathConfig.define(id("abilities"), ConfigSpec.builder()
 				.define("enabled", true,

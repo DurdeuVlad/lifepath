@@ -32,6 +32,11 @@ import org.jetbrains.annotations.Nullable;
  * Decay clamps at {@code max(protectedFloor, lowest-band bound)} and never
  * touches {@code highestLevel}. Every lazy pass advances
  * {@code lastDecayCheckpoint} to {@code now} so elapsed time is charged once.
+ *
+ * <p>Max-level XP buffer (config {@code max_level_xp_buffer}): xp banked
+ * above the max-level threshold is spent BEFORE the level drops — decay
+ * charges the bank the curve price of the levels it would remove. The
+ * surplus only DELAYS level loss; once spent, decay bites normally.
  */
 public final class SkillDecayService {
 	public static final ResourceLocation DECAY_CONFIG = LifepathMod.id("decay");
@@ -102,10 +107,38 @@ public final class SkillDecayService {
 		// e.g. saturated overflow, is legitimate state).
 		double bounded = Math.min(fracCur, Math.max(fracRaw, cur.protectedFloor()));
 		boolean decayed = bounded < fracCur - 1e-9;
-		int newLevel = decayed
-				? Math.max(0, Math.min((int) Math.floor(bounded), def.maxLevel()))
-				: cur.level();
-		double newXp = decayed ? xpForFractional(def, bounded) : cur.xp();
+		double capXp = LevelCurves.forSkill(def).xpForLevel(def.maxLevel());
+		int newLevel;
+		double newXp;
+		if (decayed && maxLevelXpBuffer() && cur.level() >= def.maxLevel()
+				&& cur.xp() > capXp) {
+			// Banked surplus at max level: decay spends xp before levels. The
+			// xp price of the would-be level loss is the curve span it covers —
+			// xpForFractional(fracCur) − xpForFractional(bounded) — scaled by
+			// max_level_xp_buffer_drain. While the remainder still sits at or
+			// above the cap threshold the level stays maxed and the leftover
+			// surplus persists for the next pass; once the bank is exhausted
+			// the remainder simply maps back onto the curve (it IS the on-curve
+			// xp of the resulting fractional level), so the level drops by only
+			// the uncovered share. Finite surplus → finite delay, never immunity.
+			double xpCost = (xpForFractional(def, fracCur)
+					- xpForFractional(def, bounded)) * maxLevelXpBufferDrain();
+			double remaining = Math.max(0.0, cur.xp() - xpCost);
+			if (remaining >= capXp) {
+				newLevel = Math.min(cur.level(), def.maxLevel());
+				newXp = remaining;
+			} else {
+				newLevel = Math.max(0, Math.min(
+						(int) Math.floor(fractionalLevelForXp(def, remaining)),
+						def.maxLevel()));
+				newXp = remaining;
+			}
+		} else {
+			newLevel = decayed
+					? Math.max(0, Math.min((int) Math.floor(bounded), def.maxLevel()))
+					: cur.level();
+			newXp = decayed ? xpForFractional(def, bounded) : cur.xp();
+		}
 		SkillProgress next = new SkillProgress(newXp, newLevel,
 				cur.highestLevel(), cur.protectedFloor(), cur.aptitude(),
 				cur.lastMeaningfulUse(), checkpoint);
@@ -216,6 +249,23 @@ public final class SkillDecayService {
 	}
 
 	/**
+	 * Inverse of {@link #xpForFractional}: the fractional level whose curve
+	 * position is exactly {@code xp} total. Used when a partially-spent max
+	 * level buffer drops below the cap — the leftover bank lands the skill at
+	 * this level, with the stored xp already sitting on the curve.
+	 */
+	private static double fractionalLevelForXp(SkillDefinition def, double xp) {
+		int level = Math.min(def.maxLevel(), LevelCurves.levelForSkill(def, xp));
+		double lo = LevelCurves.forSkill(def).xpForLevel(level);
+		double hi = level >= def.maxLevel() ? lo
+				: LevelCurves.forSkill(def).xpForLevel(level + 1);
+		if (hi <= lo) {
+			return level;
+		}
+		return level + Math.min(1.0, Math.max(0.0, (xp - lo) / (hi - lo)));
+	}
+
+	/**
 	 * Breadth tax: holding many high-level skills at once is upkeep —
 	 * each NON-specialization skill at or above {@code breadth_threshold}
 	 * adds {@code breadth_per_skill} to this decay pass's rate, capped at
@@ -286,6 +336,18 @@ public final class SkillDecayService {
 
 	public static double breadthCap() {
 		return ((Number) LifepathConfig.getOrDefault(DECAY_CONFIG, "breadth_cap", 1.5)).doubleValue();
+	}
+
+	/** Whether xp banked above the max-level threshold buffers decay (§9). */
+	public static boolean maxLevelXpBuffer() {
+		return ((Boolean) LifepathConfig.getOrDefault(
+				DECAY_CONFIG, "max_level_xp_buffer", Boolean.TRUE));
+	}
+
+	/** Multiplier on the xp price decay charges the banked surplus. */
+	public static double maxLevelXpBufferDrain() {
+		return ((Number) LifepathConfig.getOrDefault(
+				DECAY_CONFIG, "max_level_xp_buffer_drain", 1.0)).doubleValue();
 	}
 
 	/**
