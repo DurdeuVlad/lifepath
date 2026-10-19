@@ -4,6 +4,7 @@
 	"player_caused_only": true,
 	"base_xp": 0.15,
 	"per_tag": {
+		"lifepath:exotic_log": 0.6,
 		"minecraft:crimson_stems": 0.25,
 		"minecraft:warped_stems": 0.25
 	},

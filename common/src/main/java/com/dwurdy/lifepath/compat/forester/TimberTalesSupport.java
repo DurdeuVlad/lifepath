@@ -5,10 +5,12 @@ import com.dwurdy.lifepath.event.ActivityDispatcher;
 import com.dwurdy.lifepath.event.ActivityEvent;
 import com.dwurdy.lifepath.event.ActivityTypes;
 import com.dwurdy.lifepath.platform.Platform;
+import com.dwurdy.lifepath.producer.PlacedBlockTracker;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +26,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * the same convention {@code onForgeTake} uses for
  * {@code lifepath:smithing_workstations} — letting the woodcutting
  * xp_source's {@code required_tags} gate pass. The coerced BreakEvent is
- * read reflectively; any API drift fails closed with no award.
+ * read reflectively; any API drift fails closed with no award. The
+ * {@link PlacedBlockTracker} guard replicates the vanilla break path's
+ * re-mine rule: a placed base block felled by TT pays nothing.
  */
 public final class TimberTalesSupport {
 
@@ -43,6 +47,13 @@ public final class TimberTalesSupport {
 					.getMethod("getState").invoke(breakEvent);
 			if (!(player instanceof ServerPlayer serverPlayer) || state == null
 					|| isAutomation(serverPlayer)) {
+				return;
+			}
+			// Same re-mine guard the vanilla break path applies: a fell
+			// whose base block the player placed pays nothing.
+			BlockPos pos = (BlockPos) breakEvent.getClass()
+					.getMethod("getPos").invoke(breakEvent);
+			if (pos != null && PlacedBlockTracker.consume(serverPlayer.level(), pos)) {
 				return;
 			}
 			Set<ResourceLocation> tags = state.getTags()
