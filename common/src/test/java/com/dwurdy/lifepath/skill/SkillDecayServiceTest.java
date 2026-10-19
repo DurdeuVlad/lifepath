@@ -32,6 +32,8 @@ class SkillDecayServiceTest {
 		LifepathContent.levelCurves().clear();
 		LifepathContent.specializations().clear();
 		SkillDecayService.resetForTests();
+		// Buffer tests load decay.toml; reset so spec order never leaks config.
+		com.dwurdy.lifepath.config.LifepathConfig.resetForTests();
 		// xpForLevel(n) = 10n on this curve (linear) — easy level math.
 		List<Double> t = new ArrayList<>();
 		for (int i = 0; i <= 101; i++) {
@@ -246,6 +248,97 @@ class SkillDecayServiceTest {
 		data.setSkillProgress(SKILL_B, atLevel(20, T0));
 		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
 		assertEquals(59.0, p.xp() / 10.0, 0.001);
+	}
+
+	// ---- max-level XP buffer (decay.toml max_level_xp_buffer) ----
+	// On the test curve xpForLevel(n) = 10n, so the level-100 cap sits at
+	// 1000 xp and band 91–100 costs 10 xp per decayed level.
+
+	/** Level-100 record with {@code surplus} xp banked above the 1000 threshold. */
+	private static SkillProgress atMaxWithBank(double surplus, long use) {
+		return new SkillProgress(1000.0 + surplus, 100, 100, 0, Aptitude.B, use);
+	}
+
+	/** Loads a minimal decay.toml containing only the buffer keys. */
+	private static void loadDecayConfig(String toml) throws Exception {
+		var dir = java.nio.file.Files.createTempDirectory("decaycfg");
+		java.nio.file.Files.writeString(dir.resolve("decay.toml"), toml);
+		com.dwurdy.lifepath.config.LifepathConfig.resetForTests();
+		com.dwurdy.lifepath.config.LifepathConfig.define(SkillDecayService.DECAY_CONFIG,
+				com.dwurdy.lifepath.config.ConfigSpec.builder()
+						.define("max_level_xp_buffer", true, "test")
+						.define("max_level_xp_buffer_drain", 1.0, "test")
+						.build());
+		com.dwurdy.lifepath.config.LifepathConfig.loadAll(dir);
+	}
+
+	@Test
+	void maxLevelBankedXpAbsorbsDecay() {
+		// 10 idle days in band 91–100 (0.35/day) → 3.5 decayed levels, a
+		// 35-xp curve span. A 40-xp bank covers it: level holds at 100 and
+		// the leftover 5 xp stays banked for the next pass.
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atMaxWithBank(40.0, T0));
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(100, p.level());
+		assertEquals(1005.0, p.xp(), 0.001);
+		assertEquals(100, p.highestLevel());
+	}
+
+	@Test
+	void maxLevelBankExhaustedThenLevelDrops() {
+		// Surplus 30 < the 35-xp cost: the whole bank is spent, then the
+		// uncovered 5 xp lands on the curve — 99.5 vs. 96.5 unbuffered.
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atMaxWithBank(30.0, T0));
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(99, p.level());
+		assertEquals(995.0, p.xp(), 0.001);
+	}
+
+	@Test
+	void maxLevelWithoutBankDecaysNormally() {
+		// Exactly at the cap threshold: no surplus, pre-buffer decay applies.
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atLevel(100, T0));
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(96, p.level());
+		assertEquals(965.0, p.xp(), 0.001);
+	}
+
+	@Test
+	void maxLevelBankOnlyDelaysLevelLoss() {
+		// Pass 1 drains the bank to 5 xp; pass 2 finds it short of the next
+		// 35-xp cost and the level starts dropping — a delay, never immunity.
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atMaxWithBank(40.0, T0));
+		SkillProgress first = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(100, first.level());
+		SkillProgress second = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 20 * DAY);
+		assertEquals(97, second.level());
+		assertEquals(970.0, second.xp(), 0.001);
+	}
+
+	@Test
+	void maxLevelBufferDisabledRestoresOldBehavior() throws Exception {
+		loadDecayConfig("max_level_xp_buffer = false\n");
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atMaxWithBank(40.0, T0));
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(96, p.level());
+		assertEquals(965.0, p.xp(), 0.001);
+	}
+
+	@Test
+	void bufferDrainMultiplierScalesTheXpPrice() throws Exception {
+		// drain 2.0: the same 3.5-level decay costs 70 xp instead of 35 —
+		// the 40-xp bank falls short and the level drops to 97.
+		loadDecayConfig("max_level_xp_buffer_drain = 2.0\n");
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		data.setSkillProgress(SKILL, atMaxWithBank(40.0, T0));
+		SkillProgress p = SkillDecayService.applyLazy(data, SKILL, T0 + GRACE + 10 * DAY);
+		assertEquals(97, p.level());
+		assertEquals(970.0, p.xp(), 0.001);
 	}
 
 	@Test

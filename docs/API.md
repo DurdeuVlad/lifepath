@@ -123,7 +123,7 @@ unparseable files rename to `<name>.toml.invalid` and defaults apply.
 | `general.toml` | `debug_logging` |
 | `character.toml` | `flush_interval_ticks` |
 | `skills.toml` | `band_*` (7 tiers), `global_xp_multiplier`, per-skill `*_xp_multiplier` (mining/farming/smithing/fishing/foraging/engineering), `aptitude_{d..s}_{xp,decay}_multiplier`, `unmapped_sources_award_xp` |
-| `decay.toml` | decay `enabled`, `grace_hours`, `maintenance_minutes`, `band_{1..5}_{upper,rate}` |
+| `decay.toml` | decay `enabled`, `grace_hours`, `maintenance_minutes`, `band_{1..5}_{upper,rate}`, `max_level_xp_buffer{,_drain}` |
 | `abilities.toml` | `enabled`, `passive_interval_ticks`, `nearby_max_radius`, `cooldown_multiplier`, `persist_min_seconds` |
 | `resources.toml` | `tick_interval_ticks` |
 | `diminishing.toml` | `enabled`, `window_hours`, `tier_{1,2}_{count,multiplier}`, `tier_3_multiplier`, `signature_cap` |

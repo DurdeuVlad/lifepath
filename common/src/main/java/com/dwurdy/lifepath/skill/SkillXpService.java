@@ -158,16 +158,7 @@ public final class SkillXpService {
 			return new XpResult(0, 0, 0, 0, 0, false);
 		}
 		long now = System.currentTimeMillis();
-		if (current.level() >= def.maxLevel()) {
-			// At cap: practice still counts as meaningful use (decay reads this
-			// timestamp), but no XP accrues and no level can change.
-			data.setSkillProgress(skillId, SkillService.clamped(
-					new SkillProgress(current.xp(), current.level(), current.highestLevel(),
-							current.protectedFloor(), current.aptitude(), now,
-							Math.max(now, current.lastDecayCheckpoint())), def.maxLevel()));
-			return new XpResult(0, current.level(), current.level(),
-					current.xp(), current.xp(), true);
-		}
+		boolean atCap = current.level() >= def.maxLevel();
 		XpModifier.XpContext ctx = new XpModifier.XpContext(player, skillId, current,
 				source, data.speciesId(), data.specializationId(), data);
 		double modified = amount;
@@ -190,6 +181,19 @@ public final class SkillXpService {
 		double sum = current.xp() + Math.max(0.0, modified);
 		// Saturate: an overflowing sum is "maxed out", never a wrapped/NaN wipe.
 		double newXp = Double.isFinite(sum) ? Math.max(0.0, sum) : Double.MAX_VALUE;
+		if (atCap) {
+			// At cap no level can change, but with the max-level XP buffer the
+			// award still banks: surplus XP is what SkillDecayService spends
+			// before the level drops. Buffer disabled = the historical
+			// behaviour — no XP accrues, the award only refreshes meaningful use.
+			double banked = SkillDecayService.maxLevelXpBuffer() ? newXp : current.xp();
+			data.setSkillProgress(skillId, SkillService.clamped(
+					new SkillProgress(banked, current.level(), current.highestLevel(),
+							current.protectedFloor(), current.aptitude(), now,
+							Math.max(now, current.lastDecayCheckpoint())), def.maxLevel()));
+			return new XpResult(0, current.level(), current.level(),
+					current.xp(), banked, true);
+		}
 		int newLevel = Math.min(def.maxLevel(), LevelCurves.levelForSkill(def, newXp));
 		SkillProgress next = SkillService.clamped(
 				new SkillProgress(newXp, newLevel, Math.max(current.highestLevel(), newLevel),

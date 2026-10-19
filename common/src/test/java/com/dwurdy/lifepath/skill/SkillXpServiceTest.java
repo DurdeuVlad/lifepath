@@ -232,6 +232,43 @@ class SkillXpServiceTest {
 	}
 
 	@Test
+	void atCapAwardBanksSurplusXp() {
+		// Max-level XP buffer (default on): awards at cap stock the surplus
+		// SkillDecayService spends before the level drops.
+		registerSkill(2);
+		registerCurve(100);
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		SkillXpService.setXpCore(data, SKILL, 1e9);
+		double banked = data.skill(SKILL).xp();
+		var r = SkillXpService.awardXpCore(data, SKILL, 10.0, SRC);
+		assertTrue(r.applied());
+		assertEquals(2, data.skill(SKILL).level());
+		assertEquals(banked + 10.0, data.skill(SKILL).xp());
+	}
+
+	@Test
+	void atCapAwardDoesNotBankWhenBufferDisabled() throws Exception {
+		var dir = java.nio.file.Files.createTempDirectory("decaycfg");
+		java.nio.file.Files.writeString(dir.resolve("decay.toml"),
+				"max_level_xp_buffer = false\n");
+		com.dwurdy.lifepath.config.LifepathConfig.resetForTests();
+		com.dwurdy.lifepath.config.LifepathConfig.define(SkillDecayService.DECAY_CONFIG,
+				com.dwurdy.lifepath.config.ConfigSpec.builder()
+						.define("max_level_xp_buffer", true, "test")
+						.build());
+		com.dwurdy.lifepath.config.LifepathConfig.loadAll(dir);
+
+		registerSkill(2);
+		registerCurve(100);
+		PlayerCharacterData data = PlayerCharacterData.createDefault();
+		SkillXpService.setXpCore(data, SKILL, 1e9);
+		double banked = data.skill(SKILL).xp();
+		SkillXpService.awardXpCore(data, SKILL, 10.0, SRC);
+		assertEquals(banked, data.skill(SKILL).xp()); // buffer off: nothing accrues
+		com.dwurdy.lifepath.config.LifepathConfig.resetForTests();
+	}
+
+	@Test
 	void rejectedAwardReportsRealProgress() {
 		registerSkill(100);
 		registerCurve(100);

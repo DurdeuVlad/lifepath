@@ -152,6 +152,28 @@ public final class LifepathMod {
 						"Upper bound of decay band 5 (top).")
 				.define("band_5_rate", 0.35, v -> v >= 0 && v <= 100,
 						"Levels lost per real day inside band 5 (91–100).")
+				.define("max_level_xp_buffer", true,
+						"XP banked above the max-level threshold absorbs decay"
+								+ " before the level drops: decay charges the bank the"
+								+ " curve price of the levels it would remove. The"
+								+ " surplus only delays level loss — no immunity.")
+				.define("max_level_xp_buffer_drain", 1.0, v -> v > 0 && v <= 100,
+						"Multiplier on the XP price decay charges the banked surplus"
+								+ " (2.0 drains the bank twice as fast). Must stay"
+								+ " positive — 0 would grant permanent immunity.")
+				.define("breadth_enabled", true,
+						"Master switch for the breadth tax: skills at or above"
+								+ " breadth_threshold raise decay on your OTHER"
+								+ " non-specialization skills.")
+				.define("breadth_threshold", 25, v -> v >= 0 && v <= 100,
+						"Skills at or above this level count toward the breadth tax.")
+				.define("breadth_per_skill", 0.20, v -> v >= 0 && v <= 100,
+						"Decay-rate surcharge per qualifying non-specialization skill.")
+				.define("breadth_cap", 1.5, v -> v >= 0 && v <= 100,
+						"Maximum total surcharge the breadth tax can add.")
+				.define("breadth_generalist_discount", 0.5, v -> v >= 0 && v < 1,
+						"Fraction of the breadth tax a generalist specialization"
+								+ " (one claiming no skill tables) is forgiven.")
 				.build());
 		LifepathConfig.define(id("abilities"), ConfigSpec.builder()
 				.define("enabled", true,

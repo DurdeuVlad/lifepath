@@ -61,6 +61,8 @@ band, `band_N_rate` = levels lost per real day while inside it).
 | `band_3_upper` / `band_3_rate` | `75` / `0.10` | `0 – 100` | Levels 51–75. |
 | `band_4_upper` / `band_4_rate` | `90` / `0.20` | `0 – 100` | Levels 76–90. |
 | `band_5_upper` / `band_5_rate` | `100` / `0.35` | `0 – 100` | Levels 91–100. |
+| `max_level_xp_buffer` | `true` | bool | XP banked above the max-level threshold absorbs decay before the level drops — the bank pays the curve price of the decayed levels. |
+| `max_level_xp_buffer_drain` | `1.0` | `0 < v ≤ 100` | Multiplier on the XP price decay charges the banked surplus (2.0 drains twice as fast). |
 
 ## `abilities.toml`
 
