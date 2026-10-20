@@ -8,6 +8,44 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
+## [1.0.0-beta.13] — 2026-10-20
+
+Data audit of the milestone perk drop: several registry references were
+silently no-oping in-game, the perk tuning lands, and a build-time
+integrity test now guards the whole shipped ability set.
+
+### Fixed
+
+- **Dead registry ids resolved.** `generic.sneaking_speed` and
+  `generic.sweeping_damage_ratio` moved to `player.*` in 1.21.1, and
+  `luck_of_the_sea` was referenced as a mob effect where only
+  `minecraft:luck` exists. Foraging, hunting, performance, and
+  woodcutting passives plus the fishing luck perks pointed at ids that
+  never resolved — those bonuses silently did nothing. All references
+  now resolve.
+- **Perk descriptions match their triggers.** "Well fed", "bright
+  light", and "bloodied" conditions stay at thresholds the text actually
+  promises — no situationally-labelled perks that fire nearly always.
+
+### Changed — milestone perks
+
+- **Athletics** jump-boost perks also add safe fall distance.
+- **Foraging** Bushwhacker perks add movement efficiency; **Hunting**
+  night perks add sneak speed.
+- **Farming** growth pulses strengthened (up to six rolls at level 100);
+  crop- and leaf-nearby detection radii widened.
+- **Cooking**: `Pantry Snack IV` renamed `Pantry Snack III` — the
+  series has three perks.
+- **Scholarship**: `xp_book2`/`xp_book3` added to craft XP (live on
+  pre-1.6 XP Storage; deprecated but still registered upstream).
+
+### Added — build-time data guard
+
+- **Shipped-ability integrity test.** Every shipped ability file decodes
+  through the production path and every registry reference resolves
+  against the vanilla registries — a typo'd id now fails the build
+  instead of silently no-oping in-game.
+
 ## [1.0.0-beta.12] — 2026-10-19
 
 Mastery now pays rent. Every ten-level milestone grants a real signature
