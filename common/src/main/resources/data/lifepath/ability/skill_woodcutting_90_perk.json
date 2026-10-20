@@ -14,7 +14,7 @@
 			{
 				"type": "lifepath:block_nearby",
 				"block": "#minecraft:leaves",
-				"radius": 6
+				"radius": 7
 			}
 		]
 	},

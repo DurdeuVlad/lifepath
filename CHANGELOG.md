@@ -18,7 +18,7 @@ and the forester's TimberTales integration is code-complete.
 
 ### Added — Milestone signature perks
 
-- **Every milestone grants a signature perk.** All 21 skills' 10-level
+- **Every milestone grants a signature perk.** All 20 skills' 10-level
   milestones (10 through 100) now carry a concrete situational effect in
   addition to the existing passive attribute boosts — conditional
   abilities expressed through the ability engine (effects under the right
@@ -72,14 +72,14 @@ and the forester's TimberTales integration is code-complete.
 ## [1.0.0-beta.11] — 2026-10-18
 
 Skill now shapes what you're **allowed to use**, not just how well you
-perform. Every one of the 21 skills unlocks real capabilities at each
+perform. Every one of the 20 skills unlocks real capabilities at each
 ten-level band — and every profession's flagship mod feeds the skill it
 belongs to. The miner digs deeper veins, the soldier earns the right to
 draw steel, the scholar handles the maps; nobody skips the ladder.
 
 ### Added — Skill-unlock gates
 
-- **Capability unlocks every 10 levels, all 21 skills.** Skills gate real
+- **Capability unlocks every 10 levels, all 20 skills.** Skills gate real
   access through data-driven `data/lifepath/gate/*.json` files and new
   tier tags: mining gates ore tiers (coal at 10 → ancient debris at 80),
   defence gates weapon/armour/shield tiers, archery gates bow tiers,

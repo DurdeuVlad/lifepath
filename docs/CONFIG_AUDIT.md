@@ -24,6 +24,7 @@ cached values note it below).
 | Decay band bounds ×5 | `band_<n>_upper` | `decay.toml` | `25/50/75/90/100` |
 | Decay band rates ×5 | `band_<n>_rate` | `decay.toml` | `0/0.05/0.10/0.20/0.35` lv/day |
 | Max-level XP buffer toggle / drain | `max_level_xp_buffer`, `max_level_xp_buffer_drain` | `decay.toml` | `true` / `1.0` |
+| Breadth tax toggle / threshold / per-skill / cap / generalist discount | `breadth_enabled`, `breadth_threshold`, `breadth_per_skill`, `breadth_cap`, `breadth_generalist_discount` | `decay.toml` | `true` / `25` / `0.20` / `1.5` / `0.5` |
 | Ability system kill switch | `enabled` | `abilities.toml` | `true` |
 | Passive eval interval | `passive_interval_ticks` | `abilities.toml` | `20` (1 s) |
 | Nearby-scan radius cap | `nearby_max_radius` | `abilities.toml` | `32` |

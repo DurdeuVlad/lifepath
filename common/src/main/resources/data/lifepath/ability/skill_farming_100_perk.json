@@ -1,6 +1,6 @@
 {
 	"display_name": "Demeter's Blessing",
-	"description": "The crop underfoot drinks four growth pulses.",
+	"description": "The crop underfoot drinks six growth pulses.",
 	"icon": "skill/farming",
 	"trigger": {
 		"type": "passive",
@@ -21,7 +21,7 @@
 	"actions": [
 		{
 			"type": "lifepath:grow_blocks",
-			"growth_rolls": 4
+			"growth_rolls": 6
 		}
 	]
 }

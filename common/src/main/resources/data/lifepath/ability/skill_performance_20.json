@@ -12,7 +12,7 @@
 	"actions": [
 		{
 			"type": "lifepath:modify_attribute",
-			"attribute": "minecraft:generic.sneaking_speed",
+			"attribute": "minecraft:player.sneaking_speed",
 			"operation": "add_multiplied_base",
 			"value": 0.05,
 			"duration_ticks": 120

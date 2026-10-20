@@ -1,6 +1,6 @@
 {
 	"display_name": "Bushwhacker II",
-	"description": "Speed I while pushing through vegetation.",
+	"description": "Speed I and +20% movement efficiency while pushing through vegetation.",
 	"icon": "skill/foraging",
 	"trigger": {
 		"type": "passive",
@@ -23,6 +23,13 @@
 			"effect": "minecraft:speed",
 			"duration": 120,
 			"amplifier": 0
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.movement_efficiency",
+			"operation": "add_value",
+			"value": 0.2,
+			"duration_ticks": 120
 		}
 	]
 }

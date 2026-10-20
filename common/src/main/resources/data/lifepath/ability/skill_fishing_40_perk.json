@@ -1,6 +1,6 @@
 {
 	"display_name": "Tidecaller's Charm I",
-	"description": "Luck of the sea I near open water.",
+	"description": "Luck I near open water.",
 	"icon": "skill/fishing",
 	"trigger": {
 		"type": "passive",
@@ -21,7 +21,7 @@
 	"actions": [
 		{
 			"type": "lifepath:apply_effect",
-			"effect": "minecraft:luck_of_the_sea",
+			"effect": "minecraft:luck",
 			"duration": 120,
 			"amplifier": 0
 		}

@@ -1,6 +1,6 @@
 {
 	"display_name": "Gardener's Step V",
-	"description": "The crop underfoot drinks three growth pulses.",
+	"description": "The crop underfoot drinks five growth pulses.",
 	"icon": "skill/farming",
 	"trigger": {
 		"type": "passive",
@@ -21,7 +21,7 @@
 	"actions": [
 		{
 			"type": "lifepath:grow_blocks",
-			"growth_rolls": 3
+			"growth_rolls": 5
 		}
 	]
 }

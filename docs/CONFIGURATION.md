@@ -63,6 +63,11 @@ band, `band_N_rate` = levels lost per real day while inside it).
 | `band_5_upper` / `band_5_rate` | `100` / `0.35` | `0 – 100` | Levels 91–100. |
 | `max_level_xp_buffer` | `true` | bool | XP banked above the max-level threshold absorbs decay before the level drops — the bank pays the curve price of the decayed levels. |
 | `max_level_xp_buffer_drain` | `1.0` | `0 < v ≤ 100` | Multiplier on the XP price decay charges the banked surplus (2.0 drains twice as fast). |
+| `breadth_enabled` | `true` | bool | Master switch for the breadth tax: skills at or above `breadth_threshold` raise decay on your other skills. |
+| `breadth_threshold` | `25` | `0 – 100` | Skills at or above this level count toward the breadth tax. |
+| `breadth_per_skill` | `0.20` | `0 – 100` | Decay-rate surcharge added per over-threshold non-specialization skill. |
+| `breadth_cap` | `1.5` | `0 – 100` | Maximum total surcharge the breadth tax can add. |
+| `breadth_generalist_discount` | `0.5` | `0 ≤ v < 1` | Fraction of the breadth tax a generalist specialization is spared (0.5 = pays half). |
 
 ## `abilities.toml`
 

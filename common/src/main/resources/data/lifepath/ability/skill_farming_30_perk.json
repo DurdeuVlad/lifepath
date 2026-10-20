@@ -14,7 +14,7 @@
 			{
 				"type": "lifepath:block_nearby",
 				"block": "#minecraft:crops",
-				"radius": 4
+				"radius": 5
 			}
 		]
 	},

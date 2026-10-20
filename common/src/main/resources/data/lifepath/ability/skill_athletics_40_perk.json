@@ -1,6 +1,6 @@
 {
 	"display_name": "Spring-Heeled II",
-	"description": "Constant jump boost I.",
+	"description": "Constant jump boost I; +2 safe fall distance.",
 	"icon": "skill/athletics",
 	"trigger": {
 		"type": "passive",
@@ -15,6 +15,13 @@
 			"effect": "minecraft:jump_boost",
 			"duration": 120,
 			"amplifier": 0
+		},
+		{
+			"type": "lifepath:modify_attribute",
+			"attribute": "minecraft:generic.safe_fall_distance",
+			"operation": "add_value",
+			"value": 2.0,
+			"duration_ticks": 120
 		}
 	]
 }

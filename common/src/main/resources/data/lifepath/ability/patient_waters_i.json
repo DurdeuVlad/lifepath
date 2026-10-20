@@ -21,7 +21,7 @@
 	"actions": [
 		{
 			"type": "lifepath:apply_effect",
-			"effect": "minecraft:luck_of_the_sea",
+			"effect": "minecraft:luck",
 			"duration": 80,
 			"amplifier": 0
 		}
