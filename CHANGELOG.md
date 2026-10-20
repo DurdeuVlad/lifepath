@@ -8,6 +8,30 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
+## [1.0.0-beta.14] — 2026-10-20
+
+Hotfix: the beta.11–13 Fabric jars crash during server startup.
+
+### Fixed
+
+- **Dedicated-server boot crash on Fabric.** `BucketablePickupMixin`
+  injected into `Bucketable.bucketMobPickup`, a static *interface*
+  method — Mixin rejects injectors inside interface mixins outright,
+  so the server dies during class loading on Fabric's mixin stack.
+  (NeoForge's newer Mixin tolerated the declaration, which is why the
+  pack-side server still booted.) The husbandry `cared` emit is now a
+  caller-side `@WrapOperation` on the two vanilla call sites:
+  `AbstractFish.mobInteract` (all fish + tadpoles) and
+  `Axolotl.mobInteract`. Verified live on a dedicated Fabric server —
+  bucket-catching a cod and an axolotl each award husbandry XP.
+
+### Known limitations
+
+- Modded `Bucketable` implementations that invoke the helper from
+  their own `mobInteract` can't be reached through a single seam;
+  Naturalist's catchables already emit `cared` through their own
+  compat mixins. Further modded funnels need targeted compat entries.
+
 ## [1.0.0-beta.13] — 2026-10-20
 
 Data audit of the milestone perk drop: several registry references were
