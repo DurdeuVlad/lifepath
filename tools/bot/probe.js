@@ -32,6 +32,9 @@ bot._client.on("custom_payload", (p) => {
 			+ Buffer.from(p.data || []).toString("hex"));
 });
 bot.on("death", () => console.log("BOT DIED"));
+bot.on("blockBreakProgressObserved", (block, stage) => {
+	console.log("CRACK t=" + Date.now() + " stage=" + stage + " " + block.name);
+});
 bot.on("playerCollect", (collector, entity) => {
 	if (collector === bot.entity)
 		console.log("PICKED " + (entity.name || entity.objectType) + " " + entity.position);
@@ -69,6 +72,22 @@ async function cmd(line) {
 				if (!item) { console.log("HOLD none " + rest.join(" ")); break; }
 				await bot.equip(item, "hand");
 				console.log("HELD " + item.name);
+				break;
+			}
+			case "slots": {
+				console.log("SLOTS " + bot.inventory.slots.map((s, i) =>
+						s ? i + ":" + s.name + "x" + s.count : null)
+						.filter(Boolean).join(", "));
+				break;
+			}
+			case "holdslot": {
+				// holdslot <n> — equip inventory slot n (works for modded
+				// items that show up as 'unknown' in minecraft-data)
+				const n = parseInt(rest[0]);
+				const it = bot.inventory.slots[n];
+				if (!it) { console.log("HOLDSLOT empty " + n); break; }
+				await bot.equip(it, "hand");
+				console.log("HOLDSLOT " + n + " held " + it.name);
 				break;
 			}
 			case "use":
