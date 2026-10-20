@@ -75,6 +75,18 @@ async function cmd(line) {
 				bot.activateItem();
 				console.log("USED " + (bot.heldItem ? bot.heldItem.name : "empty"));
 				break;
+			case "interact": {
+				// interact — right-click the nearest entity (sends the
+				// interact-entity packet → mobInteract, e.g. bucket pickup)
+				const e = bot.nearestEntity((en) => en.name !== bot.username
+						&& en.type !== "item" && en.name !== "experience_orb");
+				if (!e) { console.log("INTERACT none"); break; }
+				await bot.lookAt(e.position.offset(0, e.height * 0.5, 0));
+				bot.activateEntity(e);
+				await new Promise((r) => setTimeout(r, 300));
+				console.log("INTERACTED " + e.name + " " + e.uuid);
+				break;
+			}
 			case "attack": {
 				const e = bot.nearestEntity((en) => en.name !== bot.username);
 				if (!e) { console.log("ATTACK none"); break; }

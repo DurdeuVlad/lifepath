@@ -12,6 +12,10 @@ bin/
 run/
 logs/
 
+# Standalone server labs (downloaded jars + worlds, not repo content)
+lab/
+lab-nf/
+
 # IDEs
 .idea/
 *.iml
