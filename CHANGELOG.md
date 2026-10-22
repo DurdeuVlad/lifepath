@@ -8,6 +8,61 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
+## [1.1.0-beta.1] — 2026-10-23
+
+First beta on the 1.1.0 line: the professions milestone ships as a
+verified set. Game content is identical to 1.0.0-beta.14 - this tag
+promotes the live-verified milestone to the minor line and adds the
+test tooling used to prove it. See the beta.12-beta.14 entries below
+for the full feature log; the summary is what's-in now.
+
+### What's in
+
+- **Milestone signature perks** - every 10-level milestone on all 20
+  skills grants a concrete situational effect on top of its passive
+  attribute training.
+- **Level-100 XP bank** - surplus XP above the cap absorbs decay at
+  curve price before the level slips. Finite delay, never immunity.
+- **Scholar integrations** - Enchanting Infuser, Enchantment Library,
+  and XP Storage stations/books tagged \scholarly\, craft XP wired,
+  and the \scholarly_tier_arcana\ use-gate at level 40.
+- **Forester integration** - TimberTales hollow logs join the log tags
+  and the fell bridge fires on the real \TimberTalesEvents\ seam
+  (NeoForge).
+- **Gate hardening** - dispenser equips respect gear gates; denied
+  actions send a localized \lifepath.gate.denied\ message (Romanian
+  included, 922 keys per shipped jar).
+
+### Verified in-game (dedicated servers, shipped jars)
+
+- Boot: Fabric + NeoForge dedicated servers reach \Done\ with zero
+  mixin errors on these exact artifacts.
+- Live: gate deny/allow UX, dispenser equip A/B, slow-mining (2.83x
+  crack pacing at gate), mace damage clamp (1.0 vs 6.0), milestone
+  attribute pulse, bucket-pickup husbandry XP (cod + axolotl),
+  XP Storage gate + real XP consumption, Enchanting Infuser gate +
+  real grid craft paying scholarship XP with quality stamping,
+  Enchantment Library block placement + block-entity data, and the
+  full level-100 XP-bank drain/exhaustion cycle.
+- TimberTales fell award is mixin-application-verified on a real
+  NeoForge + TT 1.1.3 boot; in-play award needs a NeoForge client.
+
+### Added - test tooling
+
+- \	ools/bot\: slot-based equip (\holdslot\), inventory \slots\ dump,
+  entity \interact\, and a passive crack-animation \watcher.js\ for
+  mining-speed pacing measurement.
+
+### Known limitations
+
+- Modded \Bucketable\ implementations that invoke the helper from
+  their own \mobInteract\ can't be reached through a single seam;
+  Naturalist's catchables already emit \cared\ through their own
+  compat mixins.
+- NeoForge in-game client interaction is unproven - no compatible
+  protocol client exists yet; common code is byte-identical across
+  loaders and every injection resolves at apply time.
+
 ## [1.0.0-beta.14] — 2026-10-20
 
 Hotfix: the beta.11–13 Fabric jars crash during server startup.
