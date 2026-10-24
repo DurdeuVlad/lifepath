@@ -8,6 +8,23 @@ release.
 Report bugs: <https://github.com/DurdeuVlad/lifepath/issues> — use the "Bug
 report" template, include loader, version, and repro steps.
 
+## [1.1.0] — 2026-10-24
+
+Stable promotion of the verified professions milestone. Code is
+identical to .1.0-beta.1\ - the feature set below was proven live
+on dedicated servers running the shipped artifacts (gate A/B, decay,
+integrations, XP bank). See the beta entries for the full log.
+
+- Milestone signature perks on all 20 skills' 10-level marks
+- Level-100 XP bank: surplus absorbs decay before the level slips
+- Scholar integrations: Enchanting Infuser, Enchantment Library,
+  XP Storage (\scholarly\ tags, craft XP, level-40 use-gate)
+- TimberTales forester bridge (NeoForge)
+- Dispenser-equip gate fix; localized \lifepath.gate.denied  (Romanian included)
+- Known limitations unchanged from the beta line: modded
+  \Bucketable\ funnels need targeted compat entries; NeoForge
+  in-play client interaction is unverified (no compatible client).
+
 ## [1.1.0-beta.1] — 2026-10-23
 
 First beta on the 1.1.0 line: the professions milestone ships as a
